@@ -1,24 +1,32 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Shell, NotConnected } from "@/components/Shell";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "ZAPRUDA — лента рыболовных отчётов" },
+      { name: "description", content: "Отчёты спиннингистов: водоёмы, приманки, погода и улов." },
+      { property: "og:title", content: "ZAPRUDA — лента рыболовных отчётов" },
+      { property: "og:description", content: "Отчёты спиннингистов: водоёмы, приманки, погода и улов." },
+    ],
+  }),
+  component: Feed,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Feed() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <Shell>
+      <section className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Спиннинг · отчёты</p>
+          <h1 className="mt-2 text-3xl font-bold md:text-4xl">Лента рыбалок</h1>
+          <p className="mt-2 max-w-md text-muted-foreground">
+            Реальные выезды: где, на что и при какой погоде клевало.
+          </p>
+        </div>
+        <Link to="/reports/new" className="btn-primary self-start">+ Новый отчёт</Link>
+      </section>
+      <NotConnected what="Отчёты, уловы, комментарии и реакции" />
+    </Shell>
   );
 }
