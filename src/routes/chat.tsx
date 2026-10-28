@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import type { FormEvent } from "react";
 import { Shell, NotConnected } from "@/components/Shell";
 import { ReactionBar } from "@/components/ReactionBar";
 
@@ -24,7 +25,7 @@ function Chat() {
     "Сегодня щука брала на паузе 😂🐊",
   ]);
 
-  function send(e: React.FormEvent<HTMLFormElement>) {
+  function send(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const message = draft.trim();
     if (!message) return;
