@@ -27,6 +27,7 @@ function Label({ t, children }: { t: string; children: React.ReactNode }) {
 
 function NewReport() {
   const [catches, setCatches] = useState<Catch[]>([{ species: "", weight: "", length: "" }]);
+  const [story, setStory] = useState("");
   const upd = (i: number, k: keyof Catch, v: string) =>
     setCatches((c) => c.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
 
