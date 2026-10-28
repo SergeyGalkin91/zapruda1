@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { Wordmark } from "@/components/Wordmark";
 
 const nav = [
   { to: "/", label: "Лента" },
+  { to: "/communities", label: "Сообщества" },
   { to: "/chat", label: "Чат" },
   { to: "/reports/new", label: "Новый отчёт" },
   { to: "/profile", label: "Профиль" },
@@ -13,9 +15,7 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="min-h-screen pb-20 md:pb-0">
       <header className="sticky top-0 z-20 border-b bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-          <Link to="/" className="font-display text-lg font-bold tracking-tight">
-            ZAPRUDA<span className="text-primary">.</span>
-          </Link>
+          <Link to="/"><Wordmark /></Link>
           <nav className="hidden gap-1 md:flex">
             {nav.map((n) => (
               <Link

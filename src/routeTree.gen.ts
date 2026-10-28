@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReportsNewRouteImport } from './routes/reports.new'
 
@@ -30,6 +31,11 @@ const ChatRoute = ChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunitiesRoute = CommunitiesRouteImport.update({
+  id: '/communities',
+  path: '/communities',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
+  '/communities': typeof CommunitiesRoute
   '/profile': typeof ProfileRoute
   '/reports/new': typeof ReportsNewRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
+  '/communities': typeof CommunitiesRoute
   '/profile': typeof ProfileRoute
   '/reports/new': typeof ReportsNewRoute
 }
@@ -60,21 +68,31 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
+  '/communities': typeof CommunitiesRoute
   '/profile': typeof ProfileRoute
   '/reports/new': typeof ReportsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/chat' | '/profile' | '/reports/new'
+  fullPaths:
+    '/' | '/auth' | '/chat' | '/communities' | '/profile' | '/reports/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/chat' | '/profile' | '/reports/new'
-  id: '__root__' | '/' | '/auth' | '/chat' | '/profile' | '/reports/new'
+  to: '/' | '/auth' | '/chat' | '/communities' | '/profile' | '/reports/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/chat'
+    | '/communities'
+    | '/profile'
+    | '/reports/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
+  CommunitiesRoute: typeof CommunitiesRoute
   ProfileRoute: typeof ProfileRoute
   ReportsNewRoute: typeof ReportsNewRoute
 }
@@ -102,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communities': {
+      id: '/communities'
+      path: '/communities'
+      fullPath: '/communities'
+      preLoaderRoute: typeof CommunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -123,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
+  CommunitiesRoute: CommunitiesRoute,
   ProfileRoute: ProfileRoute,
   ReportsNewRoute: ReportsNewRoute,
 }
