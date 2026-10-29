@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Camera, ImagePlus, Trash2 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
+import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 
 export const Route = createFileRoute("/reports/new")({
   head: () => ({
@@ -38,6 +39,7 @@ function NewReport() {
   const [windDirection, setWindDirection] = useState("");
   const [windSpeed, setWindSpeed] = useState("");
   const [technique, setTechnique] = useState("");
+  const [fishingMethod, setFishingMethod] = useState("");
   const [lures, setLures] = useState("");
   const [story, setStory] = useState("");
   const [isPublic, setIsPublic] = useState(true);
@@ -84,6 +86,10 @@ function NewReport() {
       setError("Укажи название отчёта.");
       return;
     }
+    if (!fishingMethod) {
+      setError("Выбери вид рыбалки — по нему будут открываться достижения.");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -116,6 +122,7 @@ function NewReport() {
             wind_direction: windDirection.trim() || null,
             wind_speed_ms: windSpeed.trim() ? Number(windSpeed) : null,
             is_public: isPublic,
+            fishing_method: fishingMethod,
           })
           .select("id")
           .single();
@@ -182,6 +189,7 @@ function NewReport() {
           <div className="md:col-span-2">
             <Label t="Название отчёта *"><input className="field" placeholder="Например, утро на Кудьме" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} required /></Label>
           </div>
+          <Label t="Вид рыбалки для достижений *"><select className="field" value={fishingMethod} required onChange={(e) => setFishingMethod(e.target.value)}><option value="" disabled>Выбери дисциплину…</option>{FISHING_DISCIPLINES.map((d) => <option key={d.code} value={d.code}>{d.title}</option>)}</select></Label>
           <Label t="Водоём"><input className="field" placeholder="Например, Волга у Нижнего" value={location} onChange={(e) => setLocation(e.target.value)} /></Label>
           <Label t="Погода"><input className="field" placeholder="Пасмурно, небольшой дождь" value={weather} onChange={(e) => setWeather(e.target.value)} /></Label>
           <Label t="Температура, °C"><input className="field" type="number" step="0.1" placeholder="+12" value={temperature} onChange={(e) => setTemperature(e.target.value)} /></Label>
