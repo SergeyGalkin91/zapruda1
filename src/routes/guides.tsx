@@ -26,6 +26,8 @@ type Guide = {
   boat_model: string;
   boat_capacity: number | null;
   sonar_model: string;
+  live_sonar_system: string;
+  live_sonar_model: string;
   included_gear: string;
   service_program: string;
   cancellation_terms: string;
@@ -62,6 +64,8 @@ const EMPTY_GUIDE: Omit<Guide, "user_id"> = {
   boat_model: "",
   boat_capacity: 2,
   sonar_model: "",
+  live_sonar_system: "Нет",
+  live_sonar_model: "",
   included_gear: "",
   service_program: "Инструктаж по лодке, работа с эхолотом и поиск перспективных мест",
   cancellation_terms: "Условия отмены и переноса согласуем до подтверждения выезда.",
@@ -138,6 +142,8 @@ function GuideCabinet() {
         boat_model: guideResult.data.boat_model,
         boat_capacity: guideResult.data.boat_capacity,
         sonar_model: guideResult.data.sonar_model,
+        live_sonar_system: guideResult.data.live_sonar_system,
+        live_sonar_model: guideResult.data.live_sonar_model,
         included_gear: guideResult.data.included_gear,
         service_program: guideResult.data.service_program,
         cancellation_terms: guideResult.data.cancellation_terms,
@@ -223,6 +229,8 @@ function GuideCabinet() {
       guide_service: guide.service_program.trim(),
       boat_type: guide.boat_model.trim(),
       sonar_model: guide.sonar_model.trim(),
+      live_sonar_system: guide.live_sonar_system,
+      live_sonar_model: guide.live_sonar_system === "Нет" ? "" : guide.live_sonar_model.trim(),
       gear_included: guide.included_gear.trim(),
       price_includes: details.trim() || guide.service_program.trim(),
       cancel_policy: guide.cancellation_terms.trim(),
@@ -295,7 +303,17 @@ function GuideCabinet() {
             <Label title="Какая рыбалка"><input className="field" value={guide.specialties} maxLength={400} onChange={(e)=>update("specialties",e.target.value)} placeholder="Судак, спиннинг, джиг" /></Label>
             <Label title="Лодка / модель"><input className="field" required maxLength={180} value={guide.boat_model} onChange={(e)=>update("boat_model",e.target.value)} placeholder="Например, Волжанка 46" /></Label>
             <Label title="Пассажиров на борту"><input className="field" type="number" min={1} max={12} value={guide.boat_capacity ?? ""} onChange={(e)=>update("boat_capacity",e.target.value?Number(e.target.value):null)} /></Label>
-            <Label title="Эхолот / модель"><input className="field" value={guide.sonar_model} maxLength={180} onChange={(e)=>update("sonar_model",e.target.value)} placeholder="Garmin / Lowrance / другой" /></Label>
+            <Label title="Основной эхолот / модель"><input className="field" value={guide.sonar_model} maxLength={180} onChange={(e)=>update("sonar_model",e.target.value)} placeholder="Garmin, Lowrance, Humminbird…" /></Label>
+            <Label title="Система живого сканирования (Panoptix)"><select className="field" value={guide.live_sonar_system} onChange={(e)=>update("live_sonar_system",e.target.value)}>
+              {["Нет","Garmin Panoptix","Garmin LiveScope","Другая система"].map((name)=><option key={name}>{name}</option>)}
+            </select></Label>
+            {guide.live_sonar_system !== "Нет" && <Label title="Модель Panoptix / LiveScope">
+              <input className="field" list="guide-live-sonar-models" value={guide.live_sonar_model} maxLength={180}
+                onChange={(e)=>update("live_sonar_model",e.target.value)} placeholder="Например, LVS34 или PS22"/>
+              <datalist id="guide-live-sonar-models">
+                {["PS22","PS30","PS51","PS70","LVS32","LVS34","LVS42","Другая модель"].map((name)=><option key={name} value={name}/>)}
+              </datalist>
+            </Label>
             <Label title="Что входит из снастей"><input className="field" value={guide.included_gear} maxLength={500} onChange={(e)=>update("included_gear",e.target.value)} placeholder="Спиннинги, приманки, жилеты…" /></Label>
           </div>
           <Label title="О гиде"><textarea className="field min-h-24" value={guide.about} maxLength={1500} onChange={(e)=>update("about",e.target.value)} placeholder="Какие водоёмы знаешь, как проходит выезд…" /></Label>
