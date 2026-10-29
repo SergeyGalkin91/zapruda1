@@ -7,6 +7,9 @@ import {
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
+import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
+import { FISHING_DISCIPLINES } from "@/lib/disciplines";
+import type { FishingSpecialization } from "@/lib/disciplines";
 import { supabase } from "@/integrations/supabase/client";
 import type { FishingProgress } from "@/lib/progression";
 import { EMPTY_PROGRESS } from "@/lib/progression";
@@ -70,6 +73,7 @@ function Profile() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [preferences, setPreferences] = useState<AnglerForm>(EMPTY_FORM);
   const [progress, setProgress] = useState<FishingProgress | null>(null);
+  const [specializations, setSpecializations] = useState<FishingSpecialization[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -91,10 +95,11 @@ function Profile() {
     setUserId(auth.user.id);
     setEmail(auth.user.email ?? "");
 
-    const [profileResult, prefsResult, progressResult] = await Promise.all([
+    const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
       supabase.from("profiles").select("username,display_name,bio,avatar_url").eq("id", auth.user.id).maybeSingle(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
       supabase.rpc("my_fishing_progress"),
+      supabase.rpc("my_fishing_specializations"),
     ]);
 
     if (profileResult.error) {
@@ -139,6 +144,20 @@ function Profile() {
         trips_organized: Number(raw.trips_organized),
         heaviest_catch_kg: raw.heaviest_catch_kg == null ? null : Number(raw.heaviest_catch_kg),
       } : EMPTY_PROGRESS);
+    }
+    if (specializationsResult.error) {
+      setError((prev) => prev + " Не удалось загрузить дисциплины: " + specializationsResult.error.message);
+      setSpecializations([]);
+    } else {
+      setSpecializations((specializationsResult.data ?? []).map((row) => ({
+        fishing_method: row.fishing_method,
+        report_count: Number(row.report_count),
+        catches_count: Number(row.catches_count),
+        credited_catches: Number(row.credited_catches),
+        photo_reports: Number(row.photo_reports),
+        distinct_waters: Number(row.distinct_waters),
+        heaviest_catch_kg: row.heaviest_catch_kg == null ? null : Number(row.heaviest_catch_kg),
+      })));
     }
     setLoading(false);
   }, []);
@@ -241,7 +260,7 @@ function Profile() {
                 <Label name="Регион"><input className="field" maxLength={120} value={preferences.home_region} onChange={(e) => update("home_region", e.target.value)} placeholder="Нижегородская область" /></Label>
                 <Label name="Основной способ ловли">
                   <select className="field" value={preferences.main_technique} onChange={(e) => update("main_technique", e.target.value)}>
-                    {["Спиннинг","Фидер","Поплавок","Нахлыст","Зимняя рыбалка","Другое"].map((item) => <option key={item}>{item}</option>)}
+                    {FISHING_DISCIPLINES.map((item) => <option key={item.code} value={item.code}>{item.title}</option>)}
                   </select>
                 </Label>
                 <Label name="С берега или с лодки">
@@ -299,8 +318,12 @@ function Profile() {
             </form>
           </section>
 
+          <div className="mb-6 flex flex-wrap gap-3">
+            <Link to="/guides" className="btn-ghost inline-flex">Кабинет рыболовного гида</Link>
+            <Link to="/spearfishing" className="btn-ghost inline-flex">Подводная охота</Link>
+          </div>
           {progress ? (
-            <FishingProgressTree progress={progress} />
+            <><FishingProgressTree progress={progress} /><FishingDisciplineTree stats={specializations} preferredMethod={preferences.main_technique} /></>
           ) : (
             <div className="panel p-5 text-sm text-zinc-400">Пока не удалось загрузить ветку достижений. Попробуй обновить страницу.</div>
           )}
