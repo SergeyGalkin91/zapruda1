@@ -268,6 +268,41 @@ export type Database = {
           },
         ]
       }
+      report_photos: {
+        Row: {
+          id: string
+          report_id: string
+          user_id: string
+          storage_path: string
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          report_id: string
+          user_id: string
+          storage_path: string
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          report_id?: string
+          user_id?: string
+          storage_path?: string
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_photos_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "fishing_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_private_locations: {
         Row: {
           created_at: string
