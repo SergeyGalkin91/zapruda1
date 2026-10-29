@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Camera, ImagePlus, Trash2 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -42,15 +43,48 @@ function NewReport() {
   const [isPublic, setIsPublic] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [savedReportId, setSavedReportId] = useState<string | null>(null);
+  const [savedCatches, setSavedCatches] = useState(false);
+  const [uploadedCount, setUploadedCount] = useState(0);
+  const [progress, setProgress] = useState("");
+
+  useEffect(() => {
+    const urls = photos.map((photo) => URL.createObjectURL(photo));
+    setPreviews(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [photos]);
+
+  function choosePhotos(files: FileList | null) {
+    if (savedReportId) return;
+    const selected = Array.from(files ?? []);
+    if (selected.length > 6) {
+      setError("Можно добавить не больше 6 фотографий к отчёту.");
+      return;
+    }
+    const invalid = selected.find((photo) => !["image/jpeg", "image/png", "image/webp"].includes(photo.type) || photo.size > 8 * 1024 * 1024);
+    if (invalid) {
+      setError("Каждое фото должно быть JPG, PNG или WebP размером до 8 МБ.");
+      return;
+    }
+    setError("");
+    setPhotos(selected);
+  }
 
   const upd = (i: number, k: keyof Catch, v: string) =>
     setCatches((c) => c.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
 
   async function publish(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (saving) return;
     setError("");
     const cleanTitle = title.trim();
-    if (!cleanTitle) { setError("Укажи название отчёта."); return; }
+    if (!cleanTitle) {
+      setError("Укажи название отчёта.");
+      return;
+    }
+
     setSaving(true);
     try {
       const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -58,44 +92,83 @@ function NewReport() {
       const user = authData.user;
       if (!user) throw new Error("Сначала войди в аккаунт, потом публикуй отчёт.");
 
-      const { data: report, error: reportError } = await supabase
-        .from("fishing_reports")
-        .insert({
-          user_id: user.id,
-          title: cleanTitle,
-          body: [story.trim(), technique.trim() ? "Техника: " + technique.trim() : "", lures.trim() ? "Приманки: " + lures.trim() : ""].filter(Boolean).join("\n\n") || null,
-          location_name: location.trim() || null,
-          weather_summary: weather.trim() || null,
-          air_temperature_c: temperature.trim() ? Number(temperature) : null,
-          pressure_hpa: pressure.trim() ? Number(pressure) * 1.33322 : null,
-          wind_direction: windDirection.trim() || null,
-          wind_speed_ms: windSpeed.trim() ? Number(windSpeed) : null,
-          is_public: isPublic,
-        })
-        .select("id")
-        .single();
-      if (reportError) throw reportError;
-
-      const validCatches = catches.filter((c) => c.species.trim()).map((c) => ({
-        report_id: report.id,
-        user_id: user.id,
-        species: c.species.trim(),
-        weight_kg: c.weight.trim() ? Number(c.weight) : null,
-        length_cm: c.length.trim() ? Number(c.length) : null,
-        technique: technique.trim() || null,
-        lure: lures.trim() || null,
-      }));
-      if (validCatches.length) {
-        const { error: catchesError } = await supabase.from("catches").insert(validCatches);
-        if (catchesError) {
-          setError("Отчёт создан, но улов сохранить не удалось: " + catchesError.message);
-          setSaving(false);
-          return;
+      // Don't create a report with photos until the optional database migration exists.
+      if (!savedReportId && photos.length) {
+        const { error: photosTableError } = await supabase.from("report_photos").select("id").limit(1);
+        if (photosTableError) {
+          throw new Error("Фотографии пока не подключены в Supabase. Потребуется миграция report_photos. " + photosTableError.message);
         }
       }
+
+      let reportId = savedReportId;
+      if (!reportId) {
+        setProgress("Сохраняем отчёт…");
+        const { data: report, error: reportError } = await supabase
+          .from("fishing_reports")
+          .insert({
+            user_id: user.id,
+            title: cleanTitle,
+            body: [story.trim(), technique.trim() ? "Техника: " + technique.trim() : "", lures.trim() ? "Приманки: " + lures.trim() : ""].filter(Boolean).join("\n\n") || null,
+            location_name: location.trim() || null,
+            weather_summary: weather.trim() || null,
+            air_temperature_c: temperature.trim() ? Number(temperature) : null,
+            pressure_hpa: pressure.trim() ? Number(pressure) * 1.33322 : null,
+            wind_direction: windDirection.trim() || null,
+            wind_speed_ms: windSpeed.trim() ? Number(windSpeed) : null,
+            is_public: isPublic,
+          })
+          .select("id")
+          .single();
+        if (reportError) throw reportError;
+        reportId = report.id;
+        setSavedReportId(reportId);
+      }
+
+      if (!savedCatches) {
+        const validCatches = catches.filter((c) => c.species.trim()).map((c) => ({
+          report_id: reportId,
+          user_id: user.id,
+          species: c.species.trim(),
+          weight_kg: c.weight.trim() ? Number(c.weight) : null,
+          length_cm: c.length.trim() ? Number(c.length) : null,
+          technique: technique.trim() || null,
+          lure: lures.trim() || null,
+        }));
+        if (validCatches.length) {
+          const { error: catchesError } = await supabase.from("catches").insert(validCatches);
+          if (catchesError) throw new Error("Не удалось сохранить улов: " + catchesError.message);
+        }
+        setSavedCatches(true);
+      }
+
+      for (let i = uploadedCount; i < photos.length; i++) {
+        const photo = photos[i];
+        const extension = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
+        const path = `${user.id}/${reportId}/${crypto.randomUUID()}.${extension}`;
+        setProgress(`Загружаем фото ${i + 1} из ${photos.length}…`);
+        const { error: uploadError } = await supabase.storage
+          .from("report-photos")
+          .upload(path, photo, { contentType: photo.type, cacheControl: "3600", upsert: false });
+        if (uploadError) throw new Error("Не удалось загрузить фото: " + uploadError.message);
+
+        const { error: photoRecordError } = await supabase.from("report_photos").insert({
+          report_id: reportId,
+          user_id: user.id,
+          storage_path: path,
+          sort_order: i,
+        });
+        if (photoRecordError) {
+          await supabase.storage.from("report-photos").remove([path]);
+          throw new Error("Фото загружено, но не удалось привязать к отчёту: " + photoRecordError.message);
+        }
+        setUploadedCount(i + 1);
+      }
+      setProgress("");
       await navigate({ to: "/" });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Не удалось опубликовать отчёт.");
+    } catch (caught) {
+      setProgress("");
+      const message = caught instanceof Error ? caught.message : "Не удалось опубликовать отчёт.";
+      setError(savedReportId ? "Отчёт уже сохранён. " + message + " Можно повторить загрузку." : message);
     } finally {
       setSaving(false);
     }
@@ -126,6 +199,54 @@ function NewReport() {
           </label>
         </section>
 
+        <section className="panel space-y-4 p-5">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl border border-lime-300/30 bg-lime-300/10 text-lime-300">
+              <Camera className="size-5" aria-hidden="true" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold">Фотографии с рыбалки</h2>
+              <p className="text-xs text-muted-foreground">До 6 фотографий · JPG, PNG, WebP · до 8 МБ каждая</p>
+            </div>
+          </div>
+          <label className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-lime-300/35 bg-lime-300/[0.035] px-4 py-5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10 ${savedReportId ? "pointer-events-none opacity-50" : ""}`}>
+            <ImagePlus className="size-5" aria-hidden="true" />
+            {photos.length ? "Заменить выбранные фотографии" : "Выбрать фотографии"}
+            <input
+              aria-label="Выбрать фотографии с рыбалки"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              disabled={Boolean(savedReportId)}
+              className="sr-only"
+              onChange={(e) => choosePhotos(e.target.files)}
+            />
+          </label>
+          {previews.length > 0 && (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {previews.map((src, index) => (
+                <div key={src} className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10">
+                  <img src={src} alt={`Фото к отчёту ${index + 1}`} className="size-full object-cover" />
+                  {!savedReportId && (
+                    <button
+                      type="button"
+                      className="absolute right-2 top-2 rounded-lg bg-black/75 p-2 text-white transition hover:bg-black"
+                      onClick={() => setPhotos((current) => current.filter((_, i) => i !== index))}
+                      aria-label={`Убрать фотографию ${index + 1}`}
+                    >
+                      <Trash2 className="size-4" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-xs leading-5 text-muted-foreground">
+            Файлы сохраняются в защищённом хранилище. Фотографии общедоступных отчётов будут видны в ленте;
+            фото закрытых отчётов останутся доступны только владельцу.
+          </p>
+        </section>
+
         <section className="panel space-y-3 p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">Улов</h2>
@@ -143,8 +264,8 @@ function NewReport() {
 
         {error && <p className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive" role="alert">{error}</p>}
         <div className="flex items-center gap-3">
-          <button className="btn-primary" disabled={saving}>{saving ? "Публикуем…" : "Опубликовать отчёт"}</button>
-          <span className="text-xs text-muted-foreground">Фотографии подключим следующим этапом.</span>
+          <button className="btn-primary" disabled={saving}>{saving ? "Сохраняем…" : savedReportId ? "Завершить загрузку" : "Опубликовать отчёт"}</button>
+          {progress && <span className="text-xs text-lime-300" role="status">{progress}</span>}
         </div>
       </form>
     </Shell>
