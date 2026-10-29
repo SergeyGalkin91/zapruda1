@@ -319,6 +319,53 @@ function Profile() {
             </form>
           </section>
 
+          <section aria-labelledby="angler-map-title" className="mb-7 overflow-hidden rounded-3xl border border-[#D7FF35]/20 bg-[#151915] p-5 sm:p-7">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">ZAPRUDA / Моя карта</p>
+                <h2 id="angler-map-title" className="mt-2 flex items-center gap-2 text-xl font-extrabold text-white">
+                  <MapPin className="size-5 text-[#D7FF35]" aria-hidden="true" /> Рыболовная карта региона
+                </h2>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
+                  Яндекс Карты по городу из твоего профиля. Найди водоёмы и спланируй выезд.
+                  Точные места рыбалки здесь не публикуются.
+                </p>
+              </div>
+              {preferences.home_city.trim() && (
+                <a
+                  className="btn-ghost inline-flex"
+                  href={`https://yandex.ru/maps/?text=${encodeURIComponent([preferences.home_city, preferences.home_region].filter(Boolean).join(", ") + " водоёмы")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Открыть Яндекс Карты ↗
+                </a>
+              )}
+            </div>
+            {preferences.home_city.trim() ? (
+              <>
+                <p className="mb-3 mt-5 text-xs font-semibold text-[#D7FF35]">
+                  {preferences.home_city}{preferences.home_region ? ` · ${preferences.home_region}` : ""}
+                </p>
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0D100C]">
+                  <iframe
+                    key={preferences.home_city + preferences.home_region}
+                    title="Яндекс Карты — водоёмы рядом с городом"
+                    src={`https://yandex.ru/map-widget/v1/?text=${encodeURIComponent([preferences.home_city, preferences.home_region].filter(Boolean).join(", ") + " водоёмы")}`}
+                    className="block h-[300px] w-full sm:h-[380px]"
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
+                </div>
+                <p className="mt-3 text-xs text-zinc-500">Карта отображается сторонним сервисом Яндекс. Геолокация устройства не запрашивается.</p>
+              </>
+            ) : (
+              <div className="mt-5 rounded-2xl border border-dashed border-white/15 bg-black/20 p-5 text-sm text-zinc-300">
+                Заполни поле «Город рыбалки» выше и сохрани профиль — здесь появится карта твоего региона.
+              </div>
+            )}
+          </section>
+
           <AnglerTackleCabinet userId={userId} />
 
           <div className="mb-6 mt-6 flex flex-wrap gap-3">
