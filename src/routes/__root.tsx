@@ -38,6 +38,9 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
+  const diagnostic = import.meta.env.DEV
+    ? (error instanceof Error ? `${error.name}: ${error.message}` : String(error))
+    : null;
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -51,6 +54,11 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
+        {diagnostic && (
+          <pre role="status" className="mt-4 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-amber-400/30 bg-amber-950/30 p-3 text-left text-xs text-amber-100">
+            {diagnostic}
+          </pre>
+        )}
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
