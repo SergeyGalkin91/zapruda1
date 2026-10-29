@@ -342,6 +342,8 @@ export type Database = {
           life_jackets_available: boolean
           operator_eligibility_confirmed: boolean
           platform_commission_bps: number
+          live_sonar_system: string
+          live_sonar_model: string
         }
         Insert: {
           id?: string
@@ -378,6 +380,8 @@ export type Database = {
           life_jackets_available?: boolean
           operator_eligibility_confirmed?: boolean
           platform_commission_bps?: number
+          live_sonar_system?: string
+          live_sonar_model?: string
         }
         Update: {
           id?: string
@@ -414,6 +418,8 @@ export type Database = {
           life_jackets_available?: boolean
           operator_eligibility_confirmed?: boolean
           platform_commission_bps?: number
+          live_sonar_system?: string
+          live_sonar_model?: string
         }
         Relationships: [
           {
@@ -500,6 +506,50 @@ export type Database = {
           {
             foreignKeyName: "partner_trip_messages_sender_id_fkey"
             columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      angler_gear: {
+        Row: {
+          id: string
+          user_id: string
+          gear_type: string
+          brand: string
+          model: string
+          variant: string
+          notes: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          gear_type: string
+          brand: string
+          model: string
+          variant?: string
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          gear_type?: string
+          brand?: string
+          model?: string
+          variant?: string
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "angler_gear_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -610,6 +660,8 @@ export type Database = {
           eligibility_self_attested: boolean
           is_active: boolean
           updated_at: string
+          live_sonar_system: string
+          live_sonar_model: string
         }
         Insert: {
           user_id: string
@@ -629,6 +681,8 @@ export type Database = {
           eligibility_self_attested?: boolean
           is_active?: boolean
           updated_at?: string
+          live_sonar_system?: string
+          live_sonar_model?: string
         }
         Update: {
           user_id?: string
@@ -648,6 +702,8 @@ export type Database = {
           eligibility_self_attested?: boolean
           is_active?: boolean
           updated_at?: string
+          live_sonar_system?: string
+          live_sonar_model?: string
         }
         Relationships: [
           {
