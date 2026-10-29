@@ -1,36 +1,82 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Shell, NotConnected } from "@/components/Shell";
-import { ReactionBar } from "@/components/ReactionBar";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({
     meta: [
       { title: "Чат рыболовов — ZAPRUDA" },
-      { name: "description", content: "Общий чат спиннингистов в реальном времени." },
+      { name: "description", content: "Общий чат спиннингистов." },
       { property: "og:title", content: "Чат рыболовов — ZAPRUDA" },
-      { property: "og:description", content: "Общий чат спиннингистов в реальном времени." },
+      { property: "og:description", content: "Общий чат спиннингистов." },
     ],
   }),
   component: Chat,
 });
 
 const quick = ["🎣", "🐟", "🔥", "👍", "😂", "💪", "❤️", "👏", "🤝", "🤯", "🐊", "🏆", "🌧️", "🌅", "📍", "🪱"];
+type ChatMessage = {
+  id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
+  profiles?: { username: string | null; display_name: string | null; avatar_url: string | null } | null;
+};
 
 function Chat() {
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState<string[]>([
-    "Всем ни хвоста ни чешуи! 🎣🤝",
-    "Сегодня щука брала на паузе 😂🐊",
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [status, setStatus] = useState("Загружаем чат…");
+  const [sending, setSending] = useState(false);
 
-  function send(e: FormEvent<HTMLFormElement>) {
+  const loadMessages = useCallback(async () => {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData.user) {
+      setUserId(null);
+      setStatus("Войди в аккаунт, чтобы читать и отправлять сообщения.");
+      return;
+    }
+    setUserId(authData.user.id);
+    const { data, error } = await (supabase as any)
+      .from("chat_messages")
+      .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url)")
+      .order("created_at", { ascending: true })
+      .limit(100);
+    if (error) {
+      setStatus("Не удалось загрузить чат: " + error.message);
+      return;
+    }
+    setMessages((data ?? []) as ChatMessage[]);
+    setStatus("");
+  }, []);
+
+  useEffect(() => {
+    void loadMessages();
+    const channel = supabase
+      .channel("zaprud-chat-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, () => {
+        void loadMessages();
+      })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [loadMessages]);
+
+  async function send(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const message = draft.trim();
-    if (!message) return;
-    setMessages((current) => [...current, message]);
+    const body = draft.trim();
+    if (!body || !userId || sending) return;
+    setSending(true);
+    const { error } = await (supabase as any).from("chat_messages").insert({ user_id: userId, body });
+    setSending(false);
+    if (error) {
+      setStatus("Сообщение не отправлено: " + error.message);
+      return;
+    }
     setDraft("");
+    await loadMessages();
   }
 
   return (
@@ -41,19 +87,18 @@ function Chat() {
           <p className="text-xs text-muted-foreground">Общий канал · рыбалка, трофеи и немного баек 😂</p>
         </div>
         <div className="flex-1 space-y-4 overflow-y-auto p-5">
-          <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
-            ✨ Деморежим: сообщения и реакции пока хранятся только в этой открытой странице. После подключения таблиц Supabase подключим сохранение и чат в реальном времени.
-          </div>
-          {messages.map((message, i) => (
-            <div key={i} className="max-w-[90%] space-y-2">
+          {status && <div className="rounded-lg border p-3 text-xs text-muted-foreground">{status}</div>}
+          {messages.map((message) => (
+            <div key={message.id} className="max-w-[90%] space-y-2">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="flex size-7 items-center justify-center rounded-full bg-secondary text-sm">🎣</span>
-                <span>{i < 2 ? "Рыболов сообщества" : "Вы"}</span>
+                <span>{message.user_id === userId ? "Вы" : message.profiles?.display_name || message.profiles?.username || "Рыболов"}</span>
+                <time>{new Date(message.created_at).toLocaleString()}</time>
               </div>
-              <div className="rounded-2xl rounded-tl-sm bg-secondary px-4 py-3 text-sm">{message}</div>
-              <ReactionBar compact />
+              <div className="rounded-2xl rounded-tl-sm bg-secondary px-4 py-3 text-sm whitespace-pre-wrap break-words">{message.body}</div>
             </div>
           ))}
+          {!status && messages.length === 0 && <p className="text-sm text-muted-foreground">Пока тихо. Будь первым — напиши в чат! 🎣</p>}
         </div>
         <form className="space-y-2 border-t p-3" onSubmit={send}>
           <div className="flex flex-wrap gap-1">
@@ -63,15 +108,12 @@ function Chat() {
             ))}
           </div>
           <div className="flex gap-2">
-            <label className="btn-ghost cursor-pointer" aria-label="Прикрепить фото или видео">
-              📎<input type="file" accept="image/*,video/*" className="hidden" disabled />
-            </label>
-            <input className="field" placeholder="Напиши что-нибудь… 🎣" value={draft} onChange={(e) => setDraft(e.target.value)} />
-            <button className="btn-primary" type="submit" disabled={!draft.trim()}>Отправить 🚀</button>
+            <input className="field min-w-0 flex-1" placeholder={userId ? "Напиши что-нибудь… 🎣" : "Сначала войди в аккаунт"} value={draft} onChange={(e) => setDraft(e.target.value)} disabled={!userId || sending} maxLength={2000} />
+            <button className="btn-primary" type="submit" disabled={!draft.trim() || !userId || sending}>{sending ? "Отправляем…" : "Отправить 🚀"}</button>
           </div>
         </form>
       </div>
-      <div className="mt-4"><NotConnected what="Постоянное хранение чата, личные сообщения, вложения и синхронизация реакций между пользователями" /></div>
+      <div className="mt-4"><NotConnected what="Личные сообщения и вложения в чате" /></div>
     </Shell>
   );
 }
