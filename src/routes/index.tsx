@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { ReactionBar } from "@/components/ReactionBar";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +39,77 @@ type Comment = {
   created_at: string;
   profiles?: { username: string | null; display_name: string | null; avatar_url: string | null } | null;
 };
+
+function ReportPhotoGallery({ photos, title }: { photos: string[]; title: string }) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (activeIndex === null) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActiveIndex(null);
+      if (event.key === "ArrowRight") setActiveIndex((i) => i === null ? null : (i + 1) % photos.length);
+      if (event.key === "ArrowLeft") setActiveIndex((i) => i === null ? null : (i - 1 + photos.length) % photos.length);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeIndex, photos.length]);
+
+  if (!photos.length) return null;
+  return (
+    <>
+      <div className={`grid gap-1.5 overflow-hidden rounded-2xl ${photos.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+        {photos.map((src, index) => (
+          <button
+            key={index}
+            type="button"
+            className={`group relative overflow-hidden bg-zinc-900 text-left ${photos.length === 3 && index === 0 ? "col-span-2" : ""}`}
+            onClick={() => setActiveIndex(index)}
+            aria-label={`Открыть фото ${index + 1} из ${photos.length}: ${title}`}
+          >
+            <img
+              src={src}
+              loading="lazy"
+              alt={`${title} — фото ${index + 1}`}
+              className={`w-full object-cover transition duration-300 group-hover:scale-[1.025] ${photos.length === 1 || (photos.length === 3 && index === 0) ? "aspect-[16/10]" : "aspect-[4/3]"}`}
+            />
+            {index === 0 && photos.length > 1 && (
+              <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-lg bg-black/80 px-2.5 py-1.5 text-xs font-semibold text-white">
+                <Images className="size-3.5" aria-hidden="true" /> {photos.length} фото
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+      {activeIndex !== null && (
+        <div role="dialog" aria-modal="true" aria-label={`Фотографии: ${title}`} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-3 sm:p-10">
+          <button type="button" className="absolute inset-0" aria-label="Закрыть просмотр" onClick={() => setActiveIndex(null)} />
+          <img src={photos[activeIndex]} alt={`${title} — фото ${activeIndex + 1}`} className="pointer-events-none relative max-h-[85vh] max-w-[95vw] object-contain" />
+          <button
+            type="button"
+            className="absolute right-4 top-4 z-10 rounded-full border border-white/20 bg-black/80 p-3 text-white transition hover:border-lime-300"
+            aria-label="Закрыть"
+            onClick={() => setActiveIndex(null)}
+          >
+            <X className="size-5" />
+          </button>
+          {photos.length > 1 && (
+            <>
+              <button type="button" className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/80 p-3 text-white hover:text-lime-300" aria-label="Предыдущее фото" onClick={() => setActiveIndex((activeIndex - 1 + photos.length) % photos.length)}>
+                <ChevronLeft className="size-6" />
+              </button>
+              <button type="button" className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/80 p-3 text-white hover:text-lime-300" aria-label="Следующее фото" onClick={() => setActiveIndex((activeIndex + 1) % photos.length)}>
+                <ChevronRight className="size-6" />
+              </button>
+            </>
+          )}
+          <span className="pointer-events-none absolute bottom-5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/75 px-3 py-1 text-xs text-zinc-200">
+            {activeIndex + 1} / {photos.length}
+          </span>
+        </div>
+      )}
+    </>
+  );
+}
 
 function ReportComments({ reportId }: { reportId: string }) {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -123,6 +195,7 @@ function ReportComments({ reportId }: { reportId: string }) {
 function Feed() {
   const PAGE_SIZE = 15;
   const [reports, setReports] = useState<Report[]>([]);
+  const [photosByReport, setPhotosByReport] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -155,6 +228,31 @@ function Feed() {
       const page = (data ?? []) as unknown as Report[];
       setReports((current) => reset ? page : [...current, ...page.filter((item) => !current.some((old) => old.id === item.id))]);
       setHasMore(page.length === PAGE_SIZE);
+
+      if (reset) setPhotosByReport({});
+      if (page.length) {
+        // The photo table is optional until its migration is applied.
+        // Never let a missing gallery backend prevent fishing reports from loading.
+        const { data: photoRows, error: photoError } = await supabase
+          .from("report_photos")
+          .select("report_id,storage_path,sort_order")
+          .in("report_id", page.map((report) => report.id))
+          .order("sort_order", { ascending: true });
+
+        if (!photoError && photoRows?.length) {
+          const { data: signedUrls, error: signingError } = await supabase.storage
+            .from("report-photos")
+            .createSignedUrls(photoRows.map((photo) => photo.storage_path), 3600);
+          if (!signingError && signedUrls) {
+            const next: Record<string, string[]> = {};
+            photoRows.forEach((photo, index) => {
+              const signedUrl = signedUrls[index]?.signedUrl;
+              if (signedUrl) (next[photo.report_id] ??= []).push(signedUrl);
+            });
+            setPhotosByReport((current) => reset ? next : { ...current, ...next });
+          }
+        }
+      }
       setError("");
     }
     setLoading(false);
@@ -231,6 +329,7 @@ function Feed() {
               <h2 className="text-lg font-bold">{report.title}</h2>
               {report.body && <p className="mt-2 whitespace-pre-wrap text-sm">{report.body}</p>}
             </div>
+            <ReportPhotoGallery photos={photosByReport[report.id] ?? []} title={report.title} />
             <div className="flex flex-wrap gap-2 text-xs">
               {report.location_name && (
                 <div className="space-y-2">
