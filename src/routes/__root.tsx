@@ -8,7 +8,7 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -38,9 +38,16 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
-  const diagnostic = import.meta.env.DEV
-    ? (error instanceof Error ? `${error.name}: ${error.message}` : String(error))
-    : null;
+  const [showDetails, setShowDetails] = useState(false);
+  // Do not expose diagnostics by default in production. Users can choose to
+  // reveal a short error message during troubleshooting, without any stack.
+  const diagnostic = error instanceof Error
+    ? `${error.name}: ${error.message}`
+    : error instanceof Response
+      ? `HTTP ${error.status}`
+      : typeof error === "string"
+        ? error
+        : "Неизвестная ошибка при загрузке страницы.";
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -54,9 +61,17 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
-        {diagnostic && (
-          <pre role="status" className="mt-4 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-amber-400/30 bg-amber-950/30 p-3 text-left text-xs text-amber-100">
-            {diagnostic}
+        <button
+          type="button"
+          className="mt-4 text-xs font-semibold text-lime-300 underline underline-offset-4"
+          onClick={() => setShowDetails((open) => !open)}
+          aria-expanded={showDetails}
+        >
+          {showDetails ? "Скрыть причину ошибки" : "Показать причину ошибки"}
+        </button>
+        {showDetails && (
+          <pre role="status" className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-amber-400/30 bg-amber-950/30 p-3 text-left text-xs text-amber-100">
+            {diagnostic.slice(0, 500)}
           </pre>
         )}
         <div className="mt-6 flex flex-wrap justify-center gap-2">
