@@ -226,7 +226,7 @@ function Feed() {
               {report.body && <p className="mt-2 whitespace-pre-wrap text-sm">{report.body}</p>}
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
-              {report.location_name && <span className="rounded-full bg-secondary px-3 py-1.5">📍 {report.location_name}</span>}
+              {report.location_name && <a href={`https://yandex.ru/maps/?text=${encodeURIComponent(report.location_name)}`} target="_blank" rel="noreferrer" className="rounded-full bg-secondary px-3 py-1.5 transition hover:text-primary">📍 {report.location_name} · Яндекс Карты ↗</a>}
               {report.weather_summary && <span className="rounded-full bg-secondary px-3 py-1.5">🌦️ {report.weather_summary}</span>}
               {report.air_temperature_c != null && <span className="rounded-full bg-secondary px-3 py-1.5">🌡️ {report.air_temperature_c}°C</span>}
               {report.wind_direction && <span className="rounded-full bg-secondary px-3 py-1.5">💨 {report.wind_direction}{report.wind_speed_ms != null ? `, ${report.wind_speed_ms} м/с` : ""}</span>}
