@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.0";
 
-const cors = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET, OPTIONS","Content-Type":"application/json; charset=utf-8", "Cache-Control":"private, max-age=900"};
+const cors = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS","Content-Type":"application/json; charset=utf-8", "Cache-Control":"private, max-age=900"};
 const respond = (status: number, body: unknown) => new Response(JSON.stringify(body), {status,headers:cors});
 const decode = (x:string) => x.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,"$1").replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/&lt;/g,"<").replace(/&gt;/g,">").trim();
 const tag = (s:string,t:string) => decode(s.match(new RegExp("<"+t+"(?:\\s[^>]*)?>([\\s\\S]*?)</"+t+">","i"))?.[1]??"");
@@ -16,7 +16,7 @@ function supabaseKey(){
 }
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors});
- if(req.method!=="GET")return respond(405,{error:"Method not allowed"});
+ if(req.method!=="POST")return respond(405,{error:"Method not allowed"});
  const url=Deno.env.get("SUPABASE_URL")??"",key=supabaseKey();
  if(!url||!key)return respond(503,{error:"Backend not configured"});
  const jwt=req.headers.get("Authorization")?.replace(/^Bearer /,"");
