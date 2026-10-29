@@ -303,6 +303,149 @@ export type Database = {
           },
         ]
       }
+      partner_trips: {
+        Row: {
+          id: string
+          organizer_id: string
+          city: string
+          destination: string
+          departure_at: string
+          fishing_method: string
+          target_fish: string
+          transport: string
+          seats: number
+          finance_mode: "free" | "split" | "fee"
+          contribution_rub: number
+          cost_details: string
+          description: string
+          status: "open" | "closed"
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organizer_id: string
+          city: string
+          destination: string
+          departure_at: string
+          fishing_method?: string
+          target_fish?: string
+          transport?: string
+          seats?: number
+          finance_mode?: "free" | "split" | "fee"
+          contribution_rub?: number
+          cost_details?: string
+          description?: string
+          status?: "open" | "closed"
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organizer_id?: string
+          city?: string
+          destination?: string
+          departure_at?: string
+          fishing_method?: string
+          target_fish?: string
+          transport?: string
+          seats?: number
+          finance_mode?: "free" | "split" | "fee"
+          contribution_rub?: number
+          cost_details?: string
+          description?: string
+          status?: "open" | "closed"
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_trips_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_trip_requests: {
+        Row: {
+          id: string
+          trip_id: string
+          applicant_id: string
+          note: string
+          status: "pending" | "accepted" | "declined" | "withdrawn"
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          trip_id: string
+          applicant_id: string
+          note?: string
+          status?: "pending" | "accepted" | "declined" | "withdrawn"
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          trip_id?: string
+          applicant_id?: string
+          note?: string
+          status?: "pending" | "accepted" | "declined" | "withdrawn"
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_trip_requests_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "partner_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_trip_requests_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_trip_messages: {
+        Row: {
+          id: string
+          request_id: string
+          sender_id: string
+          body: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          request_id: string
+          sender_id: string
+          body: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          request_id?: string
+          sender_id?: string
+          body?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_trip_messages_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "partner_trip_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_trip_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_private_locations: {
         Row: {
           created_at: string
