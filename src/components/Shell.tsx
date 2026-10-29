@@ -105,7 +105,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <span>ZAPRUDA COMMUNITY · Свои на одной волне</span>
         <div className="flex flex-wrap items-center gap-4">
           <Link to="/feedback" className="font-semibold text-[#D7FF35] hover:underline">Предложить улучшение / сотрудничество</Link>
-          <a href="https://t.me/ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer" className="hover:text-white">Telegram ZAPRUDA</a>
+          <a href="https://web.telegram.org/a/#@ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer" className="hover:text-white">Telegram Web ZAPRUDA</a>
         </div>
       </footer>
 
