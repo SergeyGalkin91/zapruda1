@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useState } from "react";
+import type { FormEvent } from "react";
 import { Check, ListPlus, RotateCw, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -42,7 +43,7 @@ export function AnglerTackleCabinet({ userId }: { userId: string }) {
     setVariant(next==="reel"?"2500":"");
   }
 
-  async function addItem(e:React.FormEvent<HTMLFormElement>){
+  async function addItem(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
     if(working)return;
     const resolvedBrand=(brand==="Другой бренд"?customBrand:brand).trim();
