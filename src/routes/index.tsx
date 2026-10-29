@@ -31,6 +31,95 @@ type Report = {
   profiles?: { username: string | null; display_name: string | null; avatar_url: string | null } | null;
 };
 
+type Comment = {
+  id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
+  profiles?: { username: string | null; display_name: string | null; avatar_url: string | null } | null;
+};
+
+function ReportComments({ reportId }: { reportId: string }) {
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [draft, setDraft] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+
+  const loadComments = useCallback(async () => {
+    const { data: auth } = await supabase.auth.getUser();
+    setUserId(auth.user?.id ?? null);
+    const { data, error: queryError } = await supabase
+      .from("comments")
+      .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url)")
+      .eq("report_id", reportId)
+      .order("created_at", { ascending: true })
+      .limit(100);
+    if (queryError) {
+      setError("Не удалось загрузить комментарии: " + queryError.message);
+      return;
+    }
+    setComments((data ?? []) as unknown as Comment[]);
+    setError("");
+  }, [reportId]);
+
+  useEffect(() => {
+    void loadComments();
+    const channel = supabase
+      .channel("report-comments-" + reportId)
+      .on("postgres_changes", { event: "*", schema: "public", table: "comments", filter: "report_id=eq." + reportId }, () => void loadComments())
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [loadComments, reportId]);
+
+  async function sendComment(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const body = draft.trim();
+    if (!body || sending) return;
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) {
+      setError("Войди в аккаунт, чтобы комментировать.");
+      return;
+    }
+    setSending(true);
+    setError("");
+    const { error: insertError } = await supabase.from("comments").insert({
+      report_id: reportId,
+      user_id: auth.user.id,
+      body,
+    });
+    if (insertError) setError("Не удалось отправить комментарий: " + insertError.message);
+    else {
+      setDraft("");
+      await loadComments();
+    }
+    setSending(false);
+  }
+
+  return (
+    <section className="border-t pt-4">
+      <h3 className="mb-3 text-sm font-semibold">💬 Комментарии ({comments.length})</h3>
+      <div className="space-y-3">
+        {comments.map((comment) => (
+          <div key={comment.id} className="rounded-lg bg-muted/50 p-3">
+            <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="font-semibold text-foreground">{comment.profiles?.display_name || comment.profiles?.username || "Рыболов"}</span>
+              <span>{new Date(comment.created_at).toLocaleString("ru-RU")}</span>
+            </div>
+            <p className="whitespace-pre-wrap text-sm">{comment.body}</p>
+          </div>
+        ))}
+        {!comments.length && <p className="text-xs text-muted-foreground">Пока никто не прокомментировал. Начни обсуждение!</p>}
+      </div>
+      <form onSubmit={sendComment} className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <input className="field flex-1" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={userId ? "Написать комментарий…" : "Войди, чтобы комментировать"} maxLength={2000} />
+        <button className="btn-primary" disabled={sending || !draft.trim()}>{sending ? "Отправка…" : "Отправить"}</button>
+      </form>
+      {error && <p className="mt-2 text-xs text-destructive" role="status">{error}</p>}
+    </section>
+  );
+}
+
 function Feed() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,19 +133,14 @@ function Feed() {
       .order("created_at", { ascending: false })
       .limit(50);
 
-    if (queryError) {
-      setError("Не удалось загрузить отчёты: " + queryError.message);
-    } else {
-      setReports((data ?? []) as unknown as Report[]);
-      setError("");
-    }
+    if (queryError) setError("Не удалось загрузить отчёты: " + queryError.message);
+    else { setReports((data ?? []) as unknown as Report[]); setError(""); }
     setLoading(false);
   }, []);
 
   useEffect(() => {
     void loadReports();
-    const channel = supabase
-      .channel("public-fishing-reports-feed")
+    const channel = supabase.channel("public-fishing-reports-feed")
       .on("postgres_changes", { event: "*", schema: "public", table: "fishing_reports" }, () => void loadReports())
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
@@ -72,7 +156,6 @@ function Feed() {
         </div>
         <Link to="/reports/new" className="btn-primary self-start">🎣 Новый отчёт</Link>
       </section>
-
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">{error}</div>}
       {!loading && !error && reports.length === 0 && (
@@ -109,6 +192,7 @@ function Feed() {
               {report.pressure_hpa != null && <span className="rounded-full bg-secondary px-3 py-1.5">🧭 ${Math.round(report.pressure_hpa / 1.33322)} мм рт. ст.</span>}
             </div>
             <ReactionBar reportId={report.id} />
+            <ReportComments reportId={report.id} />
           </article>
         );
       })}
