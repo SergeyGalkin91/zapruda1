@@ -367,7 +367,7 @@ function Profile() {
             )}
           </section>
 
-          <PrivateFishingMarks userId={userId} />
+          <PrivateFishingMarks userId={userId} homeCity={preferences.home_city} homeRegion={preferences.home_region} />
 
           <AnglerTackleCabinet userId={userId} />
 
