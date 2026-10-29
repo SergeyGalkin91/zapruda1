@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { ExternalLink, MapPin, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { InteractiveFishingMap } from "@/components/InteractiveFishingMap";
 
 type Kind = "promising" | "snag" | "dropoff" | "hole" | "riffle" | "other";
 type Mark = {
@@ -32,6 +33,7 @@ export function PrivateFishingMarks({ userId }: { userId: string }) {
   const [note, setNote] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [draftPoint, setDraftPoint] = useState<{ latitude: number; longitude: number } | null>(null);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
@@ -70,7 +72,7 @@ export function PrivateFishingMarks({ userId }: { userId: string }) {
       setMarks((prev) => [data as Mark, ...prev].slice(0, 100));
       setSelected(data as Mark);
     }
-    setTitle(""); setNote(""); setLatitude(""); setLongitude("");
+    setTitle(""); setNote(""); setLatitude(""); setLongitude(""); setDraftPoint(null);
     setStatus("Точка сохранена только в твоём профиле.");
   }
 
@@ -99,13 +101,28 @@ export function PrivateFishingMarks({ userId }: { userId: string }) {
           <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D7FF35]">Личная карта · только для тебя</p>
           <h2 id="private-fishing-marks" className="mt-1 text-xl font-extrabold text-white">Мои рыболовные метки</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
-            Отмечай коряги, бровки, ямы и перспективные места по координатам.
+            Нажми на карту ниже, выбери тип точки и сохрани корягу, бровку, яму или перспективное место.
             Другие пользователи ZAPRUDA не видят твои метки. При открытии карты координаты передаются Яндексу.
           </p>
         </div>
       </div>
       {error && <p role="alert" className="mt-4 rounded-xl border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p>}
       {status && <p role="status" className="mt-4 text-sm text-[#D7FF35]">{status}</p>}
+      <div className="mt-5"><InteractiveFishingMap
+        marks={marks.map((mark) => ({ id: mark.id, title: mark.title, kind: mark.kind, latitude: mark.latitude, longitude: mark.longitude }))}
+        selected={draftPoint}
+        onPick={(point) => {
+          setDraftPoint(point);
+          setLatitude(point.latitude.toFixed(6));
+          setLongitude(point.longitude.toFixed(6));
+          setError("");
+          setStatus("Точка выбрана. Укажи название и нажми «Сохранить личную метку».");
+        }}
+        onSelectMark={(id) => {
+          const mark = marks.find((item) => item.id === id);
+          if (mark) { setSelected(mark); setStatus("Выбрана сохранённая метка «" + mark.title + "»."); }
+        }}
+      /></div>
       <form onSubmit={save} className="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-black/15 p-4 sm:grid-cols-2">
         <label className="text-xs font-semibold text-zinc-300">Тип метки
           <select className="field mt-1 w-full" value={kind} onChange={(e) => setKind(e.target.value as Kind)}>
@@ -116,10 +133,10 @@ export function PrivateFishingMarks({ userId }: { userId: string }) {
           <input className="field mt-1 w-full" required minLength={2} maxLength={80} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Например, коряжник у берега" />
         </label>
         <label className="text-xs font-semibold text-zinc-300">Широта *
-          <input className="field mt-1 w-full" required inputMode="decimal" value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="56.247551" />
+          <input className="field mt-1 w-full" required inputMode="decimal" value={latitude} onChange={(e) => { setLatitude(e.target.value); setDraftPoint(null); }} placeholder="56.247551" />
         </label>
         <label className="text-xs font-semibold text-zinc-300">Долгота *
-          <input className="field mt-1 w-full" required inputMode="decimal" value={longitude} onChange={(e) => setLongitude(e.target.value)} placeholder="43.949333" />
+          <input className="field mt-1 w-full" required inputMode="decimal" value={longitude} onChange={(e) => { setLongitude(e.target.value); setDraftPoint(null); }} placeholder="43.949333" />
         </label>
         <label className="text-xs font-semibold text-zinc-300 sm:col-span-2">Заметка о точке
           <textarea className="field mt-1 min-h-20 w-full" maxLength={700} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Глубина, приманка, зацепы, вид рыбы…" />
