@@ -14,7 +14,7 @@ export const Route = createFileRoute("/feedback")({
 });
 
 type Kind = "cooperation" | "improvement" | "bug";
-type MyRequest = { id: string; request_type: string; subject: string; created_at: string; review_status: string };
+type MyRequest = { id: string; request_type: string; subject: string; created_at: string; review_status: string; telegram_status: string };
 
 export function FeedbackPage() {
   const [category, setCategory] = useState<Kind>("improvement");
@@ -32,7 +32,7 @@ export function FeedbackPage() {
     const user = auth.user;
     if (!user) { setRecent([]); return; }
     const { data } = await supabase.from("community_requests")
-      .select("id,request_type,subject,created_at,review_status")
+      .select("id,request_type,subject,created_at,review_status,telegram_status")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }).limit(8);
     setRecent((data ?? []) as MyRequest[]);
@@ -56,7 +56,7 @@ export function FeedbackPage() {
     });
     setSubmitting(false);
     if (invokeError || !data?.saved) {
-      setError(data?.error || "Не удалось отправить. Проверь подключение и войди в аккаунт.");
+      setError(data?.error || invokeError?.message || "Не удалось отправить. Проверь подключение и войди в аккаунт.");
       return;
     }
     setResult({ id: String(data.id), notified: data.telegram_delivered === true });
@@ -91,7 +91,7 @@ export function FeedbackPage() {
         {error && <p role="alert" className="mt-5 rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}
         {result && <div role="status" className="mt-5 rounded-xl border border-[#D7FF35]/35 bg-[#D7FF35]/10 p-4">
           <p className="flex items-center gap-2 text-sm font-extrabold text-[#D7FF35]"><CheckCircle2 className="size-5" />Обращение сохранено</p>
-          <p className="mt-2 text-xs text-zinc-300">Номер: {result.id.slice(0,8)}. {result.notified ? "Уведомление отправлено в администраторский чат." : "Уведомление в Telegram ожидает подключения или повторной обработки; обращение сохранено в системе."}</p>
+          <p className="mt-2 text-xs text-zinc-300">Номер: {result.id.slice(0,8)}. {result.notified ? "Уведомление отправлено в администраторский чат." : "Обращение сохранено в базе. Доставка в Telegram пока не подтверждена."}</p>
         </div>}
         <form onSubmit={send} className="mt-5 space-y-4">
           <label className="block space-y-1.5 text-xs font-bold text-zinc-300">
@@ -127,7 +127,7 @@ export function FeedbackPage() {
           <h3 className="flex items-center gap-2 font-black"><Handshake className="size-5 text-[#D7FF35]"/>Партнёрам</h3>
           <p className="mt-3 text-sm leading-6 text-zinc-400">Открыты к предложениям рыболовных гидов, магазинов, брендов, клубов и организаторов соревнований.</p>
         </div>
-        {authenticated && <div className="rounded-2xl border border-white/10 bg-[#151A14] p-5"><h3 className="font-black">Мои обращения</h3><div className="mt-3 space-y-2">{recent.map((r) => <div key={r.id} className="rounded-xl border border-white/10 p-3"><p className="text-sm font-bold text-white">{r.subject}</p><p className="mt-1 text-xs text-zinc-400">{new Date(r.created_at).toLocaleString("ru-RU")} · {r.review_status === "new" ? "Получено" : r.review_status === "in_review" ? "На рассмотрении" : r.review_status === "resolved" ? "Рассмотрено" : "Закрыто"}</p></div>)}{!recent.length && <p className="text-xs text-zinc-400">Пока нет обращений.</p>}</div></div>}
+        {authenticated && <div className="rounded-2xl border border-white/10 bg-[#151A14] p-5"><h3 className="font-black">Мои обращения</h3><div className="mt-3 space-y-2">{recent.map((r) => <div key={r.id} className="rounded-xl border border-white/10 p-3"><p className="text-sm font-bold text-white">{r.subject}</p><p className="mt-1 text-xs text-zinc-400">{new Date(r.created_at).toLocaleString("ru-RU")} · {r.review_status === "new" ? "Получено" : r.review_status === "in_review" ? "На рассмотрении" : r.review_status === "resolved" ? "Рассмотрено" : "Закрыто"} · {r.telegram_status === "sent" ? "Telegram: доставлено" : "Telegram: не подтверждено"}</p></div>)}{!recent.length && <p className="text-xs text-zinc-400">Пока нет обращений.</p>}</div></div>}
         <a href="https://t.me/ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center rounded-xl border border-[#D7FF35]/25 px-4 py-3 text-sm font-bold text-[#D7FF35] hover:bg-[#D7FF35]/10">
           Telegram ZAPRUDA COMMUNITY
