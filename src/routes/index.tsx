@@ -187,7 +187,9 @@ function Feed() {
 
   return (
     <Shell>
-      <section className="relative mb-8 overflow-hidden rounded-3xl border border-lime-300/15 bg-[#10120c] px-5 py-6 sm:px-7 sm:py-8">\n        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-lime-300/[0.07] blur-3xl" />\n        <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <section className="relative mb-8 overflow-hidden rounded-3xl border border-lime-300/15 bg-[#10120c] px-5 py-6 sm:px-7 sm:py-8">
+        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-lime-300/[0.07] blur-3xl" />
+        <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">🎣 Спиннинг · отчёты</p>
           <h1 className="mt-2 text-3xl font-bold md:text-4xl">Лента рыбалок 🐟</h1>
