@@ -43,6 +43,8 @@ type Trip = {
   price_includes: string;
   cancel_policy: string;
   guide_experience_years: number | null;
+  live_sonar_system: string;
+  live_sonar_model: string;
   platform_commission_bps: number;
   safety_briefing: boolean;
   life_jackets_available: boolean;
@@ -103,6 +105,7 @@ function Partners() {
   const [financeFilter, setFinanceFilter] = useState("all");
   const [methodFilter, setMethodFilter] = useState("all");
   const [kindFilter, setKindFilter] = useState("all");
+  const [liveSonarOnly, setLiveSonarOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState("");
@@ -136,7 +139,7 @@ function Partners() {
       setUserId(auth.user?.id ?? null);
       const { data, error: tripsError } = await supabase
         .from("partner_trips")
-        .select("id,organizer_id,city,destination,departure_at,fishing_method,target_fish,transport,seats,finance_mode,contribution_rub,cost_details,description,status,trip_kind,guide_service,boat_type,sonar_model,gear_included,price_includes,cancel_policy,guide_experience_years,platform_commission_bps,safety_briefing,life_jackets_available,operator_eligibility_confirmed,organizer:profiles!partner_trips_organizer_id_fkey(username,display_name,avatar_url)")
+        .select("id,organizer_id,city,destination,departure_at,fishing_method,target_fish,transport,seats,finance_mode,contribution_rub,cost_details,description,status,trip_kind,guide_service,boat_type,sonar_model,gear_included,price_includes,cancel_policy,guide_experience_years,live_sonar_system,live_sonar_model,platform_commission_bps,safety_briefing,life_jackets_available,operator_eligibility_confirmed,organizer:profiles!partner_trips_organizer_id_fkey(username,display_name,avatar_url)")
         .order("departure_at", { ascending: true })
         .limit(100);
       if (tripsError) throw tripsError;
@@ -182,9 +185,10 @@ function Partners() {
       (!cityFilter.trim() || [trip.city, trip.destination].some((x) => x.toLowerCase().includes(cityFilter.trim().toLowerCase()))) &&
       (financeFilter === "all" || trip.finance_mode === financeFilter) &&
       (kindFilter === "all" || trip.trip_kind === kindFilter) &&
+      (!liveSonarOnly || (trip.trip_kind === "guided" && trip.live_sonar_system !== "Нет")) &&
       (methodFilter === "all" || trip.fishing_method === methodFilter)
     );
-  }), [trips, view, cityFilter, financeFilter, methodFilter, kindFilter, userId, applications]);
+  }), [trips, view, cityFilter, financeFilter, methodFilter, kindFilter, liveSonarOnly, userId, applications]);
 
   async function submitTrip(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -368,6 +372,7 @@ function Partners() {
           <option value="community">Напарники</option>
           <option value="guided">Платный гид</option>
         </select>
+        <label className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-2 py-2 text-xs text-zinc-300"><input type="checkbox" checked={liveSonarOnly} onChange={(e) => setLiveSonarOnly(e.target.checked)} className="accent-lime-300" />С Panoptix / LiveScope</label>
         <select className="field w-full sm:w-auto" aria-label="Способ ловли" value={methodFilter} onChange={(e) => setMethodFilter(e.target.value)}>
           <option value="all">Любая рыбалка</option>
           {["Спиннинг", "Фидер", "Поплавок", "Зимняя рыбалка", "Нахлыст", "Другое"].map((item) => <option key={item}>{item}</option>)}
@@ -437,6 +442,7 @@ function Partners() {
                     <p className="mt-2"><b className="text-white">Программа:</b> {trip.guide_service}</p>
                     <p><b className="text-white">Лодка:</b> {trip.boat_type}</p>
                     {trip.sonar_model && <p><b className="text-white">Эхолот:</b> {trip.sonar_model}</p>}
+                    {trip.live_sonar_system !== "Нет" && <p><b className="text-white">Живое сканирование:</b> {trip.live_sonar_system}{trip.live_sonar_model ? ` · ${trip.live_sonar_model}` : ""} <span className="text-zinc-500">(со слов гида)</span></p>}
                     {trip.gear_included && <p><b className="text-white">Снасти:</b> {trip.gear_included}</p>}
                     <p><b className="text-white">В цену входит:</b> {trip.price_includes}</p>
                     <p><b className="text-white">Условия отмены:</b> {trip.cancel_policy}</p>
