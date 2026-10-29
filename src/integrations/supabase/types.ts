@@ -556,6 +556,51 @@ export type Database = {
           },
         ]
       }
+      community_requests: {
+        Row: {
+          id: string
+          user_id: string
+          request_type: "improvement" | "cooperation" | "bug"
+          category: string
+          subject: string
+          body: string
+          contact: string
+          review_status: "new" | "in_review" | "resolved" | "closed"
+          telegram_status: "pending" | "sent" | "failed"
+          telegram_attempts: number
+          telegram_sent_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          request_type: "improvement" | "cooperation" | "bug"
+          category?: string
+          subject: string
+          body: string
+          contact?: string
+          review_status?: "new" | "in_review" | "resolved" | "closed"
+          telegram_status?: "pending" | "sent" | "failed"
+          telegram_attempts?: number
+          telegram_sent_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          request_type?: "improvement" | "cooperation" | "bug"
+          category?: string
+          subject?: string
+          body?: string
+          contact?: string
+          review_status?: "new" | "in_review" | "resolved" | "closed"
+          telegram_status?: "pending" | "sent" | "failed"
+          telegram_attempts?: number
+          telegram_sent_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       angler_preferences: {
         Row: {
           user_id: string
