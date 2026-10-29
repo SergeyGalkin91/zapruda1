@@ -230,7 +230,7 @@ function Feed() {
               {report.weather_summary && <span className="rounded-full bg-secondary px-3 py-1.5">🌦️ {report.weather_summary}</span>}
               {report.air_temperature_c != null && <span className="rounded-full bg-secondary px-3 py-1.5">🌡️ {report.air_temperature_c}°C</span>}
               {report.wind_direction && <span className="rounded-full bg-secondary px-3 py-1.5">💨 {report.wind_direction}{report.wind_speed_ms != null ? `, ${report.wind_speed_ms} м/с` : ""}</span>}
-              {report.pressure_hpa != null && <span className="rounded-full bg-secondary px-3 py-1.5">🧭 ${Math.round(report.pressure_hpa / 1.33322)} мм рт. ст.</span>}
+              {report.pressure_hpa != null && <span className="rounded-full bg-secondary px-3 py-1.5">🧭 {Math.round(report.pressure_hpa / 1.33322)} мм рт. ст.</span>}
             </div>
             <ReactionBar reportId={report.id} />
             <ReportComments reportId={report.id} />
