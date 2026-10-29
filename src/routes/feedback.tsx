@@ -39,10 +39,20 @@ export function FeedbackPage() {
   }
 
   useEffect(() => {
-    void supabase.auth.getUser().then(({ data }) => {
-      setAuthenticated(Boolean(data.user && !data.user.is_anonymous));
-      if (data.user && !data.user.is_anonymous) void loadRecent();
-    });
+    let active = true;
+    void supabase.auth.getUser()
+      .then(({ data, error: authError }) => {
+        if (!active) return;
+        const signedIn = Boolean(data.user && !data.user.is_anonymous && !authError);
+        setAuthenticated(signedIn);
+        if (signedIn) void loadRecent().catch(() => setRecent([]));
+      })
+      .catch(() => {
+        if (!active) return;
+        setAuthenticated(false);
+        setError("Не удалось проверить вход. Обнови страницу или войди в аккаунт.");
+      });
+    return () => { active = false; };
   }, []);
 
   async function send(e: FormEvent<HTMLFormElement>) {
@@ -51,19 +61,24 @@ export function FeedbackPage() {
     setSubmitting(true);
     setError("");
     setResult(null);
-    const { data, error: invokeError } = await supabase.functions.invoke("submit-community-request", {
-      body: { request_type: category, category: category === "cooperation" ? "Партнёрство" : category === "bug" ? "Ошибка приложения" : "Улучшение сервиса", subject, body: message, contact },
-    });
-    setSubmitting(false);
-    if (invokeError || !data?.saved) {
-      setError(data?.error || invokeError?.message || "Не удалось отправить. Проверь подключение и войди в аккаунт.");
-      return;
+    try {
+      const { data, error: invokeError } = await supabase.functions.invoke("submit-community-request", {
+        body: { request_type: category, category: category === "cooperation" ? "Партнёрство" : category === "bug" ? "Ошибка приложения" : "Улучшение сервиса", subject, body: message, contact },
+      });
+      if (invokeError || !data?.saved) {
+        setError(data?.error || invokeError?.message || "Не удалось отправить. Проверь подключение и войди в аккаунт.");
+        return;
+      }
+      setResult({ id: String(data.id), notified: data.telegram_delivered === true });
+      setSubject("");
+      setMessage("");
+      setContact("");
+      await loadRecent().catch(() => setRecent([]));
+    } catch {
+      setError("Нет связи с сервером. Проверь подключение и попробуй ещё раз.");
+    } finally {
+      setSubmitting(false);
     }
-    setResult({ id: String(data.id), notified: data.telegram_delivered === true });
-    setSubject("");
-    setMessage("");
-    setContact("");
-    await loadRecent();
   }
 
   return <Shell>
@@ -128,9 +143,9 @@ export function FeedbackPage() {
           <p className="mt-3 text-sm leading-6 text-zinc-400">Открыты к предложениям рыболовных гидов, магазинов, брендов, клубов и организаторов соревнований.</p>
         </div>
         {authenticated && <div className="rounded-2xl border border-white/10 bg-[#151A14] p-5"><h3 className="font-black">Мои обращения</h3><div className="mt-3 space-y-2">{recent.map((r) => <div key={r.id} className="rounded-xl border border-white/10 p-3"><p className="text-sm font-bold text-white">{r.subject}</p><p className="mt-1 text-xs text-zinc-400">{new Date(r.created_at).toLocaleString("ru-RU")} · {r.review_status === "new" ? "Получено" : r.review_status === "in_review" ? "На рассмотрении" : r.review_status === "resolved" ? "Рассмотрено" : "Закрыто"} · {r.telegram_status === "sent" ? "Telegram: доставлено" : "Telegram: не подтверждено"}</p></div>)}{!recent.length && <p className="text-xs text-zinc-400">Пока нет обращений.</p>}</div></div>}
-        <a href="https://t.me/ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer"
+        <a href="https://web.telegram.org/a/#@ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center rounded-xl border border-[#D7FF35]/25 px-4 py-3 text-sm font-bold text-[#D7FF35] hover:bg-[#D7FF35]/10">
-          Telegram ZAPRUDA COMMUNITY
+          Открыть ZAPRUDA в Telegram Web
         </a>
       </aside>
     </div>
