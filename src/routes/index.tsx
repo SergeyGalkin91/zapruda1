@@ -226,7 +226,23 @@ function Feed() {
               {report.body && <p className="mt-2 whitespace-pre-wrap text-sm">{report.body}</p>}
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
-              {report.location_name && <a href={`https://yandex.ru/maps/?text=${encodeURIComponent(report.location_name)}`} target="_blank" rel="noreferrer" className="rounded-full bg-secondary px-3 py-1.5 transition hover:text-primary">📍 {report.location_name} · Яндекс Карты ↗</a>}
+              {report.location_name && (
+                <div className="space-y-2">
+                  <a href={`https://yandex.ru/maps/?text=${encodeURIComponent(report.location_name)}`} target="_blank" rel="noreferrer" className="inline-flex rounded-full bg-secondary px-3 py-1.5 text-xs transition hover:text-primary">📍 {report.location_name} · Открыть в Яндекс Картах ↗</a>
+                  <div className="overflow-hidden rounded-xl border border-border/70">
+                    <iframe
+                      title={`Карта: ${report.location_name}`}
+                      src={`https://yandex.ru/map-widget/v1/?text=${encodeURIComponent(report.location_name)}`}
+                      width="100%"
+                      height="220"
+                      frameBorder="0"
+                      allowFullScreen
+                      loading="lazy"
+                      className="block w-full"
+                    />
+                  </div>
+                </div>
+              )}
               {report.weather_summary && <span className="rounded-full bg-secondary px-3 py-1.5">🌦️ {report.weather_summary}</span>}
               {report.air_temperature_c != null && <span className="rounded-full bg-secondary px-3 py-1.5">🌡️ {report.air_temperature_c}°C</span>}
               {report.wind_direction && <span className="rounded-full bg-secondary px-3 py-1.5">💨 {report.wind_direction}{report.wind_speed_ms != null ? `, ${report.wind_speed_ms} м/с` : ""}</span>}
