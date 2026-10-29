@@ -3,49 +3,50 @@ import type { ReactNode } from "react";
 import { Wordmark } from "@/components/Wordmark";
 
 const nav = [
-  { to: "/", label: "Лента" },
-  { to: "/communities", label: "Сообщества" },
-  { to: "/chat", label: "Чат" },
-  { to: "/assistant", label: "ИИ-рыболов" },
-  { to: "/reports/new", label: "Новый отчёт" },
-  { to: "/profile", label: "Профиль" },
+  { to: "/", label: "Лента", icon: "⌂" },
+  { to: "/communities", label: "Клубы", icon: "♧" },
+  { to: "/chat", label: "Чат", icon: "✉" },
+  { to: "/assistant", label: "ИИ-рыболов", icon: "✳" },
+  { to: "/profile", label: "Профиль", icon: "◉" },
 ] as const;
 
 export function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen pb-20 md:pb-0">
-      <header className="sticky top-0 z-20 border-b bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-          <Link to="/"><Wordmark /></Link>
-          <nav className="hidden gap-1 md:flex">
+    <div className="min-h-screen pb-24 md:pb-0">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-background/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+          <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0"><Wordmark /></Link>
+          <nav aria-label="Основная навигация" className="hidden items-center gap-1 lg:flex">
             {nav.map((n) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground"
-                activeProps={{ className: "text-foreground bg-secondary" }}
-                activeOptions={{ exact: true }}
-              >
+              <Link key={n.to} to={n.to}
+                className="rounded-full px-3 py-2 text-sm text-muted-foreground transition hover:bg-white/5 hover:text-foreground"
+                activeProps={{ className: "rounded-full bg-white/10 px-3 py-2 text-sm font-semibold text-foreground" }}
+                activeOptions={{ exact: true }}>
                 {n.label}
               </Link>
             ))}
           </nav>
-          <Link to="/auth" className="btn-ghost">Войти</Link>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link to="/auth" className="btn-ghost hidden sm:inline-flex">Войти</Link>
+            <Link to="/reports/new" className="btn-primary">＋ <span className="hidden sm:inline">Новый отчёт</span><span className="sm:hidden">Отчёт</span></Link>
+          </div>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-3 border-t bg-background md:hidden">
-        {nav.map((n) => (
-          <Link
-            key={n.to}
-            to={n.to}
-            className="py-3 text-center text-xs text-muted-foreground"
-            activeProps={{ className: "text-primary" }}
-            activeOptions={{ exact: true }}
-          >
-            {n.label}
-          </Link>
-        ))}
+
+      <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
+
+      <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
+        <div className="mx-auto grid max-w-xl grid-cols-5">
+          {nav.map((n) => (
+            <Link key={n.to} to={n.to}
+              className="flex min-h-16 flex-col items-center justify-center gap-1 px-1 py-2 text-[11px] text-muted-foreground transition"
+              activeProps={{ className: "flex min-h-16 flex-col items-center justify-center gap-1 px-1 py-2 text-[11px] font-semibold text-primary" }}
+              activeOptions={{ exact: true }}>
+              <span aria-hidden="true" className="text-xl leading-none">{n.icon}</span>
+              <span className="truncate">{n.label}</span>
+            </Link>
+          ))}
+        </div>
       </nav>
     </div>
   );
@@ -54,9 +55,9 @@ export function Shell({ children }: { children: ReactNode }) {
 export function NotConnected({ what }: { what: string }) {
   return (
     <div className="panel border-dashed p-6 text-center">
-      <p className="font-display text-sm font-semibold">База данных ещё не подключена</p>
+      <p className="font-display text-sm font-semibold">Раздел в разработке</p>
       <p className="mt-2 text-sm text-muted-foreground">
-        {what} появятся после подключения вашего проекта Supabase.
+        {what} — подключаем и доводим до рабочего состояния.
       </p>
     </div>
   );
