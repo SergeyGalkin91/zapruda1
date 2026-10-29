@@ -398,7 +398,7 @@ function Partners() {
                 <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-400"><MapPin className="size-3.5" aria-hidden="true" /> {trip.city}</p>
                 <div className="mt-4 flex flex-wrap gap-2 text-xs">
                   <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/20 px-2.5 py-1.5"><CalendarDays className="size-3.5 text-lime-300" aria-hidden="true" />{formatDeparture(trip.departure_at)}</span>
-                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/20 px-2.5 py-1.5"><Users className="size-3.5 text-lime-300" aria-hidden="true" />{remaining} из {trip.seats} мест</span>
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/20 px-2.5 py-1.5"><Users className="size-3.5 text-lime-300" aria-hidden="true" />{own ? `${remaining} из ${trip.seats} мест` : `До ${trip.seats} мест · уточни наличие`}</span>
                 </div>
               </div>
               <div className="space-y-4 p-5">
@@ -448,7 +448,7 @@ function Partners() {
                         {myRequest.status === "pending" && <button className={ghostButton} disabled={working} onClick={() => void decide(myRequest, "withdrawn")}>Отозвать</button>}
                         {myRequest.status === "accepted" && <button className={ghostButton} onClick={() => void openChat(myRequest.id)}><MessageCircle className="size-4" />Личный чат</button>}
                       </div>
-                    ) : outOfDate || remaining === 0 ? (
+                    ) : outOfDate || (own && remaining === 0) ? (
                       <p className="text-xs text-zinc-400">{remaining === 0 ? "Свободных мест не осталось" : "Приём заявок завершён"}</p>
                     ) : userId ? (
                       <button className={actionButton + " w-full"} type="button" onClick={() => { setApplyTo(trip.id); setApplicationNote(""); }}>
