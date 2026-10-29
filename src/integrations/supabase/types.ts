@@ -124,6 +124,7 @@ export type Database = {
           weather_summary: string | null
           wind_direction: string | null
           wind_speed_ms: number | null
+          fishing_method: string | null
         }
         Insert: {
           air_temperature_c?: number | null
@@ -141,6 +142,7 @@ export type Database = {
           weather_summary?: string | null
           wind_direction?: string | null
           wind_speed_ms?: number | null
+          fishing_method?: string | null
         }
         Update: {
           air_temperature_c?: number | null
@@ -158,6 +160,7 @@ export type Database = {
           weather_summary?: string | null
           wind_direction?: string | null
           wind_speed_ms?: number | null
+          fishing_method?: string | null
         }
         Relationships: [
           {
@@ -320,6 +323,25 @@ export type Database = {
           description: string
           status: "open" | "closed"
           created_at: string
+          experience_needed: string
+          social_style: string
+          duration_hours: number | null
+          meeting_area: string
+          gear_requirements: string
+          safety_notes: string
+          boat_trip: boolean
+          trip_kind: "community" | "guided"
+          guide_service: string
+          boat_type: string
+          sonar_model: string
+          gear_included: string
+          price_includes: string
+          cancel_policy: string
+          guide_experience_years: number | null
+          safety_briefing: boolean
+          life_jackets_available: boolean
+          operator_eligibility_confirmed: boolean
+          platform_commission_bps: number
         }
         Insert: {
           id?: string
@@ -337,6 +359,25 @@ export type Database = {
           description?: string
           status?: "open" | "closed"
           created_at?: string
+          experience_needed?: string
+          social_style?: string
+          duration_hours?: number | null
+          meeting_area?: string
+          gear_requirements?: string
+          safety_notes?: string
+          boat_trip?: boolean
+          trip_kind?: "community" | "guided"
+          guide_service?: string
+          boat_type?: string
+          sonar_model?: string
+          gear_included?: string
+          price_includes?: string
+          cancel_policy?: string
+          guide_experience_years?: number | null
+          safety_briefing?: boolean
+          life_jackets_available?: boolean
+          operator_eligibility_confirmed?: boolean
+          platform_commission_bps?: number
         }
         Update: {
           id?: string
@@ -354,6 +395,25 @@ export type Database = {
           description?: string
           status?: "open" | "closed"
           created_at?: string
+          experience_needed?: string
+          social_style?: string
+          duration_hours?: number | null
+          meeting_area?: string
+          gear_requirements?: string
+          safety_notes?: string
+          boat_trip?: boolean
+          trip_kind?: "community" | "guided"
+          guide_service?: string
+          boat_type?: string
+          sonar_model?: string
+          gear_included?: string
+          price_includes?: string
+          cancel_policy?: string
+          guide_experience_years?: number | null
+          safety_briefing?: boolean
+          life_jackets_available?: boolean
+          operator_eligibility_confirmed?: boolean
+          platform_commission_bps?: number
         }
         Relationships: [
           {
@@ -531,6 +591,259 @@ export type Database = {
           },
         ]
       }
+      guide_profiles: {
+        Row: {
+          user_id: string
+          title: string
+          home_city: string
+          about: string
+          specialties: string
+          experience_years: number | null
+          boat_model: string
+          boat_capacity: number | null
+          sonar_model: string
+          included_gear: string
+          service_program: string
+          cancellation_terms: string
+          offers_safety_briefing: boolean
+          offers_life_jackets: boolean
+          eligibility_self_attested: boolean
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          title?: string
+          home_city?: string
+          about?: string
+          specialties?: string
+          experience_years?: number | null
+          boat_model?: string
+          boat_capacity?: number | null
+          sonar_model?: string
+          included_gear?: string
+          service_program?: string
+          cancellation_terms?: string
+          offers_safety_briefing?: boolean
+          offers_life_jackets?: boolean
+          eligibility_self_attested?: boolean
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          title?: string
+          home_city?: string
+          about?: string
+          specialties?: string
+          experience_years?: number | null
+          boat_model?: string
+          boat_capacity?: number | null
+          sonar_model?: string
+          included_gear?: string
+          service_program?: string
+          cancellation_terms?: string
+          offers_safety_briefing?: boolean
+          offers_life_jackets?: boolean
+          eligibility_self_attested?: boolean
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guide_verifications: {
+        Row: {
+          user_id: string
+          verified_at: string | null
+          revoked_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          verified_at?: string | null
+          revoked_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          verified_at?: string | null
+          revoked_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_verifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "guide_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      guide_booking_quotes: {
+        Row: {
+          request_id: string
+          trip_id: string
+          guide_id: string
+          customer_id: string
+          fixed_price_rub: number
+          commission_bps: number
+          estimated_commission_rub: number
+          estimated_guide_net_rub: number
+          payment_status: string
+          created_at: string
+          paid_at: string | null
+        }
+        Insert: {
+          request_id: string
+          trip_id: string
+          guide_id: string
+          customer_id: string
+          fixed_price_rub: number
+          commission_bps: number
+          estimated_commission_rub: number
+          estimated_guide_net_rub: number
+          payment_status?: string
+          created_at?: string
+          paid_at?: string | null
+        }
+        Update: {
+          request_id?: string
+          trip_id?: string
+          guide_id?: string
+          customer_id?: string
+          fixed_price_rub?: number
+          commission_bps?: number
+          estimated_commission_rub?: number
+          estimated_guide_net_rub?: number
+          payment_status?: string
+          created_at?: string
+          paid_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_booking_quotes_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: true
+            referencedRelation: "partner_trip_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spearfishing_profiles: {
+        Row: {
+          user_id: string
+          home_city: string
+          preferred_waters: string
+          experience_years: number | null
+          activity_style: string
+          access_type: string
+          equipment_overview: string
+          buddy_notes: string
+          safety_training_self_reported: boolean
+          buddy_only: boolean
+          publicly_listed: boolean
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          home_city?: string
+          preferred_waters?: string
+          experience_years?: number | null
+          activity_style?: string
+          access_type?: string
+          equipment_overview?: string
+          buddy_notes?: string
+          safety_training_self_reported?: boolean
+          buddy_only?: boolean
+          publicly_listed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          home_city?: string
+          preferred_waters?: string
+          experience_years?: number | null
+          activity_style?: string
+          access_type?: string
+          equipment_overview?: string
+          buddy_notes?: string
+          safety_training_self_reported?: boolean
+          buddy_only?: boolean
+          publicly_listed?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spearfishing_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_user_blocks: {
+        Row: {
+          blocker_id: string
+          blocked_id: string
+          created_at: string
+        }
+        Insert: {
+          blocker_id: string
+          blocked_id: string
+          created_at?: string
+        }
+        Update: {
+          blocker_id?: string
+          blocked_id?: string
+          created_at?: string
+        }
+        Relationships: [
+        ]
+      }
+      partner_user_reports: {
+        Row: {
+          id: string
+          reporter_id: string
+          reported_id: string
+          trip_id: string | null
+          reason: string
+          details: string
+          review_status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          reporter_id: string
+          reported_id: string
+          trip_id?: string | null
+          reason: string
+          details?: string
+          review_status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          reporter_id?: string
+          reported_id?: string
+          trip_id?: string | null
+          reason?: string
+          details?: string
+          review_status?: string
+          created_at?: string
+        }
+        Relationships: [
+        ]
+      }
       report_private_locations: {
         Row: {
           created_at: string
@@ -575,6 +888,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      my_fishing_specializations: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          fishing_method: string
+          report_count: number
+          catches_count: number
+          credited_catches: number
+          photo_reports: number
+          distinct_waters: number
+          heaviest_catch_kg: number | null
+        }[]
+      }
       my_fishing_progress: {
         Args: Record<PropertyKey, never>
         Returns: {
