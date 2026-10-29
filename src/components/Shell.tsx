@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, Waves, Handshake,
   MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Lightbulb,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
+import { supabase } from "@/integrations/supabase/client";
 
 const desktopNav = [
   { to: "/", label: "Лента", Icon: House },
@@ -37,6 +38,18 @@ const otherNav = [
 
 export function Shell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  // Supabase emits INITIAL_SESSION on mount, and SIGNED_IN / SIGNED_OUT after auth changes.
+  // Keep navigation reactive without requiring a page reload or exposing an SSR auth flash.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsSignedIn(Boolean(session?.user));
+      setAuthReady(true);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="min-h-screen pb-24 xl:pb-0">
@@ -61,9 +74,16 @@ export function Shell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex shrink-0 items-center gap-2">
-            <Link to="/auth" className="hidden rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white sm:inline-flex">
-              Войти
-            </Link>
+            {authReady && (isSignedIn ? (
+              <Link to="/profile" className="inline-flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15">
+                <UserRound className="size-4" aria-hidden="true" />
+                Профиль
+              </Link>
+            ) : (
+              <Link to="/auth" className="hidden rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white sm:inline-flex">
+                Войти
+              </Link>
+            ))}
             <Link to="/reports/new" className="btn-primary hidden xl:inline-flex">
               <Plus className="size-4" strokeWidth={2.7} aria-hidden="true" />
               Новый отчёт
@@ -93,9 +113,15 @@ export function Shell({ children }: { children: ReactNode }) {
                 <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
               </Link>
             ))}
-            <Link to="/auth" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07] sm:hidden">
-              <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
-            </Link>
+            {authReady && (isSignedIn ? (
+              <Link to="/profile" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07] sm:hidden">
+                <UserRound className="size-4 text-[#D7FF35]" aria-hidden="true" />Мой профиль
+              </Link>
+            ) : (
+              <Link to="/auth" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07] sm:hidden">
+                <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
+              </Link>
+            ))}
           </nav>
         )}
       </header>
