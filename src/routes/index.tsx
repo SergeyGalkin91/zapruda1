@@ -195,7 +195,10 @@ function Feed() {
           <h1 className="mt-2 text-3xl font-bold md:text-4xl">Лента рыбалок 🐟</h1>
           <p className="mt-2 max-w-md text-muted-foreground">Реальные выезды: где, на что и при какой погоде клевало. Делись победами и фейлами 😂</p>
         </div>
-        <Link to="/reports/new" className="btn-primary self-start">🎣 Новый отчёт</Link>
+        <div className="flex flex-wrap gap-2">
+          <Link to="/reports/new" className="btn-primary self-start">🎣 Новый отчёт</Link>
+          <Link to="/partners" className="inline-flex items-center justify-center rounded-xl border border-lime-300/35 px-4 py-2.5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10">🤝 Найти напарника</Link>
+        </div>
         </div>
       </section>
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
