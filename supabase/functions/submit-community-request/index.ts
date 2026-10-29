@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.99.3";
+import { createClient } from "npm:@supabase/supabase-js@2.49.0";
 
 type RequestKind = "improvement" | "cooperation" | "bug";
 type RequestBody = {
