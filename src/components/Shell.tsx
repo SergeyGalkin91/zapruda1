@@ -23,7 +23,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 className="rounded-full px-3 py-2 text-sm text-muted-foreground transition hover:bg-white/5 hover:text-foreground"
                 activeProps={{ className: "rounded-full bg-white/10 px-3 py-2 text-sm font-semibold text-foreground" }}
                 activeOptions={{ exact: true }}>
-                {n.label}
+                {n.label}{n.to === "/market" && <span className="ml-1.5 rounded-full border border-lime-300/25 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-lime-300">скоро</span>}
               </Link>
             ))}
           </nav>
@@ -45,6 +45,7 @@ export function Shell({ children }: { children: ReactNode }) {
               activeOptions={{ exact: true }}>
               <span aria-hidden="true" className="text-xl leading-none">{n.icon}</span>
               <span className="truncate">{n.label}</span>
+              {n.to === "/market" && <span className="text-[9px] font-bold leading-none text-lime-300">скоро</span>}
             </Link>
           ))}
         </div>
