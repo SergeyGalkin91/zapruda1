@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import {
   ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, Waves,
-  MessageCircle, Plus, ShoppingBag, UserRound, Users, X,
+  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Lightbulb,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 
@@ -28,6 +28,7 @@ const mobileNav = [
 const otherNav = [
   { to: "/spearfishing", label: "Подводная охота", Icon: Waves },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
+  { to: "/feedback", label: "Сотрудничество и идеи", Icon: Lightbulb },
   { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
