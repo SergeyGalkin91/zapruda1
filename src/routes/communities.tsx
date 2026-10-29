@@ -52,7 +52,7 @@ function Communities() {
         </div>
         <p className="mt-4 text-xs leading-5 text-zinc-400">
           Предложения и обращения к администрации отправляй через защищённую форму ZAPRUDA.
-          Личные контакты и обращения не публикуются в Telegram-канале.
+          Личные контакты, заявки и жалобы не публикуются в публичной Telegram-группе. Для них предусмотрен закрытый чат администрации.
         </p>
       </section>
       <Link to="/chat" className="panel mt-6 flex items-center justify-between p-5 hover:border-primary">
