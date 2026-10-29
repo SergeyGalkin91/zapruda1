@@ -4,7 +4,7 @@ import type { FormEvent } from "react";
 import {
   ArrowRight, CalendarDays, CarFront, Check, CircleDollarSign, Clock3,
   Fish, MapPin, MessageCircle, Plus, RefreshCw, Send, ShieldCheck, SlidersHorizontal,
-  Users, X,
+  Users, X, Ship, Waves, ShieldAlert, Ban,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,18 @@ type Trip = {
   cost_details: string;
   description: string;
   status: "open" | "closed";
+  trip_kind: "community" | "guided";
+  guide_service: string;
+  boat_type: string;
+  sonar_model: string;
+  gear_included: string;
+  price_includes: string;
+  cancel_policy: string;
+  guide_experience_years: number | null;
+  platform_commission_bps: number;
+  safety_briefing: boolean;
+  life_jackets_available: boolean;
+  operator_eligibility_confirmed: boolean;
   organizer?: Profile | null;
 };
 type Application = {
@@ -90,6 +102,7 @@ function Partners() {
   const [cityFilter, setCityFilter] = useState("");
   const [financeFilter, setFinanceFilter] = useState("all");
   const [methodFilter, setMethodFilter] = useState("all");
+  const [kindFilter, setKindFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState("");
@@ -123,7 +136,7 @@ function Partners() {
       setUserId(auth.user?.id ?? null);
       const { data, error: tripsError } = await supabase
         .from("partner_trips")
-        .select("id,organizer_id,city,destination,departure_at,fishing_method,target_fish,transport,seats,finance_mode,contribution_rub,cost_details,description,status,organizer:profiles!partner_trips_organizer_id_fkey(username,display_name,avatar_url)")
+        .select("id,organizer_id,city,destination,departure_at,fishing_method,target_fish,transport,seats,finance_mode,contribution_rub,cost_details,description,status,trip_kind,guide_service,boat_type,sonar_model,gear_included,price_includes,cancel_policy,guide_experience_years,platform_commission_bps,safety_briefing,life_jackets_available,operator_eligibility_confirmed,organizer:profiles!partner_trips_organizer_id_fkey(username,display_name,avatar_url)")
         .order("departure_at", { ascending: true })
         .limit(100);
       if (tripsError) throw tripsError;
@@ -168,9 +181,10 @@ function Partners() {
     return (
       (!cityFilter.trim() || [trip.city, trip.destination].some((x) => x.toLowerCase().includes(cityFilter.trim().toLowerCase()))) &&
       (financeFilter === "all" || trip.finance_mode === financeFilter) &&
+      (kindFilter === "all" || trip.trip_kind === kindFilter) &&
       (methodFilter === "all" || trip.fishing_method === methodFilter)
     );
-  }), [trips, view, cityFilter, financeFilter, methodFilter, userId, applications]);
+  }), [trips, view, cityFilter, financeFilter, methodFilter, kindFilter, userId, applications]);
 
   async function submitTrip(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -219,7 +233,7 @@ function Partners() {
     setWorking(false);
     if (insertError) { setError("Не получилось отправить отклик: " + insertError.message); return; }
     setApplyTo(null); setApplicationNote("");
-    setNotice("Отклик отправлен. Организатор получит заявку и решит, подходит ли ему напарник.");
+    setNotice("Заявка отправлена. Организатор решит, принять ли её. Денежных списаний не было.");
     await loadData();
   }
 
@@ -297,6 +311,7 @@ function Partners() {
             <button className={actionButton} type="button" onClick={() => { setShowForm((v) => !v); setError(""); }}>
               <Plus aria-hidden="true" className="size-4" /> Организовать выезд
             </button>
+            <Link to="/guides" className={ghostButton}><Ship className="size-4" /> Выезды с гидом</Link>
             <span className="inline-flex items-center gap-2 text-xs text-zinc-400"><Users aria-hidden="true" className="size-4 text-lime-300" /> Компания вместо одиночной рыбалки</span>
           </div>
         </div>
@@ -314,7 +329,7 @@ function Partners() {
             <Field title="Водоём / район *"><input className="field" required minLength={2} maxLength={150} value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Ока, Кудьма, Волга…" /></Field>
             <Field title="Дата и время *"><input className="field" required type="datetime-local" value={departure} onChange={(e) => setDeparture(e.target.value)} /></Field>
             <Field title="Свободных мест *"><select className="field" value={seats} onChange={(e) => setSeats(e.target.value)}>{Array.from({ length: 8 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}</select></Field>
-            <Field title="Способ ловли"><select className="field" value={method} onChange={(e) => setMethod(e.target.value)}>{["Спиннинг", "Фидер", "Поплавок", "Зимняя рыбалка", "Нахлыст", "Другое"].map((item) => <option key={item}>{item}</option>)}</select></Field>
+            <Field title="Способ ловли"><select className="field" value={method} onChange={(e) => setMethod(e.target.value)}>{["Спиннинг", "Фидер", "Поплавок", "Зимняя рыбалка", "Нахлыст", "Подводная охота", "Другое"].map((item) => <option key={item}>{item}</option>)}</select></Field>
             <Field title="Кого ловим"><input className="field" maxLength={100} value={fish} onChange={(e) => setFish(e.target.value)} placeholder="Щука, судак, окунь…" /></Field>
             <Field title="Транспорт"><select className="field" value={transport} onChange={(e) => setTransport(e.target.value)}>{["Есть машина", "Нужна машина", "Своим ходом", "Обсудим"].map((item) => <option key={item}>{item}</option>)}</select></Field>
             <Field title="Финансовые условия"><select className="field" value={financeMode} onChange={(e) => setFinanceMode(e.target.value as Trip["finance_mode"])}><option value="free">Бесплатно</option><option value="split">Делим расходы</option><option value="fee">Фиксированный взнос</option></select></Field>
@@ -348,6 +363,11 @@ function Partners() {
       <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-[#151812] p-3">
         <SlidersHorizontal className="ml-1 size-4 text-lime-300" aria-hidden="true" />
         <input className="field min-w-0 flex-1 sm:max-w-56" aria-label="Поиск по городу и водоёму" value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} placeholder="Город или водоём…" />
+        <select className="field w-full sm:w-auto" aria-label="Формат выезда" value={kindFilter} onChange={(e) => setKindFilter(e.target.value)}>
+          <option value="all">Все выезды</option>
+          <option value="community">Напарники</option>
+          <option value="guided">Платный гид</option>
+        </select>
         <select className="field w-full sm:w-auto" aria-label="Способ ловли" value={methodFilter} onChange={(e) => setMethodFilter(e.target.value)}>
           <option value="all">Любая рыбалка</option>
           {["Спиннинг", "Фидер", "Поплавок", "Зимняя рыбалка", "Нахлыст", "Другое"].map((item) => <option key={item}>{item}</option>)}
@@ -390,9 +410,9 @@ function Partners() {
                     : <div className="flex size-12 items-center justify-center rounded-full border border-lime-300/30 bg-lime-300/10 text-lg font-black text-lime-300">{displayName[0]?.toUpperCase()}</div>}
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-white">{displayName}</p>
-                    <p className="mt-0.5 text-xs text-zinc-400">Организатор выезда</p>
+                    <p className="mt-0.5 text-xs text-zinc-400">{trip.trip_kind === "guided" ? "Рыболовный гид · данные со слов организатора" : "Организатор выезда"}</p>
                   </div>
-                  <span className="rounded-full border border-lime-300/25 bg-lime-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-lime-300">{own ? "Мой выезд" : outOfDate ? "Завершён" : "Набор открыт"}</span>
+                  <span className="rounded-full border border-lime-300/25 bg-lime-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-lime-300">{trip.trip_kind === "guided" ? "ПЛАТНЫЙ ГИД" : own ? "Мой выезд" : outOfDate ? "Завершён" : "Набор открыт"}</span>
                 </div>
                 <h2 className="text-xl font-extrabold text-white">{trip.destination}</h2>
                 <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-400"><MapPin className="size-3.5" aria-hidden="true" /> {trip.city}</p>
@@ -406,11 +426,24 @@ function Partners() {
                   <div><p className="text-zinc-500">Рыбалка</p><p className="mt-1 font-bold text-zinc-200"><Fish className="mr-1 inline size-3.5 text-lime-300" />{trip.fishing_method}{trip.target_fish ? ` · ${trip.target_fish}` : ""}</p></div>
                   <div><p className="text-zinc-500">Транспорт</p><p className="mt-1 font-bold text-zinc-200"><CarFront className="mr-1 inline size-3.5 text-lime-300" />{trip.transport}</p></div>
                   <div className="col-span-2 rounded-xl border border-lime-300/20 bg-lime-300/[0.045] px-3 py-3">
-                    <p className="text-zinc-400"><CircleDollarSign className="mr-1 inline size-4 text-lime-300" />{financeLabels[trip.finance_mode]}</p>
+                    <p className="text-zinc-400"><CircleDollarSign className="mr-1 inline size-4 text-lime-300" />{trip.trip_kind === "guided" ? "Стоимость платной рыбалки" : financeLabels[trip.finance_mode]}</p>
                     <p className="mt-1 text-base font-extrabold text-lime-300">{moneyLabel(trip)}</p>
                     {trip.cost_details && <p className="mt-1 text-xs leading-5 text-zinc-300">{trip.cost_details}</p>}
                   </div>
                 </div>
+                {trip.trip_kind === "guided" && (
+                  <section className="rounded-xl border border-lime-300/20 bg-black/20 p-3 text-xs leading-6 text-zinc-300">
+                    <p className="font-black uppercase tracking-wider text-lime-300"><Ship className="mr-1 inline size-4" /> Гид на лодке</p>
+                    <p className="mt-2"><b className="text-white">Программа:</b> {trip.guide_service}</p>
+                    <p><b className="text-white">Лодка:</b> {trip.boat_type}</p>
+                    {trip.sonar_model && <p><b className="text-white">Эхолот:</b> {trip.sonar_model}</p>}
+                    {trip.gear_included && <p><b className="text-white">Снасти:</b> {trip.gear_included}</p>}
+                    <p><b className="text-white">В цену входит:</b> {trip.price_includes}</p>
+                    <p><b className="text-white">Условия отмены:</b> {trip.cancel_policy}</p>
+                    <p className="mt-2 border-t border-white/10 pt-2 text-zinc-400"><ShieldAlert className="mr-1 inline size-4 text-lime-300"/>Инструктаж и жилеты подтверждены гидом самостоятельно. Квалификация не проверена.</p>
+                    <p className="mt-1 text-zinc-500">Заявка не является оплатой. Комиссия платформы {trip.platform_commission_bps / 100}% будет применяться только при подключённом эквайринге и оплате.</p>
+                  </section>
+                )}
                 {trip.description && <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-300">{trip.description}</p>}
                 {own && (
                   <div className="space-y-3 border-t border-white/10 pt-4">
@@ -460,7 +493,8 @@ function Partners() {
                     {myRequest?.status === "accepted" && chatRequest === myRequest.id && chatPanel(myRequest.id)}
                     {applyTo === trip.id && (
                       <form onSubmit={sendApplication} className="space-y-3 rounded-xl border border-lime-300/25 bg-lime-300/[0.04] p-3">
-                        <p className="text-sm font-bold">Отклик на выезд</p>
+                        <p className="text-sm font-bold">{trip.trip_kind === "guided" ? "Заявка на платный выезд с гидом" : "Отклик на выезд"}</p>
+                        {trip.trip_kind === "guided" && <p className="text-xs text-lime-300">Стоимость: {moneyLabel(trip)}. Подача заявки бесплатна, онлайн-оплата пока не подключена.</p>}
                         <textarea className="field min-h-24 text-sm" maxLength={500} placeholder="Расскажи о себе и почему хочешь поехать (необязательно)" value={applicationNote} onChange={(e) => setApplicationNote(e.target.value)} />
                         <p className="text-xs text-zinc-400">Отправка отклика не означает, что место уже подтверждено.</p>
                         <div className="flex gap-2">
