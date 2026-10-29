@@ -5,6 +5,7 @@ import { Wordmark } from "@/components/Wordmark";
 const nav = [
   { to: "/", label: "Лента", icon: "⌂" },
   { to: "/communities", label: "Клубы", icon: "♧" },
+  { to: "/market", label: "Барахолка", icon: "◇" },
   { to: "/chat", label: "Чат", icon: "✉" },
   { to: "/assistant", label: "ИИ-рыболов", icon: "✳" },
   { to: "/profile", label: "Профиль", icon: "◉" },
@@ -36,7 +37,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
 
       <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-xl grid-cols-5">
+        <div className="mx-auto grid max-w-xl grid-cols-6">
           {nav.map((n) => (
             <Link key={n.to} to={n.to}
               className="flex min-h-16 flex-col items-center justify-center gap-1 px-1 py-2 text-[11px] text-muted-foreground transition"
