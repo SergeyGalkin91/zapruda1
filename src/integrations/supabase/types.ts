@@ -556,6 +556,12 @@ export type Database = {
           },
         ]
       }
+      zapruda_admins: {
+        Row: { user_id: string; created_at: string }
+        Insert: { user_id: string; created_at?: string }
+        Update: { user_id?: string; created_at?: string }
+        Relationships: []
+      }
       community_requests: {
         Row: {
           id: string
