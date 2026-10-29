@@ -118,7 +118,7 @@ create policy "Participants send approved trip chat" on public.partner_trip_mess
 
 -- Cap accepted applicants even under concurrent organizer actions.
 create or replace function public.check_partner_trip_capacity()
-returns trigger language plpgsql security definer set search_path = public, pg_temp as $$
+returns trigger language plpgsql security invoker set search_path = public, pg_temp as $
 declare available_seats integer;
 declare accepted_count integer;
 begin
@@ -132,6 +132,9 @@ begin
     select count(*) into accepted_count
       from public.partner_trip_requests
       where trip_id = new.trip_id and status = 'accepted' and id <> new.id;
+    if old.status <> 'pending' then
+      raise exception 'Only pending applications can be accepted';
+    end if;
     if accepted_count >= available_seats then
       raise exception 'На выезд больше нет свободных мест';
     end if;
