@@ -446,6 +446,91 @@ export type Database = {
           },
         ]
       }
+      angler_preferences: {
+        Row: {
+          user_id: string
+          home_city: string
+          home_region: string
+          main_technique: string
+          target_species: string[]
+          fishing_access: string
+          transport: string
+          favorite_lures: string
+          tackle_text: string
+          preferred_water: string
+          fishing_notes: string
+          search_radius_km: number
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          home_city?: string
+          home_region?: string
+          main_technique?: string
+          target_species?: string[]
+          fishing_access?: string
+          transport?: string
+          favorite_lures?: string
+          tackle_text?: string
+          preferred_water?: string
+          fishing_notes?: string
+          search_radius_km?: number
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          home_city?: string
+          home_region?: string
+          main_technique?: string
+          target_species?: string[]
+          fishing_access?: string
+          transport?: string
+          favorite_lures?: string
+          tackle_text?: string
+          preferred_water?: string
+          fishing_notes?: string
+          search_radius_km?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "angler_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_memberships: {
+        Row: {
+          user_id: string
+          active_until: string
+          updated_at: string
+          payment_reference: string | null
+        }
+        Insert: {
+          user_id: string
+          active_until: string
+          updated_at?: string
+          payment_reference?: string | null
+        }
+        Update: {
+          user_id?: string
+          active_until?: string
+          updated_at?: string
+          payment_reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_memberships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_private_locations: {
         Row: {
           created_at: string
@@ -490,7 +575,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      my_fishing_progress: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          report_count: number
+          catches_count: number
+          photo_count: number
+          photo_reports: number
+          reactions_received: number
+          trips_organized: number
+          heaviest_catch_kg: number | null
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
