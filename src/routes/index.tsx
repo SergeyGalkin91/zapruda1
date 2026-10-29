@@ -187,7 +187,7 @@ function Feed() {
 
   return (
     <Shell>
-      <section className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <section className="relative mb-8 overflow-hidden rounded-3xl border border-lime-300/15 bg-[#10120c] px-5 py-6 sm:px-7 sm:py-8">\n        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-lime-300/[0.07] blur-3xl" />\n        <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">🎣 Спиннинг · отчёты</p>
           <h1 className="mt-2 text-3xl font-bold md:text-4xl">Лента рыбалок 🐟</h1>
@@ -243,7 +243,7 @@ function Feed() {
       {error && !loading && <button type="button" className="btn-ghost mt-3" onClick={() => void loadPage(reports.length === 0)}>Повторить загрузку</button>}
         </div>
         <aside className="hidden space-y-4 lg:block">
-          <div className="panel p-5"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">ZAPRUDA SPINNING</p><h2 className="mt-3 text-xl font-bold">Рыбалка — это истории</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Уловы, рабочие приманки, погода и честные отчёты с воды. Листай ленту и делись своим выездом.</p><Link to="/reports/new" className="btn-primary mt-4 w-full">＋ Опубликовать отчёт</Link></div>
+          <div className="panel border-lime-300/15 p-5"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">НАШЕ СООБЩЕСТВО</p><h2 className="mt-3 text-xl font-bold [text-shadow:0_1px_8px_rgba(215,255,0,0.10)]">Не просто улов. Свои на одной волне.</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Обмениваемся опытом, честно рассказываем о рыбалках, находим напарников и помогаем друг другу становиться лучше.</p><Link to="/reports/new" className="btn-primary mt-4 w-full">＋ Поделиться историей</Link></div>
           <div className="panel p-4"><h3 className="font-semibold">Подсказка дня 🎯</h3><p className="mt-2 text-sm text-muted-foreground">Укажи приманку, глубину и проводку в отчёте — другим рыболовам будет проще повторить результат.</p></div>
         </aside>
       </div>
