@@ -9,6 +9,7 @@ import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
+import { PrivateFishingMarks } from "@/components/PrivateFishingMarks";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import type { FishingSpecialization } from "@/lib/disciplines";
 import { supabase } from "@/integrations/supabase/client";
@@ -365,6 +366,8 @@ function Profile() {
               </div>
             )}
           </section>
+
+          <PrivateFishingMarks userId={userId} />
 
           <AnglerTackleCabinet userId={userId} />
 
