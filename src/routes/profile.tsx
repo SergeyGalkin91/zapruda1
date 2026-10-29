@@ -8,6 +8,7 @@ import {
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
+import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import type { FishingSpecialization } from "@/lib/disciplines";
 import { supabase } from "@/integrations/supabase/client";
@@ -295,7 +296,7 @@ function Profile() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <Label name="Мои снасти" hint="Укажи спиннинги, тесты, катушки и плетёнку.">
+                <Label name="Дополнительные заметки о снастях" hint="Для выбора брендов, моделей и размеров используй каталог ниже.">
                   <textarea className="field min-h-32" maxLength={1600} value={preferences.tackle_text} onChange={(e) => update("tackle_text", e.target.value)} placeholder={"Narval Euphoria 10–42 г\nDaiwa Prorex LT 3000\nШнур PE #1.2"} />
                 </Label>
                 <Label name="Любимые приманки" hint="Важен вес и тип: поможет подобрать технику.">
@@ -318,7 +319,9 @@ function Profile() {
             </form>
           </section>
 
-          <div className="mb-6 flex flex-wrap gap-3">
+          <AnglerTackleCabinet userId={userId} />
+
+          <div className="mb-6 mt-6 flex flex-wrap gap-3">
             <Link to="/guides" className="btn-ghost inline-flex">Кабинет рыболовного гида</Link>
             <Link to="/spearfishing" className="btn-ghost inline-flex">Подводная охота</Link>
           </div>
