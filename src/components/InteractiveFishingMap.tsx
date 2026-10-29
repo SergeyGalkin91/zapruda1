@@ -44,11 +44,13 @@ type Props = {
   selected: Point | null;
   onPick: (point: Point) => void;
   onSelectMark: (id: string) => void;
+  homeCity?: string;
+  homeRegion?: string;
 };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c] ?? c));
 
-export function InteractiveFishingMap({ marks, selected, onPick, onSelectMark }: Props) {
+export function InteractiveFishingMap({ marks, selected, onPick, onSelectMark, homeCity, homeRegion }: Props) {
   const node = useRef<HTMLDivElement>(null);
   const map = useRef<LeafletMap | null>(null);
   const lib = useRef<LeafletApi | null>(null);
@@ -77,6 +79,16 @@ export function InteractiveFishingMap({ marks, selected, onPick, onSelectMark }:
         attribution: "© OpenStreetMap contributors",
         maxZoom: 19,
       }).addTo(mapInstance);
+      if (!start && homeCity?.trim()) {
+        void fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(homeCity.trim()) + "&count=8&language=ru&format=json")
+          .then((response) => response.ok ? response.json() : Promise.reject(new Error("Geocoder unavailable")))
+          .then((geo: { results?: Array<{ latitude: number; longitude: number; admin1?: string }> }) => {
+            if (!active) return;
+            const locations = geo.results ?? [];
+            const matched = locations.find((entry) => homeRegion?.trim() && entry.admin1?.toLowerCase().includes(homeRegion.trim().toLowerCase())) ?? locations[0];
+            if (matched) mapInstance.setView([matched.latitude, matched.longitude], 11);
+          }).catch(() => { /* Keep the map navigable if geocoding fails. */ });
+      }
       mapInstance.on("click", ({ latlng }) => {
         onPickRef.current({ latitude: Number(latlng.lat.toFixed(6)), longitude: Number(latlng.lng.toFixed(6)) });
       });
