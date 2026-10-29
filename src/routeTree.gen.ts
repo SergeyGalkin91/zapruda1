@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatRouteImport } from './routes/chat'
@@ -17,6 +18,11 @@ import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReportsNewRouteImport } from './routes/reports.new'
 
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -54,6 +60,7 @@ const ReportsNewRoute = ReportsNewRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/feedback': typeof FeedbackRoute
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
@@ -63,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/reports/new': typeof ReportsNewRoute
 }
 export interface FileRoutesByTo {
+  '/feedback': typeof FeedbackRoute
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/auth': typeof AuthRoute
@@ -72,6 +80,7 @@ export interface FileRoutesByTo {
   '/reports/new': typeof ReportsNewRoute
 }
 export interface FileRoutesById {
+  '/feedback': typeof FeedbackRoute
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
@@ -84,6 +93,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/feedback'
     | '/'
     | '/assistant'
     | '/auth'
@@ -93,6 +103,7 @@ export interface FileRouteTypes {
     | '/reports/new'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/feedback'
     | '/'
     | '/assistant'
     | '/auth'
@@ -101,6 +112,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reports/new'
   id:
+    | '/feedback'
     | '__root__'
     | '/'
     | '/assistant'
@@ -112,6 +124,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  FeedbackRoute: typeof FeedbackRoute
   IndexRoute: typeof IndexRoute
   AssistantRoute: typeof AssistantRoute
   AuthRoute: typeof AuthRoute
@@ -123,6 +136,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -176,6 +196,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  FeedbackRoute: FeedbackRoute,
   IndexRoute: IndexRoute,
   AssistantRoute: AssistantRoute,
   AuthRoute: AuthRoute,
