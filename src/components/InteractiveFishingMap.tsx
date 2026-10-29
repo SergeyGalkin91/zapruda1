@@ -56,6 +56,7 @@ export function InteractiveFishingMap({ marks, selected, onPick, onSelectMark }:
   const onPickRef = useRef(onPick);
   const onSelectRef = useRef(onSelectMark);
   const [problem, setProblem] = useState("");
+  const [ready, setReady] = useState(false);
   onPickRef.current = onPick;
   onSelectRef.current = onSelectMark;
 
@@ -71,6 +72,7 @@ export function InteractiveFishingMap({ marks, selected, onPick, onSelectMark }:
         zoomControl: true,
       });
       map.current = mapInstance;
+      setReady(true);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors",
         maxZoom: 19,
@@ -108,7 +110,7 @@ export function InteractiveFishingMap({ marks, selected, onPick, onSelectMark }:
       const marker = L.marker([selected.latitude, selected.longitude]).addTo(instance);
       markers.current.push(marker);
     }
-  }, [marks, selected, problem]);
+  }, [marks, selected, ready]);
 
   return (
     <div className="space-y-2">
