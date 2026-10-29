@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { ReactionBar } from "@/components/ReactionBar";
+import { DailyFishingBrief } from "@/components/DailyFishingBrief";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -299,6 +300,7 @@ function Feed() {
         </div>
         </div>
       </section>
+      <DailyFishingBrief />
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">{error}</div>}
       {!loading && !error && reports.length === 0 && (
