@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import {
-  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, Waves,
+  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, Waves, Handshake,
   MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Lightbulb,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
@@ -26,6 +26,7 @@ const mobileNav = [
 ] as const;
 
 const otherNav = [
+  { to: "/feedback", label: "Предложения и сотрудничество", Icon: Handshake },
   { to: "/spearfishing", label: "Подводная охота", Icon: Waves },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
   { to: "/feedback", label: "Сотрудничество и идеи", Icon: Lightbulb },
@@ -100,6 +101,13 @@ export function Shell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
+      <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-white/10 px-4 py-5 text-xs text-zinc-500 sm:px-6">
+        <span>ZAPRUDA COMMUNITY · Свои на одной волне</span>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link to="/feedback" className="font-semibold text-[#D7FF35] hover:underline">Предложить улучшение / сотрудничество</Link>
+          <a href="https://t.me/ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer" className="hover:text-white">Telegram ZAPRUDA</a>
+        </div>
+      </footer>
 
       <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#0D100C]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.32)] backdrop-blur-xl xl:hidden">
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
