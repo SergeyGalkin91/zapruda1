@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { MessageCircle, Send, ShieldCheck } from "lucide-react";
 import { Shell, NotConnected } from "@/components/Shell";
 import { countries, topics } from "@/lib/geo";
 
@@ -33,6 +34,27 @@ function Communities() {
   return (
     <Shell>
       <h1 className="text-3xl font-bold">Сообщества</h1>
+      <section className="mt-6 overflow-hidden rounded-3xl border border-[#D7FF35]/30 bg-gradient-to-br from-[#233219] via-[#172018] to-[#0D100C] p-5 sm:p-7">
+        <div className="flex flex-wrap items-center gap-4">
+          <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 text-[#D7FF35]">
+            <Send className="size-7" aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D7FF35]">Официальное Telegram-сообщество</p>
+            <h2 className="mt-1 text-xl font-black text-white">ZAPRUDA COMMUNITY</h2>
+            <p className="mt-1 text-sm text-zinc-300">Новости приложения, обсуждения рыбалки и общение участников.</p>
+          </div>
+        </div>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <a href="https://t.me/ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer"
+            className="btn-primary inline-flex"><MessageCircle className="size-4" /> Открыть Telegram</a>
+          <Link to="/feedback" className="btn-ghost inline-flex"><ShieldCheck className="size-4" /> Предложить улучшение</Link>
+        </div>
+        <p className="mt-4 text-xs leading-5 text-zinc-400">
+          Предложения и обращения к администрации отправляй через защищённую форму ZAPRUDA.
+          Личные контакты и обращения не публикуются в Telegram-канале.
+        </p>
+      </section>
       <Link to="/chat" className="panel mt-6 flex items-center justify-between p-5 hover:border-primary">
         <div>
           <p className="font-display font-bold">Весь ZAPRUDA</p>
