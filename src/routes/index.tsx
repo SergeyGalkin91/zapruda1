@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { ReactionBar } from "@/components/ReactionBar";
 import { supabase } from "@/integrations/supabase/client";
@@ -121,30 +121,69 @@ function ReportComments({ reportId }: { reportId: string }) {
 }
 
 function Feed() {
+  const PAGE_SIZE = 15;
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState("");
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const requestRef = useRef(false);
 
-  const loadReports = useCallback(async () => {
+  const loadPage = useCallback(async (reset = false) => {
+    if (requestRef.current || (!reset && (!hasMore || loadingMore))) return;
+    requestRef.current = true;
+    if (reset) {
+      setLoading(true);
+      setHasMore(true);
+    } else {
+      setLoadingMore(true);
+    }
+
+    const from = reset ? 0 : reports.length;
     const { data, error: queryError } = await supabase
       .from("fishing_reports")
       .select("id,title,body,created_at,location_name,weather_summary,wind_direction,wind_speed_ms,air_temperature_c,pressure_hpa,user_id,profiles(username,display_name,avatar_url)")
       .eq("is_public", true)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .order("id", { ascending: false })
+      .range(from, from + PAGE_SIZE - 1);
 
-    if (queryError) setError("Не удалось загрузить отчёты: " + queryError.message);
-    else { setReports((data ?? []) as unknown as Report[]); setError(""); }
+    if (queryError) {
+      setError("Не удалось загрузить отчёты: " + queryError.message);
+    } else {
+      const page = (data ?? []) as unknown as Report[];
+      setReports((current) => reset ? page : [...current, ...page.filter((item) => !current.some((old) => old.id === item.id))]);
+      setHasMore(page.length === PAGE_SIZE);
+      setError("");
+    }
     setLoading(false);
-  }, []);
+    setLoadingMore(false);
+    requestRef.current = false;
+  }, [hasMore, loadingMore, reports.length]);
+
+  useEffect(() => { void loadPage(true); }, []);
 
   useEffect(() => {
-    void loadReports();
+    const node = sentinelRef.current;
+    if (!node || !hasMore || loading || loadingMore || error) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) void loadPage(false);
+    }, { rootMargin: "700px 0px" });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadingMore, error, loadPage]);
+
+  useEffect(() => {
     const channel = supabase.channel("public-fishing-reports-feed")
-      .on("postgres_changes", { event: "*", schema: "public", table: "fishing_reports" }, () => void loadReports())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "fishing_reports" }, (payload) => {
+        const fresh = payload.new as { is_public?: boolean };
+        if (fresh.is_public) void loadPage(true);
+      })
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
-  }, [loadReports]);
+  }, [loadPage]);
+
 
   return (
     <Shell>
@@ -166,7 +205,7 @@ function Feed() {
           <Link to="/reports/new" className="btn-primary mt-4 inline-flex">Создать отчёт</Link>
         </div>
       )}
-      {reports.map((report) => {
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">\n        <div className="min-w-0">\n      {reports.map((report) => {
         const name = report.profiles?.display_name || report.profiles?.username || "Рыболов";
         return (
           <article key={report.id} className="panel mb-5 space-y-4 p-5">
