@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import {
-  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu,
+  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, Waves,
   MessageCircle, Plus, ShoppingBag, UserRound, Users, X,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
@@ -9,6 +9,7 @@ import { Wordmark } from "@/components/Wordmark";
 const desktopNav = [
   { to: "/", label: "Лента", Icon: House },
   { to: "/partners", label: "Напарники", Icon: Users },
+  { to: "/guides", label: "Гиды", Icon: Ship },
   { to: "/communities", label: "Клубы", Icon: Compass },
   { to: "/market", label: "Барахолка", Icon: ShoppingBag, comingSoon: true },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
@@ -25,6 +26,8 @@ const mobileNav = [
 ] as const;
 
 const otherNav = [
+  { to: "/spearfishing", label: "Подводная охота", Icon: Waves },
+  { to: "/guides", label: "Кабинет гида", Icon: Ship },
   { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
@@ -34,7 +37,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0">
+    <div className="min-h-screen pb-24 xl:pb-0">
       <header className="sticky top-0 z-50 border-b border-white/[0.09] bg-[#0D100C]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0" onClick={() => setMenuOpen(false)}>
@@ -68,7 +71,7 @@ export function Shell({ children }: { children: ReactNode }) {
               aria-label={menuOpen ? "Закрыть список разделов" : "Открыть список разделов"}
               aria-expanded={menuOpen}
               aria-controls="zapruda-extra-nav"
-              className="inline-flex size-10 items-center justify-center rounded-xl border border-white/15 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 xl:hidden"
+              className="inline-flex size-10 items-center justify-center rounded-xl border border-white/15 text-[#D7FF35] transition hover:bg-[#D7FF35]/10"
               onClick={() => setMenuOpen((value) => !value)}
             >
               {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -79,7 +82,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <nav
             id="zapruda-extra-nav"
             aria-label="Остальные разделы"
-            className="absolute right-4 top-[66px] z-50 w-[min(320px,calc(100vw-2rem))] space-y-1 rounded-2xl border border-white/15 bg-[#171C14] p-2 shadow-2xl shadow-black/70 xl:hidden"
+            className="absolute right-4 top-[66px] z-50 w-[min(320px,calc(100vw-2rem))] space-y-1 rounded-2xl border border-white/15 bg-[#171C14] p-2 shadow-2xl shadow-black/70"
           >
             <div className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.19em] text-[#D7FF35]">ZAPRUDA / Разделы</div>
             {otherNav.map(({ to, label, Icon }) => (
