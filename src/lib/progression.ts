@@ -27,11 +27,11 @@ export const FISHING_RANKS = [
   { minXp: 0, title: "Новичок", motto: "Первые шаги к воде", symbol: "01" },
   { minXp: 100, title: "Любитель", motto: "Рыбалка в удовольствие", symbol: "02" },
   { minXp: 300, title: "Увлечённый", motto: "Знает свой водоём", symbol: "03" },
-  { minXp: 700, title: "Спиннингист", motto: "Уверенно владеет снастью", symbol: "04" },
+  { minXp: 700, title: "Рыболов-практик", motto: "Осваивает разные способы ловли", symbol: "04" },
   { minXp: 1400, title: "Опытный рыболов", motto: "Делится опытом", symbol: "05" },
   { minXp: 2600, title: "Мастер водоёмов", motto: "Исследует новые места", symbol: "06" },
   { minXp: 4500, title: "Эксперт ZAPRUDA", motto: "Лидер сообщества", symbol: "07" },
-  { minXp: 7000, title: "Профессионал ZAPRUDA", motto: "Легенда сообщества", symbol: "08" },
+  { minXp: 7000, title: "Легенда ZAPRUDA", motto: "Опыт и уважение сообщества", symbol: "08" },
 ] as const;
 
 export const ACTIVITY_XP = {
