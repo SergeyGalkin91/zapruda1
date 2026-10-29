@@ -118,7 +118,7 @@ create policy "Participants send approved trip chat" on public.partner_trip_mess
 
 -- Cap accepted applicants even under concurrent organizer actions.
 create or replace function public.check_partner_trip_capacity()
-returns trigger language plpgsql security invoker set search_path = public, pg_temp as $
+returns trigger language plpgsql security invoker set search_path = public, pg_temp as $$
 declare available_seats integer;
 declare accepted_count integer;
 begin
