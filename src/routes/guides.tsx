@@ -313,7 +313,7 @@ function GuideCabinet() {
               <datalist id="guide-live-sonar-models">
                 {["PS22","PS30","PS51","PS70","LVS32","LVS34","LVS42","Другая модель"].map((name)=><option key={name} value={name}/>)}
               </datalist>
-            </Label>
+            </Label>}
             <Label title="Что входит из снастей"><input className="field" value={guide.included_gear} maxLength={500} onChange={(e)=>update("included_gear",e.target.value)} placeholder="Спиннинги, приманки, жилеты…" /></Label>
           </div>
           <Label title="О гиде"><textarea className="field min-h-24" value={guide.about} maxLength={1500} onChange={(e)=>update("about",e.target.value)} placeholder="Какие водоёмы знаешь, как проходит выезд…" /></Label>
