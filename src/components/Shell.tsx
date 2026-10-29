@@ -4,6 +4,7 @@ import { Wordmark } from "@/components/Wordmark";
 
 const nav = [
   { to: "/", label: "Лента", icon: "⌂" },
+  { to: "/partners", label: "Напарники", icon: "♧" },
   { to: "/communities", label: "Клубы", icon: "♧" },
   { to: "/market", label: "Барахолка", icon: "◇" },
   { to: "/chat", label: "Чат", icon: "✉" },
@@ -37,11 +38,11 @@ export function Shell({ children }: { children: ReactNode }) {
       <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
 
       <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-xl grid-cols-6">
+        <div className="mx-auto grid max-w-xl grid-cols-7">
           {nav.map((n) => (
             <Link key={n.to} to={n.to}
-              className="flex min-h-16 flex-col items-center justify-center gap-1 px-1 py-2 text-[11px] text-muted-foreground transition"
-              activeProps={{ className: "flex min-h-16 flex-col items-center justify-center gap-1 px-1 py-2 text-[11px] font-semibold text-primary" }}
+              className="flex min-h-16 flex-col items-center justify-center gap-0.5 px-0.5 py-2 text-[9px] text-muted-foreground sm:text-[11px] transition"
+              activeProps={{ className: "flex min-h-16 flex-col items-center justify-center gap-0.5 px-0.5 py-2 text-[9px] font-semibold text-primary sm:text-[11px]" }}
               activeOptions={{ exact: true }}>
               <span aria-hidden="true" className="text-xl leading-none">{n.icon}</span>
               <span className="truncate">{n.label}</span>
