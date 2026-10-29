@@ -196,6 +196,7 @@ function Feed() {
           <p className="mt-2 max-w-md text-muted-foreground">Реальные выезды: где, на что и при какой погоде клевало. Делись победами и фейлами 😂</p>
         </div>
         <Link to="/reports/new" className="btn-primary self-start">🎣 Новый отчёт</Link>
+        </div>
       </section>
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">{error}</div>}
