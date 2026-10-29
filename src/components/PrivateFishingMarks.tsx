@@ -25,7 +25,7 @@ const labels: Record<Kind, string> = {
 const kinds = Object.keys(labels) as Kind[];
 const numberFromInput = (s: string) => Number(s.trim().replace(",", "."));
 
-export function PrivateFishingMarks({ userId }: { userId: string }) {
+export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: string; homeCity?: string; homeRegion?: string }) {
   const [marks, setMarks] = useState<Mark[]>([]);
   const [selected, setSelected] = useState<Mark | null>(null);
   const [kind, setKind] = useState<Kind>("promising");
@@ -109,6 +109,8 @@ export function PrivateFishingMarks({ userId }: { userId: string }) {
       {error && <p role="alert" className="mt-4 rounded-xl border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p>}
       {status && <p role="status" className="mt-4 text-sm text-[#D7FF35]">{status}</p>}
       <div className="mt-5"><InteractiveFishingMap
+        homeCity={homeCity}
+        homeRegion={homeRegion}
         marks={marks.map((mark) => ({ id: mark.id, title: mark.title, kind: mark.kind, latitude: mark.latitude, longitude: mark.longitude }))}
         selected={draftPoint}
         onPick={(point) => {
