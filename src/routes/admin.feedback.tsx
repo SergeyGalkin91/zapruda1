@@ -36,6 +36,8 @@ function AdminFeedback() {
   const [kind, setKind] = useState("all");
   const [delivery, setDelivery] = useState("all");
   const [error, setError] = useState("");
+  const [retrying, setRetrying] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -66,6 +68,23 @@ function AdminFeedback() {
 
   useEffect(() => { void refresh(); }, [refresh]);
 
+  async function retryTelegram(id: string) {
+    if (retrying) return;
+    setRetrying(id);
+    setNotice("");
+    setError("");
+    const { data, error: invokeError } = await supabase.functions.invoke("admin-telegram-retry", {
+      body: { id },
+    });
+    setRetrying(null);
+    if (invokeError || data?.status !== "sent") {
+      setError(typeof data?.error === "string" ? data.error : "Не удалось доставить в Telegram. Проверь настройки бота и чата.");
+    } else {
+      setNotice("Уведомление отправлено в закрытый Telegram-чат.");
+    }
+    await refresh();
+  }
+
   const filtered = useMemo(() => rows.filter((item) =>
     (kind === "all" || item.request_type === kind) &&
     (delivery === "all" || item.telegram_status === delivery)
@@ -84,6 +103,7 @@ function AdminFeedback() {
         <Link to="/feedback" className="btn-ghost mt-4 inline-flex">Вернуться к обращениям</Link>
       </div>
       : <>
+        {notice && <p role="status" className="mt-5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 p-3 text-sm text-[#D7FF35]">{notice}</p>}
         {error && <p role="alert" className="mt-5 rounded-xl border border-red-400/25 bg-red-500/10 p-3 text-sm text-red-200">{error}</p>}
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <label className="text-xs text-zinc-300">Тип обращения
@@ -95,7 +115,7 @@ function AdminFeedback() {
           <label className="text-xs text-zinc-300">Уведомление Telegram
             <select aria-label="Статус Telegram" className="field mt-1" value={delivery} onChange={(e) => setDelivery(e.target.value)}>
               <option value="all">Все</option><option value="pending">Ожидает</option>
-              <option value="sent">Отправлено</option><option value="failed">Сбой</option>
+              <option value="sent">Отправлено</option><option value="failed">Сбой</option><option value="processing">В обработке</option>
             </select>
           </label>
           <button type="button" className="btn-ghost mt-4" onClick={() => void refresh()}><RefreshCcw className="size-4" />Обновить</button>
@@ -114,6 +134,12 @@ function AdminFeedback() {
             <h2 className="mt-3 text-base font-bold text-white">{entry.subject}</h2>
             <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-zinc-300">{entry.body}</p>
             {entry.contact && <p className="mt-3 break-words text-xs text-zinc-300"><strong>Контакт:</strong> {entry.contact}</p>}
+            {(entry.telegram_status === "pending" || entry.telegram_status === "failed") && entry.telegram_attempts < 3 &&
+              <button type="button" className="btn-ghost mt-3 inline-flex" disabled={retrying !== null}
+                onClick={() => void retryTelegram(entry.id)}>
+                <Send className="size-4" />
+                {retrying === entry.id ? "Отправляем…" : "Повторить уведомление в Telegram"}
+              </button>}
             <div className="mt-4 flex flex-wrap justify-between gap-2 border-t border-white/10 pt-3 text-[11px] text-zinc-500">
               <span>{new Date(entry.created_at).toLocaleString("ru-RU")}</span>
               <span>ID: {entry.id.slice(0, 8)} · Статус: {entry.review_status}</span>
