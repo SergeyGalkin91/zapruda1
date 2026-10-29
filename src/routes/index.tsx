@@ -205,7 +205,9 @@ function Feed() {
           <Link to="/reports/new" className="btn-primary mt-4 inline-flex">Создать отчёт</Link>
         </div>
       )}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">\n        <div className="min-w-0">\n      {reports.map((report) => {
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+        <div className="min-w-0">
+      {reports.map((report) => {
         const name = report.profiles?.display_name || report.profiles?.username || "Рыболов";
         return (
           <article key={report.id} className="panel mb-5 space-y-4 p-5">
@@ -235,6 +237,16 @@ function Feed() {
           </article>
         );
       })}
+      <div ref={sentinelRef} className="h-4" aria-hidden="true" />
+      {loadingMore && <div className="py-5 text-center text-sm text-muted-foreground">Подтягиваем следующие отчёты…</div>}
+      {!loading && !loadingMore && !hasMore && reports.length > 0 && <p className="py-6 text-center text-xs text-muted-foreground">Ты в курсе всех отчётов на данный момент 🎣</p>}
+      {error && !loading && <button type="button" className="btn-ghost mt-3" onClick={() => void loadPage(reports.length === 0)}>Повторить загрузку</button>}
+        </div>
+        <aside className="hidden space-y-4 lg:block">
+          <div className="panel p-5"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">ZAPRUDA SPINNING</p><h2 className="mt-3 text-xl font-bold">Рыбалка — это истории</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Уловы, рабочие приманки, погода и честные отчёты с воды. Листай ленту и делись своим выездом.</p><Link to="/reports/new" className="btn-primary mt-4 w-full">＋ Опубликовать отчёт</Link></div>
+          <div className="panel p-4"><h3 className="font-semibold">Подсказка дня 🎯</h3><p className="mt-2 text-sm text-muted-foreground">Укажи приманку, глубину и проводку в отчёте — другим рыболовам будет проще повторить результат.</p></div>
+        </aside>
+      </div>
     </Shell>
   );
 }
