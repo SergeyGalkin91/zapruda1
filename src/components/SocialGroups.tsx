@@ -63,12 +63,13 @@ export function SocialGroups(){
 
   useEffect(()=>{
     void refresh();
+    const interval=window.setInterval(()=>{if(!document.hidden)void refresh()},15000);
     const channel=supabase.channel("social-community-invitations")
       .on("postgres_changes",{event:"*",schema:"public",table:"social_group_members"},()=>void refresh())
       .subscribe();
     const focus=()=>void refresh();
     window.addEventListener("focus",focus);
-    return()=>{window.removeEventListener("focus",focus);void supabase.removeChannel(channel);};
+    return()=>{window.clearInterval(interval);window.removeEventListener("focus",focus);void supabase.removeChannel(channel);};
   },[refresh]);
   useEffect(()=>{
     if(!activeGroup){setMessages([]);return;}
@@ -205,8 +206,8 @@ export function SocialGroups(){
           <button type="submit" disabled={busy||newName.trim().length<3} className="btn-primary inline-flex"><Plus className="size-4"/> Оставить заявку на клуб</button>
           {requests.map(r=><div key={r.id} className="rounded-lg border border-white/10 bg-black/15 p-3 text-xs">
             <strong>{r.name}</strong> · {r.fee_rub} ₽
-            <p className="mt-1 text-zinc-400">{r.status==="awaiting_payment"?"Ожидает подключения оплаты / подтверждения":r.status==="paid"?"Платёж подтверждён администратором":"Заявка закрыта"}</p>
-            {r.status==="paid"&&<button type="button" className="btn-primary mt-2" disabled={busy} onClick={()=>void activateClub(r)}>Активировать оплаченный клуб</button>}
+            <p className="mt-1 text-zinc-400">{r.status==="awaiting_payment"?"Ожидает подключения оплаты / подтверждения":r.status==="paid"?"Оплата подтверждена — клуб создан автоматически":"Заявка закрыта"}</p>
+            
           </div>)}
         </form>
         <div className="space-y-3 rounded-xl border border-white/10 bg-black/10 p-4">
