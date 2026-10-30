@@ -81,7 +81,7 @@ export function GuideBookingInbox(){
  const [methods,setMethods]=useState<Record<string,"bank_card"|"sbp">>({});
  const refresh=useCallback(async()=>{
    const {data:auth}=await supabase.auth.getUser();
-   if(!auth.user){setUid("");setLoading(false);return;}
+   if(!auth.user){setUid("");setItems([]);setQuotes({});setMethods({});setError("");setNotice("");setLoading(false);return;}
    const id=auth.user.id;setUid(id);
    const {data,error:e}=await db.from("guide_booking_inquiries")
      .select("id,customer_id,guide_id,service_mode,planned_at,meeting_text,customer_note,agreement_terms,amount_rub,commission_rub,guide_net_rub,status,payment_method,created_at")
@@ -91,7 +91,8 @@ export function GuideBookingInbox(){
    setLoading(false);
  },[]);
  useEffect(()=>{void refresh();const onFocus=()=>void refresh();window.addEventListener("focus",onFocus);
-   return()=>window.removeEventListener("focus",onFocus);},[refresh]);
+   const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{void refresh();});
+   return()=>{window.removeEventListener("focus",onFocus);subscription.unsubscribe();};},[refresh]);
  async function quote(item:Booking){
    const draft=quotes[item.id];
    if(!draft)return;
