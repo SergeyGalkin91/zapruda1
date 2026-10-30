@@ -64,7 +64,7 @@ export function GuideReviews() {
   <div className="mt-5 space-y-3">{reviews.length===0?<p className="text-sm text-zinc-400">Пока нет отзывов о гидах.</p>:reviews.map(r=>{
    const stat=stats.get(r.target_id);
    return <article key={r.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
-    <div className="flex flex-wrap justify-between gap-2"><a href={"/reviews?guide="+encodeURIComponent(r.target_id)} className="font-bold text-[#D7FF35]">{names[r.target_id]||"Гид"}</a><span className="text-sm text-[#D7FF35]"><Star className="mr-1 inline size-4"/>{r.stars}/5</span></div>
+    <div className="flex flex-wrap justify-between gap-2"><a href={"/anglers/"+encodeURIComponent(r.target_id)} className="font-bold text-[#D7FF35]">{names[r.target_id]||"Гид"}</a><span className="text-sm text-[#D7FF35]"><Star className="mr-1 inline size-4"/>{r.stars}/5</span></div>
     <p className="mt-1 text-xs text-zinc-500">Рейтинг: {stat?(stat.sum/stat.count).toFixed(1):"—"} · {stat?.count||0} отзывов</p>
     <p className="mt-3 whitespace-pre-wrap break-words text-sm">{r.body}</p>
     <p className="mt-2 text-xs text-zinc-500">Автор: {names[r.author_id]||"Участник"} · {new Date(r.created_at).toLocaleDateString("ru-RU")}</p>
