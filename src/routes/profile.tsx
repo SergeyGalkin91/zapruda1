@@ -172,7 +172,7 @@ function Profile() {
       supabase.from("profiles").select("username,display_name,bio,avatar_url,chat_city").eq("id", auth.user.id).maybeSingle(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
       supabase.rpc("my_fishing_progress"),
-      supabase.rpc("my_fishing_specializations"),
+      supabase.rpc("my_fishing_specializations_v2"),
     ]);
 
     if (profileResult.error) {
@@ -230,10 +230,14 @@ function Profile() {
       setSpecializations((specializationsResult.data ?? []).map((row) => ({
         fishing_method: row.fishing_method,
         report_count: Number(row.report_count),
+        credited_reports: Number(row.credited_reports),
         catches_count: Number(row.catches_count),
         credited_catches: Number(row.credited_catches),
         photo_reports: Number(row.photo_reports),
+        credited_photo_reports: Number(row.credited_photo_reports),
         distinct_waters: Number(row.distinct_waters),
+        active_days: Number(row.active_days),
+        distinct_species: Number(row.distinct_species),
         heaviest_catch_kg: row.heaviest_catch_kg == null ? null : Number(row.heaviest_catch_kg),
       })));
     }
