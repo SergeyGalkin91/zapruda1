@@ -38,19 +38,39 @@ const otherNav = [
 
 export function Shell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [authReady, setAuthReady] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [authError, setAuthError] = useState("");
 
-  // Supabase emits INITIAL_SESSION on mount, and SIGNED_IN / SIGNED_OUT after auth changes.
-  // Keep navigation reactive without requiring a page reload or exposing an SSR auth flash.
+  // Always render a usable login link while the browser session initializes.
+  // The listener handles login/logout; getSession covers clients that delay INITIAL_SESSION.
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsSignedIn(Boolean(session?.user));
-      setAuthReady(true);
-    });
-    return () => subscription.unsubscribe();
+    let active = true;
+    let sawAuthEvent = false;
+    let subscription: { unsubscribe: () => void } | undefined;
+    try {
+      const result = supabase.auth.onAuthStateChange((_event, session) => {
+        if (!active) return;
+        sawAuthEvent = true;
+        setIsSignedIn(Boolean(session?.user));
+        setAuthError("");
+      });
+      subscription = result.data.subscription;
+      void supabase.auth.getSession().then(({ data, error }) => {
+        if (!active || sawAuthEvent) return;
+        if (error) throw error;
+        setIsSignedIn(Boolean(data.session?.user));
+      }).catch((error: unknown) => {
+        if (!active) return;
+        setAuthError(error instanceof Error ? error.message : "Не удалось проверить авторизацию.");
+      });
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Не удалось инициализировать авторизацию.");
+    }
+    return () => {
+      active = false;
+      subscription?.unsubscribe();
+    };
   }, []);
 
   async function handleLogout() {
@@ -79,7 +99,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <Wordmark />
           </Link>
           <nav aria-label="Основная навигация" className="hidden items-center gap-1 xl:flex">
-            {desktopNav.filter(({ to }) => to !== "/profile" || (authReady && isSignedIn)).map(({ to, label, Icon, ...rest }) => (
+            {desktopNav.filter(({ to }) => to !== "/profile" || isSignedIn).map(({ to, label, Icon, ...rest }) => (
               <Link
                 key={to}
                 to={to}
@@ -94,7 +114,7 @@ export function Shell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex shrink-0 items-center gap-2">
-            {authReady && (isSignedIn ? (
+            {isSignedIn ? (
               <>
                 <a href="/profile" className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3">
                   <UserRound className="size-4" aria-hidden="true" />
@@ -115,7 +135,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <Link to="/auth" className="inline-flex rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white">
                 Войти
               </Link>
-            ))}
+            )}
             <Link to="/reports/new" className="btn-primary hidden xl:inline-flex">
               <Plus className="size-4" strokeWidth={2.7} aria-hidden="true" />
               Новый отчёт
@@ -146,7 +166,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
               </Link>
             ))}
-            {authReady && (isSignedIn ? (
+            {isSignedIn ? (
               <>
                 <a href="/profile" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
                   <UserRound className="size-4 text-[#D7FF35]" aria-hidden="true" />Мой профиль
@@ -165,7 +185,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <Link to="/auth" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
                 <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
               </Link>
-            ))}
+            )}
           </nav>
         )}
       </header>
