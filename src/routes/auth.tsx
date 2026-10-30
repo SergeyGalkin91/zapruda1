@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,41 +14,39 @@ export const Route = createFileRoute("/auth")({
       { property: "og:description", content: "Войдите или создайте аккаунт рыболова в ZAPRUDA." },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>) => ({ mode: search.mode === "up" ? "up" as const : "in" as const }),
   component: Auth,
 });
 
 function Auth() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"in" | "up" | "forgot" | "new-password">("in");
+  const search = Route.useSearch();
+  const [mode, setMode] = useState<"in" | "up" | "forgot" | "new-password">(search.mode);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let alive = true;
+    // Never forcibly redirect users from registration to profile.
+    // Existing sessions are checked after explicit login; password recovery is handled separately.
     const recovering = new URLSearchParams(window.location.search).get("recovery") === "1";
     if (recovering) setMode("new-password");
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!alive) return;
-      if (event === "PASSWORD_RECOVERY") {
-        setMode("new-password");
-      } else if (event === "SIGNED_IN" && session?.user && !recovering) {
-        void navigate({ to: "/profile" });
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setMode("new-password");
     });
-    void supabase.auth.getSession()
-      .then(({ data }) => {
-        if (alive && data.session?.user && !recovering) void navigate({ to: "/profile" });
-      })
-      .catch(() => {
-        // Manual sign-in must remain available when the network is disconnected.
-      });
-    return () => { alive = false; subscription.unsubscribe(); };
-  }, [navigate]);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (mode === "in" || mode === "up") setMode(search.mode);
+  }, [search.mode]);
+
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -56,7 +55,8 @@ function Auth() {
     setNotice("");
     try {
       if (mode === "in") {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        const { data, error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        if (!data.session && !authError) throw new Error("Сервер не вернул сессию. Попробуй войти ещё раз.");
         if (authError) throw authError;
         await navigate({ to: "/profile" });
       } else if (mode === "forgot") {
@@ -127,13 +127,10 @@ function Auth() {
           <p className="mt-2 text-sm text-muted-foreground">{mode === "in" ? "Войди по email и паролю или выбери подключённый сервис." : mode === "up" ? "Заполни данные и подтверди адрес электронной почты." : mode === "forgot" ? "Отправим ссылку для сброса пароля на почту." : "Придумай новый пароль для своего аккаунта."}</p>
 
           <div className="my-6 grid grid-cols-2 rounded-xl bg-[#20271D] p-1 text-sm">
-            {(["in", "up"] as const).map((m) => (
-              <button type="button" key={m} onClick={() => { setMode(m); setError(""); setNotice(""); }}
-                className={`rounded-lg py-2.5 font-semibold transition ${mode === m ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>
-                {m === "in" ? "Вход" : "Регистрация"}
-              </button>
-            ))}
+            <a href="/auth?mode=in" aria-current={mode === "in" ? "page" : undefined} className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "in" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>Вход</a>
+            <a href="/auth?mode=up" aria-current={mode === "up" ? "page" : undefined} className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "up" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>Регистрация</a>
           </div>
+          <p className="mb-4 text-xs text-zinc-400">Для входа используй <strong className="text-[#D7FF35]">email</strong>, на который регистрировал аккаунт, а не никнейм.</p>
 
           <form className="space-y-4" onSubmit={submit}>
             {mode === "up" && (
@@ -148,11 +145,21 @@ function Auth() {
             </label>}
             {(mode === "in" || mode === "up" || mode === "new-password") && <label className="block space-y-1.5 text-sm font-medium">
               {mode === "new-password" ? "Новый пароль" : "Пароль"}
-              <input className="field" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Не менее 6 символов" minLength={6} autoComplete={mode === "in" ? "current-password" : "new-password"} required />
+              <span className="relative block">
+                <input className="field pr-14" type={passwordVisible ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Не менее 6 символов" minLength={6} autoComplete={mode === "in" ? "current-password" : "new-password"} required />
+                <button type="button" aria-label={passwordVisible ? "Скрыть пароль" : "Показать пароль"} title={passwordVisible ? "Скрыть пароль" : "Показать пароль"} aria-pressed={passwordVisible} onClick={() => setPasswordVisible((prev) => !prev)} className="absolute inset-y-0 right-1 flex w-11 items-center justify-center rounded-lg text-[#D7FF35] hover:bg-white/10">
+                  {passwordVisible ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </span>
             </label>}
             {mode === "new-password" && <label className="block space-y-1.5 text-sm font-medium">
               Повтори новый пароль
-              <input className="field" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={6} autoComplete="new-password" required />
+              <span className="relative block">
+                <input className="field pr-14" type={confirmVisible ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={6} autoComplete="new-password" required />
+                <button type="button" aria-label={confirmVisible ? "Скрыть повтор пароля" : "Показать повтор пароля"} aria-pressed={confirmVisible} onClick={() => setConfirmVisible((prev) => !prev)} className="absolute inset-y-0 right-1 flex w-11 items-center justify-center rounded-lg text-[#D7FF35] hover:bg-white/10">
+                  {confirmVisible ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </span>
             </label>}
             {error && <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
             {notice && <p role="status" className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">{notice}</p>}
