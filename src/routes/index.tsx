@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Images, X, ArrowUpRight, Compass, Fish, Sparkles, Target, Waves } from "lucide-react";
+import { ChevronLeft, ChevronRight, Images, X, ArrowUpRight, Compass, Fish, Sparkles, Target, Waves, Anchor, Sailboat, Snowflake, Feather, Crosshair, Tent, Ship, Mountain, CircleDot, Droplets, Route, FishSymbol } from "lucide-react";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import { Shell } from "@/components/Shell";
 import { ReactionBar } from "@/components/ReactionBar";
@@ -193,6 +193,9 @@ function ReportComments({ reportId }: { reportId: string }) {
   );
 }
 
+const disciplineVisuals = [Fish, Target, CircleDot, Feather, Snowflake, Tent, Anchor, Droplets, Ship, Sailboat, Crosshair, Waves, Mountain, CircleDot, FishSymbol] as const;
+const disciplineAccent = ["#FF6A00","#D7FF35","#80E8C9","#E8B9FF","#8EDBFF","#FFB56A","#D7FF35","#78CDF8","#FF6A00","#75CBE5","#D7FF35","#E4CF83","#B5E7A3","#8EDBFF","#BAC6B0"] as const;
+
 function Feed() {
   const PAGE_SIZE = 15;
   const [activeDiscipline,setActiveDiscipline] = useState("Спиннинг");
@@ -314,14 +317,15 @@ function Feed() {
         </section>
         <section className="rounded-[24px] border border-white/10 bg-[#141A16] p-4 sm:p-6">
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-            <div><p className="text-[10px] font-black uppercase tracking-[.25em] text-[#FF6A00]">FISHING ID / ТВОЙ КОД</p><h2 className="mt-1 text-xl font-black uppercase tracking-tight text-white sm:text-2xl">Выбери свой стиль</h2><p className="mt-1 text-xs text-[#A8B5A6]">15 направлений. У каждого свой характер, свои достижения.</p></div>
+            <div><p className="text-[10px] font-black uppercase tracking-[.25em] text-[#FF6A00]">FISHING ID / ТВОЙ КОД</p><h2 className="mt-1 text-xl font-black uppercase tracking-tight text-white sm:text-2xl">Выбери свой стиль</h2><p className="mt-1 text-xs text-[#A8B5A6]">15 направлений с собственной символикой. Выбирай стиль — получай тематические достижения, рекомендации и единомышленников.</p></div>
             <Link to="/profile" className="inline-flex items-center gap-1 text-xs font-bold text-[#D7FF35] hover:underline">Мои предпочтения <ArrowUpRight className="size-3.5"/></Link>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-            {FISHING_DISCIPLINES.map((discipline,index)=><button type="button" key={discipline.code} aria-pressed={activeDiscipline===discipline.code} onClick={()=>setActiveDiscipline(discipline.code)} className={`group relative min-h-[116px] overflow-hidden rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 ${activeDiscipline===discipline.code?"border-[#FF6A00] bg-[#1D231D] shadow-[inset_0_0_0_1px_rgba(255,106,0,.45),0_0_20px_rgba(255,106,0,.12)]":"border-white/10 bg-[#0B0F0E] hover:border-[#D7FF35]/45"}`}>
-              <span aria-hidden="true" className="absolute -right-3 -top-5 select-none text-7xl opacity-[.18] grayscale transition group-hover:opacity-35">{discipline.icon}</span>
+            {FISHING_DISCIPLINES.map((discipline,index)=><button type="button" key={discipline.code} aria-pressed={activeDiscipline===discipline.code} onClick={()=>setActiveDiscipline(discipline.code)} className={`group relative min-h-[156px] overflow-hidden rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 ${activeDiscipline===discipline.code?"border-[#FF6A00] bg-[#1D231D] shadow-[inset_0_0_0_1px_rgba(255,106,0,.45),0_0_20px_rgba(255,106,0,.12)]":"border-white/10 bg-[#0B0F0E] hover:border-[#D7FF35]/45"}`}>
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-75" style={{background:`radial-gradient(ellipse at 87% 18%, ${disciplineAccent[index]}25, transparent 60%), repeating-radial-gradient(circle at 115% -20%, transparent 0px, transparent 23px, ${disciplineAccent[index]}12 24px, transparent 25px)`}}/>
+              <span aria-hidden="true" className="absolute right-2 top-3 flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-black/20 text-white/80 transition-all duration-300 group-hover:rotate-[-8deg] group-hover:scale-110" style={{color:disciplineAccent[index],borderColor:`${disciplineAccent[index]}44`}}>{(() => { const Visual = disciplineVisuals[index]; return <Visual className="size-9" strokeWidth={1.3}/>; })()}</span>
               <span className={`relative block text-[10px] font-bold tracking-widest ${activeDiscipline===discipline.code?"text-[#FF6A00]":"text-[#7E9180]"}`}>ID / {String(index+1).padStart(2,"0")}</span>
-              <span className="relative mt-5 block text-sm font-black text-white">{discipline.title}</span>
+              <span className="relative mt-16 block text-sm font-black text-white">{discipline.title}</span>
               <span className="relative mt-1 block text-[10px] leading-4 text-[#A2AFA3]">{discipline.detail}</span>
             </button>)}
           </div>
