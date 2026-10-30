@@ -16,7 +16,7 @@ export function SocialGroups(){
   const [groups,setGroups]=useState<Group[]>([]);
   const [cityFilter,setCityFilter]=useState("");
   const [selectedPublicClub,setSelectedPublicClub]=useState("");
-  const [publicReports,setPublicReports]=useState<{id:string;title:string;user_id:string}[]>([]);
+  const [publicReports,setPublicReports]=useState<{id:string;title:string;user_id:string;photo?:string}[]>([]);
   const [members,setMembers]=useState<Member[]>([]);
   const [people,setPeople]=useState<Person[]>([]);
   const [requests,setRequests]=useState<Request[]>([]);
@@ -157,7 +157,17 @@ export function SocialGroups(){
     if(!memberIds.length)return;
     const {data,error:e}=await supabase.from("fishing_reports").select("id,title,user_id").eq("is_public",true).in("user_id",memberIds).order("created_at",{ascending:false}).limit(12);
     if(e)setError("Не удалось загрузить публичные отчёты: "+e.message);
-    else setPublicReports(data??[]);
+    else {
+      const rows=(data??[]) as {id:string;title:string;user_id:string;photo?:string}[];
+      if(rows.length){
+        const {data:photos}=await supabase.from("report_photos").select("report_id,storage_path,sort_order").in("report_id",rows.map(r=>r.id)).order("sort_order",{ascending:true});
+        const first=new Map<string,string>();
+        for(const p of photos??[])if(!first.has(p.report_id))first.set(p.report_id,p.storage_path);
+        const paths=[...first.values()];
+        if(paths.length){const {data:urls}=await supabase.storage.from("report-photos").createSignedUrls(paths,1800);const byPath=new Map(paths.map((p,i)=>[p,urls?.[i]?.signedUrl||""]));for(const row of rows){const path=first.get(row.id);if(path)row.photo=byPath.get(path)}}
+      }
+      setPublicReports(rows);
+    }
   }
   const own=groups.filter(g=>g.owner_id===uid);
   const joined=groups.filter(g=>members.some(m=>m.group_id===g.id&&m.user_id===uid&&m.status==="accepted"));
@@ -181,7 +191,7 @@ export function SocialGroups(){
           {g.interests&&<p className="mt-2 text-sm">Интересы: {g.interests}</p>}
           {g.description&&<p className="mt-1 text-sm text-zinc-300">{g.description}</p>}
           <button type="button" className="mt-2 text-xs font-bold text-[#D7FF35] underline" onClick={()=>void openPublicClub(g.id)}>{selectedPublicClub===g.id?"Скрыть отчёты":"Публичные отчёты участников"}</button>
-          {selectedPublicClub===g.id&&<div className="mt-2 space-y-1">{publicReports.length?publicReports.map(r=><Link key={r.id} to="/" className="block rounded-lg border border-white/10 p-2 text-xs hover:border-[#D7FF35]/30">{r.title} · открыть в ленте</Link>):<p className="text-xs text-zinc-500">Публичных отчётов пока нет.</p>}</div>}
+          {selectedPublicClub===g.id&&<div className="mt-2 space-y-1">{publicReports.length?publicReports.map(r=><Link key={r.id} to="/" className="block rounded-lg border border-white/10 p-2 text-xs hover:border-[#D7FF35]/30">{r.photo&&<img src={r.photo} alt="" loading="lazy" className="mb-2 aspect-[16/9] w-full rounded-md object-cover"/>}{r.title} · открыть в ленте</Link>):<p className="text-xs text-zinc-500">Публичных отчётов пока нет.</p>}</div>}
         </div>;
       })}
       {!groups.some(g=>g.city.toLocaleLowerCase("ru").includes(cityFilter.trim().toLocaleLowerCase("ru")))&&<p className="text-sm text-zinc-500">Клубов в этом городе пока нет.</p>}
