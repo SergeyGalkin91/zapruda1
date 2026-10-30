@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Star, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ReportReview } from "@/components/ReportReview";
 
 type Booking={id:string;guide_id:string;planned_at:string;paid_at:string|null;provider_payment_id:string|null};
 type Review={id:string;author_id:string;target_id:string;stars:number;body:string;created_at:string};
@@ -67,6 +68,7 @@ export function GuideReviews() {
     <div className="flex flex-wrap justify-between gap-2"><a href={"/anglers/"+encodeURIComponent(r.target_id)} className="font-bold text-[#D7FF35]">{names[r.target_id]||"Гид"}</a><span className="text-sm text-[#D7FF35]"><Star className="mr-1 inline size-4"/>{r.stars}/5</span></div>
     <p className="mt-1 text-xs text-zinc-500">Рейтинг: {stat?(stat.sum/stat.count).toFixed(1):"—"} · {stat?.count||0} отзывов</p>
     <p className="mt-3 whitespace-pre-wrap break-words text-sm">{r.body}</p>
+    <ReportReview reviewId={r.id} source="guide"/>
     <p className="mt-2 text-xs text-zinc-500">Автор: {names[r.author_id]||"Участник"} · {new Date(r.created_at).toLocaleDateString("ru-RU")}</p>
    </article>;
   })}</div>
