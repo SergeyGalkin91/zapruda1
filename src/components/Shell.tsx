@@ -12,7 +12,7 @@ import { applyAppearance, loadAppearance } from "@/lib/appearance";
 const desktopNav = [
   { to: "/", label: "Лента", Icon: House },
   { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
-  { to: "/fishing-map", label: "Карта и рыбалка", Icon: Compass },
+  { to: "/fishing-map", label: "Карта", Icon: Compass },
   { to: "/partners", label: "Напарники", Icon: Users },
   { to: "/communities", label: "Клубы", Icon: Compass },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
