@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/messages")({
   head: () => ({ meta: [{ title: "Личные сообщения — ZAPRUDA" }, { name: "description", content: "Личные переписки по согласию и обмен выбранными рыболовными метками." }] }),
-  validateSearch: (query: Record<string, unknown>) => ({ mark: typeof query.mark === "string" ? query.mark : "" }),
+  validateSearch: (query: Record<string, unknown>) => ({ mark: typeof query.mark === "string" ? query.mark : "", ...(typeof query.to === "string" ? { to: query.to } : {}) }),
   component: Messages,
 });
 
@@ -19,7 +19,7 @@ const display = (p?: Person) => p?.display_name || p?.username || "Рыболо�
 const datetime = (s: string) => new Date(s).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 function Messages() {
-  const { mark: initialMark } = Route.useSearch();
+  const { mark: initialMark, to: requestedPerson } = Route.useSearch();
   const [uid, setUid] = useState("");
   const [people, setPeople] = useState<Person[]>([]);
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -88,6 +88,11 @@ function Messages() {
   useEffect(() => { if (initialMark) setSelectedMark(initialMark); }, [initialMark]);
 
   const getPeer = (t: Thread) => t.requester_id === uid ? t.recipient_id : t.requester_id;
+  useEffect(() => {
+    const person = people.find(p => p.id === requestedPerson);
+    if (person) setFilter(person.username || person.display_name || "");
+  }, [people, requestedPerson]);
+
   const names = useMemo(() => new Map(people.map(p => [p.id, display(p)])), [people]);
   const active = threads.find(t => t.id === activeId);
   const incoming = threads.filter(t => t.status === "pending" && t.recipient_id === uid);
