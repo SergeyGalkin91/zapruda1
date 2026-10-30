@@ -57,7 +57,7 @@ function Communities() {
       <Link to="/chat" className="panel mt-6 flex items-center justify-between p-5 hover:border-primary">
         <div>
           <p className="font-display font-bold">Весь ZAPRUDA</p>
-          <p className="text-sm text-muted-foreground">Общий чат рыбаков со всего сообщества</p>
+          <p className="text-sm text-muted-foreground">Общий чат и переход к странам, областям, городам и тематическим веткам</p>
         </div>
         <span className="text-primary">→</span>
       </Link>
@@ -68,8 +68,11 @@ function Communities() {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{cis.map((c) => <Chip key={c.code} c={c} />)}</div>
       {sel && <section className="mt-5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/5 p-4 text-sm">
         <p className="font-semibold text-[#D7FF35]">{sel.flag} {sel.name}</p>
-        <p className="mt-1 text-zinc-300">Узнай о водоёмах этой страны и коллекциях рыб в Атласе рыболова.</p>
-        <Link to="/atlas" search={{ country: sel.code }} className="mt-3 inline-flex font-bold text-[#D7FF35] underline">Открыть Атлас →</Link>
+        <p className="mt-1 text-zinc-300">Общайся с рыболовами этой страны, выбери регион и город, затем тематическую ветку.</p>
+        <div className="mt-3 flex flex-wrap gap-4">
+          <Link to="/chat" search={{country: sel.code, place: "", topic: "general"}} className="inline-flex font-bold text-[#D7FF35] underline">Открыть чаты страны →</Link>
+          <Link to="/atlas" search={{country: sel.code}} className="inline-flex font-semibold text-zinc-300 underline">Атлас водоёмов →</Link>
+        </div>
       </section>}
       <Link to="/atlas" search={{ country: "" }} className="mt-6 flex items-center justify-between rounded-2xl border border-[#D7FF35]/30 bg-[#D7FF35]/5 p-5 transition hover:border-[#D7FF35]">
         <span><strong className="block text-lg text-[#D7FF35]">Атлас рыболова</strong><span className="mt-1 block text-sm text-zinc-300">Водоёмы России и СНГ, карточки рыб и коллекции трофеев</span></span>
