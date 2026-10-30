@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BrainCircuit, Check, Compass, Fish, MapPin, Save, Settings2, ShieldCheck,
-  Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText, FishingHook,
+  Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
@@ -343,7 +343,7 @@ function Profile() {
             </div>
             {userId && <a href="#my-gear-sets" className="group block max-w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-left transition hover:border-[#D7FF35]/40 sm:max-w-[345px]">
               <span className="flex items-center gap-2 text-xs font-bold text-[#D7FF35]">
-                <FishingHook className="size-4" aria-hidden="true" />
+                <Fish className="size-4" aria-hidden="true" />
                 {featuredGear ? "Чем ловлю · " + featuredGear.title : "Мои рыболовные комплекты"}
               </span>
               {featuredGear ? <span className="mt-2 block space-y-1 text-xs leading-5 text-zinc-200">
