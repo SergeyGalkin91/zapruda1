@@ -8,6 +8,7 @@ import {
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { GuideVerification } from "@/components/GuideVerification";
+import { GuideBookingInbox } from "@/components/GuideBookings";
 
 export const Route = createFileRoute("/guides")({
   head: () => ({ meta: [
@@ -21,6 +22,8 @@ type Guide = {
   user_id: string;
   service_mode: "shore" | "boat" | "both";
   meeting_area: string;
+  meeting_lat: number | null;
+  meeting_lon: number | null;
   title: string;
   home_city: string;
   about: string;
@@ -62,6 +65,8 @@ const EMPTY_GUIDE: Omit<Guide, "user_id"> = {
   title: "",
   service_mode: "shore",
   meeting_area: "",
+  meeting_lat: null,
+  meeting_lon: null,
   home_city: "",
   about: "",
   specialties: "Спиннинг",
@@ -144,6 +149,8 @@ function GuideCabinet() {
         title: guideResult.data.title,
         service_mode: (guideResult.data.service_mode || "boat") as "shore"|"boat"|"both",
         meeting_area: guideResult.data.meeting_area || "",
+        meeting_lat: guideResult.data.meeting_lat === null ? null : Number(guideResult.data.meeting_lat),
+        meeting_lon: guideResult.data.meeting_lon === null ? null : Number(guideResult.data.meeting_lon),
         home_city: guideResult.data.home_city,
         about: guideResult.data.about,
         specialties: guideResult.data.specialties,
@@ -181,6 +188,10 @@ function GuideCabinet() {
   async function saveGuide(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!userId || working) return;
+    if ((guide.meeting_lat===null)!==(guide.meeting_lon===null)){
+      setError("Укажи обе координаты места встречи или оставь обе пустыми.");
+      return;
+    }
     if (guide.is_active && !isReady) {
       setError("Заполни программу и безопасность. Лодка и спасжилеты обязательны только для лодочного гида.");
       return;
@@ -322,6 +333,16 @@ function GuideCabinet() {
               <input className="field" maxLength={160} value={guide.meeting_area}
                  onChange={e=>update("meeting_area",e.target.value)} placeholder="Например, Ока — Мызинский мост, Нижний Новгород" />
             </Label>
+            <Label title="Широта точки встречи (Яндекс Карты)">
+              <input type="number" step="0.000001" min={-90} max={90} className="field"
+                value={guide.meeting_lat ?? ""} onChange={e=>update("meeting_lat",e.target.value?Number(e.target.value):null)}
+                placeholder="56.247551" />
+            </Label>
+            <Label title="Долгота точки встречи (Яндекс Карты)">
+              <input type="number" step="0.000001" min={-180} max={180} className="field"
+                value={guide.meeting_lon ?? ""} onChange={e=>update("meeting_lon",e.target.value?Number(e.target.value):null)}
+                placeholder="43.949333" />
+            </Label>
             <Label title="Имя гида или название услуги"><input className="field" value={guide.title} maxLength={100} onChange={(e) => update("title",e.target.value)} placeholder="Например, Иван — рыболовный гид" required /></Label>
             <Label title="Город и регион работы"><input className="field" value={guide.home_city} maxLength={100} onChange={(e) => update("home_city",e.target.value)} placeholder="Нижний Новгород" required /></Label>
             <Label title="Стаж работы с рыбалкой, лет"><input className="field" type="number" min={0} max={60} value={guide.experience_years ?? ""} onChange={(e)=>update("experience_years",e.target.value?Number(e.target.value):null)} /></Label>
@@ -369,6 +390,7 @@ function GuideCabinet() {
       </section>
 
       <GuideVerification userId={userId} guideSaved={hasGuide} onVerificationChange={setIsVerified} />
+      <GuideBookingInbox />
 
       <section className="mt-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
