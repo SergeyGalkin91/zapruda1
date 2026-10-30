@@ -12,7 +12,7 @@ type Place = {
   country_code: string | null; name: string; created_by: string | null;
 };
 type ChatMessage = {
-  id: string; user_id: string; body: string; created_at: string;
+  id: string; user_id: string; body: string; created_at: string; reply_to_id:string|null;
   profiles?: { username: string | null; display_name: string | null; avatar_url: string | null; chat_city: string | null } | null;
 };
 const GLOBAL_ID = "00000000-0000-4000-8000-000000000001";
@@ -48,6 +48,8 @@ function GeographicChat() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
+  const [replyTo,setReplyTo]=useState<ChatMessage|null>(null);
+  const [reactions,setReactions]=useState<Record<string,{emoji:string;user_id:string}[]>>({});
   const [regionName, setRegionName] = useState("");
   const [cityName, setCityName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -105,7 +107,7 @@ function GeographicChat() {
   const currentTopic = TOPICS.find(t => t.key === topic) || TOPICS[0];
 
   function go(id: string, newTopic: ChatTopic = topic) {
-    setDraft(""); setChatError("");
+    setDraft("");setReplyTo(null); setChatError("");
     void navigate({ to: "/chat", search: { place: id, topic: newTopic, country: "" } });
   }
 
@@ -118,13 +120,13 @@ function GeographicChat() {
 
     const fetchMessages = async () => {
       const { data, error: queryError } = await api.from("chat_messages")
-        .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url,chat_city)")
+        .select("id,user_id,body,created_at,reply_to_id,profiles(username,display_name,avatar_url,chat_city)")
         .eq("place_id", selectedPlace.id).eq("topic", topic)
         .order("created_at", { ascending: false }).limit(100);
       if (!alive) return;
       setChatLoading(false);
       if (queryError) setChatError("Не удалось открыть ветку: " + queryError.message);
-      else { setChatError(""); setMessages(((data || []) as ChatMessage[]).reverse()); }
+      else { setChatError(""); setMessages(((data || []) as ChatMessage[]).reverse()); const ids=(data??[]).map((m:{id:string})=>m.id); if(ids.length){const {data:rr}=await api.from("chat_message_reactions").select("message_id,user_id,emoji").in("message_id",ids);if(alive){const next:Record<string,{emoji:string;user_id:string}[]>={};(rr??[]).forEach((r:{message_id:string;emoji:string;user_id:string})=>{(next[r.message_id]??=[]).push(r)});setReactions(next)}}else setReactions({}); }
     };
     void fetchMessages();
     const channel = supabase.channel("zapruda-chat-" + selectedPlace.id + "-" + topic)
@@ -171,11 +173,19 @@ function GeographicChat() {
     if (!body || !uid || busy || !selectedPlace) return;
     setBusy(true); setChatError("");
     const { error: sendError } = await api.from("chat_messages")
-      .insert({ user_id: uid, body, place_id: selectedPlace.id, topic });
+      .insert({ user_id: uid, body, place_id: selectedPlace.id, topic, reply_to_id:replyTo?.id??null });
     setBusy(false);
     if (sendError) { setChatError("Сообщение не отправлено: " + sendError.message); return; }
-    setDraft("");
+    setDraft("");setReplyTo(null);
     setRefreshIndex(i => i + 1);
+  }
+
+  async function react(messageId:string,emoji:string){
+    if(!uid)return;
+    const previous=(reactions[messageId]??[]).find(r=>r.user_id===uid);
+    if(previous){const {error:e}=await api.from("chat_message_reactions").delete().eq("message_id",messageId).eq("user_id",uid);if(e){setChatError(e.message);return;}}
+    if(previous?.emoji!==emoji){const {error:e}=await api.from("chat_message_reactions").insert({message_id:messageId,user_id:uid,emoji});if(e){setChatError(e.message);return;}}
+    setRefreshIndex(x=>x+1);
   }
 
   return <Shell>
@@ -320,12 +330,18 @@ function GeographicChat() {
                   {new Date(message.created_at).toLocaleString("ru-RU",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
                 </time>
               </div>
-              <div className="zapruda-chat-bubble whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-zinc-100">
+              <div className="zapruda-chat-bubble whitespace-pre-wrap break-words rounded-lg px-4 py-3 text-sm text-zinc-100">
+                {message.reply_to_id&&<div className="mb-2 border-l-2 border-[#D7FF35] pl-2 text-xs text-zinc-400">{messages.find(m=>m.id===message.reply_to_id)?.body?.slice(0,130)??"Ответ на сообщение"}</div>}
                 {message.body}
               </div>
+              <div className="flex items-center gap-2 text-xs"><button type="button" className="text-zinc-400 underline" onClick={()=>setReplyTo(message)}>Ответить</button>
+              {["❤️","👍","🔥","😂"].map(emoji=><button key={emoji} type="button" onClick={()=>void react(message.id,emoji)}
+                className={"rounded border px-1.5 py-1 "+((reactions[message.id]??[]).some(r=>r.user_id===uid&&r.emoji===emoji)?"border-[#D7FF35]":"border-white/10")}
+                aria-label={"Реакция "+emoji}>{emoji} {(reactions[message.id]??[]).filter(r=>r.emoji===emoji).length||""}</button>)}</div>
             </article>)}
           </div>
           <form className="space-y-2 border-t border-white/10 p-3 sm:p-4" onSubmit={send}>
+            {replyTo&&<div className="flex justify-between rounded border border-[#D7FF35]/30 p-2 text-xs"><span>Ответ: {replyTo.body.slice(0,90)}</span><button type="button" onClick={()=>setReplyTo(null)}>Отмена</button></div>}
             <div className="flex flex-wrap gap-1">
               {quick.map(q=><button key={q} type="button" title={"Вставить "+q}
                 onClick={() => setDraft(d=>(d+q).slice(0,2000))}
