@@ -61,10 +61,16 @@ export function FishingJournal({userId,finished}:{userId:string;finished:Session
   setBusy(true);const {error:e}=await (supabase as any).from("fishing_session_comments").insert({session_id:id,user_id:userId,body});
   setBusy(false);if(e)setError(e.message);else {setDrafts(d=>({...d,[id]:""}));await load();}
  }
+ async function removeComment(id:string){
+  if(busy||!window.confirm("Удалить свой комментарий?"))return;
+  setBusy(true);setError("");
+  const {error:e}=await (supabase as any).from("fishing_session_comments").delete().eq("id",id).eq("user_id",userId);
+  setBusy(false);if(e)setError(e.message);else await load();
+ }
  const unpublished=finished.filter(s=>!posts.some(p=>p.session_id===s.id));
  return <section className="mb-8 rounded-3xl border border-white/10 bg-[#151915] p-5 sm:p-7" id="fishing-journal">
   <h2 className="text-xl font-bold">Дневник рыбалок и реакции</h2>
-  <p className="mt-2 text-sm text-zinc-400">Завершённые сессии сохраняются на сервере. Для публикации выбери рыбалку, добавь описание и реши, показывать ли её сообществу. GPS-трек пока хранится только в этом браузере и не публикуется.</p>
+  <p className="mt-2 text-sm text-zinc-400">Заверши рыбалку, затем нажми на её дату ниже и сохрани результат. Запись можно изменить или удалить. Для лайков, реакций и комментариев выбери видимость «Сообществу». GPS-маршрут пока хранится только в этом браузере и не публикуется.</p>
   {error&&<p role="alert" className="mt-3 text-sm text-red-300">{error}</p>}
   {notice&&<p role="status" className="mt-3 text-sm text-[#D7FF35]">{notice}</p>}
   <div className="mt-4 flex flex-wrap gap-2">
@@ -86,7 +92,7 @@ export function FishingJournal({userId,finished}:{userId:string;finished:Session
      <div className="flex items-start justify-between gap-3"><div><h3 className="font-bold">{p.title}</h3><p className="mt-1 text-xs text-zinc-500">{new Date(p.created_at).toLocaleString("ru-RU")} · {p.visibility==="private"?"Только мне":"Публичная запись"}</p></div>{own&&<div className="flex gap-2"><button className="text-xs text-[#D7FF35]" onClick={()=>choose(p.session_id)}>Изменить</button><button className="text-xs text-red-300" onClick={()=>void remove(p.session_id)}>Удалить</button></div>}</div>
      {p.description&&<p className="mt-3 whitespace-pre-wrap text-sm text-zinc-300">{p.description}</p>}
      {p.visibility==="public"&&<><div className="mt-3 flex flex-wrap gap-2">{emojis.map(e=><button key={e} type="button" aria-label={"Реакция "+e} disabled={busy} className={"rounded-lg border px-2 py-1 text-sm "+(rs.some(r=>r.emoji===e&&r.user_id===userId)?"border-[#D7FF35]":"border-white/10")} onClick={()=>void react(p.session_id,e)}>{e} {rs.filter(r=>r.emoji===e).length||""}</button>)}</div>
-      <div className="mt-4 space-y-2">{cs.map(c=><p key={c.id} className="rounded-lg bg-white/5 px-3 py-2 text-xs text-zinc-300">{c.body} {c.user_id===userId&&<span className="text-zinc-500">(мой)</span>}</p>)}</div>
+      <div className="mt-4 space-y-2">{cs.map(c=><p key={c.id} className="rounded-lg bg-white/5 px-3 py-2 text-xs text-zinc-300">{c.body} {c.user_id===userId&&<button type="button" disabled={busy} className="ml-2 text-red-300 underline" onClick={()=>void removeComment(c.id)}>Удалить</button>}</p>)}</div>
       <div className="mt-3 flex gap-2"><input aria-label="Комментарий" maxLength={500} className="field min-w-0 flex-1" placeholder="Написать комментарий" value={drafts[p.session_id]||""} onChange={e=>setDrafts(d=>({...d,[p.session_id]:e.target.value}))}/><button className="btn-ghost" disabled={busy||!(drafts[p.session_id]||"").trim()} onClick={()=>void comment(p.session_id)}>Отправить</button></div>
      </>}
     </article>;
