@@ -146,7 +146,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <nav
             id="zapruda-extra-nav"
             aria-label="Остальные разделы"
-            className="absolute right-4 top-[66px] z-50 w-[min(320px,calc(100vw-2rem))] space-y-1 rounded-2xl border border-white/15 bg-[#171C14] p-2 shadow-2xl shadow-black/70"
+            className="absolute right-0 top-[calc(100%+8px)] z-50 w-[min(320px,calc(100vw-2rem))] space-y-1 rounded-2xl border border-white/15 bg-[#171C14] p-2 shadow-2xl shadow-black/70"
           >
             <div className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.19em] text-[#D7FF35]">ZAPRUDA / Разделы</div>
             {otherNav.map(({ to, label, Icon }) => (
@@ -187,7 +187,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <span>ZAPRUDA COMMUNITY · Свои на одной волне</span>
         <div className="flex flex-wrap items-center gap-4">
           <Link to="/feedback" className="font-semibold text-[#D7FF35] hover:underline">Предложить улучшение / сотрудничество</Link>
-          <a href="https://web.telegram.org/a/#@ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer" className="hover:text-white">Telegram Web ZAPRUDA</a>
+          <a href="https://t.me/ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer" className="hover:text-white">Telegram ZAPRUDA</a>
         </div>
       </footer>
 
