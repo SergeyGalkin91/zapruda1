@@ -45,6 +45,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [authError, setAuthError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pendingClubs, setPendingClubs] = useState(0);
 
   useEffect(() => { applyAppearance(loadAppearance()); }, []);
 
@@ -90,6 +91,22 @@ export function Shell({ children }: { children: ReactNode }) {
     }).catch(() => { if (active) setIsAdmin(false); });
     return () => { active = false; };
   }, [isSignedIn]);
+
+  useEffect(() => {
+    if (!isAdmin) { setPendingClubs(0); return; }
+    let live = true;
+    const refresh = async () => {
+      const { count, error } = await (supabase as any).from("club_creation_requests")
+        .select("id", { count: "exact", head: true }).eq("status", "awaiting_payment");
+      if (live && !error) setPendingClubs(count ?? 0);
+    };
+    void refresh();
+    const interval = window.setInterval(() => { if (!document.hidden) void refresh(); }, 30000);
+    const channel = supabase.channel("admin-club-requests")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "club_creation_requests" }, () => void refresh())
+      .subscribe();
+    return () => { live = false; window.clearInterval(interval); void supabase.removeChannel(channel); };
+  }, [isAdmin]);
 
   return (
     <div className="min-h-screen pb-24 xl:pb-0">
@@ -166,7 +183,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <Link to="/moderation"
                 className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.07]">
                 <ShieldCheck className="size-4 text-[#D7FF35]" aria-hidden="true" />
-                Модерация заявок
+                Модерация заявок {pendingClubs > 0 ? "(" + pendingClubs + ")" : ""}
                 <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
               </Link>
             )}
