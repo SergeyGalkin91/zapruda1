@@ -414,18 +414,18 @@ function Profile() {
                 </label>
                 <div className="space-y-2 sm:col-span-2">
                   <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">Мои способы ловли · можно выбрать несколько</p>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {FISHING_DISCIPLINES.map((item,index) => {
                       const selected = preferences.fishing_methods.includes(item.code);
                       const accent = index % 5 === 0 ? "#FF6A00" : "#D7FF35";
                       return <button key={item.code} type="button" aria-pressed={selected}
                         onClick={() => toggleMethod(item.code)}
-                        className={`group relative min-h-[132px] overflow-hidden rounded-2xl border p-3 text-left transition-all hover:-translate-y-0.5 ${selected ? "border-[#D7FF35] bg-[#1A2515] shadow-[inset_0_0_0_1px_rgba(215,255,53,.2)]" : "border-white/10 bg-[#0B0F0E] hover:border-[#D7FF35]/40"}`}>
-                        <span className="absolute -right-2 -top-4 select-none text-6xl opacity-25 grayscale transition group-hover:opacity-50" aria-hidden="true">{item.icon}</span>
-                        <span className="relative text-[10px] font-black tracking-widest" style={{color:accent}}>FISHING ID / {String(index+1).padStart(2,"0")}</span>
-                        <span className="relative mt-9 block text-sm font-black text-white">{item.title}</span>
-                        <span className="relative mt-1 block text-[10px] leading-4 text-zinc-400">{item.detail}</span>
-                        {selected && <span className="absolute right-2 top-2 flex size-5 items-center justify-center rounded-full bg-[#D7FF35] text-[#0B0F0E]"><Check className="size-3.5"/></span>}
+                        className={`group relative flex min-h-[166px] flex-col justify-end overflow-hidden rounded-[20px] border px-4 pb-4 pt-16 text-left transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] ${selected ? "border-[#D7FF35] bg-[#172315] shadow-[inset_0_0_0_1px_rgba(215,255,53,.18),0_8px_28px_rgba(0,0,0,.22)]" : "border-white/10 bg-[#0C1110] hover:border-[#D7FF35]/50 hover:bg-[#141A15]"}`}>
+                        <span aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-80" style={{background:`radial-gradient(circle at 90% 8%,${accent}21,transparent 57%),repeating-radial-gradient(circle at 100% -10%,transparent 0px,transparent 28px,${accent}11 29px,transparent 30px)`}}/>
+                        <span className="pointer-events-none absolute right-3 top-3 flex size-12 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-4xl opacity-70 grayscale transition group-hover:scale-110 group-hover:opacity-100 group-hover:grayscale-0" aria-hidden="true">{item.icon}</span>
+                        <span className="relative mb-1 block text-base font-black leading-tight text-white">{item.title}</span>
+                        <span className="relative block text-[11px] leading-[1.45] text-[#A8B5A6]">{item.detail}</span>
+                        {selected && <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-[#D7FF35]/40 bg-[#D7FF35]/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#D7FF35]"><Check className="size-3"/> Выбрано</span>}
                       </button>;
                     })}
                   </div>
