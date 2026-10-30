@@ -1,10 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
 import { MessageCircle, Send, ShieldCheck } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { SocialGroups } from "@/components/SocialGroups";
 import { VerifiedGuideDirectory } from "@/components/VerifiedGuideDirectory";
-import { countries } from "@/lib/geo";
 
 export const Route = createFileRoute("/communities")({
   head: () => ({
@@ -19,18 +17,6 @@ export const Route = createFileRoute("/communities")({
 });
 
 function Communities() {
-  const [country, setCountry] = useState<string | null>(null);
-  const cis = countries.filter((c) => c.group === "cis");
-  const Chip = ({ c }: { c: (typeof countries)[number] }) => (
-    <button
-      onClick={() => setCountry(c.code)}
-      className={`panel flex items-center gap-2 px-4 py-3 text-left text-sm font-semibold ${country === c.code ? "border-primary" : ""}`}
-    >
-      <span className="text-lg">{c.flag}</span>{c.name}
-    </button>
-  );
-  const sel = countries.find((c) => c.code === country);
-
   return (
     <Shell>
       <h1 className="text-3xl font-bold">Сообщества</h1>
@@ -66,20 +52,6 @@ function Communities() {
       <SocialGroups />
       <VerifiedGuideDirectory />
 
-      <h2 className="mt-8 mb-3 text-sm uppercase tracking-widest text-muted-foreground">Страны СНГ</h2>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{cis.map((c) => <Chip key={c.code} c={c} />)}</div>
-      {sel && <section className="mt-5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/5 p-4 text-sm">
-        <p className="font-semibold text-[#D7FF35]">{sel.flag} {sel.name}</p>
-        <p className="mt-1 text-zinc-300">Общайся с рыболовами этой страны, выбери регион и город, затем тематическую ветку.</p>
-        <div className="mt-3 flex flex-wrap gap-4">
-          <Link to="/chat" search={{country: sel.code, place: "", topic: "general"}} className="inline-flex font-bold text-[#D7FF35] underline">Открыть чаты страны →</Link>
-          <Link to="/atlas" search={{country: sel.code}} className="inline-flex font-semibold text-zinc-300 underline">Атлас водоёмов →</Link>
-        </div>
-      </section>}
-      <Link to="/atlas" search={{ country: "" }} className="mt-6 flex items-center justify-between rounded-2xl border border-[#D7FF35]/30 bg-[#D7FF35]/5 p-5 transition hover:border-[#D7FF35]">
-        <span><strong className="block text-lg text-[#D7FF35]">Атлас рыболова</strong><span className="mt-1 block text-sm text-zinc-300">Водоёмы России и СНГ, карточки рыб и коллекции трофеев</span></span>
-        <span className="text-[#D7FF35]">Открыть →</span>
-      </Link>
     </Shell>
   );
 }
