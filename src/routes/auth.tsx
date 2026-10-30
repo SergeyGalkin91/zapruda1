@@ -59,7 +59,14 @@ function Auth() {
         const { data, error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (!data.session && !authError) throw new Error("Сервер не вернул сессию. Попробуй войти ещё раз.");
         if (authError) throw authError;
-        await navigate({ to: data.user?.user_metadata?.account_role === "guide" ? "/guides" : "/profile" });
+        if (data.user?.user_metadata?.account_role === "guide") {
+          const { data: guide, error: guideError } = await supabase.from("guide_profiles")
+            .select("user_id").eq("user_id", data.user.id).maybeSingle();
+          if (guideError) throw guideError;
+          await navigate({ to: guide ? "/profile" : "/guides" });
+        } else {
+          await navigate({ to: "/profile" });
+        }
       } else if (mode === "forgot") {
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
           redirectTo: window.location.origin + "/auth?recovery=1",
