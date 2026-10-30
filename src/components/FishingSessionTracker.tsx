@@ -93,19 +93,23 @@ export function FishingSessionTracker({ userId, serverSession }: { userId: strin
   }, [userId]);
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
   useEffect(() => {
-    const pauseIfHidden = () => {
-      if (document.visibilityState !== "hidden") return;
-      const t = dataRef.current.active;
-      if (t?.runningSince !== null && t) {
-        persist({ ...dataRef.current, active: { ...t, activeMs: elapsed(t, Date.now()), runningSince: null } });
+    const syncVisibility = () => {
+      const trip = dataRef.current.active;
+      if (!trip) return;
+      const foreground = document.visibilityState === "visible";
+      if (!foreground && trip.runningSince !== null) {
+        persist({ ...dataRef.current, active: { ...trip, activeMs: elapsed(trip, Date.now()), runningSince: null } });
+      } else if (foreground && serverSession?.status === "running" && trip.runningSince === null) {
+        persist({ ...dataRef.current, active: { ...trip, runningSince: Date.now() } });
       }
     };
-    document.addEventListener("visibilitychange", pauseIfHidden);
-    window.addEventListener("pagehide", pauseIfHidden);
-    return () => { document.removeEventListener("visibilitychange", pauseIfHidden); window.removeEventListener("pagehide", pauseIfHidden); };
-  // The handler reads the latest session from a ref, not a captured render.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+    document.addEventListener("visibilitychange", syncVisibility);
+    window.addEventListener("pagehide", syncVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", syncVisibility);
+      window.removeEventListener("pagehide", syncVisibility);
+    };
+  }, [serverSession?.status, userId]);
 
   useEffect(() => {
     if (!data.active || data.active.runningSince === null || !navigator.geolocation || watch.current !== null) return;
@@ -136,10 +140,10 @@ export function FishingSessionTracker({ userId, serverSession }: { userId: strin
     }
     const id = new Date(serverSession.started_at).getTime();
     if (prev?.id !== id) {
-      persist({ ...dataRef.current, active: { id, start: id, activeMs: 0, runningSince: serverSession.status === "running" ? Date.now() : null, points: [], distanceM: 0 } });
+      persist({ ...dataRef.current, active: { id, start: id, activeMs: 0, runningSince: serverSession.status === "running" && document.visibilityState === "visible" ? Date.now() : null, points: [], distanceM: 0 } });
     } else if (prev.runningSince !== null && serverSession.status === "paused") {
       persist({ ...dataRef.current, active: { ...prev, activeMs: elapsed(prev, Date.now()), runningSince: null } });
-    } else if (prev.runningSince === null && serverSession.status === "running") {
+    } else if (prev.runningSince === null && serverSession.status === "running" && document.visibilityState === "visible") {
       persist({ ...dataRef.current, active: { ...prev, runningSince: Date.now() } });
     }
   }, [serverSession?.id, serverSession?.status, userId]);
@@ -169,6 +173,6 @@ export function FishingSessionTracker({ userId, serverSession }: { userId: strin
         <button type="button" className="btn-ghost text-xs" disabled={!trip.points.length} onClick={() => void exportTrip(trip, true)}><Share2 className="size-4"/> Поделиться маршрутом</button>
       </div>
     </div>}
-    <p className="mt-4 text-xs leading-5 text-zinc-500">Локальный журнал: {data.history.length} завершённых сессий, {duration(data.history.reduce((sum, t) => sum + Math.min(t.activeMs, 86400000), 0))} всего. На этом устройстве, без серверного подтверждения и без начисления официальных ачивок. При сворачивании приложения сессия автоматически ставится на паузу: браузер не гарантирует запись в фоне. Для фоновой записи и часов потребуется мобильное приложение. Перед отправкой GPX убедись, что маршрут не раскрывает секретные точки.</p>
+    <p className="mt-4 text-xs leading-5 text-zinc-500">Локальный журнал: {data.history.length} завершённых сессий, {duration(data.history.reduce((sum, t) => sum + Math.min(t.activeMs, 86400000), 0))} всего. На этом устройстве, без серверного подтверждения и без начисления официальных ачивок. При сворачивании вкладки GPS-запись приостанавливается и возобновляется при возвращении. Серверный таймер продолжает идти, пока ты не нажмёшь «Пауза». Для фоновой записи и часов потребуется мобильное приложение. Перед отправкой GPX убедись, что маршрут не раскрывает секретные точки.</p>
   </section>;
 }
