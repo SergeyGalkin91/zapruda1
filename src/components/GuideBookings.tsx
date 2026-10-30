@@ -26,7 +26,12 @@ export function GuideBookingRequest({guideId,guideName,available}:{guideId:strin
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
- useEffect(()=>{void supabase.auth.getUser().then(({data})=>setUid(data.user?.id||""));},[]);
+ useEffect(()=>{
+  let active=true;
+  void supabase.auth.getUser().then(({data})=>{if(active)setUid(data.user?.id||"");});
+  const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{if(active)setUid(session?.user?.id||"");});
+  return()=>{active=false;subscription.unsubscribe();};
+ },[]);
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();
   if(busy||!uid||uid===guideId||!available.includes(mode))return;
