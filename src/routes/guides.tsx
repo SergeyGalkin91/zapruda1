@@ -99,6 +99,7 @@ function GuideCabinet() {
   const [userId, setUserId] = useState<string | null>(null);
   const [guide, setGuide] = useState<Omit<Guide, "user_id">>(EMPTY_GUIDE);
   const [hasGuide, setHasGuide] = useState(false);
+  const [editingGuide,setEditingGuide]=useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [trips, setTrips] = useState<GuidedTrip[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -213,6 +214,7 @@ function GuideCabinet() {
     setWorking(false);
     if (saveError) { setError("Не удалось сохранить анкету: " + saveError.message); return; }
     setHasGuide(true);
+    setEditingGuide(false);
     setTripMode(guide.service_mode === "boat" ? "boat" : "shore");
     setNotice("Анкета гида сохранена. Это самозаявленные сведения, а не подтверждение квалификации.");
   }
@@ -321,7 +323,7 @@ function GuideCabinet() {
             {isVerified ? "✓ Проверенный гид" : guide.is_active ? "Активная анкета · заявка требует проверки" : "Черновик / не опубликован"}
           </span>
         </div>
-        <form onSubmit={saveGuide} className="space-y-5">
+        {hasGuide&&!editingGuide?<div className="space-y-4 rounded-lg border border-white/10 p-4"><p className="text-lg font-bold">{guide.title||"Анкета гида"}</p><p className="text-sm text-zinc-300">{guide.home_city} · {guide.service_mode==="shore"?"Береговой гид":guide.service_mode==="boat"?"Лодочный гид":"Берег и лодка"}</p><p className="whitespace-pre-wrap text-sm text-zinc-400">{guide.about||guide.service_program}</p><p className="text-xs text-zinc-500">Анкета сохранена в твоём аккаунте.</p><button type="button" className="btn-ghost" onClick={()=>setEditingGuide(true)}>Редактировать анкету</button><Link to="/profile" className="btn-ghost ml-2 inline-flex">Мой профиль</Link></div>:<form onSubmit={saveGuide} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <Label title="Формат гида">
               <select className="field" value={guide.service_mode} onChange={e=>{const m=e.target.value as "shore"|"boat"|"both";update("service_mode",m);setTripMode(m==="boat"?"boat":"shore");}}>
@@ -399,7 +401,7 @@ function GuideCabinet() {
             <span>Показывать анкету и разрешить публикацию платных выездов</span>
           </label>
           <button className="btn-primary" type="submit" disabled={working}><Save className="size-4"/>{working?"Сохраняем…":"Сохранить профиль гида"}</button>
-        </form>
+        </form>}
       </section>
 
       <GuideVerification userId={userId} guideSaved={hasGuide} onVerificationChange={setIsVerified} />
