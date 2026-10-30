@@ -489,6 +489,13 @@ function Partners() {
                       </div>
                     ) : outOfDate || (own && remaining === 0) ? (
                       <p className="text-xs text-zinc-400">{remaining === 0 ? "Свободных мест не осталось" : "Приём заявок завершён"}</p>
+                    ) : trip.trip_kind === "guided" ? (
+                      <div className="space-y-2">
+                        <p className="text-xs leading-5 text-zinc-400">Бронирование платного выезда только после согласования условий и подтверждённой оплаты через ZAPRUDA. Приём платежей пока не подключён.</p>
+                        <Link to="/communities" className={actionButton + " w-full"}>
+                          Выбрать проверенного гида <ArrowRight className="size-4" />
+                        </Link>
+                      </div>
                     ) : userId ? (
                       <button className={actionButton + " w-full"} type="button" onClick={() => { setApplyTo(trip.id); setApplicationNote(""); }}>
                         Откликнуться <ArrowRight className="size-4" />
