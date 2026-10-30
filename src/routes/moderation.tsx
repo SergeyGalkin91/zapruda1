@@ -27,6 +27,14 @@ function Moderation(){
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
 
+  async function sendQueuedEmails(){
+    setBusy(true);setError("");setNotice("");
+    const {data,error:invokeError}=await supabase.functions.invoke("dispatch-admin-email",{body:{}});
+    setBusy(false);
+    if(invokeError){setError("Проверка почты: "+invokeError.message);return;}
+    if(data?.error){setError("Проверка почты: "+data.error+(data.detail?" · "+data.detail:""));return;}
+    setNotice("Обработка уведомлений: отправлено "+(data?.sent??0)+", ошибок "+(data?.failed??0)+". Проверь почту Яндекс.");
+  }
   async function refresh(){
     const {data:auth}=await supabase.auth.getUser();
     if(!auth.user){setAdmin(false);setLoading(false);return;}
@@ -107,6 +115,11 @@ function Moderation(){
     {error&&<p role="alert" className="mt-4 rounded-xl border border-red-400/25 p-4 text-sm text-red-200">{error}</p>}
     {notice&&<p role="status" className="mt-4 rounded-xl border border-[#D7FF35]/25 p-4 text-sm text-[#D7FF35]">{notice}</p>}
     {admin&&<div className="mt-6 grid items-start gap-5 lg:grid-cols-2">
+      <section className="rounded-xl border border-[#D7FF35]/25 bg-[#151915] p-4">
+        <h2 className="font-bold">Уведомления администрации</h2>
+        <p className="mt-1 text-xs text-zinc-400">Проверить отправку накопленных писем на zaprudacommunity@yandex.com через Яндекс SMTP. Доступно только администратору.</p>
+        <button type="button" className="btn-primary mt-3" disabled={busy} onClick={()=>void sendQueuedEmails()}>{busy?"Проверяем…":"Отправить ожидающие уведомления"}</button>
+      </section>
       <section className="space-y-3 rounded-2xl border border-white/10 bg-[#151915] p-5">
         <h2 className="flex items-center gap-2 text-lg font-black"><BadgeCheck className="size-5 text-[#D7FF35]"/> Проверка гидов ({guides.length})</h2>
         {!guides.length&&<p className="text-sm text-zinc-500">Нет новых заявок.</p>}
