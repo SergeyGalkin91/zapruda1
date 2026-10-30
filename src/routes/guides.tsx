@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
+import { GuideVerification } from "@/components/GuideVerification";
 
 export const Route = createFileRoute("/guides")({
   head: () => ({ meta: [
@@ -88,6 +89,7 @@ function GuideCabinet() {
   const [userId, setUserId] = useState<string | null>(null);
   const [guide, setGuide] = useState<Omit<Guide, "user_id">>(EMPTY_GUIDE);
   const [hasGuide, setHasGuide] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
   const [trips, setTrips] = useState<GuidedTrip[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -197,8 +199,8 @@ function GuideCabinet() {
 
   async function publish(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!userId || !hasGuide || !guide.is_active || !isReady || working) {
-      setError("Сначала сохрани и активируй полноценную анкету гида.");
+    if (!userId || !hasGuide || !guide.is_active || !isReady || !isVerified || working) {
+      setError("Коммерческие выезды доступны только после подтверждения документов администратором ZAPRUDA.");
       return;
     }
     const date = new Date(departure);
@@ -270,7 +272,7 @@ function GuideCabinet() {
       <div className="relative mt-5 flex flex-wrap gap-3">
         <Link to="/partners" className="btn-ghost inline-flex"> <Compass className="size-4" /> Смотреть все выезды</Link>
         <span className="inline-flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]">
-          <ShieldAlert className="size-4" /> Верификация документов пока не подключена
+          <ShieldAlert className="size-4" /> Для платных выездов нужна проверка администратора
         </span>
       </div>
     </section>
@@ -292,7 +294,7 @@ function GuideCabinet() {
             <h2 className="mt-2 text-xl font-black">Мой профиль гида</h2>
           </div>
           <span className="rounded-lg border border-[#D7FF35]/20 bg-[#D7FF35]/5 px-3 py-2 text-xs text-zinc-300">
-            {guide.is_active ? "Активная анкета · без проверки" : "Черновик / не опубликован"}
+            {isVerified ? "✓ Проверенный гид" : guide.is_active ? "Активная анкета · заявка требует проверки" : "Черновик / не опубликован"}
           </span>
         </div>
         <form onSubmit={saveGuide} className="space-y-5">
@@ -341,14 +343,16 @@ function GuideCabinet() {
         </form>
       </section>
 
+      <GuideVerification userId={userId} guideSaved={hasGuide} onVerificationChange={setIsVerified} />
+
       <section className="mt-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div><p className="text-xs font-black uppercase tracking-[0.18em] text-[#D7FF35]">02 / Мои услуги</p>
             <h2 className="mt-2 text-xl font-black">Платные выезды</h2></div>
-          <button type="button" className="btn-primary" disabled={!hasGuide || !guide.is_active || !isReady}
+          <button type="button" className="btn-primary" disabled={!hasGuide || !guide.is_active || !isReady || !isVerified}
             onClick={()=>setOpenNewTrip((v)=>!v)}><Plus className="size-4"/> Новый выезд</button>
         </div>
-        {(!hasGuide || !guide.is_active || !isReady) && <p className="rounded-xl border border-[#D7FF35]/20 p-4 text-sm text-zinc-400">Для платных выездов сначала заполни и сохрани активную анкету гида, включая информацию по безопасности.</p>}
+        {(!hasGuide || !guide.is_active || !isReady || !isVerified) && <p className="rounded-xl border border-[#D7FF35]/20 p-4 text-sm text-zinc-400">Платные выезды доступны после сохранения анкеты, подтверждения мер безопасности и верификации документов администратором. Данные о Panoptix и LiveScope пока заявляются самим гидом и отдельно должны сверяться при проверке.</p>}
         {openNewTrip && <form onSubmit={publish} className="space-y-4 rounded-2xl border border-[#D7FF35]/30 bg-[#151B11] p-5 sm:p-6">
           <p className="text-sm font-bold text-[#D7FF35]">Новый платный выезд на лодке</p>
           <div className="grid gap-4 sm:grid-cols-2">
