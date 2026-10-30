@@ -179,13 +179,13 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div className="mx-auto hidden max-w-5xl px-4 pb-2 sm:px-5 xl:block">
-          <nav aria-label="Основная навигация" className="hidden w-full items-center justify-center gap-1 rounded-lg border border-[#D7FF35]/35 bg-[#10150D] p-1.5 shadow-[0_0_12px_rgba(215,255,53,0.07)] xl:flex">
+          <nav aria-label="Основная навигация" className="hidden w-full items-stretch gap-1 rounded-lg border border-[#D7FF35]/35 bg-[#10150D] p-1.5 shadow-[0_0_12px_rgba(215,255,53,0.07)] xl:grid xl:grid-cols-6">
             {desktopNav.map(({ to, label, Icon }) => (
               <Link
                 key={to}
                 to={to}
                 activeOptions={{ exact: true }}
-                className="group relative inline-flex min-h-10 items-center gap-1.5 rounded-md border border-transparent px-3 py-2 text-[13px] font-semibold text-[#A5ADA1] transition-colors duration-150 hover:border-[#D7FF35]/25 hover:bg-[#D7FF35]/10 hover:text-[#D7FF35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] active:bg-[#D7FF35]/20"
+                className="group relative inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-2 text-[14px] font-bold text-[#A5ADA1] transition-colors duration-150 hover:border-[#D7FF35]/25 hover:bg-[#D7FF35]/10 hover:text-[#D7FF35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] active:bg-[#D7FF35]/20"
                 activeProps={{ className: "!border-[#D7FF35]/50 !bg-[#D7FF35]/15 !font-bold !text-[#D7FF35]" }}
               >
                 <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />
