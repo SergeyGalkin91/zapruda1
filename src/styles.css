@@ -93,3 +93,73 @@
   border: 1px solid var(--color-border);
   background: var(--color-card);
 }
+
+
+/* Local appearance preferences. These apply only to appearance, never data or permissions. */
+:root[data-zapruda-background="forest"] {
+  --background: #0A1710;
+  --card: #132117;
+  --secondary: #1C2C20;
+  --muted: #17241A;
+  --border: #2C3D30;
+  --input: #2D4031;
+}
+:root[data-zapruda-background="graphite"] {
+  --background: #15191D;
+  --card: #202428;
+  --secondary: #292E33;
+  --muted: #24282C;
+  --border: #383F46;
+  --input: #363C43;
+}
+:root[data-zapruda-background="night"] {
+  --background: #09161A;
+  --card: #132328;
+  --secondary: #1D3137;
+  --muted: #17272C;
+  --border: #294148;
+  --input: #2B444B;
+}
+:root[data-zapruda-background="forest"] body {
+  background: radial-gradient(ellipse 95% 70% at 45% -15%,#163521 0%,#0A1710 66%,#07100B 100%) fixed;
+}
+:root[data-zapruda-background="graphite"] body {
+  background: radial-gradient(ellipse 90% 65% at 50% -10%,#2A3036 0%,#15191D 65%,#101317 100%) fixed;
+}
+:root[data-zapruda-background="night"] body {
+  background: radial-gradient(ellipse 85% 60% at 50% -15%,#17404A 0%,#09161A 72%,#070D13 100%) fixed;
+}
+:root[data-zapruda-background="classic"] body { background: #090B09; }
+
+/* Chat backgrounds are scoped to message timelines: message readability is preserved. */
+:root[data-zapruda-chat="plain"] .zapruda-chat-window {
+  background: #111610;
+}
+:root[data-zapruda-chat="forest"] .zapruda-chat-window {
+  background: radial-gradient(circle at 15% 10%, #273C29 0%, #101B13 65%, #0D150F 100%);
+}
+:root[data-zapruda-chat="slate"] .zapruda-chat-window {
+  background: linear-gradient(145deg,#282F33 0%,#12191D 100%);
+}
+:root[data-zapruda-chat="water"] .zapruda-chat-window {
+  background: radial-gradient(circle at 30% 5%,#21444C 0%,#10242A 57%,#09181D 100%);
+}
+.zapruda-chat-window .zapruda-chat-bubble {
+  background-color: rgba(13, 18, 16, 0.86);
+  border: 1px solid rgba(196, 211, 188, 0.16);
+}
+:root[data-zapruda-chat="forest"] .zapruda-chat-window .zapruda-chat-bubble {
+  background-color: rgba(13, 30, 16, 0.90);
+}
+:root[data-zapruda-chat="slate"] .zapruda-chat-window .zapruda-chat-bubble {
+  background-color: rgba(20, 25, 30, 0.91);
+}
+:root[data-zapruda-chat="water"] .zapruda-chat-window .zapruda-chat-bubble {
+  background-color: rgba(13, 30, 36, 0.90);
+}
+:root[data-zapruda-chat="forest"] .zapruda-chat-window .zapruda-chat-own-bubble,
+:root[data-zapruda-chat="slate"] .zapruda-chat-window .zapruda-chat-own-bubble,
+:root[data-zapruda-chat="water"] .zapruda-chat-window .zapruda-chat-own-bubble {
+  border-color: rgba(215,255,53,.36);
+  background-color: rgba(56,71,25,.74);
+}
