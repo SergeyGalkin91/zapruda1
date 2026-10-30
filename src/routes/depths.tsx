@@ -17,6 +17,7 @@ function DepthsPage(){
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const [view,setView]=useState<"all"|"mine">("all");
+ const [depthBand,setDepthBand]=useState("all");
  const load=useCallback(async()=>{
   const {data,error:e}=await (supabase as any).from("depth_measurements").select("id,user_id,latitude,longitude,depth_m,note,visibility,measured_at").order("measured_at",{ascending:false}).limit(300);
   if(e)setError(e.message);else setRecords(data||[]);
@@ -39,7 +40,11 @@ function DepthsPage(){
  }
  function edit(r:Measurement){setEditing(r.id);setLatitude(String(r.latitude));setLongitude(String(r.longitude));setDepth(String(r.depth_m));setNote(r.note);setVisibility(r.visibility);window.scrollTo({top:0,behavior:"smooth"})}
  async function remove(r:Measurement){if(busy||!window.confirm("Удалить замер глубины?"))return;setBusy(true);const {error:e}=await (supabase as any).from("depth_measurements").delete().eq("id",r.id).eq("user_id",userId);setBusy(false);if(e)setError(e.message);else await load()}
- const shown=records.filter(r=>view==="all"||r.user_id===userId);
+ const shown=records.filter(r=>(view==="all"||r.user_id===userId) && (depthBand==="all" || (depthBand==="shallow" ? r.depth_m<3 : depthBand==="medium" ? r.depth_m>=3&&r.depth_m<10 : r.depth_m>=10)));
+ const colorFor=(m:number)=>m<3?"#68D9D0":m<10?"#61A9FA":"#A88BFF";
+ const mapPoints=shown.filter(r=>r.visibility==="public"||r.user_id===userId);
+ const mapCenter=mapPoints[0]||{latitude:56.3269,longitude:44.0059};
+ const mapUrl=`https://www.openstreetmap.org/export/embed.html?bbox=${mapCenter.longitude-0.06}%2C${mapCenter.latitude-0.04}%2C${mapCenter.longitude+0.06}%2C${mapCenter.latitude+0.04}&layer=mapnik&marker=${mapCenter.latitude}%2C${mapCenter.longitude}`;
  return <Shell>
   <div className="mb-6"><p className="text-xs font-black uppercase tracking-[.2em] text-[#D7FF35]">ZAPRUDA / КАРТА ГЛУБИН</p><h1 className="mt-2 text-3xl font-black">Замеры глубин</h1><p className="mt-2 text-sm text-zinc-400">Добавляй реальные промеры эхолотом в местах, где нет карт глубин. Твои точки по умолчанию приватные. Это пользовательские данные, не навигационная карта.</p><Link className="btn-ghost mt-3 inline-flex" to="/achievements">← Достижения и трекер</Link></div>
   <div className="grid gap-5 lg:grid-cols-2">
@@ -63,8 +68,14 @@ function DepthsPage(){
     <p className="mt-3 text-xs text-zinc-500">Карта © OpenStreetMap contributors. Слой отображает местоположение замера, а не готовые изобаты.</p>
    </section>
   </div>
+  <section className="panel mt-6 p-5"><h2 className="text-xl font-bold">Карта замеров глубин</h2><p className="mt-2 text-sm text-zinc-400">На обзорной карте показан центр выбранных замеров. Цветные точки ниже открываются на карте отдельно. Приватные замеры видишь только ты; встроенная OpenStreetMap не поддерживает вывод всех маркеров одновременно.</p>
+   <div className="mt-3 flex flex-wrap items-center gap-3 text-xs"><span style={{color:"#68D9D0"}}>● Мельче 3 м</span><span style={{color:"#61A9FA"}}>● 3–10 м</span><span style={{color:"#A88BFF"}}>● 10 м и глубже</span></div>
+   <iframe title="Обзорная карта замеров глубин" loading="lazy" referrerPolicy="no-referrer" className="mt-3 h-80 w-full rounded-xl border border-white/10" src={mapUrl}/>
+   <p className="mt-2 text-xs text-zinc-500">© OpenStreetMap contributors. Это пользовательские измерения, не навигационные данные.</p>
+  </section>
   <section className="panel mt-6 p-5"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-bold">Замеры сообщества</h2><div className="flex gap-2"><button className="btn-ghost" onClick={()=>setView("all")}>Общие</button><button className="btn-ghost" onClick={()=>setView("mine")}>Мои</button><button className="btn-ghost" onClick={()=>void load()}>Обновить</button></div></div>
-   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{shown.map(r=><article key={r.id} className="rounded-xl border border-white/10 p-4"><p className="text-xl font-black text-[#D7FF35]">{r.depth_m} м</p><p className="mt-1 text-sm">{r.latitude.toFixed(5)}, {r.longitude.toFixed(5)}</p><p className="mt-1 text-xs text-zinc-400">{new Date(r.measured_at).toLocaleDateString("ru-RU")} · {r.visibility==="private"?"Только мне":"Общий замер"}</p>{r.note&&<p className="mt-2 whitespace-pre-wrap text-sm">{r.note}</p>}<a className="mt-2 inline-block text-xs text-[#D7FF35] underline" href={`https://www.openstreetmap.org/?mlat=${r.latitude}&mlon=${r.longitude}#map=16/${r.latitude}/${r.longitude}`} target="_blank" rel="noreferrer">Открыть на карте</a>{r.user_id===userId&&<div className="mt-3 flex gap-3"><button className="text-xs underline" onClick={()=>edit(r)}>Изменить</button><button className="text-xs text-red-300 underline" onClick={()=>void remove(r)}>Удалить</button></div>}</article>)}{!shown.length&&<p className="text-sm text-zinc-400">Замеров пока нет. Добавь первый промер.</p>}</div>
+   <label className="mt-3 block text-sm">Фильтр глубины <select className="field ml-2" value={depthBand} onChange={e=>setDepthBand(e.target.value)}><option value="all">Все глубины</option><option value="shallow">Мельче 3 м</option><option value="medium">От 3 до 10 м</option><option value="deep">10 м и глубже</option></select></label>
+   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{shown.map(r=><article key={r.id} className="rounded-xl border border-white/10 p-4"><p className="text-xl font-black" style={{color:colorFor(r.depth_m)}}>● {r.depth_m} м</p><p className="mt-1 text-sm">{r.latitude.toFixed(5)}, {r.longitude.toFixed(5)}</p><p className="mt-1 text-xs text-zinc-400">{new Date(r.measured_at).toLocaleDateString("ru-RU")} · {r.visibility==="private"?"Только мне":"Общий замер"}</p>{r.note&&<p className="mt-2 whitespace-pre-wrap text-sm">{r.note}</p>}<a className="mt-2 inline-block text-xs text-[#D7FF35] underline" href={`https://www.openstreetmap.org/?mlat=${r.latitude}&mlon=${r.longitude}#map=16/${r.latitude}/${r.longitude}`} target="_blank" rel="noreferrer">Открыть на карте</a>{r.user_id===userId&&<div className="mt-3 flex gap-3"><button className="text-xs underline" onClick={()=>edit(r)}>Изменить</button><button className="text-xs text-red-300 underline" onClick={()=>void remove(r)}>Удалить</button></div>}</article>)}{!shown.length&&<p className="text-sm text-zinc-400">Замеров пока нет. Добавь первый промер.</p>}</div>
   </section>
  </Shell>;
 }
