@@ -6,7 +6,6 @@ on:
     paths:
       - "src/**"
       - "Dockerfile"
-      - "docker/runtime-config.mjs"
       - ".github/workflows/docker-offline-artifact.yml"
       - "package.json"
       - "bun.lock"
@@ -30,9 +29,38 @@ jobs:
           load: true
           tags: zapruda-community:local
           build-args: |
-            VITE_SUPABASE_URL=https://example.supabase.co
-            VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_docker_build_validation
+            VITE_SUPABASE_URL=https://sonvniuwtvzzyuglscah.supabase.co
+            VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_86B9kOH2BUNOuHyYoHX4qw_FbuLHl5E
             GIT_SHA=${{ github.sha }}
+      - name: Verify the production site serves complete JavaScript
+        shell: bash
+        run: |
+          docker run --rm -d --name zapruda-smoke -p 3000:3000 zapruda-community:local
+          trap 'docker rm -f zapruda-smoke >/dev/null 2>&1 || true' EXIT
+          for n in {1..20}; do
+            if curl --silent --fail http://127.0.0.1:3000/auth -o /tmp/zapruda-auth.html; then break; fi
+            sleep 1
+          done
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          class Scripts(HTMLParser):
+            def __init__(self): super().__init__(); self.js=[]
+            def handle_starttag(self, tag, attrs):
+              attrs=dict(attrs)
+              if tag=='script' and attrs.get('type')=='module' and attrs.get('src','').startswith('/assets/'): self.js.append(attrs['src'])
+          p=Scripts()
+          p.feed(open('/tmp/zapruda-auth.html').read())
+          assert p.js, "HTML must contain a browser JavaScript entrypoint"
+          open('/tmp/zapruda-entry.txt','w').write(p.js[0])
+          PY
+          ENTRY="$(cat /tmp/zapruda-entry.txt)"
+          curl --silent --fail --show-error "http://127.0.0.1:3000$ENTRY" -o /tmp/zapruda-client.js
+          node --check /tmp/zapruda-client.js
+          if grep -q 'https://example.supabase.co' /tmp/zapruda-client.js; then
+            echo "ERROR: Placeholder Supabase URL was compiled into the client"
+            exit 1
+          fi
+          echo "JavaScript entrypoint fully delivered and parsed."
       - name: Export Docker image as TAR
         run: docker save -o zapruda-community.tar zapruda-community:local
       - name: Make image available without Docker Hub
