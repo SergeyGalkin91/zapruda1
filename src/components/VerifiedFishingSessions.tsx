@@ -6,6 +6,7 @@ import { FishingSessionTracker, type FishingClockState } from "@/components/Fish
 type Session = { id: string; started_at: string; running_since: string | null; active_seconds: number; status: "running" | "paused" | "finished" };
 const seconds = (row: Session, at: number) => Math.min(86400, row.active_seconds + (row.running_since ? Math.max(0, Math.floor((at - new Date(row.running_since).getTime()) / 1000)) : 0));
 const format = (count: number) => `${Math.floor(count / 3600)} ч ${Math.floor(count % 3600 / 60)} мин`;
+const clock = (count: number) => [Math.floor(count / 3600), Math.floor(count % 3600 / 60), Math.floor(count % 60)].map(n => String(n).padStart(2, "0")).join(":");
 export function VerifiedFishingSessions({ userId }: { userId: string }) {
   const [current, setCurrent] = useState<Session | null>(null);
   const [finished, setFinished] = useState<Session[]>([]);
@@ -53,7 +54,7 @@ export function VerifiedFishingSessions({ userId }: { userId: string }) {
     {error && <p role="alert" className="mt-3 text-sm text-red-300">{error}</p>}
     {loading ? <p className="mt-4 text-sm text-zinc-400">Загружаем журнал…</p> : <>
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="text-2xl font-black tabular-nums text-[#D7FF35]">{current ? format(seconds(current, now)) : "0 ч 0 мин"}</p><p className="mt-1 text-xs text-zinc-400">Текущая рыбалка · {current?.status === "running" ? "идёт" : current?.status === "paused" ? "пауза" : "нет сессии"}</p></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="text-2xl font-black tabular-nums text-[#D7FF35]">{current ? clock(seconds(current, now)) : "00:00:00"}</p><p className="mt-1 text-xs text-zinc-400">Таймер (часы:минуты:секунды) · {current?.status === "running" ? "идёт" : current?.status === "paused" ? "пауза" : "нет сессии"}</p></div>
         <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="text-2xl font-black tabular-nums">{format(total)}</p><p className="mt-1 text-xs text-zinc-400">Завершённые рыбалки</p></div>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
