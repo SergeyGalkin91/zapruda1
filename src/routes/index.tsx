@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Images, X, ArrowUpRight, Compass, Fish, Sparkles, Target, Waves } from "lucide-react";
+import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import { Shell } from "@/components/Shell";
 import { ReactionBar } from "@/components/ReactionBar";
 import { supabase } from "@/integrations/supabase/client";
@@ -194,6 +195,7 @@ function ReportComments({ reportId }: { reportId: string }) {
 
 function Feed() {
   const PAGE_SIZE = 15;
+  const [activeDiscipline,setActiveDiscipline] = useState("Спиннинг");
   const [reports, setReports] = useState<Report[]>([]);
   const [photosByReport, setPhotosByReport] = useState<Record<string, string[]>>({});
   const [commentCounts,setCommentCounts]=useState<Record<string,number>>({});
@@ -290,8 +292,45 @@ function Feed() {
 
   return (
     <Shell>
-      <div className="mx-auto mb-5 max-w-5xl">
-        <Link to="/reports/new" className="flex min-h-12 w-full items-center justify-center rounded-lg bg-[#D7FF35] px-5 py-3 text-sm font-black uppercase tracking-wider text-[#10140B] shadow-[0_0_14px_rgba(215,255,53,0.14)] transition hover:bg-[#E7FF7A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">+ Новый отчёт</Link>
+      <div className="mx-auto mb-7 max-w-5xl space-y-5">
+        <section className="relative isolate overflow-hidden rounded-[28px] border border-[#D7FF35]/25 bg-[#0B0F0E] shadow-[0_18px_75px_rgba(0,0,0,.25)]">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-60" style={{background:"radial-gradient(ellipse at 87% 10%, rgba(215,255,53,.19), transparent 46%), radial-gradient(ellipse at 0% 100%, rgba(255,106,0,.12), transparent 48%), repeating-radial-gradient(circle at 78% 62%, transparent 0px, transparent 39px, rgba(215,255,53,.065) 40px, transparent 41px)"}}/>
+          <div className="relative grid min-h-[290px] gap-8 p-6 sm:p-10 md:grid-cols-[1fr_220px] md:items-center">
+            <div>
+              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.22em] text-[#D7FF35]"><span className="size-1.5 animate-pulse rounded-full bg-[#D7FF35]"/> ZAPRUDA COMMUNITY · FISHING CULTURE</p>
+              <h1 className="max-w-xl text-[clamp(2.5rem,7.5vw,5.3rem)] font-black uppercase leading-[.88] tracking-[-.065em] text-white">БОЛЬШЕ<br/><span className="text-[#D7FF35]">ЧЕМ РЫБАЛКА.</span></h1>
+              <p className="mt-5 max-w-xl text-sm leading-6 text-[#B5C1B4] sm:text-base">Отчёты, трофеи, люди на одной волне. Твоя рыбалка — твои правила. Найди своих, покажи результат, исследуй новые места.</p>
+              <div className="mt-6 flex flex-wrap gap-2.5">
+                <Link to="/reports/new" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#D7FF35] px-5 py-3 text-xs font-black uppercase tracking-wider text-[#0B0F0E] transition hover:bg-[#ECFF92]">+ Новый отчёт <ArrowUpRight className="size-4"/></Link>
+                <Link to="/fishing-map" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:border-[#FF6A00]/60"><Compass className="size-4 text-[#FF6A00]"/> Карта мест</Link>
+              </div>
+            </div>
+            <div className="relative hidden items-center justify-center md:flex">
+              <div className="absolute size-52 rounded-full border border-[#D7FF35]/15"/><div className="absolute size-36 rounded-full border border-[#FF6A00]/25"/>
+              <Fish className="relative size-32 -rotate-12 text-[#D7FF35]" strokeWidth={.7} />
+              <span className="absolute bottom-2 -rotate-6 rounded-md bg-[#FF6A00] px-3 py-1 text-xs font-black uppercase tracking-widest text-black">NO ORDINARY CLUB</span>
+            </div>
+          </div>
+        </section>
+        <section className="rounded-[24px] border border-white/10 bg-[#141A16] p-4 sm:p-6">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div><p className="text-[10px] font-black uppercase tracking-[.25em] text-[#FF6A00]">FISHING ID / ТВОЙ КОД</p><h2 className="mt-1 text-xl font-black uppercase tracking-tight text-white sm:text-2xl">Выбери свой стиль</h2><p className="mt-1 text-xs text-[#A8B5A6]">15 направлений. У каждого свой характер, свои достижения.</p></div>
+            <Link to="/profile" className="inline-flex items-center gap-1 text-xs font-bold text-[#D7FF35] hover:underline">Мои предпочтения <ArrowUpRight className="size-3.5"/></Link>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+            {FISHING_DISCIPLINES.map((discipline,index)=><button type="button" key={discipline.code} aria-pressed={activeDiscipline===discipline.code} onClick={()=>setActiveDiscipline(discipline.code)} className={`group relative min-h-[116px] overflow-hidden rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 ${activeDiscipline===discipline.code?"border-[#FF6A00] bg-[#1D231D] shadow-[inset_0_0_0_1px_rgba(255,106,0,.45),0_0_20px_rgba(255,106,0,.12)]":"border-white/10 bg-[#0B0F0E] hover:border-[#D7FF35]/45"}`}>
+              <span aria-hidden="true" className="absolute -right-3 -top-5 select-none text-7xl opacity-[.18] grayscale transition group-hover:opacity-35">{discipline.icon}</span>
+              <span className={`relative block text-[10px] font-bold tracking-widest ${activeDiscipline===discipline.code?"text-[#FF6A00]":"text-[#7E9180]"}`}>ID / {String(index+1).padStart(2,"0")}</span>
+              <span className="relative mt-5 block text-sm font-black text-white">{discipline.title}</span>
+              <span className="relative mt-1 block text-[10px] leading-4 text-[#A2AFA3]">{discipline.detail}</span>
+            </button>)}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/[.055] px-4 py-3">
+            <p className="flex items-center gap-2 text-xs text-white"><Target className="size-4 shrink-0 text-[#D7FF35]"/><span><strong>{activeDiscipline}</strong> — выбрано для просмотра. Сохрани направление в профиле.</span></p>
+            <Link to="/profile" className="inline-flex items-center gap-1.5 text-xs font-black text-[#D7FF35] hover:underline">Настроить профиль <ArrowUpRight className="size-3.5"/></Link>
+          </div>
+        </section>
+        <div className="flex items-center justify-between gap-3 px-1"><div><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#FF6A00]">ZAPRUDA LIVE</p><h2 className="text-xl font-black uppercase text-white">Лента сообщества</h2></div><Link to="/communities" className="text-xs font-bold text-[#D7FF35] hover:underline">Найти своих →</Link></div>
       </div>
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">{error}</div>}
