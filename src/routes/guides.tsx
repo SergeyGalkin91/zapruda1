@@ -19,6 +19,8 @@ export const Route = createFileRoute("/guides")({
 
 type Guide = {
   user_id: string;
+  service_mode: "shore" | "boat" | "both";
+  meeting_area: string;
   title: string;
   home_city: string;
   about: string;
@@ -58,6 +60,8 @@ type ProfileField = Exclude<keyof Guide, "user_id">;
 
 const EMPTY_GUIDE: Omit<Guide, "user_id"> = {
   title: "",
+  service_mode: "shore",
+  meeting_area: "",
   home_city: "",
   about: "",
   specialties: "Спиннинг",
@@ -103,6 +107,7 @@ function GuideCabinet() {
   const [seats, setSeats] = useState("2");
   const [fish, setFish] = useState("");
   const [method, setMethod] = useState("Спиннинг");
+  const [tripMode, setTripMode] = useState<"shore"|"boat">("shore");
   const [duration, setDuration] = useState("6");
   const [details, setDetails] = useState("");
 
@@ -137,6 +142,8 @@ function GuideCabinet() {
       setHasGuide(Boolean(guideResult.data));
       if (guideResult.data) setGuide({
         title: guideResult.data.title,
+        service_mode: (guideResult.data.service_mode || "boat") as "shore"|"boat"|"both",
+        meeting_area: guideResult.data.meeting_area || "",
         home_city: guideResult.data.home_city,
         about: guideResult.data.about,
         specialties: guideResult.data.specialties,
@@ -164,10 +171,10 @@ function GuideCabinet() {
 
   const isReady = Boolean(
     guide.title.trim().length >= 2 && guide.home_city.trim().length >= 2 &&
-    guide.boat_model.trim().length >= 2 &&
+    (guide.service_mode === "shore" || guide.boat_model.trim().length >= 2) &&
     guide.service_program.trim().length >= 5 &&
     guide.cancellation_terms.trim().length >= 5 &&
-    guide.offers_life_jackets && guide.offers_safety_briefing &&
+    (guide.service_mode === "shore" || guide.offers_life_jackets) && guide.offers_safety_briefing &&
     guide.eligibility_self_attested
   );
 
@@ -175,7 +182,7 @@ function GuideCabinet() {
     e.preventDefault();
     if (!userId || working) return;
     if (guide.is_active && !isReady) {
-      setError("Для публикации услуг укажи лодку и условия, подтверди инструктаж, спасжилеты и соблюдение правил.");
+      setError("Заполни программу и безопасность. Лодка и спасжилеты обязательны только для лодочного гида.");
       return;
     }
     setWorking(true);
@@ -194,6 +201,7 @@ function GuideCabinet() {
     setWorking(false);
     if (saveError) { setError("Не удалось сохранить анкету: " + saveError.message); return; }
     setHasGuide(true);
+    setTripMode(guide.service_mode === "boat" ? "boat" : "shore");
     setNotice("Анкета гида сохранена. Это самозаявленные сведения, а не подтверждение квалификации.");
   }
 
@@ -205,6 +213,10 @@ function GuideCabinet() {
     }
     const date = new Date(departure);
     const totalPrice = Number(price);
+    if (guide.service_mode !== "both" && guide.service_mode !== tripMode) {
+      setError("Этот вид выезда не поддерживается твоей анкетой.");
+      return;
+    }
     if (isNaN(date.getTime()) || date.getTime() <= Date.now() || !Number.isInteger(totalPrice) || totalPrice < 1) {
       setError("Укажи дату в будущем и стоимость за человека в целых рублях.");
       return;
@@ -220,8 +232,8 @@ function GuideCabinet() {
       departure_at: date.toISOString(),
       fishing_method: method,
       target_fish: fish.trim(),
-      transport: "Лодка гида",
-      boat_trip: true,
+      transport: tripMode === "boat" ? "Лодка гида" : "Пешком, берег",
+      boat_trip: tripMode === "boat",
       seats: Number(seats),
       duration_hours: Number(duration),
       finance_mode: "fee",
@@ -229,16 +241,16 @@ function GuideCabinet() {
       cost_details: details.trim() || "Стоимость указана за одного участника",
       description: guide.about.trim(),
       guide_service: guide.service_program.trim(),
-      boat_type: guide.boat_model.trim(),
-      sonar_model: guide.sonar_model.trim(),
-      live_sonar_system: guide.live_sonar_system,
+      boat_type: tripMode === "boat" ? guide.boat_model.trim() : "",
+      sonar_model: tripMode === "boat" ? guide.sonar_model.trim() : "",
+      live_sonar_system: tripMode === "boat" ? guide.live_sonar_system : "Нет",
       live_sonar_model: guide.live_sonar_system === "Нет" ? "" : guide.live_sonar_model.trim(),
       gear_included: guide.included_gear.trim(),
       price_includes: details.trim() || guide.service_program.trim(),
       cancel_policy: guide.cancellation_terms.trim(),
       guide_experience_years: guide.experience_years,
       safety_briefing: guide.offers_safety_briefing,
-      life_jackets_available: guide.offers_life_jackets,
+      life_jackets_available: tripMode === "boat" ? guide.offers_life_jackets : false,
       operator_eligibility_confirmed: guide.eligibility_self_attested,
     });
     setWorking(false);
@@ -299,10 +311,22 @@ function GuideCabinet() {
         </div>
         <form onSubmit={saveGuide} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
+            <Label title="Формат гида">
+              <select className="field" value={guide.service_mode} onChange={e=>{const m=e.target.value as "shore"|"boat"|"both";update("service_mode",m);setTripMode(m==="boat"?"boat":"shore");}}>
+                <option value="shore">Береговой гид</option>
+                <option value="boat">Лодочный гид</option>
+                <option value="both">Берег и лодка</option>
+              </select>
+            </Label>
+            <Label title="Район работы / место встречи">
+              <input className="field" maxLength={160} value={guide.meeting_area}
+                 onChange={e=>update("meeting_area",e.target.value)} placeholder="Например, Ока — Мызинский мост, Нижний Новгород" />
+            </Label>
             <Label title="Имя гида или название услуги"><input className="field" value={guide.title} maxLength={100} onChange={(e) => update("title",e.target.value)} placeholder="Например, Иван — рыболовный гид" required /></Label>
             <Label title="Город и регион работы"><input className="field" value={guide.home_city} maxLength={100} onChange={(e) => update("home_city",e.target.value)} placeholder="Нижний Новгород" required /></Label>
             <Label title="Стаж работы с рыбалкой, лет"><input className="field" type="number" min={0} max={60} value={guide.experience_years ?? ""} onChange={(e)=>update("experience_years",e.target.value?Number(e.target.value):null)} /></Label>
             <Label title="Какая рыбалка"><input className="field" value={guide.specialties} maxLength={400} onChange={(e)=>update("specialties",e.target.value)} placeholder="Судак, спиннинг, джиг" /></Label>
+            {guide.service_mode !== "shore" && <>
             <Label title="Лодка / модель"><input className="field" required maxLength={180} value={guide.boat_model} onChange={(e)=>update("boat_model",e.target.value)} placeholder="Например, Волжанка 46" /></Label>
             <Label title="Пассажиров на борту"><input className="field" type="number" min={1} max={12} value={guide.boat_capacity ?? ""} onChange={(e)=>update("boat_capacity",e.target.value?Number(e.target.value):null)} /></Label>
             <Label title="Основной эхолот / модель"><input className="field" value={guide.sonar_model} maxLength={180} onChange={(e)=>update("sonar_model",e.target.value)} placeholder="Garmin, Lowrance, Humminbird…" /></Label>
@@ -316,6 +340,7 @@ function GuideCabinet() {
                 {["PS22","PS30","PS51","PS70","LVS32","LVS34","LVS42","Другая модель"].map((name)=><option key={name} value={name}/>)}
               </datalist>
             </Label>}
+            </>}
             <Label title="Что входит из снастей"><input className="field" value={guide.included_gear} maxLength={500} onChange={(e)=>update("included_gear",e.target.value)} placeholder="Спиннинги, приманки, жилеты…" /></Label>
           </div>
           <Label title="О гиде"><textarea className="field min-h-24" value={guide.about} maxLength={1500} onChange={(e)=>update("about",e.target.value)} placeholder="Какие водоёмы знаешь, как проходит выезд…" /></Label>
@@ -333,7 +358,7 @@ function GuideCabinet() {
                 <span>{label}</span>
               </label>
             ))}
-            <p className="text-xs text-zinc-500">Отметки сделаны самим гидом. ZAPRUDA пока не проверяет документы и не гарантирует квалификацию.</p>
+            <p className="text-xs text-zinc-500">Лодка и спасжилеты обязательны только для лодочного гида. Документы и квалификацию проверяет администратор ZAPRUDA отдельно.</p>
           </div>
           <label className="flex items-center gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-4 text-sm font-bold">
             <input type="checkbox" className="accent-lime-300" checked={guide.is_active} onChange={(e)=>update("is_active",e.target.checked)} />
@@ -354,7 +379,13 @@ function GuideCabinet() {
         </div>
         {(!hasGuide || !guide.is_active || !isReady || !isVerified) && <p className="rounded-xl border border-[#D7FF35]/20 p-4 text-sm text-zinc-400">Платные выезды доступны после сохранения анкеты, подтверждения мер безопасности и верификации документов администратором. Данные о Panoptix и LiveScope пока заявляются самим гидом и отдельно должны сверяться при проверке.</p>}
         {openNewTrip && <form onSubmit={publish} className="space-y-4 rounded-2xl border border-[#D7FF35]/30 bg-[#151B11] p-5 sm:p-6">
-          <p className="text-sm font-bold text-[#D7FF35]">Новый платный выезд на лодке</p>
+          <p className="text-sm font-bold text-[#D7FF35]">Новый платный выезд с гидом</p>
+          <label className="block text-xs font-bold text-zinc-300">Формат выезда
+            <select className="field mt-1 w-full" value={tripMode} onChange={e=>setTripMode(e.target.value as "shore"|"boat")}>
+              {guide.service_mode !== "boat" && <option value="shore">Рыбалка с берега</option>}
+              {guide.service_mode !== "shore" && <option value="boat">Рыбалка с лодки</option>}
+            </select>
+          </label>
           <div className="grid gap-4 sm:grid-cols-2">
             <Label title="Водоём / район"><input className="field" value={destination} required maxLength={150} onChange={(e)=>setDestination(e.target.value)} placeholder="Волга, Кудьма…" /></Label>
             <Label title="Дата и время"><input className="field" type="datetime-local" required value={departure} onChange={(e)=>setDeparture(e.target.value)} /></Label>
