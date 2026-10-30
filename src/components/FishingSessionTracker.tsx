@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { getKey, loadYandex, type YandexApi } from "@/components/InteractiveFishingMap";
-import { Clock3, MapPinned, Pause, Play, Square, Download, Share2 } from "lucide-react";
+import { Clock3, MapPinned, Download, Share2 } from "lucide-react";
 
 type Point = { lat: number; lon: number; time: number; accuracy: number };
 type Trip = { id: number; start: number; activeMs: number; runningSince: number | null; points: Point[]; distanceM: number; ended?: number };
@@ -71,7 +71,8 @@ function FishingRouteMap({ points }: { points: Point[] }) {
   </div>;
 }
 
-export function FishingSessionTracker({ userId }: { userId: string }) {
+export type FishingClockState = { id: string; started_at: string; running_since: string | null; active_seconds: number; status: "running" | "paused" | "finished" };
+export function FishingSessionTracker({ userId, serverSession }: { userId: string; serverSession: FishingClockState | null }) {
   const [data, setData] = useState<Stored>(empty);
   const [now, setNow] = useState(Date.now());
   const [gpsError, setGpsError] = useState("");
@@ -127,10 +128,21 @@ export function FishingSessionTracker({ userId }: { userId: string }) {
     return () => { if (watch.current !== null) navigator.geolocation.clearWatch(watch.current); watch.current = null; };
   }, [data.active?.id, data.active?.runningSince, userId]);
   const active = data.active;
-  const start = () => { const time = Date.now(); setGpsError(""); persist({ ...dataRef.current, active: { id: time, start: time, activeMs: 0, runningSince: time, points: [], distanceM: 0 } }); };
-  const pause = () => { const t = dataRef.current.active; if (!t) return; persist({ ...dataRef.current, active: { ...t, activeMs: elapsed(t, Date.now()), runningSince: null } }); };
-  const resume = () => { const t = dataRef.current.active; if (t) persist({ ...dataRef.current, active: { ...t, runningSince: Date.now() } }); };
-  const finish = () => { const t = dataRef.current.active; if (!t) return; persist({ active: null, history: [{ ...t, activeMs: elapsed(t, Date.now()), runningSince: null, ended: Date.now() }, ...dataRef.current.history].slice(0, 40) }); };
+  useEffect(() => {
+    const prev = dataRef.current.active;
+    if (!serverSession) {
+      if (prev) persist({ ...dataRef.current, active: null, history: [{ ...prev, activeMs: elapsed(prev, Date.now()), runningSince: null, ended: Date.now() }, ...dataRef.current.history].slice(0, 40) });
+      return;
+    }
+    const id = new Date(serverSession.started_at).getTime();
+    if (prev?.id !== id) {
+      persist({ ...dataRef.current, active: { id, start: id, activeMs: 0, runningSince: serverSession.status === "running" ? Date.now() : null, points: [], distanceM: 0 } });
+    } else if (prev.runningSince !== null && serverSession.status === "paused") {
+      persist({ ...dataRef.current, active: { ...prev, activeMs: elapsed(prev, Date.now()), runningSince: null } });
+    } else if (prev.runningSince === null && serverSession.status === "running") {
+      persist({ ...dataRef.current, active: { ...prev, runningSince: Date.now() } });
+    }
+  }, [serverSession?.id, serverSession?.status, userId]);
   const exportTrip = async (t: Trip, share: boolean) => {
     const file = new File([gpx(t)], `zapruda-${new Date(t.start).toISOString().slice(0, 10)}.gpx`, { type: "application/gpx+xml" });
     if (share && navigator.share && navigator.canShare?.({ files: [file] })) {
@@ -143,16 +155,10 @@ export function FishingSessionTracker({ userId }: { userId: string }) {
   return <section className="mb-7 rounded-3xl border border-[#D7FF35]/25 bg-[#151915] p-5 sm:p-7">
     <p className="text-xs font-extrabold uppercase tracking-[.18em] text-[#D7FF35]">ZAPRUDA / НА ВОДОЁМЕ</p>
     <h2 className="mt-2 flex items-center gap-2 text-xl font-bold"><Clock3 className="size-5 text-[#D7FF35]"/> Трекер рыбалки</h2>
-    <p className="mt-2 text-sm leading-6 text-zinc-400">Время ловли и пройденная дистанция. GPS включается только во время сессии с твоего разрешения.</p>
+    <p className="mt-2 text-sm leading-6 text-zinc-400">GPS-маршрут серверной рыболовной сессии. Управление таймером находится выше.</p>
     <div className="mt-4 grid grid-cols-2 gap-3">
       <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="font-mono text-3xl font-bold tabular-nums text-[#D7FF35]">{active ? duration(elapsed(active, now)) : "00:00"}</p><p className="text-xs text-zinc-400">Часы : минуты</p></div>
       <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="font-mono text-3xl font-bold tabular-nums">{(active?.distanceM ?? 0) / 1000 < 10 ? ((active?.distanceM ?? 0) / 1000).toFixed(2) : ((active?.distanceM ?? 0) / 1000).toFixed(1)} км</p><p className="text-xs text-zinc-400">Пройдено по GPS</p></div>
-    </div>
-    <div className="mt-4 flex flex-wrap gap-2">
-      {!active && <button type="button" className="btn-primary" onClick={start}><Play className="size-4"/> Начать рыбалку</button>}
-      {active?.runningSince !== null && active && <button type="button" className="btn-ghost" onClick={pause}><Pause className="size-4"/> Пауза</button>}
-      {active?.runningSince === null && active && <button type="button" className="btn-primary" onClick={resume}><Play className="size-4"/> Продолжить</button>}
-      {active && <button type="button" className="btn-ghost" onClick={finish}><Square className="size-4"/> Завершить</button>}
     </div>
     {gpsError && <p role="status" className="mt-3 text-xs text-amber-200">{gpsError}. Таймер продолжает работать.</p>}
     {trip && <div className="mt-5 space-y-3">
