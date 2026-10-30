@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Star, ShieldCheck, MessageSquareText } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { GuideReviews } from "@/components/GuideReviews";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reviews")({
@@ -102,6 +103,6 @@ function Reviews() {
         <p className="mt-3 whitespace-pre-wrap break-words text-sm text-zinc-200">{x.body}</p>
         <p className="mt-3 flex items-center gap-2 text-xs text-zinc-500"><MessageSquareText className="size-4"/> {new Date(x.created_at).toLocaleDateString("ru-RU")} · Совместный выезд</p>
       </article>)}</div>}
-    <p className="mt-6 text-xs text-zinc-500">Отзывы о платных гидах подключим после проверки фактического завершения бронирования и оплаты. Одного созданного заказа недостаточно.</p>
+    <GuideReviews/>
   </Shell>;
 }
