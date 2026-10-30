@@ -140,7 +140,10 @@ export function FishingSessionTracker({ userId, serverSession }: { userId: strin
     }
     const id = new Date(serverSession.started_at).getTime();
     if (prev?.id !== id) {
-      persist({ ...dataRef.current, active: { id, start: id, activeMs: 0, runningSince: serverSession.status === "running" && document.visibilityState === "visible" ? Date.now() : null, points: [], distanceM: 0 } });
+      const archived = prev
+        ? [{ ...prev, activeMs: elapsed(prev, Date.now()), runningSince: null, ended: Date.now() }, ...dataRef.current.history].slice(0, 40)
+        : dataRef.current.history;
+      persist({ ...dataRef.current, history: archived, active: { id, start: id, activeMs: 0, runningSince: serverSession.status === "running" && document.visibilityState === "visible" ? Date.now() : null, points: [], distanceM: 0 } });
     } else if (prev.runningSince !== null && serverSession.status === "paused") {
       persist({ ...dataRef.current, active: { ...prev, activeMs: elapsed(prev, Date.now()), runningSince: null } });
     } else if (prev.runningSince === null && serverSession.status === "running" && document.visibilityState === "visible") {
