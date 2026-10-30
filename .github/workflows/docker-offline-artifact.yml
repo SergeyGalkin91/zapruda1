@@ -1,0 +1,43 @@
+name: ZAPRUDA offline Docker image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "Dockerfile"
+      - "docker/runtime-config.mjs"
+      - ".github/workflows/docker-offline-artifact.yml"
+      - "package.json"
+      - "bun.lock"
+      - "vite.config.ts"
+  workflow_dispatch:
+
+jobs:
+  export-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build standalone image with replaceable public Supabase settings
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: zapruda-community:local
+          build-args: |
+            VITE_SUPABASE_URL=https://example.supabase.co
+            VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_docker_build_validation
+      - name: Export Docker image as TAR
+        run: docker save -o zapruda-community.tar zapruda-community:local
+      - name: Make image available without Docker Hub
+        uses: actions/upload-artifact@v4
+        with:
+          name: zapruda-community-offline
+          path: zapruda-community.tar
+          retention-days: 7
+          compression-level: 1
