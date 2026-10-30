@@ -616,6 +616,7 @@ export type Database = {
           home_city: string
           home_region: string
           main_technique: string
+          fishing_methods: string[]
           target_species: string[]
           fishing_access: string
           transport: string
@@ -631,6 +632,7 @@ export type Database = {
           home_city?: string
           home_region?: string
           main_technique?: string
+          fishing_methods?: string[]
           target_species?: string[]
           fishing_access?: string
           transport?: string
@@ -646,6 +648,7 @@ export type Database = {
           home_city?: string
           home_region?: string
           main_technique?: string
+          fishing_methods?: string[]
           target_species?: string[]
           fishing_access?: string
           transport?: string
