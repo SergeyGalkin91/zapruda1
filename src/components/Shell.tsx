@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, Waves,
-  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2,
+  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +33,7 @@ const otherNav = [
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
   { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
+  { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
 ] as const;
 
