@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BrainCircuit, Check, Compass, Fish, MapPin, Save, Settings2, ShieldCheck,
-  Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText,
+  Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText, FishingHook,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
@@ -76,6 +76,14 @@ function ProfileDetail({ label, value }: { label: string; value?: string | numbe
   </div>;
 }
 
+type FeaturedGear = {
+  title: string;
+  fishingMethod: string;
+  rod: string;
+  reel: string;
+  line: string | null;
+};
+
 function Profile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
@@ -84,6 +92,7 @@ function Profile() {
   const [email, setEmail] = useState("");
   const [shareChatCity, setShareChatCity] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [featuredGear, setFeaturedGear] = useState<FeaturedGear | null>(null);
   const [preferences, setPreferences] = useState<AnglerForm>(EMPTY_FORM);
   const [progress, setProgress] = useState<FishingProgress | null>(null);
   const [specializations, setSpecializations] = useState<FishingSpecialization[]>([]);
@@ -97,6 +106,38 @@ function Profile() {
 
   const update = <K extends keyof AnglerForm>(field: K, value: AnglerForm[K]) =>
     setPreferences((current) => ({ ...current, [field]: value }));
+
+  const loadFeaturedGear = useCallback(async (id: string) => {
+    const { data: kit, error: kitError } = await (supabase as any)
+      .from("angler_gear_sets")
+      .select("title,fishing_method,rod_id,reel_id,line_id")
+      .eq("user_id", id).eq("is_primary", true).maybeSingle();
+    if (kitError || !kit) {
+      setFeaturedGear(null);
+      return;
+    }
+    const ids = [kit.rod_id, kit.reel_id, kit.line_id].filter(Boolean) as string[];
+    const { data: gear, error: gearError } = await supabase.from("angler_gear")
+      .select("id,brand,model,variant").eq("user_id", id).in("id", ids);
+    if (gearError || !gear) {
+      setFeaturedGear(null);
+      return;
+    }
+    const gearById = new Map(gear.map(item => [item.id, [item.brand,item.model,item.variant].filter(Boolean).join(" ")]));
+    const rod = gearById.get(kit.rod_id);
+    const reel = gearById.get(kit.reel_id);
+    if (!rod || !reel) {
+      setFeaturedGear(null);
+      return;
+    }
+    setFeaturedGear({
+      title: kit.title || "Основной комплект",
+      fishingMethod: kit.fishing_method || "",
+      rod,
+      reel,
+      line: kit.line_id ? gearById.get(kit.line_id) ?? null : null,
+    });
+  }, []);
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -125,6 +166,7 @@ function Profile() {
     }
     setUserId(auth.user.id);
     setEmail(auth.user.email ?? "");
+    void loadFeaturedGear(auth.user.id);
 
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
       supabase.from("profiles").select("username,display_name,bio,avatar_url,chat_city").eq("id", auth.user.id).maybeSingle(),
@@ -196,7 +238,7 @@ function Profile() {
       })));
     }
     setLoading(false);
-  }, []);
+  }, [loadFeaturedGear]);
 
   useEffect(() => { void loadProfile(); }, [loadProfile]);
 
@@ -290,13 +332,27 @@ function Profile() {
             <p className="mt-1 text-sm text-[#A6B1A0]">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
             <p className="mt-2 text-xs text-zinc-400">{bio || "Расскажи, где и на что любишь ловить."}</p>
           </div>
-          <div className="flex max-w-full flex-wrap gap-2 sm:justify-end">
-            {preferences.fishing_methods.map(method => {
-              const item = FISHING_DISCIPLINES.find(entry => entry.code === method);
-              return <span key={method} className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]">
-                {item?.icon ?? "🎣"} {item?.title ?? method}
-              </span>;
-            })}
+          <div className="flex max-w-full flex-col items-start gap-3 sm:items-end">
+            <div className="flex max-w-full flex-wrap gap-2 sm:justify-end">
+              {preferences.fishing_methods.map(method => {
+                const item = FISHING_DISCIPLINES.find(entry => entry.code === method);
+                return <span key={method} className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]">
+                  {item?.icon ?? "🎣"} {item?.title ?? method}
+                </span>;
+              })}
+            </div>
+            {userId && <a href="#my-gear-sets" className="group block max-w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-left transition hover:border-[#D7FF35]/40 sm:max-w-[345px]">
+              <span className="flex items-center gap-2 text-xs font-bold text-[#D7FF35]">
+                <FishingHook className="size-4" aria-hidden="true" />
+                {featuredGear ? "Чем ловлю · " + featuredGear.title : "Мои рыболовные комплекты"}
+              </span>
+              {featuredGear ? <span className="mt-2 block space-y-1 text-xs leading-5 text-zinc-200">
+                <span className="block break-words"><strong className="font-bold text-white">Удилище:</strong> {featuredGear.rod}</span>
+                <span className="block break-words"><strong className="font-bold text-white">Катушка:</strong> {featuredGear.reel}</span>
+                {featuredGear.line && <span className="block break-words"><strong className="font-bold text-white">Шнур:</strong> {featuredGear.line}</span>}
+                {featuredGear.fishingMethod && <span className="block text-zinc-400">{featuredGear.fishingMethod}</span>}
+              </span> : <span className="mt-1 block text-xs text-zinc-400">Собрать первый комплект из моих снастей →</span>}
+            </a>}
           </div>
         </div>
       </section>
@@ -510,7 +566,11 @@ function Profile() {
 
           <PrivateFishingMarks userId={userId} homeCity={preferences.home_city} homeRegion={preferences.home_region} />
 
-          <AnglerTackleCabinet userId={userId} />
+          <AnglerTackleCabinet
+            userId={userId}
+            fishingMethods={preferences.fishing_methods}
+            onGearSetsChange={() => void loadFeaturedGear(userId)}
+          />
 
           <div className="mb-6 mt-6 flex flex-wrap gap-3">
             <Link to="/guides" className="btn-ghost inline-flex">Кабинет рыболовного гида</Link>
