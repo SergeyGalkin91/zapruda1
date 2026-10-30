@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BrainCircuit, Check, Compass, Fish, MapPin, Save, Settings2, ShieldCheck,
-  Sparkles, UserRound, Waves, LogOut,
+  Sparkles, UserRound, Waves, LogOut, Pencil, X,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
@@ -31,6 +31,7 @@ type AnglerForm = {
   home_city: string;
   home_region: string;
   main_technique: string;
+  fishing_methods: string[];
   target_species: string[];
   fishing_access: string;
   transport: string;
@@ -45,6 +46,7 @@ const EMPTY_FORM: AnglerForm = {
   home_city: "",
   home_region: "",
   main_technique: "Спиннинг",
+  fishing_methods: ["Спиннинг"],
   target_species: [],
   fishing_access: "Берег",
   transport: "Без машины",
@@ -67,6 +69,13 @@ function Label({ name, children, hint }: { name: string; children: React.ReactNo
   );
 }
 
+function ProfileDetail({ label, value }: { label: string; value?: string | number | null }) {
+  return <div className="min-w-0 rounded-xl border border-white/10 bg-black/15 px-4 py-3">
+    <dt className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">{label}</dt>
+    <dd className="mt-1.5 whitespace-pre-wrap break-words text-sm text-zinc-100">{value || "Не указано"}</dd>
+  </div>;
+}
+
 function Profile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
@@ -80,6 +89,7 @@ function Profile() {
   const [specializations, setSpecializations] = useState<FishingSpecialization[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [signingOut, setSigningOut] = useState(false);
@@ -141,6 +151,10 @@ function Profile() {
         home_city: row.home_city,
         home_region: row.home_region,
         main_technique: row.main_technique,
+        fishing_methods: Array.from(new Set([
+          row.main_technique,
+          ...((row.fishing_methods ?? []) as string[]),
+        ].filter(Boolean))),
         target_species: row.target_species,
         fishing_access: row.fishing_access,
         transport: row.transport,
@@ -186,6 +200,23 @@ function Profile() {
 
   useEffect(() => { void loadProfile(); }, [loadProfile]);
 
+  function toggleMethod(method: string) {
+    setPreferences((current) => {
+      const selected = current.fishing_methods.includes(method);
+      if (selected && current.fishing_methods.length === 1) return current;
+      const methods = selected ? current.fishing_methods.filter(code => code !== method) : [...current.fishing_methods, method];
+      const primary = methods.includes(current.main_technique) ? current.main_technique : methods[0];
+      return { ...current, main_technique: primary, fishing_methods: methods };
+    });
+  }
+
+  function cancelEditing() {
+    setEditing(false);
+    setNotice("");
+    setError("");
+    void loadProfile();
+  }
+
   function toggleSpecies(species: string) {
     setPreferences((current) => ({
       ...current,
@@ -203,6 +234,10 @@ function Profile() {
     const requestedUsername = username.trim();
     if (requestedUsername && !/^[a-zA-Z0-9_.-]{3,30}$/.test(requestedUsername)) {
       setError("Никнейм: от 3 до 30 символов, латинские буквы, цифры, точка, дефис или подчёркивание.");
+      return;
+    }
+    if (!preferences.fishing_methods.length) {
+      setError("Выбери хотя бы один способ ловли.");
       return;
     }
     if (shareChatCity && preferences.home_city.trim().length < 2) {
@@ -237,7 +272,8 @@ function Profile() {
       setError("Имя сохранено, но настройки рыбалки не обновлены: " + prefsError.message);
       return;
     }
-    setNotice("Рыболовный профиль сохранён. ИИ-рыболов сможет использовать эти предпочтения.");
+    setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
+    setEditing(false);
   }
 
   return (
@@ -254,8 +290,13 @@ function Profile() {
             <p className="mt-1 text-sm text-[#A6B1A0]">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
             <p className="mt-2 text-xs text-zinc-400">{bio || "Расскажи, где и на что любишь ловить."}</p>
           </div>
-          <div className="rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/10 px-4 py-3 text-xs font-bold text-[#D7FF35]">
-            <Fish className="mr-1 inline size-4" /> {preferences.main_technique}
+          <div className="flex max-w-full flex-wrap gap-2 sm:justify-end">
+            {preferences.fishing_methods.map(method => {
+              const item = FISHING_DISCIPLINES.find(entry => entry.code === method);
+              return <span key={method} className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]">
+                {item?.icon ?? "🎣"} {item?.title ?? method}
+              </span>;
+            })}
           </div>
         </div>
       </section>
@@ -273,12 +314,19 @@ function Profile() {
                 <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">Твой рыболовный профиль</h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">Именно эти данные используются для персонального подбора мест: город, транспорт, способы ловли, приманки и снасти.</p>
               </div>
-              <Link to="/assistant" className="inline-flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 px-3 py-2 text-xs font-bold text-[#D7FF35] transition hover:bg-[#D7FF35]/10">
-                <BrainCircuit className="size-4" /> К советнику
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                {!editing && <button type="button" onClick={() => { setError(""); setNotice(""); setEditing(true); }}
+                  className="btn-primary inline-flex min-h-10 items-center gap-2">
+                  <Pencil className="size-4" /> Редактировать
+                </button>}
+                <Link to="/assistant" className="inline-flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 px-3 py-2 text-xs font-bold text-[#D7FF35] transition hover:bg-[#D7FF35]/10">
+                  <BrainCircuit className="size-4" /> К советнику
+                </Link>
+              </div>
             </div>
 
-            <form onSubmit={saveProfile} className="space-y-5">
+            {editing ? (
+              <form onSubmit={saveProfile} className="space-y-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Label name="Никнейм"><input className="field" maxLength={30} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="например, zaprudafish" /></Label>
                 <Label name="Отображаемое имя"><input className="field" maxLength={100} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Как тебя называть?" /></Label>
@@ -290,9 +338,23 @@ function Profile() {
                     <span className="mt-1 block text-xs leading-5 text-zinc-400">Например: «river_hunter (Нижний Новгород)». Только название города будет публичным. Рыболовные места, метки и остальная анкета останутся приватными. Можно отключить в любой момент.</span>
                   </span>
                 </label>
-                <Label name="Основной способ ловли">
+                <div className="space-y-2 sm:col-span-2">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">Мои способы ловли · можно выбрать несколько</p>
+                  <div className="flex flex-wrap gap-2">
+                    {FISHING_DISCIPLINES.map(item => {
+                      const selected = preferences.fishing_methods.includes(item.code);
+                      return <button key={item.code} type="button" aria-pressed={selected}
+                        onClick={() => toggleMethod(item.code)}
+                        className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}>
+                        {selected ? "✓ " : ""}{item.icon} {item.title}
+                      </button>;
+                    })}
+                  </div>
+                  <p className="text-xs text-zinc-500">Например, Спиннинг + Фидер. Выбранные способы появятся в шапке профиля. Минимум один.</p>
+                </div>
+                <Label name="Основной способ для ИИ-советника">
                   <select className="field" value={preferences.main_technique} onChange={(e) => update("main_technique", e.target.value)}>
-                    {FISHING_DISCIPLINES.map((item) => <option key={item.code} value={item.code}>{item.title}</option>)}
+                    {preferences.fishing_methods.map(method => <option key={method} value={method}>{FISHING_DISCIPLINES.find(x => x.code === method)?.title ?? method}</option>)}
                   </select>
                 </Label>
                 <Label name="С берега или с лодки">
@@ -345,9 +407,51 @@ function Profile() {
               </Label>
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
                 <div className="flex items-center gap-2 text-xs text-zinc-500"><ShieldCheck className="size-4 text-[#D7FF35]" /> Снасти и предпочтения доступны только тебе и твоему персональному советнику.</div>
-                <button className="btn-primary" type="submit" disabled={saving}><Save className="size-4" /> {saving ? "Сохраняем…" : "Сохранить профиль"}</button>
+                <div className="flex flex-wrap gap-2">
+                  <button className="btn-ghost inline-flex" type="button" onClick={cancelEditing} disabled={saving}><X className="size-4" /> Отмена</button>
+                  <button className="btn-primary" type="submit" disabled={saving}><Save className="size-4" /> {saving ? "Сохраняем…" : "Сохранить профиль"}</button>
+                </div>
               </div>
             </form>
+            ) : (
+              <dl className="space-y-5">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <ProfileDetail label="Никнейм" value={username ? "@" + username : ""} />
+                  <ProfileDetail label="Отображаемое имя" value={displayName} />
+                  <ProfileDetail label="Город рыбалки" value={preferences.home_city} />
+                  <ProfileDetail label="Регион" value={preferences.home_region} />
+                  <ProfileDetail label="С берега или с лодки" value={preferences.fishing_access} />
+                  <ProfileDetail label="Транспорт" value={preferences.transport} />
+                  <ProfileDetail label="Радиус поиска" value={preferences.search_radius_km + " км"} />
+                  <ProfileDetail label="Город в общем чате" value={shareChatCity ? preferences.home_city + " (показывается)" : "Скрыт"} />
+                </div>
+                <div>
+                  <dt className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">Мои способы ловли</dt>
+                  <dd className="flex flex-wrap gap-2">
+                    {preferences.fishing_methods.map(method => <span key={method} className="rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]">
+                      {FISHING_DISCIPLINES.find(x => x.code === method)?.icon ?? "🎣"} {method}{method === preferences.main_technique ? " · основной" : ""}
+                    </span>)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">Интересующая рыба</dt>
+                  <dd className="flex flex-wrap gap-2">{preferences.target_species.length ? preferences.target_species.map(species =>
+                    <span key={species} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-zinc-200">{species}</span>)
+                    : <span className="text-sm text-zinc-500">Пока не выбраны виды рыб</span>}
+                  </dd>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <ProfileDetail label="Заметки о снастях" value={preferences.tackle_text} />
+                  <ProfileDetail label="Любимые приманки" value={preferences.favorite_lures} />
+                  <ProfileDetail label="Любимые водоёмы" value={preferences.preferred_water} />
+                  <ProfileDetail label="Пожелания для ИИ" value={preferences.fishing_notes} />
+                  <ProfileDetail label="О себе" value={bio} />
+                </div>
+                <p className="flex items-center gap-2 border-t border-white/10 pt-4 text-xs text-zinc-500">
+                  <ShieldCheck className="size-4 text-[#D7FF35]" /> Личные снасти, предпочтения и рыболовные метки не публикуются в общем доступе.
+                </p>
+              </dl>
+            )}
           </section>
 
           <section aria-labelledby="angler-map-title" className="mb-7 overflow-hidden rounded-3xl border border-[#D7FF35]/20 bg-[#151915] p-5 sm:p-7">
