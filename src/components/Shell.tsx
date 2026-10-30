@@ -32,6 +32,7 @@ const otherNav = [
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
   { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
+  { to: "/reputation", label: "Репутация и отзывы", Icon: Trophy },
   { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
 ] as const;
