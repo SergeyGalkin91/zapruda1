@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Star, ShieldCheck, MessageSquareText } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { GuideReviews } from "@/components/GuideReviews";
+import { ReportReview } from "@/components/ReportReview";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reviews")({
@@ -101,6 +102,7 @@ function Reviews() {
           <span className="ml-auto text-sm text-[#D7FF35]">{"★".repeat(x.rating)}{"☆".repeat(5-x.rating)}</span>
         </div>
         <p className="mt-3 whitespace-pre-wrap break-words text-sm text-zinc-200">{x.body}</p>
+        <ReportReview reviewId={x.id} source="partner"/>
         <p className="mt-3 flex items-center gap-2 text-xs text-zinc-500"><MessageSquareText className="size-4"/> {new Date(x.created_at).toLocaleDateString("ru-RU")} · Совместный выезд</p>
       </article>)}</div>}
     <GuideReviews/>
