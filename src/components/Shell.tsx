@@ -133,6 +133,7 @@ export function Shell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex shrink-0 items-center gap-2">
+            {isAdmin && pendingClubs > 0 && <Link to="/moderation" className="inline-flex items-center gap-1 rounded-lg border border-[#D7FF35]/50 px-2 py-2 text-xs font-bold text-[#D7FF35]" aria-label={"Новые заявки на клубы: "+pendingClubs}>Клубы · {pendingClubs}</Link>}
             <a href={isSignedIn ? "/achievements" : "/auth"} aria-label="Достижения рыболова" className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-xs font-bold text-[#D7FF35] transition hover:bg-[#D7FF35]/20 sm:px-3 sm:text-sm">
               <Trophy className="size-4" aria-hidden="true" />
               <span className="hidden sm:inline">Достижения</span>
