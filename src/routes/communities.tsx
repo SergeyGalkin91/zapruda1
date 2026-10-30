@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { MessageCircle, Send, ShieldCheck } from "lucide-react";
-import { Shell, NotConnected } from "@/components/Shell";
+import { Shell } from "@/components/Shell";
 import { SocialGroups } from "@/components/SocialGroups";
-import { countries, topics } from "@/lib/geo";
+import { countries } from "@/lib/geo";
 
 export const Route = createFileRoute("/communities")({
   head: () => ({
@@ -19,9 +19,7 @@ export const Route = createFileRoute("/communities")({
 
 function Communities() {
   const [country, setCountry] = useState<string | null>(null);
-  const [q, setQ] = useState("");
   const cis = countries.filter((c) => c.group === "cis");
-  const special = countries.filter((c) => c.group === "special");
   const Chip = ({ c }: { c: (typeof countries)[number] }) => (
     <button
       onClick={() => setCountry(c.code)}
@@ -68,21 +66,15 @@ function Communities() {
 
       <h2 className="mt-8 mb-3 text-sm uppercase tracking-widest text-muted-foreground">Страны СНГ</h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{cis.map((c) => <Chip key={c.code} c={c} />)}</div>
-      <h2 className="mt-6 mb-3 text-sm uppercase tracking-widest text-muted-foreground">Отдельный раздел</h2>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{special.map((c) => <Chip key={c.code} c={c} />)}</div>
-
-      {sel && (
-        <section className="mt-6 space-y-3">
-          <input className="field" value={q} onChange={(e) => setQ(e.target.value)}
-            placeholder={`Регион или город — ${sel.name}`} />
-          <NotConnected what="Регионы, города и городские чаты" />
-        </section>
-      )}
-
-      <h2 className="mt-8 mb-3 text-sm uppercase tracking-widest text-muted-foreground">По интересам</h2>
-      <div className="flex flex-wrap gap-2">
-        {topics.map((t) => <span key={t} className="btn-ghost">{t}</span>)}
-      </div>
+      {sel && <section className="mt-5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/5 p-4 text-sm">
+        <p className="font-semibold text-[#D7FF35]">{sel.flag} {sel.name}</p>
+        <p className="mt-1 text-zinc-300">Узнай о водоёмах этой страны и коллекциях рыб в Атласе рыболова.</p>
+        <Link to="/atlas" search={{ country: sel.code }} className="mt-3 inline-flex font-bold text-[#D7FF35] underline">Открыть Атлас →</Link>
+      </section>}
+      <Link to="/atlas" search={{ country: "" }} className="mt-6 flex items-center justify-between rounded-2xl border border-[#D7FF35]/30 bg-[#D7FF35]/5 p-5 transition hover:border-[#D7FF35]">
+        <span><strong className="block text-lg text-[#D7FF35]">Атлас рыболова</strong><span className="mt-1 block text-sm text-zinc-300">Водоёмы России и СНГ, карточки рыб и коллекции трофеев</span></span>
+        <span className="text-[#D7FF35]">Открыть →</span>
+      </Link>
     </Shell>
   );
 }
