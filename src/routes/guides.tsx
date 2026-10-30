@@ -96,6 +96,7 @@ function Label({ title, children }: { title: string; children: ReactNode }) {
 const formatMoney = (v: number) => v.toLocaleString("ru-RU") + " ₽";
 
 function GuideCabinet() {
+  const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [guide, setGuide] = useState<Omit<Guide, "user_id">>(EMPTY_GUIDE);
   const [hasGuide, setHasGuide] = useState(false);
@@ -217,6 +218,7 @@ function GuideCabinet() {
     setEditingGuide(false);
     setTripMode(guide.service_mode === "boat" ? "boat" : "shore");
     setNotice("Анкета гида сохранена. Это самозаявленные сведения, а не подтверждение квалификации.");
+    await navigate({ to: "/profile" });
   }
 
   async function publish(e: FormEvent<HTMLFormElement>) {
