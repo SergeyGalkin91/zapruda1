@@ -112,11 +112,11 @@ export function Shell({ children }: { children: ReactNode }) {
       <a href="#zapruda-main-content" className="zapruda-skip-link">Перейти к содержимому</a>
       <ActivityTracker />
       <header className="sticky top-0 z-50 border-b border-[#D7FF35]/15 bg-[#090C09]/98">
-        <div className="mx-auto flex h-[64px] max-w-3xl items-center justify-between gap-2 px-4 sm:px-6">
+        <div className="mx-auto flex h-[64px] max-w-3xl items-center justify-between gap-2 px-4 sm:px-4 xl:px-0">
           <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0">
             <Wordmark />
           </Link>
-          <nav aria-label="Основная навигация" className="hidden min-w-0 flex-1 items-center justify-center gap-0 rounded-lg border border-[#D7FF35]/40 bg-[#10150D] px-0.5 py-1 shadow-[0_0_16px_rgba(215,255,53,0.11)] lg:flex">
+          <nav aria-label="Основная навигация" className="hidden min-w-0 flex-1 items-center justify-center gap-0 rounded-lg border border-[#D7FF35]/40 bg-[#10150D] px-0.5 py-1 shadow-[0_0_16px_rgba(215,255,53,0.11)] xl:flex">
             {desktopNav.map(({ to, label, Icon }) => (
               <Link
                 key={to}
