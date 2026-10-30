@@ -290,10 +290,14 @@ function Feed() {
 
   return (
     <Shell>
-      <header className="mx-auto mb-6 flex max-w-3xl flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
-        <div><p className="text-[11px] font-black uppercase tracking-[.25em] text-[#D7FF35]">ZAPRUDA / COMMUNITY</p><h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white">Лента</h1><p className="mt-2 text-sm text-zinc-400">Реальные отчёты. Уловы. Обсуждения.</p></div>
-        <Link to="/reports/new" className="btn-primary inline-flex">+ Новый отчёт</Link>
+      <header className="mx-auto mb-4 max-w-3xl border-b border-white/10 pb-5">
+        <p className="text-[11px] font-black uppercase tracking-[.25em] text-[#D7FF35]">ZAPRUDA / COMMUNITY</p>
+        <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white">Лента</h1>
+        <p className="mt-2 text-sm text-zinc-400">Реальные отчёты. Уловы. Обсуждения.</p>
       </header>
+      <div className="mx-auto mb-5 max-w-3xl">
+        <Link to="/reports/new" className="flex min-h-12 w-full items-center justify-center rounded-lg bg-[#D7FF35] px-5 py-3 text-sm font-black uppercase tracking-wider text-[#10140B] shadow-[0_0_14px_rgba(215,255,53,0.14)] transition hover:bg-[#E7FF7A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">+ Новый отчёт</Link>
+      </div>
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">{error}</div>}
       {!loading && !error && reports.length === 0 && (
