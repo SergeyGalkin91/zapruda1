@@ -1,5 +1,6 @@
 import { useCallback,useEffect,useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { FishingSpotsMap } from "@/components/FishingSpotsMap";
 type Mark={id:string;user_id:string;latitude:number;longitude:number;kind:string;note:string;visibility:string;fish_species:string;photo_path:string|null};
 const kinds:Record<string,string>={catch:"Место улова",snag:"Коряга",dropoff:"Свал / бровка",hole:"Яма",vegetation:"Растительность",rock:"Камни",other:"Другое"};
 export function FishingMapMarks(){
@@ -29,6 +30,7 @@ export function FishingMapMarks(){
  }
  async function remove(id:string){if(!window.confirm("Удалить отметку?"))return;const {error}=await (supabase as any).from("fishing_map_marks").delete().eq("id",id).eq("user_id",me);if(error)setMessage(error.message);else await load()}
  return <section className="panel mt-6 p-5"><h2 className="text-xl font-bold">Отметки на водоёме</h2><p className="mt-2 text-sm text-zinc-400">Добавляй места улова, коряги, ямы и другие особенности водоёма. Укажи рыбу, оставь комментарий и прикрепи фото. Точки по умолчанию приватные.</p>
+ <div className="mt-4"><FishingSpotsMap points={marks} onPick={(a,b)=>{setLat(String(a));setLon(String(b));setMessage("Координаты выбраны на карте")}}/></div>
  <div className="mt-4 grid gap-3 sm:grid-cols-2">
  <label className="text-sm">Широта<input className="field mt-1 w-full" inputMode="decimal" value={lat} onChange={e=>setLat(e.target.value)}/></label>
  <label className="text-sm">Долгота<input className="field mt-1 w-full" inputMode="decimal" value={lon} onChange={e=>setLon(e.target.value)}/></label>
