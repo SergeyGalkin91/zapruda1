@@ -77,7 +77,8 @@ function Messages() {
       }).subscribe();
     const update = () => { void refresh(); if (activeId) void fetchMessages(activeId); };
     window.addEventListener("focus", update);
-    return () => { window.removeEventListener("focus", update); void supabase.removeChannel(channel); };
+    const poll = window.setInterval(() => { if (!document.hidden) update(); }, 12000);
+    return () => { window.clearInterval(poll); window.removeEventListener("focus", update); void supabase.removeChannel(channel); };
   }, [refresh, fetchMessages, activeId]);
 
   useEffect(() => {
