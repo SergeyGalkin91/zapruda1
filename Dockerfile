@@ -14,6 +14,8 @@ ENV NITRO_PRESET=node-server
 RUN test -n "$VITE_SUPABASE_URL" && test -n "$VITE_SUPABASE_PUBLISHABLE_KEY" && bun run build && test -f .output/server/index.mjs
 
 FROM node:22-alpine AS runtime
+ARG GIT_SHA=unknown
+LABEL org.opencontainers.image.revision=${GIT_SHA}
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
