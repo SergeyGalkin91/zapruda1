@@ -3,7 +3,7 @@ import { Check, MessageCircle, Plus, Send, UserPlus, Users, X } from "lucide-rea
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
-type Group = { id:string;name:string;description:string;city:string;owner_id:string };
+type Group = { id:string;name:string;description:string;city:string;country:string;interests:string;owner_id:string };
 type Member = { group_id:string;user_id:string;role:string;status:"pending"|"accepted"|"declined";invited_by:string|null };
 type Person = { id:string;username:string|null;display_name:string|null };
 type Request = {id:string;name:string;city:string;status:"awaiting_payment"|"paid"|"cancelled";fee_rub:number;created_at:string };
@@ -20,6 +20,12 @@ export function SocialGroups(){
   const [newName,setNewName]=useState("");
   const [city,setCity]=useState("");
   const [description,setDescription]=useState("");
+  const [editingGroup,setEditingGroup]=useState("");
+  const [editName,setEditName]=useState("");
+  const [editCountry,setEditCountry]=useState("Россия");
+  const [editCity,setEditCity]=useState("");
+  const [editDescription,setEditDescription]=useState("");
+  const [editInterests,setEditInterests]=useState("");
   const [groupId,setGroupId]=useState("");
   const [inviteId,setInviteId]=useState("");
   const [activeGroup,setActiveGroup]=useState("");
@@ -34,7 +40,7 @@ export function SocialGroups(){
     if(!auth.user){setUid("");return;}
     const id=auth.user.id;setUid(id);
     const [g,m,p,q]=await Promise.all([
-      db.from("social_groups").select("id,name,description,city,owner_id").order("created_at",{ascending:false}).limit(200),
+      db.from("social_groups").select("id,name,description,city,country,interests,owner_id").order("created_at",{ascending:false}).limit(200),
       db.from("social_group_members").select("group_id,user_id,role,status,invited_by"),
       supabase.from("profiles").select("id,username,display_name").neq("id",id).limit(250),
       db.from("club_creation_requests").select("id,name,city,status,fee_rub,created_at").eq("applicant_id",id).order("created_at",{ascending:false}).limit(30),
@@ -132,6 +138,14 @@ export function SocialGroups(){
     setDraft("");await loadMessages(activeGroup);
   }
 
+  function beginEdit(g:Group){setEditingGroup(g.id);setEditName(g.name);setEditCountry(g.country||"Россия");setEditCity(g.city);setEditDescription(g.description);setEditInterests(g.interests||"");}
+  async function saveGroup(){
+    if(!uid||busy||!editName.trim()||!editCountry.trim()||!editCity.trim())return;
+    setBusy(true);setError("");
+    const {error:e}=await db.from("social_groups").update({name:editName.trim(),country:editCountry.trim(),city:editCity.trim(),description:editDescription.trim(),interests:editInterests.trim()}).eq("id",editingGroup).eq("owner_id",uid);
+    setBusy(false);
+    if(e)setError("Клуб не сохранён: "+e.message);else{setEditingGroup("");setNotice("Информация клуба обновлена.");await refresh();}
+  }
   const own=groups.filter(g=>g.owner_id===uid);
   const joined=groups.filter(g=>members.some(m=>m.group_id===g.id&&m.user_id===uid&&m.status==="accepted"));
   const pending=members.filter(m=>m.user_id===uid&&m.status==="pending");
@@ -152,6 +166,18 @@ export function SocialGroups(){
             <strong className="block text-white">{g.name}</strong><span className="mt-1 block text-xs text-zinc-400">{g.city||"Любой город"} · {g.description||"Общение и выезды"}</span>
             <span className="mt-2 flex items-center gap-2 text-xs text-[#D7FF35]"><MessageCircle className="size-3.5"/> Открыть чат {g.owner_id===uid?"· мой клуб":""}</span>
           </button>)}
+          {own.map(g=><div key={"edit-"+g.id} className="mb-3 rounded-xl border border-white/10 p-3">
+            <div className="flex items-center justify-between gap-2"><span className="text-sm font-bold">{g.name}</span><button type="button" className="btn-ghost text-xs" onClick={()=>beginEdit(g)}>Редактировать клуб</button></div>
+            <p className="mt-1 text-xs text-zinc-400">{members.filter(m=>m.group_id===g.id&&m.status==="accepted").length} / 20 участников</p>
+            {editingGroup===g.id&&<div className="mt-3 grid gap-2">
+              <input className="field" maxLength={100} aria-label="Название клуба" value={editName} onChange={e=>setEditName(e.target.value)} placeholder="Название клуба"/>
+              <input className="field" maxLength={100} aria-label="Страна" value={editCountry} onChange={e=>setEditCountry(e.target.value)} placeholder="Страна"/>
+              <input className="field" maxLength={100} aria-label="Город" value={editCity} onChange={e=>setEditCity(e.target.value)} placeholder="Город"/>
+              <input className="field" maxLength={250} aria-label="Интересы клуба" value={editInterests} onChange={e=>setEditInterests(e.target.value)} placeholder="Спиннинг, судак, стритфишинг"/>
+              <textarea className="field min-h-24" maxLength={1000} aria-label="Описание клуба" value={editDescription} onChange={e=>setEditDescription(e.target.value)} placeholder="Описание клуба"/>
+              <div className="flex gap-2"><button className="btn-primary" type="button" disabled={busy} onClick={()=>void saveGroup()}>Сохранить</button><button className="btn-ghost" type="button" onClick={()=>setEditingGroup("")}>Отмена</button></div>
+            </div>}
+          </div>)}
           {!joined.length&&<p className="text-sm text-zinc-500">Пока клубов нет. Можно получить приглашение от друга или подать заявку на собственный.</p>}
         </div>
         <div>
