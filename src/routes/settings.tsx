@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Check, MessageCircle, Monitor, RotateCcw, Settings2, ShieldCheck } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { supabase } from "@/integrations/supabase/client";
 import {
   APP_BACKGROUNDS, CHAT_BACKGROUNDS, DEFAULT_APPEARANCE,
   loadAppearance, applyAppearance, saveAppearance, type Appearance,
@@ -18,11 +19,20 @@ export const Route = createFileRoute("/settings")({
 function SettingsPage() {
   const [appearance, setAppearance] = useState<Appearance>(DEFAULT_APPEARANCE);
   const [notice, setNotice] = useState("");
+  const [developer, setDeveloper] = useState(false);
+  const [yandexKey, setYandexKey] = useState("");
 
   useEffect(() => {
     const saved = loadAppearance();
     setAppearance(saved);
     applyAppearance(saved);
+    try { setYandexKey(localStorage.getItem("zapruda.yandex_maps_api_key") || ""); } catch {}
+    void supabase.auth.getUser().then(async ({data})=>{
+      if(!data.user)return;
+      const {data:role}=await supabase.from("zapruda_admins")
+        .select("user_id").eq("user_id",data.user.id).maybeSingle();
+      setDeveloper(Boolean(role));
+    });
   }, []);
 
   function change(next: Appearance) {
@@ -97,6 +107,33 @@ function SettingsPage() {
           <Link to="/messages" search={{ mark: "" }} className="font-semibold text-[#D7FF35] hover:underline">Открыть личные сообщения →</Link>
         </div>
       </section>
+
+      {developer && <section className="rounded-3xl border border-white/10 bg-[#141914] p-5 sm:p-7">
+        <h2 className="text-lg font-black text-white">Яндекс Карты · API для тестирования</h2>
+        <p className="mt-2 text-xs leading-5 text-zinc-400">
+          Сейчас в ZAPRUDA работает виджет Яндекс Карт. Чтобы выбирать личные точки кликом, нужен публичный ключ JavaScript API Яндекс Карт.
+          Здесь можно подключить ключ для тестирования только в этом браузере. Для всех пользователей позже потребуется настроить его в общем окружении приложения.
+        </p>
+        <label className="mt-4 block text-xs font-semibold text-zinc-300">Публичный ключ Яндекс Карт JavaScript API
+          <input className="field mt-1 w-full" type="text" autoComplete="off" maxLength={256}
+            placeholder="Введите ключ из кабинета разработчика Яндекса"
+            value={yandexKey} onChange={e=>setYandexKey(e.target.value)} />
+        </label>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button className="btn-primary" type="button" onClick={()=>{
+            try{
+              if(yandexKey.trim())localStorage.setItem("zapruda.yandex_maps_api_key",yandexKey.trim());
+              else localStorage.removeItem("zapruda.yandex_maps_api_key");
+              setNotice("Ключ Яндекс Карт настроен для этого браузера. Открой профиль и обнови страницу.");
+            }catch{setNotice("Браузер не разрешил сохранить ключ.");}
+          }}>Сохранить ключ карт</button>
+          <a className="btn-ghost inline-flex" target="_blank" rel="noopener noreferrer"
+            href="https://developer.tech.yandex.ru/services/">Получить ключ Яндекс Карт →</a>
+        </div>
+        <p className="mt-2 text-[11px] text-zinc-500">
+          Используется только публичный API-ключ карты, не секретный ключ платежей. Не вводи сюда ЮKassa Secret Key.
+        </p>
+      </section>}
 
       {notice && <p role="status" className="rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/5 p-4 text-sm text-[#D7FF35]">{notice}</p>}
       <footer className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/10 p-4">
