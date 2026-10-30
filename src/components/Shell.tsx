@@ -87,7 +87,8 @@ export function Shell({ children }: { children: ReactNode }) {
   }, [isSignedIn]);
 
   return (
-    <div className="min-h-screen pb-24 xl:pb-0">\n      <a href="#zapruda-main-content" className="zapruda-skip-link">Перейти к содержимому</a>
+    <div className="min-h-screen pb-24 xl:pb-0">
+      <a href="#zapruda-main-content" className="zapruda-skip-link">Перейти к содержимому</a>
       <ActivityTracker />
       <header className="sticky top-0 z-50 border-b border-white/[0.09] bg-[#0D100C]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
