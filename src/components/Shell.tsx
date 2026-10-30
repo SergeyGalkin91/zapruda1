@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, Waves, Handshake,
-  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Lightbulb,
+  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Lightbulb, LogOut,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,8 @@ export function Shell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   // Supabase emits INITIAL_SESSION on mount, and SIGNED_IN / SIGNED_OUT after auth changes.
   // Keep navigation reactive without requiring a page reload or exposing an SSR auth flash.
@@ -50,6 +52,24 @@ export function Shell({ children }: { children: ReactNode }) {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  async function handleLogout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    setAuthError("");
+    try {
+      // Local sign-out clears this device's session without signing out other devices.
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) throw error;
+      setIsSignedIn(false);
+      setMenuOpen(false);
+      // A full navigation also resets pages holding private user-specific data.
+      window.location.assign("/");
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Не удалось выйти из аккаунта.");
+      setLoggingOut(false);
+    }
+  }
 
   return (
     <div className="min-h-screen pb-24 xl:pb-0">
@@ -75,12 +95,24 @@ export function Shell({ children }: { children: ReactNode }) {
           </nav>
           <div className="flex shrink-0 items-center gap-2">
             {authReady && (isSignedIn ? (
-              <Link to="/profile" className="inline-flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15">
-                <UserRound className="size-4" aria-hidden="true" />
-                Профиль
-              </Link>
+              <>
+                <a href="/profile" className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3">
+                  <UserRound className="size-4" aria-hidden="true" />
+                  Профиль
+                </a>
+                <button
+                  type="button"
+                  onClick={() => void handleLogout()}
+                  disabled={loggingOut}
+                  aria-label="Выйти из аккаунта"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-2.5 py-2 text-sm font-semibold text-zinc-300 transition hover:border-white/30 hover:text-white disabled:opacity-50 sm:px-3"
+                >
+                  <LogOut className="size-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">{loggingOut ? "Выход…" : "Выйти"}</span>
+                </button>
+              </>
             ) : (
-              <Link to="/auth" className="hidden rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white sm:inline-flex">
+              <Link to="/auth" className="inline-flex rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white">
                 Войти
               </Link>
             ))}
@@ -100,6 +132,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </button>
           </div>
         </div>
+        {authError && <div role="alert" className="mx-auto max-w-7xl px-4 py-2 text-sm text-red-300">{authError}</div>}
         {menuOpen && (
           <nav
             id="zapruda-extra-nav"
@@ -114,11 +147,22 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             ))}
             {authReady && (isSignedIn ? (
-              <Link to="/profile" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07] sm:hidden">
-                <UserRound className="size-4 text-[#D7FF35]" aria-hidden="true" />Мой профиль
-              </Link>
+              <>
+                <a href="/profile" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
+                  <UserRound className="size-4 text-[#D7FF35]" aria-hidden="true" />Мой профиль
+                </a>
+                <button
+                  type="button"
+                  disabled={loggingOut}
+                  onClick={() => void handleLogout()}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold text-zinc-200 hover:bg-white/[0.07] disabled:opacity-50"
+                >
+                  <LogOut className="size-4 text-[#D7FF35]" aria-hidden="true" />
+                  {loggingOut ? "Выход…" : "Выйти из аккаунта"}
+                </button>
+              </>
             ) : (
-              <Link to="/auth" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07] sm:hidden">
+              <Link to="/auth" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
                 <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
               </Link>
             ))}
