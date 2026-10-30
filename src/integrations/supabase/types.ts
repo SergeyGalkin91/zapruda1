@@ -1013,6 +1013,22 @@ export type Database = {
           heaviest_catch_kg: number | null
         }[]
       }
+      my_fishing_specializations_v2: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          fishing_method: string
+          report_count: number
+          credited_reports: number
+          catches_count: number
+          credited_catches: number
+          photo_reports: number
+          credited_photo_reports: number
+          distinct_waters: number
+          active_days: number
+          distinct_species: number
+          heaviest_catch_kg: number | null
+        }[]
+      }
       my_fishing_progress: {
         Args: Record<PropertyKey, never>
         Returns: {
