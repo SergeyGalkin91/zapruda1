@@ -40,6 +40,8 @@ function Page(){
    <p className="mt-2 text-sm text-zinc-400">Репутация рыболова по отзывам после совместных выездов</p>
    <div className="mt-5 flex items-center gap-3"><Star className="size-7 text-[#D7FF35]"/><span className="text-3xl font-black">{mean}</span><span className="text-sm text-zinc-400">{reviews.length} отзывов</span></div>
    <p className="mt-3 text-xs text-zinc-500">Рейтинг ориентировочный. Отзывы подтверждены фактом принятой заявки, но не независимой проверкой присутствия.</p>
+   <div className="mt-6 grid gap-2 sm:grid-cols-3">{[{n:1,title:"Первое доверие"},{n:5,title:"Надёжный напарник"},{n:20,title:"Легенда компании"}].map(b=><div key={b.n} className={"rounded-xl border p-3 text-sm "+(reviews.length>=b.n?"border-[#D7FF35]/40 bg-[#D7FF35]/10 text-[#D7FF35]":"border-white/10 text-zinc-500")}><p className="font-bold">{reviews.length>=b.n?"🏅 ":"🔒 "}{b.title}</p><p className="mt-1 text-xs">{reviews.length} / {b.n} отзывов</p></div>)}</div>
+   <p className="mt-3 text-xs text-zinc-500">Эти медали предварительные. Они не дают XP до внедрения проверки состоявшихся выездов и защиты от взаимной накрутки.</p>
   </section>
   {error&&<p role="alert" className="mt-4 text-red-300">{error}</p>}
   <div className="mt-6 space-y-3">{reviews.map(r=><article key={r.id} className="rounded-xl border border-white/10 bg-[#151915] p-5">
