@@ -9,17 +9,17 @@ type MapLibre = {
  Popup:new(options?:Record<string,unknown>)=>{setText:(text:string)=>unknown};
  NavigationControl:new()=>unknown;
 };
-declare global { interface Window { maplibregl?: MapLibre } }
+const getMapLibre = () => (window as unknown as {maplibregl?: MapLibre}).maplibregl;
 let loadPromise:Promise<MapLibre>|null=null;
 function loadMapLibre():Promise<MapLibre>{
- if(window.maplibregl)return Promise.resolve(window.maplibregl);
+ if(getMapLibre())return Promise.resolve(getMapLibre());
  if(loadPromise)return loadPromise;
  loadPromise=new Promise((resolve,reject)=>{
   if(!document.querySelector('link[data-zapruda-maplibre]')){
    const css=document.createElement("link");css.rel="stylesheet";css.dataset.zaprudaMaplibre="true";css.href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css";document.head.appendChild(css);
   }
   const script=document.createElement("script");script.src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js";script.async=true;
-  script.onload=()=>window.maplibregl?resolve(window.maplibregl):reject(new Error("MapLibre не загрузился"));
+  script.onload=()=>getMapLibre()?resolve(getMapLibre()):reject(new Error("MapLibre не загрузился"));
   script.onerror=()=>reject(new Error("Не удалось загрузить библиотеку карты"));
   document.head.appendChild(script);
  }).catch(e=>{loadPromise=null;throw e});
@@ -48,9 +48,9 @@ export function FishingSpotsMap({points,onPick}:{points:FishingSpot[];onPick:(la
   return()=>{active=false;markers.current.forEach(m=>m.remove());markers.current=[];map.current?.remove();map.current=null};
  },[]);
  useEffect(()=>{
-  if(!ready||!map.current||!window.maplibregl)return;
+  if(!ready||!map.current||!getMapLibre())return;
   markers.current.forEach(m=>m.remove());markers.current=[];
-  const lib=window.maplibregl;
+  const lib=getMapLibre();
   points.forEach(p=>{
    const el=document.createElement("button");
    el.type="button";el.textContent=kindLabels[p.kind]||"Место";
