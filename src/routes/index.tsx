@@ -315,24 +315,24 @@ function Feed() {
             </div>
           </div>
         </section>
-        <section className="rounded-[24px] border border-white/10 bg-[#141A16] p-4 sm:p-6">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-            <div><p className="text-[10px] font-black uppercase tracking-[.25em] text-[#FF6A00]">FISHING ID / ТВОЙ КОД</p><h2 className="mt-1 text-xl font-black uppercase tracking-tight text-white sm:text-2xl">Выбери свой стиль</h2><p className="mt-1 text-xs text-[#A8B5A6]">15 направлений с собственной символикой. Выбирай стиль — получай тематические достижения, рекомендации и единомышленников.</p></div>
-            <Link to="/profile" className="inline-flex items-center gap-1 text-xs font-bold text-[#D7FF35] hover:underline">Мои предпочтения <ArrowUpRight className="size-3.5"/></Link>
-          </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-            {FISHING_DISCIPLINES.map((discipline,index)=><button type="button" key={discipline.code} aria-pressed={activeDiscipline===discipline.code} onClick={()=>setActiveDiscipline(discipline.code)} className={`group relative min-h-[156px] overflow-hidden rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 ${activeDiscipline===discipline.code?"border-[#FF6A00] bg-[#1D231D] shadow-[inset_0_0_0_1px_rgba(255,106,0,.45),0_0_20px_rgba(255,106,0,.12)]":"border-white/10 bg-[#0B0F0E] hover:border-[#D7FF35]/45"}`}>
-              <span aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-75" style={{background:`radial-gradient(ellipse at 87% 18%, ${disciplineAccent[index]}25, transparent 60%), repeating-radial-gradient(circle at 115% -20%, transparent 0px, transparent 23px, ${disciplineAccent[index]}12 24px, transparent 25px)`}}/>
-              <span aria-hidden="true" className="absolute right-2 top-3 flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-black/20 text-white/80 transition-all duration-300 group-hover:rotate-[-8deg] group-hover:scale-110" style={{color:disciplineAccent[index],borderColor:`${disciplineAccent[index]}44`}}>{(() => { const Visual = disciplineVisuals[index]; return <Visual className="size-9" strokeWidth={1.3}/>; })()}</span>
-              <span className={`relative block text-[10px] font-bold tracking-widest ${activeDiscipline===discipline.code?"text-[#FF6A00]":"text-[#7E9180]"}`}>ID / {String(index+1).padStart(2,"0")}</span>
-              <span className="relative mt-16 block text-sm font-black text-white">{discipline.title}</span>
-              <span className="relative mt-1 block text-[10px] leading-4 text-[#A2AFA3]">{discipline.detail}</span>
-            </button>)}
-          </div>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/[.055] px-4 py-3">
-            <p className="flex items-center gap-2 text-xs text-white"><Target className="size-4 shrink-0 text-[#D7FF35]"/><span><strong>{activeDiscipline}</strong> — выбрано для просмотра. Сохрани направление в профиле.</span></p>
-            <Link to="/profile" className="inline-flex items-center gap-1.5 text-xs font-black text-[#D7FF35] hover:underline">Настроить профиль <ArrowUpRight className="size-3.5"/></Link>
-          </div>
+        <section className="grid gap-3 sm:grid-cols-3">
+          <Link to="/communities" className="group relative overflow-hidden rounded-[22px] border border-[#D7FF35]/25 bg-[#182013] p-5 transition hover:border-[#D7FF35]/60">
+            <div className="absolute -right-5 -top-5 size-32 rounded-full border border-[#D7FF35]/15"/>
+            <Compass className="size-7 text-[#D7FF35]"/><p className="mt-5 text-[10px] font-black uppercase tracking-[.2em] text-[#D7FF35]">01 / COMMUNITY</p>
+            <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-white">Найди своих</h2><p className="mt-2 text-xs leading-5 text-zinc-400">Рыболовные клубы, местные команды и новые знакомства.</p>
+            <ArrowUpRight className="absolute bottom-5 right-5 size-5 text-[#D7FF35] transition group-hover:translate-x-1 group-hover:-translate-y-1"/>
+          </Link>
+          <Link to="/fishing-map" className="group relative overflow-hidden rounded-[22px] border border-white/15 bg-[#131916] p-5 transition hover:border-[#FF6A00]/60">
+            <div className="absolute inset-0 opacity-30" style={{background:"repeating-radial-gradient(circle at 90% 10%,transparent 0px,transparent 24px,rgba(255,106,0,.23) 25px,transparent 26px)"}}/>
+            <Target className="relative size-7 text-[#FF6A00]"/><p className="relative mt-5 text-[10px] font-black uppercase tracking-[.2em] text-[#FF6A00]">02 / EXPLORE</p>
+            <h2 className="relative mt-1 text-2xl font-black uppercase tracking-tight text-white">Исследуй воду</h2><p className="relative mt-2 text-xs leading-5 text-zinc-400">Карта, акватории и рыболовные маршруты.</p>
+            <ArrowUpRight className="absolute bottom-5 right-5 size-5 text-[#FF6A00] transition group-hover:translate-x-1 group-hover:-translate-y-1"/>
+          </Link>
+          <Link to="/profile" className="group relative overflow-hidden rounded-[22px] border border-white/15 bg-[#171917] p-5 transition hover:border-[#D7FF35]/60">
+            <Fish className="size-7 text-[#D7FF35]"/><p className="mt-5 text-[10px] font-black uppercase tracking-[.2em] text-[#D7FF35]">03 / FISHING ID</p>
+            <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-white">Твой стиль</h2><p className="mt-2 text-xs leading-5 text-zinc-400">Способы ловли, любимые снасти и достижения — в профиле.</p>
+            <ArrowUpRight className="absolute bottom-5 right-5 size-5 text-[#D7FF35] transition group-hover:translate-x-1 group-hover:-translate-y-1"/>
+          </Link>
         </section>
         <div className="flex items-center justify-between gap-3 px-1"><div><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#FF6A00]">ZAPRUDA LIVE</p><h2 className="text-xl font-black uppercase text-white">Лента сообщества</h2></div><Link to="/communities" className="text-xs font-bold text-[#D7FF35] hover:underline">Найти своих →</Link></div>
       </div>
