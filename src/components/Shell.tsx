@@ -31,6 +31,7 @@ const otherNav = [
   { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
   { to: "/reviews", label: "Отзывы и репутация", Icon: ShieldCheck },
+  { to: "/depths", label: "Карта глубин и замеры", Icon: Compass },
   { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
   { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
