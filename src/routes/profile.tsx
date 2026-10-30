@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BrainCircuit, Check, Compass, Fish, MapPin, Save, Settings2, ShieldCheck,
-  Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText, Anchor, Snowflake, Feather, Tent, Ship, Sailboat, Target, CircleDot, Crosshair, Mountain, Droplets, ImagePlus,
+  Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText, Anchor, Snowflake, Feather, Tent, Ship, Sailboat, Target, CircleDot, Crosshair, Mountain, Droplets, ImagePlus, Flag,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
@@ -56,7 +56,7 @@ const EMPTY_FORM: AnglerForm = {
   search_radius_km: 30,
 };
 
-const DISCIPLINE_ICONS=[Fish,Target,CircleDot,Feather,Snowflake,Tent,Anchor,Waves,Ship,Sailboat,Crosshair,Droplets,Mountain,CircleDot,Fish] as const;\nfunction DisciplineIcon({method,className="size-7"}:{method:string;className?:string}){const i=Math.max(0,FISHING_DISCIPLINES.findIndex(d=>d.code===method));const Icon=DISCIPLINE_ICONS[i];return <Icon className={className} strokeWidth={1.55} aria-hidden="true"/>;}\nconst SPECIES = ["Щука", "Судак", "Окунь", "Жерех", "Голавль", "Форель", "Карп", "Сом", "Лещ", "Карась"] as const;
+const DISCIPLINE_ICONS=[Fish,Target,CircleDot,Feather,Snowflake,Tent,Anchor,Waves,Ship,Sailboat,Crosshair,Droplets,Mountain,Flag,Sparkles] as const;\nfunction DisciplineIcon({method,className="size-7"}:{method:string;className?:string}){const i=Math.max(0,FISHING_DISCIPLINES.findIndex(d=>d.code===method));const Icon=DISCIPLINE_ICONS[i];return <Icon className={className} strokeWidth={1.55} aria-hidden="true"/>;}\nconst SPECIES = ["Щука", "Судак", "Окунь", "Жерех", "Голавль", "Форель", "Карп", "Сом", "Лещ", "Карась"] as const;
 
 function Label({ name, children, hint }: { name: string; children: React.ReactNode; hint?: string }) {
   return (
