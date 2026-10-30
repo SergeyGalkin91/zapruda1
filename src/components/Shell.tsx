@@ -30,6 +30,7 @@ const mobileNav = [
 const otherNav = [
   { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
+  { to: "/reviews", label: "Отзывы и репутация", Icon: ShieldCheck },
   { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
   { to: "/reputation", label: "Репутация и отзывы", Icon: Trophy },
