@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import type { FormEvent } from "react";
-import { ExternalLink, MapPin, Plus, Trash2 } from "lucide-react";
+import { Activity, ExternalLink, MapPin, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { InteractiveFishingMap } from "@/components/InteractiveFishingMap";
 
@@ -160,6 +160,7 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
                 <span className="mt-1 block text-xs text-zinc-400">{mark.latitude.toFixed(6)}, {mark.longitude.toFixed(6)}</span>
                 {mark.note && <span className="mt-1 block whitespace-pre-wrap break-words text-xs text-zinc-400">{mark.note}</span>}
               </button>
+              <Link to="/analytics" search={{ mark: mark.id }} title={"Анализировать метку «" + mark.title + "» (VIP Beta)"} className="rounded-lg p-2 text-[#D7FF35] hover:bg-[#D7FF35]/10" aria-label={"Аналитика выбранной точки " + mark.title}><Activity className="size-4" /></Link>
               <Link to="/messages" search={{ mark: mark.id }} title={"Поделиться меткой " + mark.title + " в личной переписке"} className="rounded-lg p-2 text-[#D7FF35] hover:bg-[#D7FF35]/10" aria-label={"Поделиться точкой " + mark.title}><ExternalLink className="size-4" /></Link>
               <button type="button" onClick={() => void remove(mark)} aria-label={"Удалить метку " + mark.title} className="rounded-lg p-2 text-zinc-500 hover:bg-red-500/10 hover:text-red-300"><Trash2 className="size-4" /></button>
             </div>
@@ -176,7 +177,7 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
           )}
         </div>
       </div>
-      <p className="mt-3 text-xs text-zinc-400">Нажми значок рядом с сохранённой точкой, чтобы выбрать личный чат и отправить её. Координаты не публикуются без твоего подтверждения.</p>
+      <p className="mt-3 text-xs text-zinc-400">Рядом с меткой есть «Аналитика Beta» для VIP и отдельная кнопка отправки в личный чат. Координаты передаются ИИ только после твоего подтверждения и не публикуются автоматически.</p>
     </section>
   );
 }
