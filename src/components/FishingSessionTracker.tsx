@@ -62,7 +62,11 @@ function FishingRouteMap({ points }: { points: Point[] }) {
         { strokeColor: "#D7FF35", strokeWidth: 5, strokeOpacity: 0.9 });
       map.current.geoObjects.add(line);
     }
-    if (points.length) map.current.setCenter([points[points.length - 1].lat, points[points.length - 1].lon]);
+    if (points.length) {
+      const last = points[points.length - 1];
+      map.current.geoObjects.add(new api.current.Placemark([last.lat, last.lon], { balloonContent: "Текущая GPS-точка" }));
+      map.current.setCenter([last.lat, last.lon], 15);
+    }
   }, [points, ready]);
   return <div className="space-y-2">
     {key && canMap && <div ref={holder} className="h-64 w-full overflow-hidden rounded-xl border border-white/15 bg-[#0B170E] sm:h-80"
