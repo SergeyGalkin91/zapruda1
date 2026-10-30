@@ -59,7 +59,7 @@ export function VerifiedGuideDirectory(){
         <p className="mt-1 text-xs text-zinc-400">{g.home_city} · {g.specialties}</p>
         <p className="mt-1 text-xs text-[#D7FF35]">{g.service_mode==="shore"?"Береговой гид":g.service_mode==="boat"?"Лодочный гид":"Берег и лодка"}</p>
         {g.meeting_area&&<p className="mt-2 text-xs text-zinc-400">Место встречи: {g.meeting_area}</p>}
-        {(g.service_mode==="boat"||g.service_mode==="both")&&<p className="mt-3 flex items-center gap-2 text-xs text-zinc-300"><Ship className="size-4 text-[#D7FF35]"/> {g.boat_model||"Лодка не указана"}</p>
+        {(g.service_mode==="boat"||g.service_mode==="both")&&<p className="mt-3 flex items-center gap-2 text-xs text-zinc-300"><Ship className="size-4 text-[#D7FF35]"/> {g.boat_model||"Лодка не указана"}</p>}
         {(g.service_mode==="boat"||g.service_mode==="both")&&<p className="mt-2 flex items-center gap-2 text-xs text-zinc-300"><Waves className="size-4 text-[#D7FF35]"/> {g.live_sonar_system==="Нет"?"Без живого сканирования":g.live_sonar_system+" "+g.live_sonar_model}</p>}
         <p className="mt-3 line-clamp-3 text-xs leading-5 text-zinc-400">{g.service_program}</p>
         {g.meeting_lat!==null&&g.meeting_lon!==null&&<a href={"https://yandex.ru/maps/?pt="+encodeURIComponent(g.meeting_lon+","+g.meeting_lat)+"&z=13"}
