@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Images, X, ArrowUpRight, Compass, Fish, Sparkles, Target, Waves, Anchor, Sailboat, Snowflake, Feather, Crosshair, Tent, Ship, Mountain, CircleDot, Droplets, Route, FishSymbol } from "lucide-react";
-import { FISHING_DISCIPLINES } from "@/lib/disciplines";
+import { ChevronLeft, ChevronRight, Images, X, ArrowUpRight, Compass, Fish, Sparkles, Target, Waves } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { ReactionBar } from "@/components/ReactionBar";
 import { supabase } from "@/integrations/supabase/client";
@@ -193,12 +192,8 @@ function ReportComments({ reportId }: { reportId: string }) {
   );
 }
 
-const disciplineVisuals = [Fish, Target, CircleDot, Feather, Snowflake, Tent, Anchor, Droplets, Ship, Sailboat, Crosshair, Waves, Mountain, CircleDot, FishSymbol] as const;
-const disciplineAccent = ["#FF6A00","#D7FF35","#80E8C9","#E8B9FF","#8EDBFF","#FFB56A","#D7FF35","#78CDF8","#FF6A00","#75CBE5","#D7FF35","#E4CF83","#B5E7A3","#8EDBFF","#BAC6B0"] as const;
-
 function Feed() {
   const PAGE_SIZE = 15;
-  const [activeDiscipline,setActiveDiscipline] = useState("Спиннинг");
   const [reports, setReports] = useState<Report[]>([]);
   const [photosByReport, setPhotosByReport] = useState<Record<string, string[]>>({});
   const [commentCounts,setCommentCounts]=useState<Record<string,number>>({});
