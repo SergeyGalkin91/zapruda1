@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { MessageCircle, Send, ShieldCheck } from "lucide-react";
 import { Shell, NotConnected } from "@/components/Shell";
+import { SocialGroups } from "@/components/SocialGroups";
 import { countries, topics } from "@/lib/geo";
 
 export const Route = createFileRoute("/communities")({
@@ -62,6 +63,8 @@ function Communities() {
         </div>
         <span className="text-primary">→</span>
       </Link>
+
+      <SocialGroups />
 
       <h2 className="mt-8 mb-3 text-sm uppercase tracking-widest text-muted-foreground">Страны СНГ</h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{cis.map((c) => <Chip key={c.code} c={c} />)}</div>
