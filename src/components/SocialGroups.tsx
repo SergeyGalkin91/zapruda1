@@ -14,6 +14,9 @@ const display=(p?:Person)=>p?.display_name||p?.username||"Рыболов";
 export function SocialGroups(){
   const [uid,setUid]=useState("");
   const [groups,setGroups]=useState<Group[]>([]);
+  const [cityFilter,setCityFilter]=useState("");
+  const [selectedPublicClub,setSelectedPublicClub]=useState("");
+  const [publicReports,setPublicReports]=useState<{id:string;title:string;user_id:string}[]>([]);
   const [members,setMembers]=useState<Member[]>([]);
   const [people,setPeople]=useState<Person[]>([]);
   const [requests,setRequests]=useState<Request[]>([]);
@@ -147,6 +150,15 @@ export function SocialGroups(){
     setBusy(false);
     if(e)setError("Клуб не сохранён: "+e.message);else{setEditingGroup("");setNotice("Информация клуба обновлена.");await refresh();}
   }
+  async function openPublicClub(groupId:string){
+    if(selectedPublicClub===groupId){setSelectedPublicClub("");return}
+    setSelectedPublicClub(groupId);setPublicReports([]);
+    const memberIds=members.filter(m=>m.group_id===groupId&&m.status==="accepted").map(m=>m.user_id);
+    if(!memberIds.length)return;
+    const {data,error:e}=await supabase.from("fishing_reports").select("id,title,user_id").eq("is_public",true).in("user_id",memberIds).order("created_at",{ascending:false}).limit(12);
+    if(e)setError("Не удалось загрузить публичные отчёты: "+e.message);
+    else setPublicReports(data??[]);
+  }
   const own=groups.filter(g=>g.owner_id===uid);
   const joined=groups.filter(g=>members.some(m=>m.group_id===g.id&&m.user_id===uid&&m.status==="accepted"));
   const pending=members.filter(m=>m.user_id===uid&&m.status==="pending");
@@ -155,6 +167,26 @@ export function SocialGroups(){
     <p className="text-xs font-extrabold uppercase tracking-[.18em] text-[#D7FF35]">ZAPRUDA / КЛУБЫ</p>
     <h2 className="mt-2 flex items-center gap-2 text-xl font-black"><Users className="size-6 text-[#D7FF35]"/> Свои клубы и закрытые чаты</h2>
     <p className="mt-2 text-sm text-zinc-400">Создавай маленькую команду рыбаков, приглашай друзей, планируй совместный стритфишинг или обсуждай выезд с проверенным гидом на лодке с Panoptix.</p>
+    <div className="mt-5 rounded-xl border border-[#D7FF35]/20 bg-black/20 p-4">
+      <h3 className="text-base font-black">Каталог клубов</h3>
+      <p className="mt-1 text-xs text-zinc-400">Поиск по городу. Ранг рассчитывается по числу участников; спортивные достижения пока не подтверждены.</p>
+      <input className="field mt-3 w-full" aria-label="Фильтр клубов по городу" placeholder="Город клуба, например Нижний Новгород" value={cityFilter} onChange={e=>setCityFilter(e.target.value)}/>
+      <div className="mt-3 space-y-2">
+      {groups.filter(g=>g.city.toLocaleLowerCase("ru").includes(cityFilter.trim().toLocaleLowerCase("ru"))).map(g=>{
+        const n=members.filter(m=>m.group_id===g.id&&m.status==="accepted").length;
+        const rank=n>=15?"Большая команда":n>=7?"Активный клуб":"Молодой клуб";
+        return <div key={"public-"+g.id} className="rounded-lg border border-white/10 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2"><strong>{g.name}</strong><span className="text-xs text-[#D7FF35]">{rank}</span></div>
+          <p className="mt-1 text-xs text-zinc-400">{g.country} · {g.city} · {n}/20 участников</p>
+          {g.interests&&<p className="mt-2 text-sm">Интересы: {g.interests}</p>}
+          {g.description&&<p className="mt-1 text-sm text-zinc-300">{g.description}</p>}
+          <button type="button" className="mt-2 text-xs font-bold text-[#D7FF35] underline" onClick={()=>void openPublicClub(g.id)}>{selectedPublicClub===g.id?"Скрыть отчёты":"Публичные отчёты участников"}</button>
+          {selectedPublicClub===g.id&&<div className="mt-2 space-y-1">{publicReports.length?publicReports.map(r=><Link key={r.id} to="/" className="block rounded-lg border border-white/10 p-2 text-xs hover:border-[#D7FF35]/30">{r.title} · открыть в ленте</Link>):<p className="text-xs text-zinc-500">Публичных отчётов пока нет.</p>}</div>}
+        </div>;
+      })}
+      {!groups.some(g=>g.city.toLocaleLowerCase("ru").includes(cityFilter.trim().toLocaleLowerCase("ru")))&&<p className="text-sm text-zinc-500">Клубов в этом городе пока нет.</p>}
+      </div>
+    </div>
     {error&&<p role="alert" className="my-3 rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-sm text-red-200">{error}</p>}
     {notice&&<p role="status" className="my-3 rounded-xl border border-[#D7FF35]/30 p-3 text-sm text-[#D7FF35]">{notice}</p>}
     {!uid?<p className="mt-4 text-sm text-zinc-400">Чтобы участвовать в клубах, <Link to="/auth" className="font-semibold text-[#D7FF35] underline">войти в аккаунт</Link>.</p>:
