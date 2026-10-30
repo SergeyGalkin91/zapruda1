@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
+import { ActivityTracker } from "@/components/ActivityTracker";
 
 const desktopNav = [
   { to: "/", label: "Лента", Icon: House },
@@ -14,6 +15,7 @@ const desktopNav = [
   { to: "/communities", label: "Клубы", Icon: Compass },
   { to: "/market", label: "Барахолка", Icon: ShoppingBag, comingSoon: true },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
+  { to: "/messages", label: "Личные", Icon: MessageCircle },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
 ] as const;
 
@@ -26,6 +28,7 @@ const mobileNav = [
 ] as const;
 
 const otherNav = [
+  { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
   { to: "/feedback", label: "Предложения и сотрудничество", Icon: Handshake },
   { to: "/spearfishing", label: "Подводная охота", Icon: Waves },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
@@ -72,6 +75,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen pb-24 xl:pb-0">
+      <ActivityTracker />
       <header className="sticky top-0 z-50 border-b border-white/[0.09] bg-[#0D100C]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0">
