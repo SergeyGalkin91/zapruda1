@@ -11,7 +11,6 @@ import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
 import { PrivateFishingMarks } from "@/components/PrivateFishingMarks";
 import { ActivityAchievements } from "@/components/ActivityAchievements";
-import { FishingSessionTracker } from "@/components/FishingSessionTracker";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import type { FishingSpecialization } from "@/lib/disciplines";
 import { supabase } from "@/integrations/supabase/client";
@@ -587,7 +586,7 @@ function Profile() {
             <div className="panel p-5 text-sm text-zinc-400">Пока не удалось загрузить ветку достижений. Попробуй обновить страницу.</div>
           )}
 
-          {userId && <FishingSessionTracker userId={userId} />}
+          <Link to="/achievements" className="btn-ghost mb-6 inline-flex">Открыть рыболовный трекер</Link>
           <div id="zapruda-achievements" className="scroll-mt-24">
             <ActivityAchievements />
           </div>
