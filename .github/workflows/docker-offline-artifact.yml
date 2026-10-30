@@ -32,6 +32,7 @@ jobs:
           build-args: |
             VITE_SUPABASE_URL=https://example.supabase.co
             VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_docker_build_validation
+            GIT_SHA=${{ github.sha }}
       - name: Export Docker image as TAR
         run: docker save -o zapruda-community.tar zapruda-community:local
       - name: Make image available without Docker Hub
