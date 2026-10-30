@@ -27,6 +27,8 @@ function Atlas() {
   const routeSearch = Route.useSearch();
   const [country, setCountry] = useState(routeSearch.country);
   const [filter, setFilter] = useState("");
+  const [kindFilter,setKindFilter]=useState("");
+  const [speciesFilter,setSpeciesFilter]=useState("");
   const [waters, setWaters] = useState<Water[]>([]);
   const [fishes, setFishes] = useState<Species[]>([]);
   const [mapping, setMapping] = useState<Mapping[]>([]);
@@ -63,6 +65,8 @@ function Atlas() {
   const byId = useMemo(() => new Map(fishes.map(fish => [fish.id, fish])), [fishes]);
   const progressById = useMemo(() => new Map(progress.map(x => [x.waterbody_id, x])), [progress]);
   const filtered = waters.filter(w => (!country || w.country_code === country) &&
+    (!kindFilter || w.kind === kindFilter) &&
+    (!speciesFilter || mapping.some(m=>m.waterbody_id===w.id && m.species_id===speciesFilter)) &&
     [w.name, w.region, w.summary].some(value => value.toLowerCase().includes(filter.trim().toLowerCase())));
   const allCountries = countries;
 
@@ -71,7 +75,7 @@ function Atlas() {
       <p className="text-xs font-extrabold uppercase tracking-[.18em] text-[#D7FF35]">ZAPRUDA / ИГРОВОЙ АТЛАС</p>
       <h1 className="mt-2 flex flex-wrap items-center gap-3 text-3xl font-black"><BookOpen className="size-8 text-[#D7FF35]"/> Атлас рыболова</h1>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">Исследуй водоёмы, узнавай о рыбе и собирай коллекции уловов. Чтобы начать, просто выбери водоём при создании обычного отчёта и приложи фото — отдельную анкету заполнять не нужно.</p>
-      <p className="mt-3 text-xs text-zinc-400">Каталог развивается постепенно. Списки рыб предварительные и не означают, что каждый вид точно встречается на любом участке. Учитывай местные правила и ограничения ловли.</p>
+      <p className="mt-3 text-xs text-zinc-400">Фильтруй каталог по стране, региону, реке или озеру и видам рыбы. Наличие вида — справочная информация, а не гарантия улова. Каталог развивается постепенно. Списки рыб предварительные и не означают, что каждый вид точно встречается на любом участке. Учитывай местные правила и ограничения ловли.</p>
       <Link to="/reports/new" className="btn-primary mt-5 inline-flex">Добавить улов →</Link>
     </section>
     <div className="mb-5 grid gap-3 sm:grid-cols-[minmax(0,220px)_minmax(0,1fr)]">
@@ -86,6 +90,10 @@ function Atlas() {
           <input className="field w-full pl-9" value={filter} onChange={e => setFilter(e.target.value)} placeholder="Например: Ока, Иртыш, Севан…"/>
         </span>
       </label>
+    </div>
+    <div className="mb-5 grid gap-3 sm:grid-cols-2">
+      <label className="text-xs font-semibold text-zinc-300">Тип водоёма<select className="field mt-1 w-full" value={kindFilter} onChange={e=>setKindFilter(e.target.value)}><option value="">Все типы</option>{Object.entries(kindName).map(([key,name])=><option key={key} value={key}>{name}</option>)}</select></label>
+      <label className="text-xs font-semibold text-zinc-300">Вид рыбы<select className="field mt-1 w-full" value={speciesFilter} onChange={e=>setSpeciesFilter(e.target.value)}><option value="">Все виды</option>{fishes.map(f=><option key={f.id} value={f.id}>{f.name}</option>)}</select></label>
     </div>
     {error && <p role="alert" className="mb-4 rounded-xl border border-red-500/30 bg-red-950/20 p-4 text-sm text-red-200">{error}</p>}
     {loading && <p className="text-sm text-zinc-400">Загружаем справочник…</p>}
