@@ -22,7 +22,7 @@ type ChatMessage = {
   user_id: string;
   body: string;
   created_at: string;
-  profiles?: { username: string | null; display_name: string | null; avatar_url: string | null } | null;
+  profiles?: { username: string | null; display_name: string | null; avatar_url: string | null; chat_city: string | null } | null;
 };
 
 function Chat() {
@@ -42,7 +42,7 @@ function Chat() {
     setUserId(authData.user.id);
     const { data, error } = await (supabase as any)
       .from("chat_messages")
-      .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url)")
+      .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url,chat_city)")
       .order("created_at", { ascending: true })
       .limit(100);
     if (error) {
@@ -92,7 +92,11 @@ function Chat() {
             <div key={message.id} className="max-w-[90%] space-y-2">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="flex size-7 items-center justify-center rounded-full bg-secondary text-sm">🎣</span>
-                <span>{message.user_id === userId ? "Вы" : message.profiles?.display_name || message.profiles?.username || "Рыболов"}</span>
+                <span className="font-semibold text-zinc-200">
+                  {message.profiles?.display_name || message.profiles?.username || (message.user_id === userId ? "Вы" : "Рыболов")}
+                  {message.profiles?.chat_city ? <span className="ml-1 font-normal text-[#D7FF35]">({message.profiles.chat_city})</span> : null}
+                  {message.user_id === userId && <span className="ml-1 font-normal text-zinc-500">· Вы</span>}
+                </span>
                 <time>{new Date(message.created_at).toLocaleString()}</time>
               </div>
               <div className="rounded-2xl rounded-tl-sm bg-secondary px-4 py-3 text-sm whitespace-pre-wrap break-words">{message.body}</div>
