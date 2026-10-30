@@ -1,32 +1,19 @@
-name: Cloudflare beta lockfile and build
+name: Cloudflare beta build
 on:
   push:
     branches: [deploy/cloudflare-beta]
   workflow_dispatch:
-permissions:
-  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: true
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.3
-      - name: Synchronize Bun lockfile
+      - name: Install dependencies without stale lockfile
         run: bun install --no-frozen-lockfile
-      - name: Commit updated lockfile to beta branch
-        run: |
-          if ! git diff --quiet -- bun.lock; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add bun.lock
-            git commit -m "chore: sync cloudflare beta bun lockfile"
-            git push origin HEAD:deploy/cloudflare-beta
-          fi
       - name: Validate Cloudflare build
         run: bun run build:cloudflare
         env:
