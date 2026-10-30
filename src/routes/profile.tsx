@@ -85,6 +85,7 @@ function Profile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [guideSummary,setGuideSummary]=useState<{title:string;home_city:string;service_mode:string;about:string}|null>(null);
+  const [accountRole,setAccountRole]=useState<"angler"|"guide">("angler");
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
@@ -164,6 +165,7 @@ function Profile() {
     }
     setUserId(auth.user.id);
     setEmail(auth.user.email ?? "");
+    setAccountRole(auth.user.user_metadata?.account_role === "guide" ? "guide" : "angler");
     void loadFeaturedGear(auth.user.id);
 
     void supabase.from("guide_profiles").select("title,home_city,service_mode,about").eq("user_id",auth.user.id).maybeSingle().then(({data})=>{if(data)setGuideSummary(data)});
@@ -382,7 +384,7 @@ function Profile() {
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">01 / Анкета</p>
-                <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">Твой рыболовный профиль</h2>
+                <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">{accountRole==="guide"?"Твой профиль · Гид":"Твой профиль · Рыбак"}</h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">Именно эти данные используются для персонального подбора мест: город, транспорт, способы ловли, приманки и снасти.</p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -589,7 +591,7 @@ function Profile() {
 
           {guideSummary&&<section className="mb-6 rounded-xl border border-[#D7FF35]/25 bg-[#161D13] p-5"><p className="text-xs font-bold uppercase tracking-widest text-[#D7FF35]">Профиль гида</p><h3 className="mt-2 text-xl font-black">{guideSummary.title}</h3><p className="mt-2 text-sm text-zinc-300">{guideSummary.home_city} · {guideSummary.service_mode==="shore"?"Береговой гид":guideSummary.service_mode==="boat"?"Лодочный гид":"Берег и лодка"}</p><p className="mt-2 text-sm text-zinc-400">{guideSummary.about}</p><Link to="/guides" className="btn-ghost mt-3 inline-flex">Открыть профиль гида</Link></section>}
           <div className="mb-6 mt-6 flex flex-wrap gap-3">
-            <Link to="/guides" className="btn-ghost inline-flex">Кабинет рыболовного гида</Link>
+            <Link to="/guides" className="btn-ghost inline-flex">{guideSummary?"Управлять профилем гида":accountRole==="guide"?"Завершить регистрацию гида":"Зарегистрироваться как гид"}</Link>
             <Link to="/spearfishing" className="btn-ghost inline-flex">Подводная охота</Link>
           </div>
           <Link to="/achievements" className="btn-ghost mb-6 inline-flex">Мои достижения</Link>
