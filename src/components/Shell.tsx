@@ -116,29 +116,14 @@ export function Shell({ children }: { children: ReactNode }) {
           <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0">
             <Wordmark />
           </Link>
-          <nav aria-label="Основная навигация" className="hidden min-w-0 flex-1 items-center justify-center gap-0 rounded-lg border border-[#D7FF35]/40 bg-[#10150D] px-0.5 py-1 shadow-[0_0_16px_rgba(215,255,53,0.11)] xl:flex">
-            {desktopNav.map(({ to, label, Icon }) => (
-              <Link
-                key={to}
-                to={to}
-                activeOptions={{ exact: true }}
-                className="group relative inline-flex items-center gap-1 rounded-md px-1.5 py-2 text-[12px] font-bold text-[#A5ADA1] transition hover:bg-white/[0.05] hover:text-white"
-                activeProps={{ className: "group relative inline-flex items-center gap-1 rounded-md border border-[#D7FF35]/40 bg-[#D7FF35]/15 px-1.5 py-2 text-[12px] font-extrabold text-[#D7FF35]" }}
-              >
-                <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />
-                {label}
-
-              </Link>
-            ))}
-          </nav>
           <div className="flex shrink-0 items-center gap-1.5">
             {isAdmin && pendingClubs > 0 && <Link to="/moderation" className="inline-flex items-center gap-1 rounded-lg border border-[#D7FF35]/50 px-2 py-2 text-xs font-bold text-[#D7FF35]" aria-label={"Новые заявки на клубы: "+pendingClubs}>Клубы · {pendingClubs}</Link>}
             {isSignedIn ? (
               <>
-                <a href="/profile" className="inline-flex items-center gap-1.5 rounded-lg border border-[#D7FF35]/45 bg-[#D7FF35]/10 shadow-[0_0_12px_rgba(215,255,53,0.07)] px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3">
+                <Link to="/profile" className="inline-flex items-center gap-1.5 rounded-lg border border-[#D7FF35]/45 bg-[#D7FF35]/10 shadow-[0_0_12px_rgba(215,255,53,0.07)] px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition-colors hover:border-[#D7FF35] hover:bg-[#D7FF35]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] active:bg-[#D7FF35]/25 sm:gap-2 sm:px-3">
                   <UserRound className="size-4" aria-hidden="true" />
                   Профиль
-                </a>
+                </Link>
               </>
             ) : (
               <Link to="/auth" className="inline-flex rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white">
@@ -146,7 +131,7 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             )}
             <details className="relative group">
-              <summary aria-label="Открыть список разделов" aria-controls="zapruda-extra-nav" className="inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-lg border border-[#D7FF35]/30 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 [&::-webkit-details-marker]:hidden">
+              <summary aria-label="Открыть список разделов" aria-controls="zapruda-extra-nav" className="inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-lg border border-[#D7FF35]/30 text-[#D7FF35] transition-colors hover:border-[#D7FF35] hover:bg-[#D7FF35]/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] active:bg-[#D7FF35]/25 [&::-webkit-details-marker]:hidden">
                 <Menu className="size-5 group-open:hidden" aria-hidden="true" />
                 <X className="hidden size-5 group-open:block" aria-hidden="true" />
               </summary>
@@ -192,6 +177,23 @@ export function Shell({ children }: { children: ReactNode }) {
           </nav>
             </details>
           </div>
+        </div>
+        <div className="mx-auto hidden max-w-5xl px-4 pb-2 sm:px-5 xl:block">
+          <nav aria-label="Основная навигация" className="hidden w-full items-center justify-center gap-1 rounded-lg border border-[#D7FF35]/35 bg-[#10150D] p-1.5 shadow-[0_0_12px_rgba(215,255,53,0.07)] xl:flex">
+            {desktopNav.map(({ to, label, Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                activeOptions={{ exact: true }}
+                className="group relative inline-flex min-h-10 items-center gap-1.5 rounded-md border border-transparent px-3 py-2 text-[13px] font-semibold text-[#A5ADA1] transition-colors duration-150 hover:border-[#D7FF35]/25 hover:bg-[#D7FF35]/10 hover:text-[#D7FF35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] active:bg-[#D7FF35]/20"
+                activeProps={{ className: "!border-[#D7FF35]/50 !bg-[#D7FF35]/15 !font-bold !text-[#D7FF35]" }}
+              >
+                <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />
+                {label}
+
+              </Link>
+            ))}
+          </nav>
         </div>
         {authError && <div role="alert" className="mx-auto max-w-5xl px-4 py-2 text-sm text-red-300">{authError}</div>}
       </header>
