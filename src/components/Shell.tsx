@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, Waves,
+  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship,
   MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
@@ -29,7 +29,6 @@ const mobileNav = [
 
 const otherNav = [
   { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
-  { to: "/spearfishing", label: "Подводная охота", Icon: Waves },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
   { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
