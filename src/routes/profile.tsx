@@ -405,11 +405,18 @@ function Profile() {
               <Label name="О себе">
                 <textarea className="field min-h-20" maxLength={400} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Несколько слов для других рыбаков" />
               </Label>
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
-                <div className="flex items-center gap-2 text-xs text-zinc-500"><ShieldCheck className="size-4 text-[#D7FF35]" /> Снасти и предпочтения доступны только тебе и твоему персональному советнику.</div>
-                <div className="flex flex-wrap gap-2">
-                  <button className="btn-ghost inline-flex" type="button" onClick={cancelEditing} disabled={saving}><X className="size-4" /> Отмена</button>
-                  <button className="btn-primary" type="submit" disabled={saving}><Save className="size-4" /> {saving ? "Сохраняем…" : "Сохранить профиль"}</button>
+              <div className="mt-7 space-y-4 border-t border-[#D7FF35]/25 pt-6">
+                <div className="flex items-start gap-2 text-xs leading-5 text-zinc-400">
+                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#D7FF35]" />
+                  После сохранения откроется готовая анкета. Снасти и личные предпочтения останутся приватными.
+                </div>
+                <div className="flex flex-wrap items-center justify-end gap-3">
+                  <button className="btn-ghost inline-flex min-h-12 items-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving}>
+                    <X className="size-4" /> Отмена
+                  </button>
+                  <button className="btn-primary inline-flex min-h-12 flex-1 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold sm:flex-none" type="submit" disabled={saving} aria-label="Сохранить редактирование профиля">
+                    <Save className="size-5" /> {saving ? "Сохраняем изменения…" : "Сохранить редактирование профиля"}
+                  </button>
                 </div>
               </div>
             </form>
