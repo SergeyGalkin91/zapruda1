@@ -6,8 +6,15 @@ import {
   formatTackleItem, REEL_SIZES, TACKLE_BRANDS, TACKLE_CATEGORIES, TACKLE_MODELS,
 } from "@/lib/tackleCatalog";
 import type { TackleItem, TackleType } from "@/lib/tackleCatalog";
+import { AnglerGearSets } from "@/components/AnglerGearSets";
 
-export function AnglerTackleCabinet({ userId }: { userId: string }) {
+export function AnglerTackleCabinet({
+  userId, fishingMethods, onGearSetsChange,
+}: {
+  userId: string;
+  fishingMethods: string[];
+  onGearSetsChange: () => void;
+}) {
   const modelListId = useId();
   const [items, setItems] = useState<TackleItem[]>([]);
   const [gearType,setGearType] = useState<TackleType>("reel");
@@ -72,6 +79,7 @@ export function AnglerTackleCabinet({ userId }: { userId: string }) {
     setNotes("");
     setNotice("Снасть добавлена в личный профиль.");
     await load();
+    onGearSetsChange();
   }
 
   async function removeItem(item:TackleItem){
@@ -83,7 +91,11 @@ export function AnglerTackleCabinet({ userId }: { userId: string }) {
       .delete().eq("id",item.id).eq("user_id",userId);
     setWorking(false);
     if(deleteError)setError("Не удалось удалить снасть: "+deleteError.message);
-    else{setNotice("Снасть удалена.");await load()}
+    else {
+      setNotice("Снасть удалена. Комплекты с этим удилищем или катушкой также будут удалены.");
+      await load();
+      onGearSetsChange();
+    }
   }
 
   const suggestions=TACKLE_MODELS[brand]??[];
@@ -168,5 +180,11 @@ export function AnglerTackleCabinet({ userId }: { userId: string }) {
         </div>)}
       </div>
     </div>
+    <AnglerGearSets
+      userId={userId}
+      items={items}
+      fishingMethods={fishingMethods}
+      onChange={onGearSetsChange}
+    />
   </section>;
 }
