@@ -57,13 +57,13 @@ function Finance(){
      {error&&<p role="alert" className="rounded-xl border border-red-400/30 p-4 text-sm text-red-200">{error}</p>}
      {authorized&&<div className="space-y-6">
        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-         {[
+         {([
            ["Выручка с выездов гидов",summary.total_guide_payments_rub,"Только подтверждённые провайдером платежи",CreditCard],
            ["Комиссия ZAPRUDA",summary.platform_commission_rub,"10% подтверждённых выездов до банковских и иных расходов",CircleDollarSign],
            ["Начислено гидам",summary.guide_amount_rub,"Обязательства перед исполнителями, не выводимый остаток",Wallet],
            ["Создание клубов",summary.club_payment_confirmed_rub,"Подтверждения платных заявок на клубы, требуют сверки с банком",ReceiptText],
            ["Неоплаченные бронирования",summary.pending_booking_amount_rub,"Согласованные суммы, не являются доходом",ShieldCheck],
-         ].map(([title,value,subtitle,Icon])=><div key={String(title)} className="rounded-2xl border border-white/10 bg-[#151915] p-4">
+         ] as const).map(([title,value,subtitle,Icon])=><div key={String(title)} className="rounded-2xl border border-white/10 bg-[#151915] p-4">
            <div className="flex items-center gap-2 text-sm font-bold text-zinc-300"><Icon className="size-4 text-[#D7FF35]"/>{String(title)}</div>
            <p className="mt-3 text-2xl font-black text-white">{currency(Number(value))}</p>
            <p className="mt-2 text-xs leading-5 text-zinc-500">{String(subtitle)}</p>
