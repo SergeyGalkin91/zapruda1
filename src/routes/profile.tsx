@@ -414,13 +414,18 @@ function Profile() {
                 </label>
                 <div className="space-y-2 sm:col-span-2">
                   <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">Мои способы ловли · можно выбрать несколько</p>
-                  <div className="flex flex-wrap gap-2">
-                    {FISHING_DISCIPLINES.map(item => {
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {FISHING_DISCIPLINES.map((item,index) => {
                       const selected = preferences.fishing_methods.includes(item.code);
+                      const accent = index % 5 === 0 ? "#FF6A00" : "#D7FF35";
                       return <button key={item.code} type="button" aria-pressed={selected}
                         onClick={() => toggleMethod(item.code)}
-                        className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}>
-                        {selected ? "✓ " : ""}{item.icon} {item.title}
+                        className={`group relative min-h-[132px] overflow-hidden rounded-2xl border p-3 text-left transition-all hover:-translate-y-0.5 ${selected ? "border-[#D7FF35] bg-[#1A2515] shadow-[inset_0_0_0_1px_rgba(215,255,53,.2)]" : "border-white/10 bg-[#0B0F0E] hover:border-[#D7FF35]/40"}`}>
+                        <span className="absolute -right-2 -top-4 select-none text-6xl opacity-25 grayscale transition group-hover:opacity-50" aria-hidden="true">{item.icon}</span>
+                        <span className="relative text-[10px] font-black tracking-widest" style={{color:accent}}>FISHING ID / {String(index+1).padStart(2,"0")}</span>
+                        <span className="relative mt-9 block text-sm font-black text-white">{item.title}</span>
+                        <span className="relative mt-1 block text-[10px] leading-4 text-zinc-400">{item.detail}</span>
+                        {selected && <span className="absolute right-2 top-2 flex size-5 items-center justify-center rounded-full bg-[#D7FF35] text-[#0B0F0E]"><Check className="size-3.5"/></span>}
                       </button>;
                     })}
                   </div>
