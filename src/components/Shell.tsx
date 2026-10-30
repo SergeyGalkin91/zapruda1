@@ -12,6 +12,7 @@ import { applyAppearance, loadAppearance } from "@/lib/appearance";
 const desktopNav = [
   { to: "/", label: "Лента", Icon: House },
   { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
+  { to: "/fishing-map", label: "Карта и рыбалка", Icon: Compass },
   { to: "/partners", label: "Напарники", Icon: Users },
   { to: "/communities", label: "Клубы", Icon: Compass },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
@@ -22,6 +23,7 @@ const desktopNav = [
 const mobileNav = [
   { to: "/", label: "Лента", Icon: House },
   { to: "/reports/new", label: "Отчёт", Icon: Plus },
+  { to: "/fishing-map", label: "Карта", Icon: Compass },
   { to: "/partners", label: "Напарники", Icon: Users },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
   { to: "/profile", label: "Профиль", Icon: UserRound },
@@ -31,7 +33,7 @@ const otherNav = [
   { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
   { to: "/reviews", label: "Отзывы и репутация", Icon: ShieldCheck },
-  { to: "/depths", label: "Карта глубин и замеры", Icon: Compass },
+
   { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
   { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
