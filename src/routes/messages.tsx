@@ -197,8 +197,8 @@ function Messages() {
         <div className="border-b border-white/10 p-4"><h2 className="font-bold">{active ? names.get(getPeer(active)) || "Переписка" : "Выбери переписку"}</h2>
           {active && <p className="text-xs text-zinc-400">{active.status === "accepted" ? "Личный чат · доступен только участникам" : "Ожидаем согласия на переписку"}</p>}
         </div>
-        <div className="min-h-64 flex-1 space-y-3 overflow-y-auto p-4">
-          {active?.status === "accepted" && messages.map(m => <div key={m.id} className={"max-w-[90%] rounded-2xl border p-3 text-sm " + (m.sender_id === uid ? "ml-auto border-[#D7FF35]/30 bg-[#D7FF35]/10" : "border-white/10 bg-white/5")}>
+        <div className="zapruda-chat-window min-h-64 flex-1 space-y-3 overflow-y-auto p-4">
+          {active?.status === "accepted" && messages.map(m => <div key={m.id} className={"zapruda-chat-bubble max-w-[90%] rounded-2xl border p-3 text-sm " + (m.sender_id === uid ? "zapruda-chat-own-bubble ml-auto border-[#D7FF35]/30 bg-[#D7FF35]/10" : "border-white/10 bg-white/5")}>
             {m.kind === "location" && m.latitude !== null && m.longitude !== null ? <div><p className="flex items-center gap-2 font-bold text-[#D7FF35]"><MapPin className="size-4"/> {m.location_title}</p><p className="my-2 text-xs text-zinc-300">{m.latitude.toFixed(6)}, {m.longitude.toFixed(6)}</p>
               <a target="_blank" rel="noopener noreferrer" className="text-xs text-[#D7FF35] underline" href={"https://yandex.ru/maps/?pt=" + encodeURIComponent(m.longitude + "," + m.latitude) + "&z=15"}>Открыть на Яндекс Картах</a></div> : <p className="whitespace-pre-wrap break-words">{m.body}</p>}
             <time className="mt-2 block text-[10px] text-zinc-500">{datetime(m.created_at)}</time></div>)}
