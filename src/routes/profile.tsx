@@ -84,6 +84,7 @@ type FeaturedGear = {
 function Profile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
+  const [guideSummary,setGuideSummary]=useState<{title:string;home_city:string;service_mode:string;about:string}|null>(null);
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
@@ -165,6 +166,7 @@ function Profile() {
     setEmail(auth.user.email ?? "");
     void loadFeaturedGear(auth.user.id);
 
+    void supabase.from("guide_profiles").select("title,home_city,service_mode,about").eq("user_id",auth.user.id).maybeSingle().then(({data})=>{if(data)setGuideSummary(data)});
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
       supabase.from("profiles").select("username,display_name,bio,avatar_url,chat_city").eq("id", auth.user.id).maybeSingle(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
@@ -573,6 +575,7 @@ function Profile() {
             onGearSetsChange={() => void loadFeaturedGear(userId)}
           />
 
+          {guideSummary&&<section className="mb-6 rounded-xl border border-[#D7FF35]/25 bg-[#161D13] p-5"><p className="text-xs font-bold uppercase tracking-widest text-[#D7FF35]">Профиль гида</p><h3 className="mt-2 text-xl font-black">{guideSummary.title}</h3><p className="mt-2 text-sm text-zinc-300">{guideSummary.home_city} · {guideSummary.service_mode==="shore"?"Береговой гид":guideSummary.service_mode==="boat"?"Лодочный гид":"Берег и лодка"}</p><p className="mt-2 text-sm text-zinc-400">{guideSummary.about}</p><Link to="/guides" className="btn-ghost mt-3 inline-flex">Открыть профиль гида</Link></section>}
           <div className="mb-6 mt-6 flex flex-wrap gap-3">
             <Link to="/guides" className="btn-ghost inline-flex">Кабинет рыболовного гида</Link>
             <Link to="/spearfishing" className="btn-ghost inline-flex">Подводная охота</Link>
