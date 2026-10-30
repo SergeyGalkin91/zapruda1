@@ -102,7 +102,7 @@ function AchievementsPage() {
         </div>
         <Link to="/profile" className="btn-ghost mt-5 inline-flex">Открыть трекер рыбалки</Link>
       </section>
-      <VerifiedFishingSessions/>
+      <VerifiedFishingSessions userId={userId}/>
       <ActivityAchievements/>
     </>}
   </Shell>;
