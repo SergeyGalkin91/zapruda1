@@ -6,10 +6,8 @@ import {
   Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
-import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
 import { PrivateFishingMarks } from "@/components/PrivateFishingMarks";
-import { ActivityAchievements } from "@/components/ActivityAchievements";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import type { FishingSpecialization } from "@/lib/disciplines";
 import { supabase } from "@/integrations/supabase/client";
@@ -579,16 +577,7 @@ function Profile() {
             <Link to="/guides" className="btn-ghost inline-flex">Кабинет рыболовного гида</Link>
             <Link to="/spearfishing" className="btn-ghost inline-flex">Подводная охота</Link>
           </div>
-          {progress ? (
-            <><FishingProgressTree progress={progress} /></>
-          ) : (
-            <div className="panel p-5 text-sm text-zinc-400">Пока не удалось загрузить ветку достижений. Попробуй обновить страницу.</div>
-          )}
-
-          <Link to="/achievements" className="btn-ghost mb-6 inline-flex">Открыть рыболовный трекер</Link>
-          <div id="zapruda-achievements" className="scroll-mt-24">
-            <ActivityAchievements />
-          </div>
+          <Link to="/achievements" className="btn-ghost mb-6 inline-flex">Мои достижения</Link>
 
           <section aria-label="Обратная связь и управление аккаунтом" className="mt-10 mb-6 space-y-5 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7">
             <div className="flex flex-wrap items-center justify-between gap-4">
