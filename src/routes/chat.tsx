@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { ArrowLeft, ChevronRight, Globe2, MapPin, MessageCircle, Plus, RefreshCw, Send, Users } from "lucide-react";
+import { ChevronRight, Globe2, MapPin, MessageCircle, Plus, RefreshCw, Send, Users } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/lib/geo";
