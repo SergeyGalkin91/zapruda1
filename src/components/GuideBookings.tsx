@@ -95,9 +95,22 @@ export function GuideBookingInbox(){
    else {setItems((data??[]) as Booking[]);setError("");}
    setLoading(false);
  },[]);
- useEffect(()=>{void refresh();const onFocus=()=>void refresh();window.addEventListener("focus",onFocus);
-   const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{void refresh();});
-   return()=>{window.removeEventListener("focus",onFocus);subscription.unsubscribe();};},[refresh]);
+ useEffect(()=>{
+   void refresh();
+   const onFocus=()=>void refresh();
+   window.addEventListener("focus",onFocus);
+   // Avoid awaiting Supabase auth methods inside its synchronous auth callback.
+   let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+   const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{
+     if(refreshTimer)clearTimeout(refreshTimer);
+     refreshTimer=setTimeout(()=>{void refresh();},0);
+   });
+   return()=>{
+     if(refreshTimer)clearTimeout(refreshTimer);
+     window.removeEventListener("focus",onFocus);
+     subscription.unsubscribe();
+   };
+ },[refresh]);
  async function quote(item:Booking){
    const draft=quotes[item.id];
    if(!draft)return;
