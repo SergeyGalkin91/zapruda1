@@ -73,6 +73,7 @@ function Profile() {
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
+  const [shareChatCity, setShareChatCity] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [preferences, setPreferences] = useState<AnglerForm>(EMPTY_FORM);
   const [progress, setProgress] = useState<FishingProgress | null>(null);
@@ -116,7 +117,7 @@ function Profile() {
     setEmail(auth.user.email ?? "");
 
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
-      supabase.from("profiles").select("username,display_name,bio,avatar_url").eq("id", auth.user.id).maybeSingle(),
+      supabase.from("profiles").select("username,display_name,bio,avatar_url,chat_city").eq("id", auth.user.id).maybeSingle(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
       supabase.rpc("my_fishing_progress"),
       supabase.rpc("my_fishing_specializations"),
@@ -129,6 +130,7 @@ function Profile() {
       setDisplayName(profileResult.data.display_name ?? "");
       setBio(profileResult.data.bio ?? "");
       setAvatarUrl(profileResult.data.avatar_url);
+      setShareChatCity(Boolean(profileResult.data.chat_city));
     }
 
     if (prefsResult.error) {
@@ -203,11 +205,15 @@ function Profile() {
       setError("Никнейм: от 3 до 30 символов, латинские буквы, цифры, точка, дефис или подчёркивание.");
       return;
     }
+    if (shareChatCity && preferences.home_city.trim().length < 2) {
+      setError("Чтобы показывать город в общем чате, сначала укажи город рыбалки.");
+      return;
+    }
     setSaving(true);
     setError("");
     setNotice("");
     const { error: profileError } = await supabase.from("profiles")
-      .update({ username: requestedUsername || null, display_name: displayName.trim() || null, bio: bio.trim() || null })
+      .update({ username: requestedUsername || null, display_name: displayName.trim() || null, bio: bio.trim() || null, chat_city: shareChatCity ? preferences.home_city.trim() : null })
       .eq("id", userId);
     if (profileError) {
       setError("Не удалось сохранить имя и описание: " + profileError.message);
@@ -278,6 +284,12 @@ function Profile() {
                 <Label name="Отображаемое имя"><input className="field" maxLength={100} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Как тебя называть?" /></Label>
                 <Label name="Город рыбалки"><input className="field" maxLength={100} value={preferences.home_city} onChange={(e) => update("home_city", e.target.value)} placeholder="Нижний Новгород" /></Label>
                 <Label name="Регион"><input className="field" maxLength={120} value={preferences.home_region} onChange={(e) => update("home_region", e.target.value)} placeholder="Нижегородская область" /></Label>
+                <label className="flex items-start gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-3 text-sm sm:col-span-2">
+                  <input type="checkbox" checked={shareChatCity} onChange={e => setShareChatCity(e.target.checked)} className="mt-1 size-4 accent-[#D7FF35]" />
+                  <span><strong className="block text-zinc-100">Показывать мой город в общем чате</strong>
+                    <span className="mt-1 block text-xs leading-5 text-zinc-400">Например: «river_hunter (Нижний Новгород)». Только название города будет публичным. Рыболовные места, метки и остальная анкета останутся приватными. Можно отключить в любой момент.</span>
+                  </span>
+                </label>
                 <Label name="Основной способ ловли">
                   <select className="field" value={preferences.main_technique} onChange={(e) => update("main_technique", e.target.value)}>
                     {FISHING_DISCIPLINES.map((item) => <option key={item.code} value={item.code}>{item.title}</option>)}
