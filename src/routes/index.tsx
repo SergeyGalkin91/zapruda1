@@ -285,20 +285,10 @@ function Feed() {
 
   return (
     <Shell>
-      <section className="relative mb-8 overflow-hidden rounded-3xl border border-lime-300/15 bg-[#10120c] px-5 py-6 sm:px-7 sm:py-8">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-lime-300/[0.07] blur-3xl" />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">🎣 Спиннинг · отчёты</p>
-          <h1 className="mt-2 text-3xl font-bold md:text-4xl">Лента рыбалок</h1>
-          <p className="mt-2 max-w-md text-muted-foreground">Отчёты, фотографии и обсуждения рыболовов.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link to="/reports/new" className="btn-primary self-start">🎣 Новый отчёт</Link>
-          <Link to="/partners" className="inline-flex items-center justify-center rounded-xl border border-lime-300/35 px-4 py-2.5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10">🤝 Найти напарника</Link>
-        </div>
-        </div>
-      </section>
+      <header className="mx-auto mb-6 flex max-w-3xl flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
+        <div><p className="text-[11px] font-black uppercase tracking-[.25em] text-[#D7FF35]">ZAPRUDA / COMMUNITY</p><h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white">Лента</h1><p className="mt-2 text-sm text-zinc-400">Реальные отчёты. Уловы. Обсуждения.</p></div>
+        <Link to="/reports/new" className="btn-primary inline-flex">+ Новый отчёт</Link>
+      </header>
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">{error}</div>}
       {!loading && !error && reports.length === 0 && (
@@ -314,7 +304,7 @@ function Feed() {
       {reports.map((report) => {
         const name = report.profiles?.display_name || report.profiles?.username || "Рыболов";
         return (
-          <article key={report.id} className="panel mb-5 space-y-4 p-5">
+          <article key={report.id} className="panel mb-4 space-y-3 border-white/10 bg-[#141814] p-4 sm:p-5">
             <div className="flex items-start gap-3">
               {report.profiles?.avatar_url
                 ? <img src={report.profiles.avatar_url} alt="" className="size-11 rounded-full object-cover" />
