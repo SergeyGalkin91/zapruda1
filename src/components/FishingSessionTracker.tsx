@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { getKey, loadYandex, type YandexApi } from "@/components/InteractiveFishingMap";
 import { Clock3, MapPinned, Pause, Play, Square, Download, Share2 } from "lucide-react";
 
 type Point = { lat: number; lon: number; time: number; accuracy: number };
@@ -32,6 +33,44 @@ function RoutePreview({ points }: { points: Point[] }) {
     <text x="304" y="18" textAnchor="end" fontSize="11" fill="#c7d3c0">С ↑</text>
   </svg>;
 }
+function FishingRouteMap({ points }: { points: Point[] }) {
+  const holder = useRef<HTMLDivElement>(null);
+  const map = useRef<InstanceType<YandexApi["Map"]> | null>(null);
+  const api = useRef<YandexApi | null>(null);
+  const [ready, setReady] = useState(false);
+  const [mapError, setMapError] = useState("");
+  const key = getKey();
+  const canMap = points.length >= 2;
+  useEffect(() => {
+    if (!key || !canMap || !holder.current) return;
+    let active = true;
+    void loadYandex(key).then(ymaps => {
+      if (!active || !holder.current) return;
+      api.current = ymaps;
+      map.current = new ymaps.Map(holder.current, { center: [points[0].lat, points[0].lon], zoom: 15, controls: ["zoomControl"] });
+      setReady(true);
+    }).catch(err => { if (active) setMapError(err instanceof Error ? err.message : "Карта недоступна"); });
+    return () => { active = false; map.current?.destroy(); map.current = null; api.current = null; setReady(false); };
+  // Map is initialized once when a route first gets enough points.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, canMap]);
+  useEffect(() => {
+    if (!ready || !map.current || !api.current) return;
+    map.current.geoObjects.removeAll();
+    const line = new api.current.Polyline(points.map(p => [p.lat, p.lon]), { hintContent: "Мой рыболовный маршрут" },
+      { strokeColor: "#D7FF35", strokeWidth: 5, strokeOpacity: 0.9 });
+    map.current.geoObjects.add(line);
+  }, [points, ready]);
+  return <div className="space-y-2">
+    {key && canMap && <div ref={holder} className="h-64 w-full overflow-hidden rounded-xl border border-white/15 bg-[#0B170E] sm:h-80"
+      aria-label="Маршрут рыбалки на Яндекс Картах" />}
+    {(!ready || !key || !canMap) && <RoutePreview points={points}/>}
+    {mapError && <p className="text-xs text-amber-200">Яндекс Карты: {mapError}. Показана схема маршрута.</p>}
+    {key && ready && <p className="text-xs text-zinc-500">Маршрут показан на Яндекс Картах. Координаты передаются поставщику карты.</p>}
+    {!key && canMap && <p className="text-xs text-zinc-500">Для отображения трека поверх Яндекс Карт нужен API-ключ в настройках разработчика. Пока показана схема.</p>}
+  </div>;
+}
+
 export function FishingSessionTracker({ userId }: { userId: string }) {
   const [data, setData] = useState<Stored>(empty);
   const [now, setNow] = useState(Date.now());
@@ -52,6 +91,21 @@ export function FishingSessionTracker({ userId }: { userId: string }) {
     return () => { if (watch.current !== null) navigator.geolocation?.clearWatch(watch.current); watch.current = null; };
   }, [userId]);
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
+  useEffect(() => {
+    const pauseIfHidden = () => {
+      if (document.visibilityState !== "hidden") return;
+      const t = dataRef.current.active;
+      if (t?.runningSince !== null && t) {
+        persist({ ...dataRef.current, active: { ...t, activeMs: elapsed(t, Date.now()), runningSince: null } });
+      }
+    };
+    document.addEventListener("visibilitychange", pauseIfHidden);
+    window.addEventListener("pagehide", pauseIfHidden);
+    return () => { document.removeEventListener("visibilitychange", pauseIfHidden); window.removeEventListener("pagehide", pauseIfHidden); };
+  // The handler reads the latest session from a ref, not a captured render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
   useEffect(() => {
     if (!data.active || data.active.runningSince === null || !navigator.geolocation || watch.current !== null) return;
     if (!window.isSecureContext) { setGpsError("GPS доступен только через HTTPS или localhost."); return; }
@@ -103,12 +157,12 @@ export function FishingSessionTracker({ userId }: { userId: string }) {
     {gpsError && <p role="status" className="mt-3 text-xs text-amber-200">{gpsError}. Таймер продолжает работать.</p>}
     {trip && <div className="mt-5 space-y-3">
       <h3 className="flex items-center gap-2 font-bold"><MapPinned className="size-4 text-[#D7FF35]"/> {active ? "Текущий трек" : "Последний завершённый трек"}</h3>
-      <RoutePreview points={trip.points}/>
+      <FishingRouteMap points={trip.points}/>
       <div className="flex flex-wrap gap-2">
         <button type="button" className="btn-ghost text-xs" disabled={!trip.points.length} onClick={() => void exportTrip(trip, false)}><Download className="size-4"/> Скачать GPX</button>
         <button type="button" className="btn-ghost text-xs" disabled={!trip.points.length} onClick={() => void exportTrip(trip, true)}><Share2 className="size-4"/> Поделиться маршрутом</button>
       </div>
     </div>}
-    <p className="mt-4 text-xs leading-5 text-zinc-500">Локальный журнал: {data.history.length} завершённых сессий, {duration(data.history.reduce((sum, t) => sum + Math.min(t.activeMs, 86400000), 0))} всего. На этом устройстве, без серверного подтверждения и без начисления официальных ачивок. При закрытии вкладки GPS-запись приостанавливается браузером; для фоновой записи и часов потребуется мобильное приложение. Перед отправкой GPX убедись, что маршрут не раскрывает секретные точки.</p>
+    <p className="mt-4 text-xs leading-5 text-zinc-500">Локальный журнал: {data.history.length} завершённых сессий, {duration(data.history.reduce((sum, t) => sum + Math.min(t.activeMs, 86400000), 0))} всего. На этом устройстве, без серверного подтверждения и без начисления официальных ачивок. При сворачивании приложения сессия автоматически ставится на паузу: браузер не гарантирует запись в фоне. Для фоновой записи и часов потребуется мобильное приложение. Перед отправкой GPX убедись, что маршрут не раскрывает секретные точки.</p>
   </section>;
 }
