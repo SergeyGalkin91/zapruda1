@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BrainCircuit, Check, Compass, Fish, MapPin, Save, Settings2, ShieldCheck,
-  Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText,
+  Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText, Anchor, Snowflake, Feather, Tent, Ship, Sailboat, Target, CircleDot, Crosshair, Mountain, Droplets, ImagePlus,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
@@ -56,7 +56,7 @@ const EMPTY_FORM: AnglerForm = {
   search_radius_km: 30,
 };
 
-const SPECIES = ["Щука", "Судак", "Окунь", "Жерех", "Голавль", "Форель", "Карп", "Сом", "Лещ", "Карась"] as const;
+const DISCIPLINE_ICONS=[Fish,Target,CircleDot,Feather,Snowflake,Tent,Anchor,Waves,Ship,Sailboat,Crosshair,Droplets,Mountain,CircleDot,Fish] as const;\nfunction DisciplineIcon({method,className="size-7"}:{method:string;className?:string}){const i=Math.max(0,FISHING_DISCIPLINES.findIndex(d=>d.code===method));const Icon=DISCIPLINE_ICONS[i];return <Icon className={className} strokeWidth={1.55} aria-hidden="true"/>;}\nconst SPECIES = ["Щука", "Судак", "Окунь", "Жерех", "Голавль", "Форель", "Карп", "Сом", "Лещ", "Карась"] as const;
 
 function Label({ name, children, hint }: { name: string; children: React.ReactNode; hint?: string }) {
   return (
@@ -92,7 +92,7 @@ function Profile() {
   const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
   const [shareChatCity, setShareChatCity] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);\n  const [avatarSymbol,setAvatarSymbol]=useState<string|null>(null);\n  const [avatarBusy,setAvatarBusy]=useState(false);
   const [featuredGear, setFeaturedGear] = useState<FeaturedGear | null>(null);
   const [savedTackle, setSavedTackle] = useState<string[]>([]);
   const [preferences, setPreferences] = useState<AnglerForm>(EMPTY_FORM);
@@ -176,7 +176,7 @@ function Profile() {
     setGuideSummary(null);
     void supabase.from("guide_profiles").select("title,home_city,service_mode,about").eq("user_id",auth.user.id).maybeSingle().then(({data})=>setGuideSummary(data??null));
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
-      supabase.from("profiles").select("username,display_name,bio,avatar_url,chat_city").eq("id", auth.user.id).maybeSingle(),
+      supabase.from("profiles").select("username,display_name,bio,avatar_url,avatar_symbol,chat_city").eq("id", auth.user.id).maybeSingle(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
       supabase.rpc("my_fishing_progress"),
       supabase.rpc("my_fishing_specializations_v2"),
@@ -188,7 +188,7 @@ function Profile() {
       setUsername(profileResult.data.username ?? "");
       setDisplayName(profileResult.data.display_name ?? "");
       setBio(profileResult.data.bio ?? "");
-      setAvatarUrl(profileResult.data.avatar_url);
+      setAvatarUrl(profileResult.data.avatar_url);\n      setAvatarSymbol((profileResult.data as any).avatar_symbol??null);
       setShareChatCity(Boolean(profileResult.data.chat_city));
     }
 
@@ -288,6 +288,29 @@ function Profile() {
     }));
   }
 
+  async function uploadAvatar(file?:File){
+    if(!file||!userId)return;
+    if(!["image/jpeg","image/png","image/webp"].includes(file.type)){setError("Выбери JPG, PNG или WebP.");return;}
+    if(file.size>3*1024*1024){setError("Аватар должен быть не больше 3 МБ.");return;}
+    setAvatarBusy(true);setError("");
+    const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+    const path=userId+"/avatar-"+Date.now()+"."+ext;
+    const {error:uploadError}=await supabase.storage.from("avatars").upload(path,file,{contentType:file.type,upsert:false});
+    if(uploadError){setError("Ошибка загрузки: "+uploadError.message);setAvatarBusy(false);return;}
+    const url=supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+    const {error}=await supabase.from("profiles").update({avatar_url:url,avatar_symbol:null} as any).eq("id",userId);
+    if(error)setError("Фото загружено, но профиль не обновился: "+error.message);
+    else{setAvatarUrl(url);setAvatarSymbol(null);setNotice("Аватар обновлён.");}
+    setAvatarBusy(false);
+  }
+  async function chooseAvatarSymbol(symbol:string){
+    if(!userId||avatarBusy)return;
+    setAvatarBusy(true);setError("");
+    const {error}=await supabase.from("profiles").update({avatar_url:null,avatar_symbol:symbol} as any).eq("id",userId);
+    if(error)setError("Не удалось выбрать значок: "+error.message);
+    else{setAvatarUrl(null);setAvatarSymbol(symbol);setNotice("Рыболовный значок сохранён.");}
+    setAvatarBusy(false);
+  }
   async function saveProfile(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!userId || saving) return;
@@ -348,14 +371,18 @@ function Profile() {
         <div className="flex flex-wrap items-center gap-4">
           {avatarUrl
             ? <img src={avatarUrl} alt="" className="size-16 rounded-lg border border-[#D7FF35]/30 object-cover" />
-            : <div className="flex size-16 items-center justify-center rounded-lg border border-[#D7FF35]/30 bg-[#D7FF35]/5"><UserRound className="size-8 text-[#D7FF35]" /></div>}
+            : <div className="flex size-16 items-center justify-center rounded-lg border border-[#D7FF35]/30 bg-[#D7FF35]/5">{avatarSymbol?<DisciplineIcon method={avatarSymbol} className="size-9 text-[#D7FF35]"/>:<UserRound className="size-8 text-[#D7FF35]" />}</div>}
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-black uppercase tracking-[.20em] text-[#D7FF35]">ZAPRUDA / {accountRole==="guide"?"ГИД":"РЫБАК"}</p>
             <h1 className="mt-1 text-2xl font-black text-white">{displayName||username||"Мой профиль"}</h1>
             <p className="mt-1 text-sm text-zinc-400">{username?"@"+username:"Никнейм не указан"}{(accountRole==="guide"?guideSummary?.home_city:preferences.home_city)?" · "+(accountRole==="guide"?guideSummary?.home_city:preferences.home_city):""}</p>
           </div>
           {!editing && <button type="button" className="btn-primary" onClick={()=>{setError("");setEditing(true)}}>Редактировать профиль</button>}
-          <span className="rounded-md border border-[#D7FF35]/40 px-3 py-1.5 text-xs font-extrabold uppercase tracking-widest text-[#D7FF35]">{accountRole==="guide"?"GUIDE":"ANGLER"}</span>
+          <div className="ml-auto flex min-w-[120px] flex-col items-center gap-2 rounded-2xl border border-[#D7FF35]/30 bg-[#D7FF35]/[.055] px-4 py-3 text-[#D7FF35]">
+            <DisciplineIcon method={preferences.main_technique} className="size-10"/>
+            <span className="text-center text-xs font-black uppercase">{accountRole==="guide"?"ГИД":preferences.main_technique}</span>
+            <span className="text-[9px] tracking-widest text-zinc-500">НАПРАВЛЕНИЕ</span>
+          </div>
         </div>
         {accountRole==="guide" ? (
           guideSummary ? <div className="mt-5 border-t border-white/10 pt-5">
@@ -400,6 +427,22 @@ function Profile() {
 
             {editing ? (
               <form onSubmit={saveProfile} className="space-y-5">
+              <section className="rounded-2xl border border-[#D7FF35]/20 bg-[#0B100D] p-4">
+                <p className="mb-1 text-sm font-black">Аватар рыболова</p>
+                <p className="mb-3 text-xs text-zinc-400">Загрузи фото или выбери рыболовный символ. Выбор сохраняется сразу.</p>
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#D7FF35]/45 bg-[#D7FF35]/10 px-4 py-3 text-xs font-bold text-[#D7FF35]">
+                  <ImagePlus className="size-4"/>{avatarBusy?"Сохраняем…":"Загрузить фото"}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={avatarBusy} onChange={e=>{void uploadAvatar(e.target.files?.[0]);e.target.value="";}}/>
+                </label>
+                <p className="mt-2 text-[11px] text-zinc-500">JPG, PNG, WebP · до 3 МБ</p>
+                <p className="mb-2 mt-5 text-xs font-bold text-zinc-400">Или выбери тематический значок:</p>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                  {FISHING_DISCIPLINES.map(item=><button type="button" key={item.code} disabled={avatarBusy} aria-label={"Аватар: "+item.title} aria-pressed={!avatarUrl&&avatarSymbol===item.code} onClick={()=>void chooseAvatarSymbol(item.code)}
+                    className={`flex min-h-[77px] flex-col items-center justify-center gap-2 rounded-xl border p-2 text-xs transition ${!avatarUrl&&avatarSymbol===item.code?"border-[#D7FF35] bg-[#D7FF35]/15 text-[#D7FF35]":"border-white/10 bg-black/20 text-zinc-400 hover:border-[#D7FF35]/50 hover:text-white"}`}>
+                    <DisciplineIcon method={item.code} className="size-7"/><span className="text-center text-[10px]">{item.title}</span>
+                  </button>)}
+                </div>
+              </section>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Label name="Никнейм"><input className="field" maxLength={30} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="например, zaprudafish" /></Label>
                 <Label name="Отображаемое имя"><input className="field" maxLength={100} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Как тебя называть?" /></Label>
@@ -422,7 +465,7 @@ function Profile() {
                         onClick={() => toggleMethod(item.code)}
                         className={`group relative flex min-h-[166px] flex-col justify-end overflow-hidden rounded-[20px] border px-4 pb-4 pt-16 text-left transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] ${selected ? "border-[#D7FF35] bg-[#172315] shadow-[inset_0_0_0_1px_rgba(215,255,53,.18),0_8px_28px_rgba(0,0,0,.22)]" : "border-white/10 bg-[#0C1110] hover:border-[#D7FF35]/50 hover:bg-[#141A15]"}`}>
                         <span aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-80" style={{background:`radial-gradient(circle at 90% 8%,${accent}21,transparent 57%),repeating-radial-gradient(circle at 100% -10%,transparent 0px,transparent 28px,${accent}11 29px,transparent 30px)`}}/>
-                        <span className="pointer-events-none absolute right-3 top-3 flex size-12 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-4xl opacity-70 grayscale transition group-hover:scale-110 group-hover:opacity-100 group-hover:grayscale-0" aria-hidden="true">{item.icon}</span>
+                        <span className="pointer-events-none absolute right-3 top-3 flex size-12 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-[#D7FF35]/80 transition group-hover:scale-110" aria-hidden="true"><DisciplineIcon method={item.code} className="size-8"/></span>
                         <span className="relative mb-1 block text-base font-black leading-tight text-white">{item.title}</span>
                         <span className="relative block text-[11px] leading-[1.45] text-[#A8B5A6]">{item.detail}</span>
                         {selected && <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-[#D7FF35]/40 bg-[#D7FF35]/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#D7FF35]"><Check className="size-3"/> Выбрано</span>}
