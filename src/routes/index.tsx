@@ -290,7 +290,7 @@ function Feed() {
 
   return (
     <Shell>
-      <div className="mx-auto mb-5 max-w-4xl">
+      <div className="mx-auto mb-5 max-w-5xl">
         <Link to="/reports/new" className="flex min-h-12 w-full items-center justify-center rounded-lg bg-[#D7FF35] px-5 py-3 text-sm font-black uppercase tracking-wider text-[#10140B] shadow-[0_0_14px_rgba(215,255,53,0.14)] transition hover:bg-[#E7FF7A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">+ Новый отчёт</Link>
       </div>
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
@@ -303,7 +303,7 @@ function Feed() {
           <Link to="/reports/new" className="btn-primary mt-4 inline-flex">Создать отчёт</Link>
         </div>
       )}
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-5xl">
         <div className="min-w-0">
       {reports.map((report) => {
         const name = report.profiles?.display_name || report.profiles?.username || "Рыболов";
