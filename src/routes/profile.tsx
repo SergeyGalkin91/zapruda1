@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
-import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
 import { PrivateFishingMarks } from "@/components/PrivateFishingMarks";
 import { ActivityAchievements } from "@/components/ActivityAchievements";
@@ -581,7 +580,7 @@ function Profile() {
             <Link to="/spearfishing" className="btn-ghost inline-flex">Подводная охота</Link>
           </div>
           {progress ? (
-            <><FishingProgressTree progress={progress} /><FishingDisciplineTree stats={specializations} preferredMethod={preferences.main_technique} /></>
+            <><FishingProgressTree progress={progress} /></>
           ) : (
             <div className="panel p-5 text-sm text-zinc-400">Пока не удалось загрузить ветку достижений. Попробуй обновить страницу.</div>
           )}
