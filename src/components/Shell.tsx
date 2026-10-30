@@ -112,18 +112,18 @@ export function Shell({ children }: { children: ReactNode }) {
       <a href="#zapruda-main-content" className="zapruda-skip-link">Перейти к содержимому</a>
       <ActivityTracker />
       <header className="sticky top-0 z-50 border-b border-[#D7FF35]/15 bg-[#090C09]/98">
-        <div className="mx-auto flex h-[64px] max-w-5xl items-center justify-between gap-3 px-4 lg:px-5">
-          <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0 lg:mr-2">
+        <div className="mx-auto flex h-[64px] max-w-3xl items-center justify-between gap-2 px-4 sm:px-6">
+          <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0">
             <Wordmark />
           </Link>
-          <nav aria-label="Основная навигация" className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 rounded-xl border border-[#D7FF35]/20 bg-black/35 px-1 py-1 shadow-[0_0_14px_rgba(215,255,53,0.08)] xl:flex">
+          <nav aria-label="Основная навигация" className="hidden min-w-0 flex-1 items-center justify-center gap-0 rounded-lg border border-[#D7FF35]/40 bg-[#10150D] px-0.5 py-1 shadow-[0_0_16px_rgba(215,255,53,0.11)] lg:flex">
             {desktopNav.map(({ to, label, Icon }) => (
               <Link
                 key={to}
                 to={to}
                 activeOptions={{ exact: true }}
-                className="group relative inline-flex items-center gap-1.5 rounded-lg px-2 py-2 text-[12px] font-semibold text-[#A5ADA1] transition hover:bg-white/[0.05] hover:text-white"
-                activeProps={{ className: "group relative inline-flex items-center gap-1.5 rounded-lg border border-[#D7FF35]/25 bg-[#D7FF35]/10 px-2 py-2 text-[12px] font-bold text-[#D7FF35]" }}
+                className="group relative inline-flex items-center gap-1 rounded-md px-1.5 py-2 text-[12px] font-bold text-[#A5ADA1] transition hover:bg-white/[0.05] hover:text-white"
+                activeProps={{ className: "group relative inline-flex items-center gap-1 rounded-md border border-[#D7FF35]/40 bg-[#D7FF35]/15 px-1.5 py-2 text-[12px] font-extrabold text-[#D7FF35]" }}
               >
                 <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />
                 {label}
@@ -131,7 +131,7 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-          <div className="flex shrink-0 items-center gap-2 xl:ml-2">
+          <div className="flex shrink-0 items-center gap-1.5">
             {isAdmin && pendingClubs > 0 && <Link to="/moderation" className="inline-flex items-center gap-1 rounded-lg border border-[#D7FF35]/50 px-2 py-2 text-xs font-bold text-[#D7FF35]" aria-label={"Новые заявки на клубы: "+pendingClubs}>Клубы · {pendingClubs}</Link>}
             {isSignedIn ? (
               <>
@@ -146,7 +146,7 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             )}
             <details className="relative group">
-              <summary aria-label="Открыть список разделов" aria-controls="zapruda-extra-nav" className="inline-flex size-10 cursor-pointer list-none items-center justify-center rounded-lg border border-[#D7FF35]/30 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 [&::-webkit-details-marker]:hidden">
+              <summary aria-label="Открыть список разделов" aria-controls="zapruda-extra-nav" className="inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-lg border border-[#D7FF35]/30 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 [&::-webkit-details-marker]:hidden">
                 <Menu className="size-5 group-open:hidden" aria-hidden="true" />
                 <X className="hidden size-5 group-open:block" aria-hidden="true" />
               </summary>
