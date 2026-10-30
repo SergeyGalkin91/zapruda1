@@ -8,7 +8,7 @@ type Stored = { active: Trip | null; history: Trip[] };
 const key = (userId: string) => "zapruda.trip-tracker.v1." + userId;
 const empty: Stored = { active: null, history: [] };
 const elapsed = (t: Trip, now: number) => t.activeMs + (t.runningSince === null ? 0 : Math.max(0, now - t.runningSince));
-const duration = (ms: number) => { const n = Math.floor(ms / 60000); return `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`; };
+const duration = (ms: number) => { const n = Math.floor(ms / 1000); return [Math.floor(n / 3600), Math.floor(n % 3600 / 60), n % 60].map(v => String(v).padStart(2, "0")).join(":"); };
 function distance(a: Point, b: Point) {
   const rad = Math.PI / 180;
   const dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
@@ -40,7 +40,7 @@ function FishingRouteMap({ points }: { points: Point[] }) {
   const [ready, setReady] = useState(false);
   const [mapError, setMapError] = useState("");
   const key = getKey();
-  const canMap = points.length >= 2;
+  const canMap = points.length >= 1;
   useEffect(() => {
     if (!key || !canMap || !holder.current) return;
     let active = true;
@@ -57,14 +57,18 @@ function FishingRouteMap({ points }: { points: Point[] }) {
   useEffect(() => {
     if (!ready || !map.current || !api.current) return;
     map.current.geoObjects.removeAll();
-    const line = new api.current.Polyline(points.map(p => [p.lat, p.lon]), { hintContent: "Мой рыболовный маршрут" },
-      { strokeColor: "#D7FF35", strokeWidth: 5, strokeOpacity: 0.9 });
-    map.current.geoObjects.add(line);
+    if (points.length >= 2) {
+      const line = new api.current.Polyline(points.map(p => [p.lat, p.lon]), { hintContent: "Мой рыболовный маршрут" },
+        { strokeColor: "#D7FF35", strokeWidth: 5, strokeOpacity: 0.9 });
+      map.current.geoObjects.add(line);
+    }
+    if (points.length) map.current.setCenter([points[points.length - 1].lat, points[points.length - 1].lon]);
   }, [points, ready]);
   return <div className="space-y-2">
     {key && canMap && <div ref={holder} className="h-64 w-full overflow-hidden rounded-xl border border-white/15 bg-[#0B170E] sm:h-80"
       aria-label="Маршрут рыбалки на Яндекс Картах" />}
     {(!ready || !key || !canMap) && <RoutePreview points={points}/>}
+    {points.length === 1 && <p className="text-xs text-zinc-400">Первая GPS-точка получена. Начни движение: после второй точки появится линия маршрута.</p>}
     {mapError && <p className="text-xs text-amber-200">Яндекс Карты: {mapError}. Показана схема маршрута.</p>}
     {key && ready && <p className="text-xs text-zinc-500">Маршрут показан на Яндекс Картах. Координаты передаются поставщику карты.</p>}
     {!key && canMap && <p className="text-xs text-zinc-500">Для отображения трека поверх Яндекс Карт нужен API-ключ в настройках разработчика. Пока показана схема.</p>}
@@ -164,12 +168,14 @@ export function FishingSessionTracker({ userId, serverSession }: { userId: strin
     <h2 className="mt-2 flex items-center gap-2 text-xl font-bold"><Clock3 className="size-5 text-[#D7FF35]"/> Трекер рыбалки</h2>
     <p className="mt-2 text-sm leading-6 text-zinc-400">GPS-маршрут серверной рыболовной сессии. Управление таймером находится выше.</p>
     <div className="mt-4 grid grid-cols-2 gap-3">
-      <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="font-mono text-3xl font-bold tabular-nums text-[#D7FF35]">{active ? duration(elapsed(active, now)) : "00:00"}</p><p className="text-xs text-zinc-400">Часы : минуты</p></div>
+      <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="font-mono text-3xl font-bold tabular-nums text-[#D7FF35]">{active ? duration(elapsed(active, now)) : "00:00:00"}</p><p className="text-xs text-zinc-400">Часы : минуты : секунды (GPS-трекер)</p></div>
       <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="font-mono text-3xl font-bold tabular-nums">{(active?.distanceM ?? 0) / 1000 < 10 ? ((active?.distanceM ?? 0) / 1000).toFixed(2) : ((active?.distanceM ?? 0) / 1000).toFixed(1)} км</p><p className="text-xs text-zinc-400">Пройдено по GPS</p></div>
     </div>
     {gpsError && <p role="status" className="mt-3 text-xs text-amber-200">{gpsError}. Таймер продолжает работать.</p>}
+    {!trip && <p className="mt-5 text-sm text-zinc-400">Нажми «Начать рыбалку» выше, затем разреши доступ к геопозиции. Карта появится после получения GPS-точки.</p>}
     {trip && <div className="mt-5 space-y-3">
       <h3 className="flex items-center gap-2 font-bold"><MapPinned className="size-4 text-[#D7FF35]"/> {active ? "Текущий трек" : "Последний завершённый трек"}</h3>
+      <p className="text-xs text-zinc-400">GPS-точек: {trip.points.length}. {trip.points.length === 0 ? "Разреши геолокацию в браузере и дождись определения координат. На компьютере без GPS маршрут может не записываться." : "Маршрут хранится только на этом устройстве."}</p>
       <FishingRouteMap points={trip.points}/>
       <div className="flex flex-wrap gap-2">
         <button type="button" className="btn-ghost text-xs" disabled={!trip.points.length} onClick={() => void exportTrip(trip, false)}><Download className="size-4"/> Скачать GPX</button>
