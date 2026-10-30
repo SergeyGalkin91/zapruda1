@@ -588,7 +588,9 @@ function Profile() {
           )}
 
           {userId && <FishingSessionTracker userId={userId} />}
-          <ActivityAchievements />
+          <div id="zapruda-achievements" className="scroll-mt-24">
+            <ActivityAchievements />
+          </div>
 
           <section aria-label="Обратная связь и управление аккаунтом" className="mt-10 mb-6 space-y-5 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7">
             <div className="flex flex-wrap items-center justify-between gap-4">
