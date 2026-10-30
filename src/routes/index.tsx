@@ -196,6 +196,7 @@ function Feed() {
   const PAGE_SIZE = 15;
   const [reports, setReports] = useState<Report[]>([]);
   const [photosByReport, setPhotosByReport] = useState<Record<string, string[]>>({});
+  const [commentCounts,setCommentCounts]=useState<Record<string,number>>({});
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -231,6 +232,10 @@ function Feed() {
 
       if (reset) setPhotosByReport({});
       if (page.length) {
+        const {data:commentRows}=await supabase.from("comments").select("report_id").in("report_id",page.map(r=>r.id));
+        const nextCounts:Record<string,number>={};
+        for(const comment of commentRows??[]) nextCounts[comment.report_id]=(nextCounts[comment.report_id]??0)+1;
+        setCommentCounts(old=>reset?nextCounts:{...old,...nextCounts});
         // The photo table is optional until its migration is applied.
         // Never let a missing gallery backend prevent fishing reports from loading.
         const { data: photoRows, error: photoError } = await supabase
@@ -323,7 +328,7 @@ function Feed() {
             <ReportPhotoGallery photos={photosByReport[report.id] ?? []} title={report.title} />
             {report.location_name && <p className="text-xs text-zinc-400">📍 {report.location_name}</p>}
             <ReactionBar reportId={report.id} />
-            <Link to="/reports/$id" params={{id:report.id}} className="inline-flex text-sm text-zinc-300 underline underline-offset-4">💬 Комментарии и вопросы</Link>
+            <Link to="/reports/$id" params={{id:report.id}} className="inline-flex text-sm text-zinc-300 underline underline-offset-4">💬 Комментарии ({commentCounts[report.id]??0}) · вопросы</Link>
           </article>
         );
       })}
