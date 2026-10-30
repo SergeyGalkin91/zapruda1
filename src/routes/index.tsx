@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { ReactionBar } from "@/components/ReactionBar";
-import { DailyFishingBrief } from "@/components/DailyFishingBrief";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -197,6 +196,7 @@ function Feed() {
   const PAGE_SIZE = 15;
   const [reports, setReports] = useState<Report[]>([]);
   const [photosByReport, setPhotosByReport] = useState<Record<string, string[]>>({});
+  const [commentCounts,setCommentCounts]=useState<Record<string,number>>({});
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -232,6 +232,10 @@ function Feed() {
 
       if (reset) setPhotosByReport({});
       if (page.length) {
+        const {data:commentRows}=await supabase.from("comments").select("report_id").in("report_id",page.map(r=>r.id));
+        const nextCounts:Record<string,number>={};
+        for(const comment of commentRows??[]) nextCounts[comment.report_id]=(nextCounts[comment.report_id]??0)+1;
+        setCommentCounts(old=>reset?nextCounts:{...old,...nextCounts});
         // The photo table is optional until its migration is applied.
         // Never let a missing gallery backend prevent fishing reports from loading.
         const { data: photoRows, error: photoError } = await supabase
@@ -286,21 +290,10 @@ function Feed() {
 
   return (
     <Shell>
-      <section className="relative mb-8 overflow-hidden rounded-3xl border border-lime-300/15 bg-[#10120c] px-5 py-6 sm:px-7 sm:py-8">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-lime-300/[0.07] blur-3xl" />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">🎣 Спиннинг · отчёты</p>
-          <h1 className="mt-2 text-3xl font-bold md:text-4xl">Лента рыбалок 🐟</h1>
-          <p className="mt-2 max-w-md text-muted-foreground">Реальные выезды: где, на что и при какой погоде клевало. Делись победами и фейлами 😂</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link to="/reports/new" className="btn-primary self-start">🎣 Новый отчёт</Link>
-          <Link to="/partners" className="inline-flex items-center justify-center rounded-xl border border-lime-300/35 px-4 py-2.5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10">🤝 Найти напарника</Link>
-        </div>
-        </div>
-      </section>
-      <DailyFishingBrief />
+      <header className="mx-auto mb-6 flex max-w-3xl flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
+        <div><p className="text-[11px] font-black uppercase tracking-[.25em] text-[#D7FF35]">ZAPRUDA / COMMUNITY</p><h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white">Лента</h1><p className="mt-2 text-sm text-zinc-400">Реальные отчёты. Уловы. Обсуждения.</p></div>
+        <Link to="/reports/new" className="btn-primary inline-flex">+ Новый отчёт</Link>
+      </header>
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">{error}</div>}
       {!loading && !error && reports.length === 0 && (
@@ -311,12 +304,12 @@ function Feed() {
           <Link to="/reports/new" className="btn-primary mt-4 inline-flex">Создать отчёт</Link>
         </div>
       )}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+      <div className="mx-auto max-w-3xl">
         <div className="min-w-0">
       {reports.map((report) => {
         const name = report.profiles?.display_name || report.profiles?.username || "Рыболов";
         return (
-          <article key={report.id} className="panel mb-5 space-y-4 p-5">
+          <article key={report.id} className="panel mb-4 space-y-3 border-white/10 bg-[#141814] p-4 sm:p-5">
             <div className="flex items-start gap-3">
               {report.profiles?.avatar_url
                 ? <img src={report.profiles.avatar_url} alt="" className="size-11 rounded-full object-cover" />
@@ -329,34 +322,13 @@ function Feed() {
             </div>
             <div>
               <h2 className="text-lg font-bold">{report.title}</h2>
-              {report.body && <p className="mt-2 whitespace-pre-wrap text-sm">{report.body}</p>}
+              {report.body && <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm text-zinc-300">{report.body}</p>}
+              <Link to="/reports/$id" params={{id:report.id}} className="mt-3 inline-flex text-sm font-semibold text-[#D7FF35]">Читать отчёт и обсуждение →</Link>
             </div>
             <ReportPhotoGallery photos={photosByReport[report.id] ?? []} title={report.title} />
-            <div className="flex flex-wrap gap-2 text-xs">
-              {report.location_name && (
-                <div className="space-y-2">
-                  <a href={`https://yandex.ru/maps/?text=${encodeURIComponent(report.location_name)}`} target="_blank" rel="noreferrer" className="inline-flex rounded-full bg-secondary px-3 py-1.5 text-xs transition hover:text-primary">📍 {report.location_name} · Открыть в Яндекс Картах ↗</a>
-                  <div className="overflow-hidden rounded-xl border border-border/70">
-                    <iframe
-                      title={`Карта: ${report.location_name}`}
-                      src={`https://yandex.ru/map-widget/v1/?text=${encodeURIComponent(report.location_name)}`}
-                      width="100%"
-                      height="220"
-                      frameBorder="0"
-                      allowFullScreen
-                      loading="lazy"
-                      className="block w-full"
-                    />
-                  </div>
-                </div>
-              )}
-              {report.weather_summary && <span className="rounded-full bg-secondary px-3 py-1.5">🌦️ {report.weather_summary}</span>}
-              {report.air_temperature_c != null && <span className="rounded-full bg-secondary px-3 py-1.5">🌡️ {report.air_temperature_c}°C</span>}
-              {report.wind_direction && <span className="rounded-full bg-secondary px-3 py-1.5">💨 {report.wind_direction}{report.wind_speed_ms != null ? `, ${report.wind_speed_ms} м/с` : ""}</span>}
-              {report.pressure_hpa != null && <span className="rounded-full bg-secondary px-3 py-1.5">🧭 {Math.round(report.pressure_hpa / 1.33322)} мм рт. ст.</span>}
-            </div>
+            {report.location_name && <p className="text-xs text-zinc-400">📍 {report.location_name}</p>}
             <ReactionBar reportId={report.id} />
-            <ReportComments reportId={report.id} />
+            <Link to="/reports/$id" params={{id:report.id}} className="inline-flex text-sm text-zinc-300 underline underline-offset-4">💬 Комментарии ({commentCounts[report.id]??0}) · вопросы</Link>
           </article>
         );
       })}
@@ -365,7 +337,7 @@ function Feed() {
       {!loading && !loadingMore && !hasMore && reports.length > 0 && <p className="py-6 text-center text-xs text-muted-foreground">Ты в курсе всех отчётов на данный момент 🎣</p>}
       {error && !loading && <button type="button" className="btn-ghost mt-3" onClick={() => void loadPage(reports.length === 0)}>Повторить загрузку</button>}
         </div>
-        <aside className="hidden space-y-4 lg:block">
+        <aside className="hidden">
           <div className="panel border-lime-300/15 p-5"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">НАШЕ СООБЩЕСТВО</p><h2 className="mt-3 text-xl font-bold [text-shadow:0_1px_8px_rgba(215,255,0,0.10)]">Не просто улов. Свои на одной волне.</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Обмениваемся опытом, честно рассказываем о рыбалках, находим напарников и помогаем друг другу становиться лучше.</p><Link to="/reports/new" className="btn-primary mt-4 w-full">＋ Поделиться историей</Link></div>
           <div className="panel p-4"><h3 className="font-semibold">Подсказка дня 🎯</h3><p className="mt-2 text-sm text-muted-foreground">Укажи приманку, глубину и проводку в отчёте — другим рыболовам будет проще повторить результат.</p></div>
         </aside>

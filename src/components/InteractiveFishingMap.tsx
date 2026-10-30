@@ -4,9 +4,9 @@ type Point={latitude:number;longitude:number};
 type DisplayMark=Point&{id:string;title:string;kind:string};
 type YandexPlacemark={};
 type YandexMap={destroy:()=>void;geoObjects:{add:(p:YandexPlacemark)=>void;removeAll:()=>void};events:{add:(name:string,fn:(event:any)=>void)=>void};setCenter:(coords:number[],zoom:number)=>void};
-type YandexApi={ready:(fn:()=>void)=>void;Map:new(node:HTMLElement,opts:{center:number[];zoom:number;controls?:string[]})=>YandexMap;Placemark:new(coords:number[],props?:Record<string,unknown>,opts?:Record<string,unknown>)=>YandexPlacemark};
+export type YandexApi={Polyline:new(coords:number[][],props?:Record<string,unknown>,opts?:Record<string,unknown>)=>YandexPlacemark;ready:(fn:()=>void)=>void;Map:new(node:HTMLElement,opts:{center:number[];zoom:number;controls?:string[]})=>YandexMap;Placemark:new(coords:number[],props?:Record<string,unknown>,opts?:Record<string,unknown>)=>YandexPlacemark};
 declare global {interface Window {ymaps?:YandexApi}}
-const getKey=()=>{
+export const getKey=()=>{
  if(typeof window==="undefined")return "";
  const bundled=(import.meta.env.VITE_YANDEX_MAPS_API_KEY||"").trim();
  let browserKey="";
@@ -14,7 +14,7 @@ const getKey=()=>{
  return bundled||browserKey;
 };
 let pending:Promise<YandexApi>|null=null;
-function loadYandex(key:string):Promise<YandexApi>{
+export function loadYandex(key:string):Promise<YandexApi>{
  if(typeof window==="undefined")return Promise.reject(new Error("Требуется браузер."));
  if(window.ymaps)return Promise.resolve(window.ymaps);
  if(!pending){

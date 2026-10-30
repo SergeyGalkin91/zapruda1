@@ -13,7 +13,7 @@ export const Route = createFileRoute("/messages")({
 type Person = { id: string; username: string | null; display_name: string | null };
 type Thread = { id: string; requester_id: string; recipient_id: string; status: "pending" | "accepted" | "declined"; created_at: string };
 type Mark = { id: string; title: string; latitude: number; longitude: number };
-type Dm = { id: string; thread_id: string; sender_id: string; kind: "text" | "location"; body: string; location_title: string | null; latitude: number | null; longitude: number | null; created_at: string };
+type Dm = { id: string; thread_id: string; sender_id: string; kind: "text" | "location"; body: string; location_title: string | null; latitude: number | null; longitude: number | null; created_at: string; reply_to_id?:string|null };
 const db = supabase as any;
 const display = (p?: Person) => p?.display_name || p?.username || "Рыболов";
 const datetime = (s: string) => new Date(s).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -30,6 +30,8 @@ function Messages() {
   const [messages, setMessages] = useState<Dm[]>([]);
   const [filter, setFilter] = useState("");
   const [draft, setDraft] = useState("");
+  const [replyTo,setReplyTo]=useState<Dm|null>(null);
+  const [messageReactions,setMessageReactions]=useState<Record<string,{user_id:string;emoji:string}[]>>({});
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,10 +64,17 @@ function Messages() {
 
   const fetchMessages = useCallback(async (id: string) => {
     const { data, error: qerr } = await db.from("social_messages")
-      .select("id,thread_id,sender_id,kind,body,location_title,latitude,longitude,created_at")
+      .select("id,thread_id,sender_id,kind,body,location_title,latitude,longitude,created_at,reply_to_id")
       .eq("thread_id", id).order("created_at", { ascending: true }).limit(200);
     if (qerr) setError("Не удалось загрузить переписку: " + qerr.message);
-    else setMessages((data ?? []) as Dm[]);
+    else {setMessages((data??[]) as Dm[]);
+      const ids=(data??[]).map((r:{id:string})=>r.id);
+      if(ids.length){const {data:reactRows}=await db.from("social_message_reactions").select("message_id,user_id,emoji").in("message_id",ids);
+        const grouped:Record<string,{user_id:string;emoji:string}[]>={};
+        (reactRows??[]).forEach((r:{message_id:string;user_id:string;emoji:string})=>(grouped[r.message_id]??=[]).push(r));
+        setMessageReactions(grouped);
+      }else setMessageReactions({});
+    }
   }, []);
 
   useEffect(() => {
@@ -77,7 +86,8 @@ function Messages() {
       }).subscribe();
     const update = () => { void refresh(); if (activeId) void fetchMessages(activeId); };
     window.addEventListener("focus", update);
-    return () => { window.removeEventListener("focus", update); void supabase.removeChannel(channel); };
+    const poll = window.setInterval(() => { if (!document.hidden) update(); }, 12000);
+    return () => { window.clearInterval(poll); window.removeEventListener("focus", update); void supabase.removeChannel(channel); };
   }, [refresh, fetchMessages, activeId]);
 
   useEffect(() => {
@@ -141,11 +151,11 @@ function Messages() {
     if (!uid || !active || active.status !== "accepted" || !draft.trim() || busy) return;
     setBusy(true); setError("");
     const { error: e2 } = await db.from("social_messages").insert({
-      thread_id: active.id, sender_id: uid, kind: "text", body: draft.trim(),
+      thread_id: active.id, sender_id: uid, kind: "text", body: draft.trim(), reply_to_id:replyTo?.id??null,
     });
     setBusy(false);
     if (e2) { setError("Сообщение не отправлено: " + e2.message); return; }
-    setDraft(""); await fetchMessages(active.id);
+    setDraft("");setReplyTo(null); await fetchMessages(active.id);
   }
 
   async function sendMark() {
@@ -164,6 +174,13 @@ function Messages() {
     await fetchMessages(active.id);
   }
 
+  async function react(messageId:string,emoji:string){
+    if(!uid||!active)return;
+    const previous=(messageReactions[messageId]??[]).find(r=>r.user_id===uid);
+    if(previous){const {error:e}=await db.from("social_message_reactions").delete().eq("message_id",messageId).eq("user_id",uid);if(e){setError(e.message);return;}}
+    if(previous?.emoji!==emoji){const {error:e}=await db.from("social_message_reactions").insert({message_id:messageId,user_id:uid,emoji});if(e){setError(e.message);return;}}
+    await fetchMessages(active.id);
+  }
   return <Shell>
     <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
       <div><p className="text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">ZAPRUDA / ОБЩЕНИЕ</p><h1 className="mt-1 text-3xl font-black text-white">Личные сообщения</h1><p className="mt-2 text-sm text-zinc-400">Переписка только после принятия запроса. Подписки не открывают личный чат автоматически.</p></div>
@@ -204,9 +221,11 @@ function Messages() {
         </div>
         <div className="zapruda-chat-window min-h-64 flex-1 space-y-3 overflow-y-auto p-4">
           {active?.status === "accepted" && messages.map(m => <div key={m.id} className={"zapruda-chat-bubble max-w-[90%] rounded-2xl border p-3 text-sm " + (m.sender_id === uid ? "zapruda-chat-own-bubble ml-auto border-[#D7FF35]/30 bg-[#D7FF35]/10" : "border-white/10 bg-white/5")}>
+            <p className="mb-2 text-[11px] font-bold text-[#D7FF35]">{m.sender_id===uid?"Вы":names.get(m.sender_id)||"Собеседник"}</p>
+            {m.reply_to_id&&<p className="mb-2 border-l-2 border-[#D7FF35] pl-2 text-xs text-zinc-400">{messages.find(x=>x.id===m.reply_to_id)?.body?.slice(0,90)??"Ответ на сообщение"}</p>}
             {m.kind === "location" && m.latitude !== null && m.longitude !== null ? <div><p className="flex items-center gap-2 font-bold text-[#D7FF35]"><MapPin className="size-4"/> {m.location_title}</p><p className="my-2 text-xs text-zinc-300">{m.latitude.toFixed(6)}, {m.longitude.toFixed(6)}</p>
               <a target="_blank" rel="noopener noreferrer" className="text-xs text-[#D7FF35] underline" href={"https://yandex.ru/maps/?pt=" + encodeURIComponent(m.longitude + "," + m.latitude) + "&z=15"}>Открыть на Яндекс Картах</a></div> : <p className="whitespace-pre-wrap break-words">{m.body}</p>}
-            <time className="mt-2 block text-[10px] text-zinc-500">{datetime(m.created_at)}</time></div>)}
+            <time className="mt-2 block text-[10px] text-zinc-500">{datetime(m.created_at)}</time><div className="mt-2 flex flex-wrap gap-2 text-xs"><button type="button" onClick={()=>setReplyTo(m)} className="underline text-zinc-400">Ответить</button>{["❤️","👍","🔥","😂"].map(emoji=><button type="button" key={emoji} onClick={()=>void react(m.id,emoji)} className={"rounded border px-1 "+((messageReactions[m.id]??[]).some(r=>r.user_id===uid&&r.emoji===emoji)?"border-[#D7FF35]":"border-white/10")}>{emoji} {(messageReactions[m.id]??[]).filter(r=>r.emoji===emoji).length||""}</button>)}</div></div>)}
           {active?.status === "accepted" && !messages.length && <p className="text-sm text-zinc-500">Напиши первое сообщение.</p>}
           {!active && <p className="text-sm text-zinc-500">Выбери собеседника слева или отправь запрос на переписку.</p>}
           {active?.status !== "accepted" && active && <p className="text-sm text-zinc-500">Нельзя отправлять сообщения до принятия запроса.</p>}
@@ -217,6 +236,7 @@ function Messages() {
             {marks.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
           </select><button className="btn-ghost inline-flex" type="button" disabled={!selectedMark || busy} onClick={() => void sendMark()}><MapPin className="size-4"/> Поделиться точкой</button></div>
           <p className="text-xs text-zinc-500">Координаты отправляются только после твоего подтверждения. Отправленную копию нельзя отозвать.</p>
+          {replyTo&&<div className="flex justify-between text-xs text-zinc-400"><span>Ответ: {replyTo.body.slice(0,90)}</span><button type="button" onClick={()=>setReplyTo(null)}>Отмена</button></div>}
           <form className="flex gap-2" onSubmit={sendText}><input className="field min-w-0 flex-1" placeholder="Сообщение…" value={draft} onChange={e => setDraft(e.target.value)} maxLength={2000}/><button type="submit" className="btn-primary inline-flex" disabled={!draft.trim() || busy}><Send className="size-4"/> Отправить</button></form>
         </div>}
       </section>

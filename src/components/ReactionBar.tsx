@@ -20,7 +20,7 @@ export function ReactionBar({
   reportId?: string;
 }) {
   const [counts, setCounts] = useState<Record<string, number>>({});
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(Boolean(reportId));
   const [busy, setBusy] = useState<string | null>(null);
@@ -49,9 +49,7 @@ export function ReactionBar({
       nextCounts[option.type] = rows.filter((row) => row.reaction_type === option.type).length;
     }
     setCounts(nextCounts);
-    setSelected(currentUserId
-      ? rows.filter((row) => row.user_id === currentUserId).map((row) => row.reaction_type)
-      : []);
+    setSelected(currentUserId ? (rows.find(row => row.user_id === currentUserId)?.reaction_type ?? null) : null);
     setLoading(false);
     setError("");
   }, [reportId]);
@@ -73,12 +71,7 @@ export function ReactionBar({
 
   const toggle = async (emoji: string, type: string) => {
     if (busy) return;
-    if (!reportId) {
-      const active = selected.includes(emoji);
-      setSelected((current) => active ? current.filter((x) => x !== emoji) : [...current, emoji]);
-      setCounts((current) => ({ ...current, [emoji]: Math.max(0, (current[emoji] ?? 0) + (active ? -1 : 1)) }));
-      return;
-    }
+    if (!reportId) return;
     if (!userId) {
       setError("Войди в аккаунт, чтобы ставить реакции.");
       return;
@@ -87,26 +80,17 @@ export function ReactionBar({
     setBusy(type);
     setError("");
     try {
-      const { data, error: findError } = await supabase
-        .from("reactions")
-        .select("id")
-        .eq("report_id", reportId)
-        .eq("user_id", userId)
-        .eq("reaction_type", type);
-
-      if (findError) throw findError;
-      const existing = data ?? [];
-      if (existing.length) {
-        const { error: deleteError } = await supabase
-          .from("reactions")
-          .delete()
-          .in("id", existing.map((row) => row.id));
-        if (deleteError) throw deleteError;
-      } else {
-        const { error: insertError } = await supabase
-          .from("reactions")
-          .insert({ report_id: reportId, user_id: userId, reaction_type: type });
-        if (insertError) throw insertError;
+      const { data, error: findError } = await supabase.from("reactions").select("id,reaction_type")
+        .eq("report_id",reportId).eq("user_id",userId);
+      if(findError) throw findError;
+      const existing=data??[];
+      if(existing.length){
+        const {error:deleteError}=await supabase.from("reactions").delete().eq("report_id",reportId).eq("user_id",userId);
+        if(deleteError) throw deleteError;
+      }
+      if(!existing.some(r=>r.reaction_type===type)){
+        const {error:insertError}=await supabase.from("reactions").insert({report_id:reportId,user_id:userId,reaction_type:type});
+        if(insertError)throw insertError;
       }
       await loadReactions();
     } catch (e) {
@@ -120,8 +104,8 @@ export function ReactionBar({
     <div>
       <div className="flex flex-wrap gap-2" aria-label="Реакции">
         {options.map(({ emoji, label, type }) => {
-          const isSelected = reportId ? selected.includes(type) : selected.includes(emoji);
-          const countKey = reportId ? type : emoji;
+          const isSelected = selected === type;
+          const countKey = type;
           return (
             <button
               key={emoji}

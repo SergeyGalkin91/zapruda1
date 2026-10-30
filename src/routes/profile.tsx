@@ -6,11 +6,8 @@ import {
   Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
-import { FishingProgressTree } from "@/components/FishingProgressTree";
-import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
 import { PrivateFishingMarks } from "@/components/PrivateFishingMarks";
-import { ActivityAchievements } from "@/components/ActivityAchievements";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import type { FishingSpecialization } from "@/lib/disciplines";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,6 +84,8 @@ type FeaturedGear = {
 function Profile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
+  const [guideSummary,setGuideSummary]=useState<{title:string;home_city:string;service_mode:string;about:string}|null>(null);
+  const [accountRole,setAccountRole]=useState<"angler"|"guide">("angler");
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
@@ -166,8 +165,11 @@ function Profile() {
     }
     setUserId(auth.user.id);
     setEmail(auth.user.email ?? "");
+    setAccountRole(auth.user.user_metadata?.account_role === "guide" ? "guide" : "angler");
     void loadFeaturedGear(auth.user.id);
 
+    setGuideSummary(null);
+    void supabase.from("guide_profiles").select("title,home_city,service_mode,about").eq("user_id",auth.user.id).maybeSingle().then(({data})=>setGuideSummary(data??null));
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
       supabase.from("profiles").select("username,display_name,bio,avatar_url,chat_city").eq("id", auth.user.id).maybeSingle(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
@@ -185,6 +187,13 @@ function Profile() {
       setShareChatCity(Boolean(profileResult.data.chat_city));
     }
 
+    // First-time angler onboarding: open the questionnaire automatically.
+    // Legacy accounts without an explicit role are unaffected.
+    if (auth.user.user_metadata?.account_role === "angler" &&
+        auth.user.user_metadata?.onboarding_complete !== true &&
+        !prefsResult.data?.home_city && !prefsResult.data?.fishing_notes) {
+      setEditing(true);
+    }
     if (prefsResult.error) {
       setError((prev) => prev + " Не удалось загрузить рыболовную анкету: " + prefsResult.error.message);
     } else if (prefsResult.data) {
@@ -318,47 +327,42 @@ function Profile() {
       setError("Имя сохранено, но настройки рыбалки не обновлены: " + prefsError.message);
       return;
     }
+    // A successful saved profile ends the new-member setup.
+    const { error: metadataError } = await supabase.auth.updateUser({
+      data: { onboarding_complete: true },
+    });
+    if (metadataError) console.warn("Не удалось отметить завершение анкеты:", metadataError.message);
     setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
     setEditing(false);
   }
 
   return (
     <Shell>
-      <section className="relative mb-6 overflow-hidden rounded-3xl border border-[#D7FF35]/20 bg-gradient-to-r from-[#1B2416] via-[#121712] to-[#0D100C] p-5 sm:p-7">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-60 rounded-full bg-[#D7FF35]/10 blur-3xl" />
-        <p className="relative text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">ZAPRUDA / Профиль рыболова</p>
-        <div className="relative mt-4 flex flex-wrap items-center gap-4">
+      <section className="mb-6 rounded-xl border border-white/10 bg-[#111611] p-5 sm:p-7">
+        <div className="flex flex-wrap items-center gap-4">
           {avatarUrl
-            ? <img src={avatarUrl} alt="" className="size-20 rounded-full border-2 border-[#D7FF35]/40 object-cover" />
-            : <div className="flex size-20 items-center justify-center rounded-full border border-[#D7FF35]/35 bg-[#D7FF35]/10"><UserRound className="size-9 text-[#D7FF35]" /></div>}
+            ? <img src={avatarUrl} alt="" className="size-16 rounded-lg border border-[#D7FF35]/30 object-cover" />
+            : <div className="flex size-16 items-center justify-center rounded-lg border border-[#D7FF35]/30 bg-[#D7FF35]/5"><UserRound className="size-8 text-[#D7FF35]" /></div>}
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-extrabold text-white sm:text-3xl">{displayName || username || "Мой рыболовный профиль"}</h1>
-            <p className="mt-1 text-sm text-[#A6B1A0]">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
-            <p className="mt-2 text-xs text-zinc-400">{bio || "Расскажи, где и на что любишь ловить."}</p>
+            <p className="text-[11px] font-black uppercase tracking-[.20em] text-[#D7FF35]">ZAPRUDA / {accountRole==="guide"?"ГИД":"РЫБАК"}</p>
+            <h1 className="mt-1 text-2xl font-black text-white">{displayName||username||"Мой профиль"}</h1>
+            <p className="mt-1 text-sm text-zinc-400">{username?"@"+username:"Никнейм не указан"}{(accountRole==="guide"?guideSummary?.home_city:preferences.home_city)?" · "+(accountRole==="guide"?guideSummary?.home_city:preferences.home_city):""}</p>
           </div>
-          <div className="flex max-w-full flex-col items-start gap-3 sm:items-end">
-            <div className="flex max-w-full flex-wrap gap-2 sm:justify-end">
-              {preferences.fishing_methods.map(method => {
-                const item = FISHING_DISCIPLINES.find(entry => entry.code === method);
-                return <span key={method} className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]">
-                  {item?.icon ?? "🎣"} {item?.title ?? method}
-                </span>;
-              })}
-            </div>
-            {userId && <a href="#my-gear-sets" className="group block max-w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-left transition hover:border-[#D7FF35]/40 sm:max-w-[345px]">
-              <span className="flex items-center gap-2 text-xs font-bold text-[#D7FF35]">
-                <Fish className="size-4" aria-hidden="true" />
-                {featuredGear ? "Чем ловлю · " + featuredGear.title : "Мои рыболовные комплекты"}
-              </span>
-              {featuredGear ? <span className="mt-2 block space-y-1 text-xs leading-5 text-zinc-200">
-                <span className="block break-words"><strong className="font-bold text-white">Удилище:</strong> {featuredGear.rod}</span>
-                <span className="block break-words"><strong className="font-bold text-white">Катушка:</strong> {featuredGear.reel}</span>
-                {featuredGear.line && <span className="block break-words"><strong className="font-bold text-white">Шнур:</strong> {featuredGear.line}</span>}
-                {featuredGear.fishingMethod && <span className="block text-zinc-400">{featuredGear.fishingMethod}</span>}
-              </span> : <span className="mt-1 block text-xs text-zinc-400">Собрать первый комплект из моих снастей →</span>}
-            </a>}
-          </div>
+          <span className="rounded-md border border-[#D7FF35]/40 px-3 py-1.5 text-xs font-extrabold uppercase tracking-widest text-[#D7FF35]">{accountRole==="guide"?"GUIDE":"ANGLER"}</span>
         </div>
+        {accountRole==="guide" ? (
+          guideSummary ? <div className="mt-5 border-t border-white/10 pt-5">
+            <h2 className="text-xl font-black">{guideSummary.title}</h2>
+            <p className="mt-2 text-sm text-zinc-300">{guideSummary.service_mode==="shore"?"Береговой гид":guideSummary.service_mode==="boat"?"Лодочный гид":"Берег и лодка"}</p>
+            {guideSummary.about&&<p className="mt-2 max-w-2xl whitespace-pre-wrap text-sm leading-6 text-zinc-400">{guideSummary.about}</p>}
+            <Link to="/guides" className="btn-ghost mt-4 inline-flex">Редактировать услуги гида</Link>
+          </div> : <div className="mt-5 border-t border-white/10 pt-4"><p className="text-sm text-zinc-400">Анкета гида ещё не заполнена.</p><Link to="/guides" className="btn-primary mt-3 inline-flex">Завершить профиль гида</Link></div>
+        ) : <div className="mt-5 grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-2">
+          <div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Способ ловли</p><p className="mt-1 text-sm text-white">{preferences.fishing_methods.join(", ")||"Не указан"}</p></div>
+          <div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Интересующая рыба</p><p className="mt-1 text-sm text-white">{preferences.target_species.join(", ")||"Не указана"}</p></div>
+          <div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Формат</p><p className="mt-1 text-sm text-white">{preferences.fishing_access||"Не указан"}</p></div>
+          <div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Основной комплект</p><p className="mt-1 text-sm text-white">{featuredGear?featuredGear.rod+" · "+featuredGear.reel:"Пока не добавлен"}</p></div>
+        </div>}
       </section>
 
       {loading && <div className="panel p-6 text-zinc-400">Загружаем рыболовный профиль и достижения…</div>}
@@ -371,7 +375,7 @@ function Profile() {
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">01 / Анкета</p>
-                <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">Твой рыболовный профиль</h2>
+                <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">{accountRole==="guide"?"Твой профиль · Гид":"Твой профиль · Рыбак"}</h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">Именно эти данные используются для персонального подбора мест: город, транспорт, способы ловли, приманки и снасти.</p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -576,17 +580,7 @@ function Profile() {
             onGearSetsChange={() => void loadFeaturedGear(userId)}
           />
 
-          <div className="mb-6 mt-6 flex flex-wrap gap-3">
-            <Link to="/guides" className="btn-ghost inline-flex">Кабинет рыболовного гида</Link>
-            <Link to="/spearfishing" className="btn-ghost inline-flex">Подводная охота</Link>
-          </div>
-          {progress ? (
-            <><FishingProgressTree progress={progress} /><FishingDisciplineTree stats={specializations} preferredMethod={preferences.main_technique} /></>
-          ) : (
-            <div className="panel p-5 text-sm text-zinc-400">Пока не удалось загрузить ветку достижений. Попробуй обновить страницу.</div>
-          )}
-
-          <ActivityAchievements />
+          <Link to="/achievements" className="btn-ghost mb-6 inline-flex">Мои достижения</Link>
 
           <section aria-label="Обратная связь и управление аккаунтом" className="mt-10 mb-6 space-y-5 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7">
             <div className="flex flex-wrap items-center justify-between gap-4">

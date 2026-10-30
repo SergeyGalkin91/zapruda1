@@ -26,7 +26,12 @@ export function GuideBookingRequest({guideId,guideName,available}:{guideId:strin
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
- useEffect(()=>{void supabase.auth.getUser().then(({data})=>setUid(data.user?.id||""));},[]);
+ useEffect(()=>{
+  let active=true;
+  void supabase.auth.getUser().then(({data})=>{if(active)setUid(data.user?.id||"");});
+  const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{if(active)setUid(session?.user?.id||"");});
+  return()=>{active=false;subscription.unsubscribe();};
+ },[]);
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();
   if(busy||!uid||uid===guideId||!available.includes(mode))return;
@@ -81,7 +86,7 @@ export function GuideBookingInbox(){
  const [methods,setMethods]=useState<Record<string,"bank_card"|"sbp">>({});
  const refresh=useCallback(async()=>{
    const {data:auth}=await supabase.auth.getUser();
-   if(!auth.user){setUid("");setLoading(false);return;}
+   if(!auth.user){setUid("");setItems([]);setQuotes({});setMethods({});setError("");setNotice("");setLoading(false);return;}
    const id=auth.user.id;setUid(id);
    const {data,error:e}=await db.from("guide_booking_inquiries")
      .select("id,customer_id,guide_id,service_mode,planned_at,meeting_text,customer_note,agreement_terms,amount_rub,commission_rub,guide_net_rub,status,payment_method,created_at")
@@ -90,8 +95,22 @@ export function GuideBookingInbox(){
    else {setItems((data??[]) as Booking[]);setError("");}
    setLoading(false);
  },[]);
- useEffect(()=>{void refresh();const onFocus=()=>void refresh();window.addEventListener("focus",onFocus);
-   return()=>window.removeEventListener("focus",onFocus);},[refresh]);
+ useEffect(()=>{
+   void refresh();
+   const onFocus=()=>void refresh();
+   window.addEventListener("focus",onFocus);
+   // Avoid awaiting Supabase auth methods inside its synchronous auth callback.
+   let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+   const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{
+     if(refreshTimer)clearTimeout(refreshTimer);
+     refreshTimer=setTimeout(()=>{void refresh();},0);
+   });
+   return()=>{
+     if(refreshTimer)clearTimeout(refreshTimer);
+     window.removeEventListener("focus",onFocus);
+     subscription.unsubscribe();
+   };
+ },[refresh]);
  async function quote(item:Booking){
    const draft=quotes[item.id];
    if(!draft)return;

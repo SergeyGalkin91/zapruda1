@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship,
-  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined, ShieldCheck,
+  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, MessagesSquare,
+  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined, ShieldCheck, Trophy,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,25 +11,29 @@ import { applyAppearance, loadAppearance } from "@/lib/appearance";
 
 const desktopNav = [
   { to: "/", label: "Лента", Icon: House },
-  { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
+  { to: "/fishing-map", label: "Карта", Icon: Compass },
   { to: "/partners", label: "Напарники", Icon: Users },
   { to: "/communities", label: "Клубы", Icon: Compass },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
-  { to: "/messages", label: "Личные", Icon: MessageCircle },
-  { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
+  { to: "/messages", label: "Личные", Icon: MessagesSquare },
 ] as const;
 
 const mobileNav = [
   { to: "/", label: "Лента", Icon: House },
   { to: "/reports/new", label: "Отчёт", Icon: Plus },
+  { to: "/fishing-map", label: "Карта", Icon: Compass },
   { to: "/partners", label: "Напарники", Icon: Users },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
   { to: "/profile", label: "Профиль", Icon: UserRound },
 ] as const;
 
 const otherNav = [
-  { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
+  { to: "/achievements", label: "Достижения", Icon: Trophy },
+  { to: "/messages", label: "Личные сообщения", Icon: MessagesSquare },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
+  { to: "/reviews", label: "Отзывы и репутация", Icon: ShieldCheck },
+  { to: "/beta", label: "Тестирование и обратная связь", Icon: ShieldCheck },
+
   { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
   { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
@@ -40,6 +44,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [authError, setAuthError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pendingClubs, setPendingClubs] = useState(0);
 
   useEffect(() => { applyAppearance(loadAppearance()); }, []);
 
@@ -86,8 +91,25 @@ export function Shell({ children }: { children: ReactNode }) {
     return () => { active = false; };
   }, [isSignedIn]);
 
+  useEffect(() => {
+    if (!isAdmin) { setPendingClubs(0); return; }
+    let live = true;
+    const refresh = async () => {
+      const { count, error } = await (supabase as any).from("club_creation_requests")
+        .select("id", { count: "exact", head: true }).eq("status", "awaiting_payment").eq("admin_approved", false);
+      if (live && !error) setPendingClubs(count ?? 0);
+    };
+    void refresh();
+    const interval = window.setInterval(() => { if (!document.hidden) void refresh(); }, 30000);
+    const channel = supabase.channel("admin-club-requests")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "club_creation_requests" }, () => void refresh())
+      .subscribe();
+    return () => { live = false; window.clearInterval(interval); void supabase.removeChannel(channel); };
+  }, [isAdmin]);
+
   return (
     <div className="min-h-screen pb-24 xl:pb-0">
+      <a href="#zapruda-main-content" className="zapruda-skip-link">Перейти к содержимому</a>
       <ActivityTracker />
       <header className="sticky top-0 z-50 border-b border-white/[0.09] bg-[#0D100C]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
@@ -110,6 +132,7 @@ export function Shell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex shrink-0 items-center gap-2">
+            {isAdmin && pendingClubs > 0 && <Link to="/moderation" className="inline-flex items-center gap-1 rounded-lg border border-[#D7FF35]/50 px-2 py-2 text-xs font-bold text-[#D7FF35]" aria-label={"Новые заявки на клубы: "+pendingClubs}>Клубы · {pendingClubs}</Link>}
             {isSignedIn ? (
               <>
                 <a href="/profile" className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3">
@@ -156,7 +179,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <Link to="/moderation"
                 className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.07]">
                 <ShieldCheck className="size-4 text-[#D7FF35]" aria-hidden="true" />
-                Модерация заявок
+                Модерация заявок {pendingClubs > 0 ? "(" + pendingClubs + ")" : ""}
                 <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
               </Link>
             )}
@@ -173,7 +196,7 @@ export function Shell({ children }: { children: ReactNode }) {
         {authError && <div role="alert" className="mx-auto max-w-7xl px-4 py-2 text-sm text-red-300">{authError}</div>}
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
+      <main id="zapruda-main-content" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
       <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-white/10 px-4 py-5 text-xs text-zinc-500 sm:px-6">
         <span>ZAPRUDA COMMUNITY · Свои на одной волне</span>
         <div className="flex flex-wrap items-center gap-4">

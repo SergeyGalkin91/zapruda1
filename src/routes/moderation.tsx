@@ -12,7 +12,7 @@ type GuideApp={
   user_id:string;legal_name:string;phone_contact:string;experience_details:string;
   boat_document_note:string;evidence_path:string;status:"pending"|"approved"|"rejected";submitted_at:string;
 };
-type ClubReq={id:string;applicant_id:string;name:string;city:string;fee_rub:number;status:"awaiting_payment"|"paid"|"cancelled";created_at:string};
+type ClubReq={id:string;applicant_id:string;name:string;city:string;fee_rub:number;status:"awaiting_payment"|"paid"|"cancelled";created_at:string;admin_approved:boolean};
 const db=supabase as any;
 
 function Moderation(){
@@ -39,7 +39,7 @@ function Moderation(){
         .select("user_id,legal_name,phone_contact,experience_details,boat_document_note,evidence_path,status,submitted_at")
         .eq("status","pending").order("submitted_at",{ascending:true}).limit(100),
       db.from("club_creation_requests")
-        .select("id,applicant_id,name,city,fee_rub,status,created_at")
+        .select("id,applicant_id,name,city,fee_rub,status,created_at,admin_approved")
         .eq("status","awaiting_payment").order("created_at",{ascending:true}).limit(100),
     ]);
     if(g.error||c.error)setError("Не удалось загрузить заявки: "+(g.error?.message||c.error?.message));
@@ -48,7 +48,7 @@ function Moderation(){
     setClubs((c.data??[]) as ClubReq[]);
     setLoading(false);
   }
-  useEffect(()=>{void refresh();},[]);
+  useEffect(()=>{void refresh();const timer=window.setInterval(()=>{if(!document.hidden)void refresh()},20000);return()=>window.clearInterval(timer);},[]);
 
   async function documentUrl(app:GuideApp){
     const {data,error:linkError}=await supabase.storage.from("guide-verification-private")
@@ -67,6 +67,16 @@ function Moderation(){
     if(reviewError){setError("Решение не сохранено: "+reviewError.message);return;}
     setNotice(approve?"Гид подтверждён администратором.":"Заявка отклонена.");
     await refresh();
+  }
+
+  async function reviewClub(request:ClubReq, approve:boolean){
+    if(busy||!window.confirm((approve?"Одобрить заявку на клуб «":"Отклонить заявку на клуб «")+request.name+"»?"))return;
+    setBusy(true);setError("");setNotice("");
+    const values=approve?{admin_approved:true,reviewed_at:new Date().toISOString()}:{status:"cancelled",reviewed_at:new Date().toISOString()};
+    const {error:e}=await db.from("club_creation_requests").update(values).eq("id",request.id).eq("status","awaiting_payment").eq("admin_approved",false);
+    setBusy(false);
+    if(e)setError("Не удалось обработать заявку: "+e.message);
+    else{setNotice(approve?"Заявка одобрена. Клуб будет активирован только после оплаты.":"Заявка отклонена.");await refresh();}
   }
 
   async function approveClub(request:ClubReq){
@@ -117,16 +127,18 @@ function Moderation(){
         </div>)}
       </section>
       <section className="space-y-3 rounded-2xl border border-white/10 bg-[#151915] p-5">
-        <h2 className="flex items-center gap-2 text-lg font-black">Клубы за 500 ₽ ({clubs.length})</h2>
+        <h2 className="flex items-center gap-2 text-lg font-black">Заявки на клубы ({clubs.length})</h2>
+        <button className="btn-ghost text-xs" type="button" onClick={()=>void refresh()}>Обновить заявки</button>
         <p className="text-xs leading-5 text-zinc-400">Никакого автоматического списания сейчас нет. Подтверждай только фактически поступившие платежи с проверяемым идентификатором.</p>
         {!clubs.length&&<p className="text-sm text-zinc-500">Заявок нет.</p>}
         {clubs.map(q=><div className="space-y-3 rounded-xl border border-white/10 p-4 text-sm" key={q.id}>
           <p className="font-bold">{q.name} · {q.fee_rub} ₽</p>
           <p className="text-xs text-zinc-300">{q.city||"Город не указан"}</p>
-          <input className="field w-full" maxLength={180} placeholder="ID проверенного платежа"
+          {!q.admin_approved?<div className="flex flex-wrap gap-2"><button type="button" className="btn-primary" disabled={busy} onClick={()=>void reviewClub(q,true)}>Принять заявку</button><button type="button" className="btn-ghost" disabled={busy} onClick={()=>void reviewClub(q,false)}>Отклонить</button></div>:<p className="text-xs text-[#D7FF35]">Заявка одобрена · ожидается подтверждение оплаты</p>}
+          {q.admin_approved&&<><input className="field w-full" maxLength={180} placeholder="ID проверенного платежа"
             value={references[q.id]||""} onChange={e=>setReferences(v=>({...v,[q.id]:e.target.value}))}/>
           <button type="button" disabled={busy||(references[q.id]||"").trim().length<4}
-            className="btn-primary" onClick={()=>void approveClub(q)}>Подтвердить полученные 500 ₽</button>
+            className="btn-primary" onClick={()=>void approveClub(q)}>Подтвердить полученные 500 ₽</button></>}
         </div>)}
       </section>
     </div>}
