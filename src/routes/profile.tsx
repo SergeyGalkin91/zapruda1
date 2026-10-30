@@ -25,6 +25,7 @@ export const Route = createFileRoute("/profile")({
 });
 
 type AnglerForm = {
+  home_country_code: string;
   home_city: string;
   home_region: string;
   main_technique: string;
@@ -40,6 +41,7 @@ type AnglerForm = {
 };
 
 const EMPTY_FORM: AnglerForm = {
+  home_country_code: "RU",
   home_city: "",
   home_region: "",
   main_technique: "Спиннинг",
@@ -401,6 +403,7 @@ function Profile() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <Label name="Никнейм"><input className="field" maxLength={30} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="например, zaprudafish" /></Label>
                 <Label name="Отображаемое имя"><input className="field" maxLength={100} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Как тебя называть?" /></Label>
+                <Label name="Страна"><select className="field" value={preferences.home_country_code} onChange={e=>update("home_country_code",e.target.value)}>{[["RU","Россия"],["BY","Беларусь"],["KZ","Казахстан"],["AM","Армения"],["AZ","Азербайджан"],["KG","Кыргызстан"],["MD","Молдова"],["TJ","Таджикистан"],["UZ","Узбекистан"],["TM","Туркменистан"]].map(([code,name])=><option key={code} value={code}>{name}</option>)}</select></Label>
                 <Label name="Город рыбалки"><input className="field" maxLength={100} value={preferences.home_city} onChange={(e) => update("home_city", e.target.value)} placeholder="Нижний Новгород" /></Label>
                 <Label name="Регион"><input className="field" maxLength={120} value={preferences.home_region} onChange={(e) => update("home_region", e.target.value)} placeholder="Нижегородская область" /></Label>
                 <label className="flex items-start gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-3 text-sm sm:col-span-2">
