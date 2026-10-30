@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship,
+  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, MessagesSquare,
   MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined, ShieldCheck, Trophy,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
@@ -16,7 +16,7 @@ const desktopNav = [
   { to: "/partners", label: "Напарники", Icon: Users },
   { to: "/communities", label: "Клубы", Icon: Compass },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
-  { to: "/messages", label: "Личные", Icon: MessageCircle },
+  { to: "/messages", label: "Личные", Icon: MessagesSquare },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
 ] as const;
 
@@ -30,7 +30,7 @@ const mobileNav = [
 ] as const;
 
 const otherNav = [
-  { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
+  { to: "/messages", label: "Личные сообщения", Icon: MessagesSquare },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
   { to: "/reviews", label: "Отзывы и репутация", Icon: ShieldCheck },
   { to: "/beta", label: "Тестирование и обратная связь", Icon: ShieldCheck },
@@ -97,7 +97,7 @@ export function Shell({ children }: { children: ReactNode }) {
     let live = true;
     const refresh = async () => {
       const { count, error } = await (supabase as any).from("club_creation_requests")
-        .select("id", { count: "exact", head: true }).eq("status", "awaiting_payment");
+        .select("id", { count: "exact", head: true }).eq("status", "awaiting_payment").eq("admin_approved", false);
       if (live && !error) setPendingClubs(count ?? 0);
     };
     void refresh();
