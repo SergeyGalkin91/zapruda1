@@ -12,7 +12,7 @@ type GuideApp={
   user_id:string;legal_name:string;phone_contact:string;experience_details:string;
   boat_document_note:string;evidence_path:string;status:"pending"|"approved"|"rejected";submitted_at:string;
 };
-type ClubReq={id:string;applicant_id:string;name:string;city:string;fee_rub:number;status:"awaiting_payment"|"paid"|"cancelled";created_at:string};
+type ClubReq={id:string;applicant_id:string;name:string;city:string;fee_rub:number;status:"awaiting_payment"|"paid"|"cancelled";created_at:string;admin_approved:boolean};
 const db=supabase as any;
 
 function Moderation(){
@@ -39,8 +39,8 @@ function Moderation(){
         .select("user_id,legal_name,phone_contact,experience_details,boat_document_note,evidence_path,status,submitted_at")
         .eq("status","pending").order("submitted_at",{ascending:true}).limit(100),
       db.from("club_creation_requests")
-        .select("id,applicant_id,name,city,fee_rub,status,created_at")
-        .eq("status","awaiting_payment").order("created_at",{ascending:true}).limit(100),
+        .select("id,applicant_id,name,city,fee_rub,status,created_at,admin_approved")
+        .eq("status","awaiting_payment").eq("admin_approved",false).order("created_at",{ascending:true}).limit(100),
     ]);
     if(g.error||c.error)setError("Не удалось загрузить заявки: "+(g.error?.message||c.error?.message));
     else setError("");
@@ -67,6 +67,16 @@ function Moderation(){
     if(reviewError){setError("Решение не сохранено: "+reviewError.message);return;}
     setNotice(approve?"Гид подтверждён администратором.":"Заявка отклонена.");
     await refresh();
+  }
+
+  async function reviewClub(request:ClubReq, approve:boolean){
+    if(busy||!window.confirm((approve?"Одобрить заявку на клуб «":"Отклонить заявку на клуб «")+request.name+"»?"))return;
+    setBusy(true);setError("");setNotice("");
+    const values=approve?{admin_approved:true,reviewed_at:new Date().toISOString()}:{status:"cancelled",reviewed_at:new Date().toISOString()};
+    const {error:e}=await db.from("club_creation_requests").update(values).eq("id",request.id).eq("status","awaiting_payment").eq("admin_approved",false);
+    setBusy(false);
+    if(e)setError("Не удалось обработать заявку: "+e.message);
+    else{setNotice(approve?"Заявка одобрена. Клуб будет активирован только после оплаты.":"Заявка отклонена.");await refresh();}
   }
 
   async function approveClub(request:ClubReq){
@@ -123,6 +133,7 @@ function Moderation(){
         {clubs.map(q=><div className="space-y-3 rounded-xl border border-white/10 p-4 text-sm" key={q.id}>
           <p className="font-bold">{q.name} · {q.fee_rub} ₽</p>
           <p className="text-xs text-zinc-300">{q.city||"Город не указан"}</p>
+          <div className="flex flex-wrap gap-2"><button type="button" className="btn-primary" disabled={busy} onClick={()=>void reviewClub(q,true)}>Принять заявку</button><button type="button" className="btn-ghost" disabled={busy} onClick={()=>void reviewClub(q,false)}>Отклонить</button></div>
           <input className="field w-full" maxLength={180} placeholder="ID проверенного платежа"
             value={references[q.id]||""} onChange={e=>setReferences(v=>({...v,[q.id]:e.target.value}))}/>
           <button type="button" disabled={busy||(references[q.id]||"").trim().length<4}
