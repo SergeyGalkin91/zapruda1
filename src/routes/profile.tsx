@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BrainCircuit, Check, Compass, Fish, MapPin, Save, Settings2, ShieldCheck,
-  Sparkles, UserRound, Waves,
+  Sparkles, UserRound, Waves, LogOut,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
@@ -80,9 +80,26 @@ function Profile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState("");
 
   const update = <K extends keyof AnglerForm>(field: K, value: AnglerForm[K]) =>
     setPreferences((current) => ({ ...current, [field]: value }));
+
+  async function handleSignOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    setSignOutError("");
+    try {
+      const { error: signOutError } = await supabase.auth.signOut({ scope: "local" });
+      if (signOutError) throw signOutError;
+      // Reset private page state with a full navigation after the session is cleared.
+      window.location.assign("/");
+    } catch (err) {
+      setSignOutError(err instanceof Error ? err.message : "Не удалось выйти из аккаунта. Попробуй ещё раз.");
+      setSigningOut(false);
+    }
+  }
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
@@ -380,6 +397,25 @@ function Profile() {
           ) : (
             <div className="panel p-5 text-sm text-zinc-400">Пока не удалось загрузить ветку достижений. Попробуй обновить страницу.</div>
           )}
+
+          <section aria-label="Управление аккаунтом" className="mt-10 mb-6 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-bold text-white">Аккаунт ZAPRUDA</h2>
+                <p className="mt-1 text-sm text-zinc-400">Выйти из аккаунта на этом устройстве.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void handleSignOut()}
+                disabled={signingOut}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-5 py-2.5 text-sm font-bold text-red-200 transition enabled:hover:border-red-300/60 enabled:hover:bg-red-500/20 disabled:cursor-wait disabled:opacity-60"
+              >
+                <LogOut className="size-4" aria-hidden="true" />
+                {signingOut ? "Выходим…" : "Выйти из аккаунта"}
+              </button>
+            </div>
+            {signOutError && <p role="alert" className="mt-3 text-sm text-red-300">{signOutError}</p>}
+          </section>
         </>
       )}
       {!loading && !userId && (
