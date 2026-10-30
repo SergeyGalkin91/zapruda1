@@ -15,7 +15,6 @@ const desktopNav = [
   { to: "/market", label: "Барахолка", Icon: ShoppingBag, comingSoon: true },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
-  { to: "/profile", label: "Профиль", Icon: UserRound },
 ] as const;
 
 const mobileNav = [
@@ -97,7 +96,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <Wordmark />
           </Link>
           <nav aria-label="Основная навигация" className="hidden items-center gap-1 xl:flex">
-            {desktopNav.filter(({ to }) => to !== "/profile" || isSignedIn).map(({ to, label, Icon, ...rest }) => (
+            {desktopNav.map(({ to, label, Icon, ...rest }) => (
               <Link
                 key={to}
                 to={to}
