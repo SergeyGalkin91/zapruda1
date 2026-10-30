@@ -92,6 +92,7 @@ function Profile() {
   const [shareChatCity, setShareChatCity] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [featuredGear, setFeaturedGear] = useState<FeaturedGear | null>(null);
+  const [savedTackle, setSavedTackle] = useState<string[]>([]);
   const [preferences, setPreferences] = useState<AnglerForm>(EMPTY_FORM);
   const [progress, setProgress] = useState<FishingProgress | null>(null);
   const [specializations, setSpecializations] = useState<FishingSpecialization[]>([]);
@@ -107,6 +108,8 @@ function Profile() {
     setPreferences((current) => ({ ...current, [field]: value }));
 
   const loadFeaturedGear = useCallback(async (id: string) => {
+    const { data: saved, error: savedError } = await supabase.from("angler_gear").select("brand,model,variant").eq("user_id", id).order("created_at",{ascending:false}).limit(40);
+    if (!savedError) setSavedTackle((saved??[]).map(item=>[item.brand,item.model,item.variant].filter(Boolean).join(" ")));
     const { data: kit, error: kitError } = await (supabase as any)
       .from("angler_gear_sets")
       .select("title,fishing_method,rod_id,reel_id,line_id")
@@ -334,6 +337,7 @@ function Profile() {
     if (metadataError) console.warn("Не удалось отметить завершение анкеты:", metadataError.message);
     setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
     setEditing(false);
+    await loadFeaturedGear(userId);
   }
 
   return (
@@ -362,7 +366,9 @@ function Profile() {
           <div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Способ ловли</p><p className="mt-1 text-sm text-white">{preferences.fishing_methods.join(", ")||"Не указан"}</p></div>
           <div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Интересующая рыба</p><p className="mt-1 text-sm text-white">{preferences.target_species.join(", ")||"Не указана"}</p></div>
           <div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Формат</p><p className="mt-1 text-sm text-white">{preferences.fishing_access||"Не указан"}</p></div>
-          <div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Основной комплект</p><p className="mt-1 text-sm text-white">{featuredGear?featuredGear.rod+" · "+featuredGear.reel:"Пока не добавлен"}</p></div>
+          <div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Снасти</p><p className="mt-1 text-sm text-white">{savedTackle.length?savedTackle.join(" · "):(preferences.tackle_text||"Пока не добавлены")}</p></div>
+          <div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Любимые приманки</p><p className="mt-1 whitespace-pre-wrap text-sm text-white">{preferences.favorite_lures||"Не указаны"}</p></div>
+          {featuredGear&&<div><p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Основной комплект</p><p className="mt-1 text-sm text-white">{featuredGear.rod+" · "+featuredGear.reel}</p></div>}
         </div>}
       </section>
 
@@ -575,11 +581,11 @@ function Profile() {
 
           <PrivateFishingMarks userId={userId} homeCity={preferences.home_city} homeRegion={preferences.home_region} />
 
-          <AnglerTackleCabinet
+          {editing && <AnglerTackleCabinet
             userId={userId}
             fishingMethods={preferences.fishing_methods}
             onGearSetsChange={() => void loadFeaturedGear(userId)}
-          />
+          />}
 
           <Link to="/achievements" className="btn-ghost mb-6 inline-flex">Мои достижения</Link>
 
