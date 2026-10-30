@@ -4,6 +4,7 @@ import { ArrowLeft, Award, Clock3, Footprints, LockKeyhole, Trophy } from "lucid
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { ActivityAchievements } from "@/components/ActivityAchievements";
+import { VerifiedFishingSessions } from "@/components/VerifiedFishingSessions";
 import { supabase } from "@/integrations/supabase/client";
 import { EMPTY_PROGRESS, type FishingProgress } from "@/lib/progression";
 
@@ -101,6 +102,7 @@ function AchievementsPage() {
         </div>
         <Link to="/profile" className="btn-ghost mt-5 inline-flex">Открыть трекер рыбалки</Link>
       </section>
+      <VerifiedFishingSessions/>
       <ActivityAchievements/>
     </>}
   </Shell>;
