@@ -29,6 +29,7 @@ const mobileNav = [
 
 const otherNav = [
   { to: "/achievements", label: "Достижения", Icon: Trophy },
+  { to: "/atlas", label: "Атлас рыболова", Icon: Fish },
   { to: "/messages", label: "Личные сообщения", Icon: MessagesSquare },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
   { to: "/reviews", label: "Отзывы и репутация", Icon: ShieldCheck },
