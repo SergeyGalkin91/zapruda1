@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Shell, NotConnected } from "@/components/Shell";
+import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/chat")({
@@ -113,7 +113,7 @@ function Chat() {
           </div>
         </form>
       </div>
-      <div className="mt-4"><NotConnected what="Личные сообщения и вложения в чате" /></div>
+      <Link to="/messages" search={{ mark: "" }} className="panel mt-4 flex items-center justify-between p-4 transition hover:border-[#D7FF35]/40"><span><strong className="block">Личные сообщения</strong><span className="text-sm text-zinc-400">Запросы на переписку, подписки и обмен приватными точками</span></span><span className="text-[#D7FF35]">Открыть →</span></Link>
     </Shell>
   );
 }
