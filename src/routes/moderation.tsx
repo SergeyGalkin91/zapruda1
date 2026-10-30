@@ -48,7 +48,7 @@ function Moderation(){
     setClubs((c.data??[]) as ClubReq[]);
     setLoading(false);
   }
-  useEffect(()=>{void refresh();},[]);
+  useEffect(()=>{void refresh();const timer=window.setInterval(()=>{if(!document.hidden)void refresh()},20000);return()=>window.clearInterval(timer);},[]);
 
   async function documentUrl(app:GuideApp){
     const {data,error:linkError}=await supabase.storage.from("guide-verification-private")
@@ -127,7 +127,8 @@ function Moderation(){
         </div>)}
       </section>
       <section className="space-y-3 rounded-2xl border border-white/10 bg-[#151915] p-5">
-        <h2 className="flex items-center gap-2 text-lg font-black">Клубы за 500 ₽ ({clubs.length})</h2>
+        <h2 className="flex items-center gap-2 text-lg font-black">Заявки на клубы ({clubs.length})</h2>
+        <button className="btn-ghost text-xs" type="button" onClick={()=>void refresh()}>Обновить заявки</button>
         <p className="text-xs leading-5 text-zinc-400">Никакого автоматического списания сейчас нет. Подтверждай только фактически поступившие платежи с проверяемым идентификатором.</p>
         {!clubs.length&&<p className="text-sm text-zinc-500">Заявок нет.</p>}
         {clubs.map(q=><div className="space-y-3 rounded-xl border border-white/10 p-4 text-sm" key={q.id}>
