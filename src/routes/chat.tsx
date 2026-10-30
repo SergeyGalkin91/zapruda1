@@ -86,7 +86,7 @@ function Chat() {
           <h1 className="text-lg font-bold">Чат рыболовов 🎣</h1>
           <p className="text-xs text-muted-foreground">Общий канал · рыбалка, трофеи и немного баек 😂</p>
         </div>
-        <div className="flex-1 space-y-4 overflow-y-auto p-5">
+        <div className="zapruda-chat-window flex-1 space-y-4 overflow-y-auto p-5">
           {status && <div className="rounded-lg border p-3 text-xs text-muted-foreground">{status}</div>}
           {messages.map((message) => (
             <div key={message.id} className="max-w-[90%] space-y-2">
@@ -99,7 +99,7 @@ function Chat() {
                 </span>
                 <time>{new Date(message.created_at).toLocaleString()}</time>
               </div>
-              <div className="rounded-2xl rounded-tl-sm bg-secondary px-4 py-3 text-sm whitespace-pre-wrap break-words">{message.body}</div>
+              <div className="zapruda-chat-bubble rounded-2xl rounded-tl-sm px-4 py-3 text-sm whitespace-pre-wrap break-words">{message.body}</div>
             </div>
           ))}
           {!status && messages.length === 0 && <p className="text-sm text-muted-foreground">Пока тихо. Будь первым — напиши в чат! 🎣</p>}
