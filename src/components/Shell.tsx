@@ -37,7 +37,6 @@ const otherNav = [
 ] as const;
 
 export function Shell({ children }: { children: ReactNode }) {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -82,7 +81,6 @@ export function Shell({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signOut({ scope: "local" });
       if (error) throw error;
       setIsSignedIn(false);
-      setMenuOpen(false);
       // A full navigation also resets pages holding private user-specific data.
       window.location.assign("/");
     } catch (error) {
@@ -95,7 +93,7 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="min-h-screen pb-24 xl:pb-0">
       <header className="sticky top-0 z-50 border-b border-white/[0.09] bg-[#0D100C]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
-          <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0" onClick={() => setMenuOpen(false)}>
+          <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0">
             <Wordmark />
           </Link>
           <nav aria-label="Основная навигация" className="hidden items-center gap-1 xl:flex">
@@ -140,20 +138,11 @@ export function Shell({ children }: { children: ReactNode }) {
               <Plus className="size-4" strokeWidth={2.7} aria-hidden="true" />
               Новый отчёт
             </Link>
-            <button
-              type="button"
-              aria-label={menuOpen ? "Закрыть список разделов" : "Открыть список разделов"}
-              aria-expanded={menuOpen}
-              aria-controls="zapruda-extra-nav"
-              className="inline-flex size-10 items-center justify-center rounded-xl border border-white/15 text-[#D7FF35] transition hover:bg-[#D7FF35]/10"
-              onClick={() => setMenuOpen((value) => !value)}
-            >
-              {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-            </button>
-          </div>
-        </div>
-        {authError && <div role="alert" className="mx-auto max-w-7xl px-4 py-2 text-sm text-red-300">{authError}</div>}
-        {menuOpen && (
+            <details className="relative group">
+              <summary aria-label="Открыть список разделов" aria-controls="zapruda-extra-nav" className="inline-flex size-10 cursor-pointer list-none items-center justify-center rounded-xl border border-white/15 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 [&::-webkit-details-marker]:hidden">
+                <Menu className="size-5 group-open:hidden" aria-hidden="true" />
+                <X className="hidden size-5 group-open:block" aria-hidden="true" />
+              </summary>
           <nav
             id="zapruda-extra-nav"
             aria-label="Остальные разделы"
@@ -161,7 +150,7 @@ export function Shell({ children }: { children: ReactNode }) {
           >
             <div className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.19em] text-[#D7FF35]">ZAPRUDA / Разделы</div>
             {otherNav.map(({ to, label, Icon }) => (
-              <Link key={to} to={to} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
+              <Link key={to} to={to} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
                 <Icon className="size-4 text-[#D7FF35]" aria-hidden="true" />{label}
                 <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
               </Link>
@@ -182,12 +171,15 @@ export function Shell({ children }: { children: ReactNode }) {
                 </button>
               </>
             ) : (
-              <Link to="/auth" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
+              <Link to="/auth" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
                 <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
               </Link>
             )}
           </nav>
-        )}
+            </details>
+          </div>
+        </div>
+        {authError && <div role="alert" className="mx-auto max-w-7xl px-4 py-2 text-sm text-red-300">{authError}</div>}
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
@@ -203,14 +195,14 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
           {mobileNav.map(({ to, label, Icon, ...rest }) =>
             "primary" in rest && rest.primary ? (
-              <Link key={to} to={to} aria-label="Создать отчёт" onClick={() => setMenuOpen(false)} className="flex min-h-[69px] flex-col items-center justify-center gap-1 text-[11px] font-bold text-[#D7FF35]">
+              <Link key={to} to={to} aria-label="Создать отчёт" className="flex min-h-[69px] flex-col items-center justify-center gap-1 text-[11px] font-bold text-[#D7FF35]">
                 <span className="flex size-11 items-center justify-center rounded-[16px] bg-[#D7FF35] text-[#0D100C] shadow-[0_0_25px_rgba(215,255,53,0.18)]">
                   <Icon className="size-6" strokeWidth={3} aria-hidden="true" />
                 </span>
                 <span className="sr-only">{label}</span>
               </Link>
             ) : (
-              <Link key={to} to={to === "/profile" && !isSignedIn ? "/auth" : to} activeOptions={{ exact: true }} onClick={() => setMenuOpen(false)}
+              <Link key={to} to={to === "/profile" && !isSignedIn ? "/auth" : to} activeOptions={{ exact: true }}
                 className="flex min-h-[69px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition sm:text-[11px]"
                 activeProps={{ className: "flex min-h-[69px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
                 {to === "/profile" && !isSignedIn ? (
