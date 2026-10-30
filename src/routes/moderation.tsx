@@ -31,7 +31,7 @@ function Moderation(){
     setBusy(true);setError("");setNotice("");
     const {data,error:invokeError}=await supabase.functions.invoke("dispatch-admin-email",{body:{}});
     setBusy(false);
-    if(invokeError){setError("Проверка почты: "+invokeError.message);return;}
+    if(invokeError){let detail="";try{const context=(invokeError as unknown as {context?:Response}).context;if(context){const payload=await context.json();detail=[payload?.error,payload?.detail].filter(Boolean).join(" · ");}}catch{ /* response unavailable */ }setError("Проверка почты: "+(detail||invokeError.message));return;}
     if(data?.error){setError("Проверка почты: "+data.error+(data.detail?" · "+data.detail:""));return;}
     setNotice("Обработка уведомлений: отправлено "+(data?.sent??0)+", ошибок "+(data?.failed??0)+". Проверь почту Яндекс.");
   }
