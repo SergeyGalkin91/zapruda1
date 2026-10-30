@@ -11,13 +11,11 @@ import { applyAppearance, loadAppearance } from "@/lib/appearance";
 
 const desktopNav = [
   { to: "/", label: "Лента", Icon: House },
-  { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
   { to: "/fishing-map", label: "Карта", Icon: Compass },
   { to: "/partners", label: "Напарники", Icon: Users },
   { to: "/communities", label: "Клубы", Icon: Compass },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
   { to: "/messages", label: "Личные", Icon: MessagesSquare },
-  { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
 ] as const;
 
 const mobileNav = [
