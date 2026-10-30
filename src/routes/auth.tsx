@@ -26,10 +26,15 @@ function Auth() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Check the saved browser session without blocking the login form on a remote getUser request.
     let alive = true;
-    void supabase.auth.getUser().then(({ data }) => {
-      if (alive && data.user) void navigate({ to: "/profile" });
-    });
+    void supabase.auth.getSession()
+      .then(({ data }) => {
+        if (alive && data.session?.user) void navigate({ to: "/profile" });
+      })
+      .catch(() => {
+        // A disconnected Supabase service must not disable manual sign-in.
+      });
     return () => { alive = false; };
   }, [navigate]);
 
@@ -54,19 +59,27 @@ function Auth() {
           options: { data: { username: cleanUsername, display_name: cleanUsername } },
         });
         if (authError) throw authError;
-        if (data.user) {
-          const { error: profileError } = await supabase.from("profiles").upsert({
-            id: data.user.id,
-            username: cleanUsername,
-            display_name: cleanUsername,
-          });
-          if (profileError) throw profileError;
+        // The database's on_auth_user_created trigger creates the profile.
+        // When email confirmation is enabled the signup response has no session,
+        // so writing to profiles here would fail the authenticated-only RLS policy.
+        if (data.session) {
+          await navigate({ to: "/profile" });
+        } else {
+          setNotice("Проверь почту и подтверди email, затем войди в аккаунт. Если письмо не пришло, проверь папку «Спам».");
         }
-        if (data.session) await navigate({ to: "/profile" });
-        else setNotice("Аккаунт создан. Если включено подтверждение email, проверь почту и подтверди адрес перед входом.");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Не удалось выполнить запрос. Попробуй ещё раз.");
+      const message = err instanceof Error ? err.message : "Не удалось выполнить запрос.";
+      const normalized = message.toLowerCase();
+      if (normalized.includes("failed to fetch") || normalized.includes("network") || normalized.includes("connection") || normalized.includes("fetch failed")) {
+        setError("Не удалось соединиться с сервером авторизации Supabase. Проверь подключение к интернету или VPN и повтори попытку.");
+      } else if (normalized.includes("invalid login credentials")) {
+        setError("Неверный email или пароль. Проверь адрес, под которым регистрировался.");
+      } else if (normalized.includes("email not confirmed")) {
+        setError("Почта ещё не подтверждена. Открой письмо подтверждения и повтори вход.");
+      } else {
+        setError(message);
+      }
     } finally {
       setBusy(false);
     }
