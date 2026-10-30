@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship,
-  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined,
+  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined, ShieldCheck,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +39,7 @@ const otherNav = [
 export function Shell({ children }: { children: ReactNode }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => { applyAppearance(loadAppearance()); }, []);
 
@@ -72,6 +73,18 @@ export function Shell({ children }: { children: ReactNode }) {
       subscription?.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    if (!isSignedIn) { setIsAdmin(false); return; }
+    void supabase.auth.getUser().then(async ({ data }) => {
+      if (!active || !data.user) return;
+      const { data: role } = await supabase.from("zapruda_admins")
+        .select("user_id").eq("user_id", data.user.id).maybeSingle();
+      if (active) setIsAdmin(Boolean(role));
+    }).catch(() => { if (active) setIsAdmin(false); });
+    return () => { active = false; };
+  }, [isSignedIn]);
 
   return (
     <div className="min-h-screen pb-24 xl:pb-0">
@@ -129,6 +142,14 @@ export function Shell({ children }: { children: ReactNode }) {
             {!isSignedIn && (
               <Link to="/auth" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
                 <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
+              </Link>
+            )}
+            {isAdmin && (
+              <Link to="/moderation"
+                className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.07]">
+                <ShieldCheck className="size-4 text-[#D7FF35]" aria-hidden="true" />
+                Модерация заявок
+                <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
               </Link>
             )}
             <div className="my-2 border-t border-white/10" />
