@@ -5,6 +5,7 @@ import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { ActivityAchievements } from "@/components/ActivityAchievements";
 import { VerifiedFishingSessions } from "@/components/VerifiedFishingSessions";
+import { ReputationAchievements } from "@/components/ReputationAchievements";
 import { supabase } from "@/integrations/supabase/client";
 import { EMPTY_PROGRESS, type FishingProgress } from "@/lib/progression";
 
@@ -103,6 +104,7 @@ function AchievementsPage() {
         <Link to="/profile" className="btn-ghost mt-5 inline-flex">Открыть трекер рыбалки</Link>
       </section>
       <VerifiedFishingSessions userId={userId}/>
+      <ReputationAchievements userId={userId}/>
       <ActivityAchievements/>
     </>}
   </Shell>;
