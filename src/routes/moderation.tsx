@@ -40,7 +40,7 @@ function Moderation(){
         .eq("status","pending").order("submitted_at",{ascending:true}).limit(100),
       db.from("club_creation_requests")
         .select("id,applicant_id,name,city,fee_rub,status,created_at,admin_approved")
-        .eq("status","awaiting_payment").eq("admin_approved",false).order("created_at",{ascending:true}).limit(100),
+        .eq("status","awaiting_payment").order("created_at",{ascending:true}).limit(100),
     ]);
     if(g.error||c.error)setError("Не удалось загрузить заявки: "+(g.error?.message||c.error?.message));
     else setError("");
@@ -133,11 +133,11 @@ function Moderation(){
         {clubs.map(q=><div className="space-y-3 rounded-xl border border-white/10 p-4 text-sm" key={q.id}>
           <p className="font-bold">{q.name} · {q.fee_rub} ₽</p>
           <p className="text-xs text-zinc-300">{q.city||"Город не указан"}</p>
-          <div className="flex flex-wrap gap-2"><button type="button" className="btn-primary" disabled={busy} onClick={()=>void reviewClub(q,true)}>Принять заявку</button><button type="button" className="btn-ghost" disabled={busy} onClick={()=>void reviewClub(q,false)}>Отклонить</button></div>
-          <input className="field w-full" maxLength={180} placeholder="ID проверенного платежа"
+          {!q.admin_approved?<div className="flex flex-wrap gap-2"><button type="button" className="btn-primary" disabled={busy} onClick={()=>void reviewClub(q,true)}>Принять заявку</button><button type="button" className="btn-ghost" disabled={busy} onClick={()=>void reviewClub(q,false)}>Отклонить</button></div>:<p className="text-xs text-[#D7FF35]">Заявка одобрена · ожидается подтверждение оплаты</p>}
+          {q.admin_approved&&<><input className="field w-full" maxLength={180} placeholder="ID проверенного платежа"
             value={references[q.id]||""} onChange={e=>setReferences(v=>({...v,[q.id]:e.target.value}))}/>
           <button type="button" disabled={busy||(references[q.id]||"").trim().length<4}
-            className="btn-primary" onClick={()=>void approveClub(q)}>Подтвердить полученные 500 ₽</button>
+            className="btn-primary" onClick={()=>void approveClub(q)}>Подтвердить полученные 500 ₽</button></>}
         </div>)}
       </section>
     </div>}
