@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship,
-  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined, ShieldCheck,
+  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined, ShieldCheck, Trophy,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
@@ -111,6 +111,10 @@ export function Shell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex shrink-0 items-center gap-2">
+            <a href={isSignedIn ? "/profile#zapruda-achievements" : "/auth"} aria-label="Достижения рыболова" className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-xs font-bold text-[#D7FF35] transition hover:bg-[#D7FF35]/20 sm:px-3 sm:text-sm">
+              <Trophy className="size-4" aria-hidden="true" />
+              <span className="hidden sm:inline">Достижения</span>
+            </a>
             {isSignedIn ? (
               <>
                 <a href="/profile" className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3">
