@@ -3,6 +3,7 @@ import { useState } from "react";
 import { MessageCircle, Send, ShieldCheck } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { SocialGroups } from "@/components/SocialGroups";
+import { VerifiedGuideDirectory } from "@/components/VerifiedGuideDirectory";
 import { countries } from "@/lib/geo";
 
 export const Route = createFileRoute("/communities")({
@@ -63,6 +64,7 @@ function Communities() {
       </Link>
 
       <SocialGroups />
+      <VerifiedGuideDirectory />
 
       <h2 className="mt-8 mb-3 text-sm uppercase tracking-widest text-muted-foreground">Страны СНГ</h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{cis.map((c) => <Chip key={c.code} c={c} />)}</div>
