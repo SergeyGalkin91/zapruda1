@@ -23,6 +23,7 @@ function Auth() {
   const search = Route.useSearch();
   const [mode, setMode] = useState<"in" | "up" | "forgot" | "new-password">(search.mode);
   const [username, setUsername] = useState("");
+  const [accountRole,setAccountRole]=useState<"angler"|"guide">("angler");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -58,7 +59,7 @@ function Auth() {
         const { data, error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (!data.session && !authError) throw new Error("Сервер не вернул сессию. Попробуй войти ещё раз.");
         if (authError) throw authError;
-        await navigate({ to: "/profile" });
+        await navigate({ to: data.user?.user_metadata?.account_role === "guide" ? "/guides" : "/profile" });
       } else if (mode === "forgot") {
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
           redirectTo: window.location.origin + "/auth?recovery=1",
@@ -80,14 +81,14 @@ function Auth() {
         const { data, error: authError } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { data: { username: cleanUsername, display_name: cleanUsername } },
+          options: { data: { username: cleanUsername, display_name: cleanUsername, account_role: accountRole } },
         });
         if (authError) throw authError;
         // The database's on_auth_user_created trigger creates the profile.
         // When email confirmation is enabled the signup response has no session,
         // so writing to profiles here would fail the authenticated-only RLS policy.
         if (data.session) {
-          await navigate({ to: "/profile" });
+          await navigate({ to: accountRole==="guide"?"/guides":"/profile" });
         } else {
           setNotice("Проверь почту и подтверди email, затем войди в аккаунт. Если письмо не пришло, проверь папку «Спам».");
         }
@@ -133,6 +134,7 @@ function Auth() {
           <p className="mb-4 text-xs text-zinc-400">Для входа используй <strong className="text-[#D7FF35]">email</strong>, на который регистрировал аккаунт, а не никнейм.</p>
 
           <form className="space-y-4" onSubmit={submit}>
+            {mode === "up" && <fieldset className="rounded-lg border border-white/10 p-3"><legend className="px-2 text-xs font-bold uppercase tracking-wider text-[#D7FF35]">Я регистрируюсь как</legend><div className="grid grid-cols-2 gap-2">{([["angler","Рыбак"],["guide","Гид"]] as const).map(([role,label])=><label key={role} className={"cursor-pointer rounded-lg border px-3 py-3 text-center text-sm font-bold "+(accountRole===role?"border-[#D7FF35] text-[#D7FF35]":"border-white/10 text-zinc-300")}><input type="radio" className="sr-only" checked={accountRole===role} onChange={()=>setAccountRole(role)}/>{label}</label>)}</div></fieldset>}
             {mode === "up" && (
               <label className="block space-y-1.5 text-sm font-medium">
                 Никнейм
