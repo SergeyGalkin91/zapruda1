@@ -168,7 +168,8 @@ function Profile() {
     setAccountRole(auth.user.user_metadata?.account_role === "guide" ? "guide" : "angler");
     void loadFeaturedGear(auth.user.id);
 
-    void supabase.from("guide_profiles").select("title,home_city,service_mode,about").eq("user_id",auth.user.id).maybeSingle().then(({data})=>{if(data)setGuideSummary(data)});
+    setGuideSummary(null);
+    void supabase.from("guide_profiles").select("title,home_city,service_mode,about").eq("user_id",auth.user.id).maybeSingle().then(({data})=>setGuideSummary(data??null));
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
       supabase.from("profiles").select("username,display_name,bio,avatar_url,chat_city").eq("id", auth.user.id).maybeSingle(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
@@ -589,9 +590,10 @@ function Profile() {
             onGearSetsChange={() => void loadFeaturedGear(userId)}
           />
 
+          {accountRole==="guide"&&!guideSummary&&<section className="mb-6 rounded-xl border border-[#D7FF35]/30 bg-[#161D13] p-5"><p className="text-xs font-black uppercase tracking-widest text-[#D7FF35]">Завершение регистрации</p><h3 className="mt-2 text-xl font-black">Заполни профиль гида</h3><p className="mt-2 text-sm text-zinc-400">Анкета будет сохранена в твоём профиле. После сохранения форма заменится карточкой гида, которую можно открыть для редактирования.</p><Link to="/guides" className="btn-primary mt-4 inline-flex">Перейти к анкете гида</Link></section>}
           {guideSummary&&<section className="mb-6 rounded-xl border border-[#D7FF35]/25 bg-[#161D13] p-5"><p className="text-xs font-bold uppercase tracking-widest text-[#D7FF35]">Профиль гида</p><h3 className="mt-2 text-xl font-black">{guideSummary.title}</h3><p className="mt-2 text-sm text-zinc-300">{guideSummary.home_city} · {guideSummary.service_mode==="shore"?"Береговой гид":guideSummary.service_mode==="boat"?"Лодочный гид":"Берег и лодка"}</p><p className="mt-2 text-sm text-zinc-400">{guideSummary.about}</p><Link to="/guides" className="btn-ghost mt-3 inline-flex">Открыть профиль гида</Link></section>}
           <div className="mb-6 mt-6 flex flex-wrap gap-3">
-            <Link to="/guides" className="btn-ghost inline-flex">{guideSummary?"Управлять профилем гида":accountRole==="guide"?"Завершить регистрацию гида":"Зарегистрироваться как гид"}</Link>
+            {guideSummary&&<Link to="/guides" className="btn-ghost inline-flex">Управлять профилем гида</Link>}
             <Link to="/spearfishing" className="btn-ghost inline-flex">Подводная охота</Link>
           </div>
           <Link to="/achievements" className="btn-ghost mb-6 inline-flex">Мои достижения</Link>
