@@ -9,6 +9,7 @@ import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { GuideVerification } from "@/components/GuideVerification";
 import { GuideBookingInbox } from "@/components/GuideBookings";
+import { InteractiveFishingMap } from "@/components/InteractiveFishingMap";
 
 export const Route = createFileRoute("/guides")({
   head: () => ({ meta: [
@@ -364,7 +365,19 @@ function GuideCabinet() {
             </>}
             <Label title="Что входит из снастей"><input className="field" value={guide.included_gear} maxLength={500} onChange={(e)=>update("included_gear",e.target.value)} placeholder="Спиннинги, приманки, жилеты…" /></Label>
           </div>
-          <Label title="О гиде"><textarea className="field min-h-24" value={guide.about} maxLength={1500} onChange={(e)=>update("about",e.target.value)} placeholder="Какие водоёмы знаешь, как проходит выезд…" /></Label>
+          <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-[#D7FF35]">Место встречи · Яндекс Карты</p>
+            <InteractiveFishingMap
+              homeCity={guide.home_city} homeRegion=""
+              marks={[]}
+              selected={guide.meeting_lat!==null&&guide.meeting_lon!==null?
+                {latitude:guide.meeting_lat,longitude:guide.meeting_lon}:null}
+              onPick={point=>{update("meeting_lat",point.latitude);update("meeting_lon",point.longitude);}}
+              onSelectMark={()=>{}}
+            />
+            <p className="mt-2 text-xs text-zinc-400">Координаты точки встречи используются в публичной карточке проверенного гида. Не отмечай здесь свои секретные рыболовные места.</p>
+          </div>
+                    <Label title="О гиде"><textarea className="field min-h-24" value={guide.about} maxLength={1500} onChange={(e)=>update("about",e.target.value)} placeholder="Какие водоёмы знаешь, как проходит выезд…" /></Label>
           <Label title="Программа: чему научишь"><textarea className="field min-h-24" required value={guide.service_program} maxLength={700} onChange={(e)=>update("service_program",e.target.value)} /></Label>
           <Label title="Отмена / перенос / погода"><textarea className="field min-h-20" required value={guide.cancellation_terms} maxLength={500} onChange={(e)=>update("cancellation_terms",e.target.value)} /></Label>
           <div className="space-y-3 rounded-xl border border-white/10 bg-black/15 p-4">
