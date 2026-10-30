@@ -348,6 +348,7 @@ function Profile() {
             <h1 className="mt-1 text-2xl font-black text-white">{displayName||username||"Мой профиль"}</h1>
             <p className="mt-1 text-sm text-zinc-400">{username?"@"+username:"Никнейм не указан"}{(accountRole==="guide"?guideSummary?.home_city:preferences.home_city)?" · "+(accountRole==="guide"?guideSummary?.home_city:preferences.home_city):""}</p>
           </div>
+          {!editing && <button type="button" className="btn-primary" onClick={()=>{setError("");setEditing(true)}}>Редактировать профиль</button>}
           <span className="rounded-md border border-[#D7FF35]/40 px-3 py-1.5 text-xs font-extrabold uppercase tracking-widest text-[#D7FF35]">{accountRole==="guide"?"GUIDE":"ANGLER"}</span>
         </div>
         {accountRole==="guide" ? (
@@ -371,7 +372,7 @@ function Profile() {
 
       {!loading && userId && (
         <>
-          <section className="mb-8 rounded-3xl border border-white/10 bg-[#151915] p-5 sm:p-7">
+          <section className={editing ? "mb-8 rounded-xl border border-white/10 bg-[#151915] p-5 sm:p-7" : "hidden"}>
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">01 / Анкета</p>
