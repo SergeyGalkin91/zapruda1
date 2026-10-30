@@ -2,18 +2,18 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, Waves,
-  MessageCircle, Plus, ShoppingBag, UserRound, Users, X,
+  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityTracker } from "@/components/ActivityTracker";
+import { applyAppearance, loadAppearance } from "@/lib/appearance";
 
 const desktopNav = [
   { to: "/", label: "Лента", Icon: House },
+  { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
   { to: "/partners", label: "Напарники", Icon: Users },
-  { to: "/guides", label: "Гиды", Icon: Ship },
   { to: "/communities", label: "Клубы", Icon: Compass },
-  { to: "/market", label: "Барахолка", Icon: ShoppingBag, comingSoon: true },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
   { to: "/messages", label: "Личные", Icon: MessageCircle },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
@@ -21,8 +21,8 @@ const desktopNav = [
 
 const mobileNav = [
   { to: "/", label: "Лента", Icon: House },
+  { to: "/reports/new", label: "Отчёт", Icon: Plus },
   { to: "/partners", label: "Напарники", Icon: Users },
-  { to: "/reports/new", label: "Отчёт", Icon: Plus, primary: true },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
   { to: "/profile", label: "Профиль", Icon: UserRound },
 ] as const;
@@ -39,6 +39,8 @@ const otherNav = [
 export function Shell({ children }: { children: ReactNode }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [authError, setAuthError] = useState("");
+
+  useEffect(() => { applyAppearance(loadAppearance()); }, []);
 
   // Always render a usable login link while the browser session initializes.
   // The listener handles login/logout; getSession covers clients that delay INITIAL_SESSION.
@@ -80,7 +82,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <Wordmark />
           </Link>
           <nav aria-label="Основная навигация" className="hidden items-center gap-1 xl:flex">
-            {desktopNav.map(({ to, label, Icon, ...rest }) => (
+            {desktopNav.map(({ to, label, Icon }) => (
               <Link
                 key={to}
                 to={to}
@@ -90,7 +92,7 @@ export function Shell({ children }: { children: ReactNode }) {
               >
                 <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />
                 {label}
-                {"comingSoon" in rest && rest.comingSoon && <span className="text-[9px] font-bold text-[#D7FF35]">скоро</span>}
+
               </Link>
             ))}
           </nav>
@@ -107,10 +109,6 @@ export function Shell({ children }: { children: ReactNode }) {
                 Войти
               </Link>
             )}
-            <Link to="/reports/new" className="btn-primary hidden xl:inline-flex">
-              <Plus className="size-4" strokeWidth={2.7} aria-hidden="true" />
-              Новый отчёт
-            </Link>
             <details className="relative group">
               <summary aria-label="Открыть список разделов" aria-controls="zapruda-extra-nav" className="inline-flex size-10 cursor-pointer list-none items-center justify-center rounded-xl border border-white/15 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 [&::-webkit-details-marker]:hidden">
                 <Menu className="size-5 group-open:hidden" aria-hidden="true" />
@@ -133,6 +131,12 @@ export function Shell({ children }: { children: ReactNode }) {
                 <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
               </Link>
             )}
+            <div className="my-2 border-t border-white/10" />
+            <Link to="/settings"
+              className="flex items-center gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 px-3 py-3 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/10">
+              <Settings2 className="size-4" aria-hidden="true" /> Настройки
+              <ArrowUpRight className="ml-auto size-3.5" aria-hidden="true" />
+            </Link>
           </nav>
             </details>
           </div>
@@ -150,27 +154,20 @@ export function Shell({ children }: { children: ReactNode }) {
 
       <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#0D100C]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.32)] backdrop-blur-xl xl:hidden">
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
-          {mobileNav.map(({ to, label, Icon, ...rest }) =>
-            "primary" in rest && rest.primary ? (
-              <Link key={to} to={to} aria-label="Создать отчёт" className="flex min-h-[69px] flex-col items-center justify-center gap-1 text-[11px] font-bold text-[#D7FF35]">
-                <span className="flex size-11 items-center justify-center rounded-[16px] bg-[#D7FF35] text-[#0D100C] shadow-[0_0_25px_rgba(215,255,53,0.18)]">
-                  <Icon className="size-6" strokeWidth={3} aria-hidden="true" />
-                </span>
-                <span className="sr-only">{label}</span>
-              </Link>
-            ) : (
-              <Link key={to} to={to === "/profile" && !isSignedIn ? "/auth" : to} activeOptions={{ exact: true }}
-                className="flex min-h-[69px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition sm:text-[11px]"
-                activeProps={{ className: "flex min-h-[69px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
-                {to === "/profile" && !isSignedIn ? (
-                  <LogIn className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
-                ) : (
-                  <Icon className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
-                )}
-                <span className="truncate">{to === "/profile" && !isSignedIn ? "Войти" : label}</span>
-              </Link>
-            )
-          )}
+          {mobileNav.map(({ to, label, Icon }) => (
+            <Link key={to}
+              to={to === "/profile" && !isSignedIn ? "/auth" : to}
+              activeOptions={{ exact: true }}
+              className="flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
+              activeProps={{ className: "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
+              {to === "/profile" && !isSignedIn ? (
+                <LogIn className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
+              ) : (
+                <Icon className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
+              )}
+              <span className="truncate">{to === "/profile" && !isSignedIn ? "Войти" : label}</span>
+            </Link>
+          ))}
         </div>
       </nav>
     </div>
