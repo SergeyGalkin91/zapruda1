@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Camera, ImagePlus, Trash2 } from "lucide-react";
+import { Camera, ImagePlus, Trash2, Sparkles } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
@@ -18,6 +18,9 @@ export const Route = createFileRoute("/reports/new")({
 });
 
 type Catch = { species: string; weight: string; length: string };
+type CatalogWater = { id: string; name: string; region: string; country_code: string };
+type CatalogFish = { id: string; name: string };
+type CatalogMapping = { waterbody_id: string; species_id: string };
 
 function Label({ t, children }: { t: string; children: React.ReactNode }) {
   return (
@@ -33,6 +36,12 @@ function NewReport() {
   const [catches, setCatches] = useState<Catch[]>([{ species: "", weight: "", length: "" }]);
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
+  const [catalogWaters, setCatalogWaters] = useState<CatalogWater[]>([]);
+  const [catalogFishes, setCatalogFishes] = useState<CatalogFish[]>([]);
+  const [catalogMappings, setCatalogMappings] = useState<CatalogMapping[]>([]);
+  const [selectedWaterbody, setSelectedWaterbody] = useState("");
+  const [aiWorking, setAiWorking] = useState(false);
+  const [aiMessage, setAiMessage] = useState("");
   const [weather, setWeather] = useState("");
   const [temperature, setTemperature] = useState("");
   const [pressure, setPressure] = useState("");
@@ -51,6 +60,21 @@ function NewReport() {
   const [savedCatches, setSavedCatches] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(0);
   const [progress, setProgress] = useState("");
+
+  useEffect(() => {
+    let live = true;
+    void Promise.all([
+      (supabase as any).from("atlas_waterbodies").select("id,name,region,country_code").order("name").limit(500),
+      (supabase as any).from("atlas_fish_species").select("id,name").limit(200),
+      (supabase as any).from("atlas_waterbody_species").select("waterbody_id,species_id").limit(2500)
+    ]).then(([w, f, m]) => {
+      if (!live) return;
+      if (!w.error) setCatalogWaters(w.data ?? []);
+      if (!f.error) setCatalogFishes(f.data ?? []);
+      if (!m.error) setCatalogMappings(m.data ?? []);
+    }).catch(() => {});
+    return () => { live = false; };
+  }, []);
 
   useEffect(() => {
     const urls = photos.map((photo) => URL.createObjectURL(photo));
@@ -74,7 +98,43 @@ function NewReport() {
     setPhotos(selected);
   }
 
-  const upd = (i: number, k: keyof Catch, v: string) =>
+  async function identifyFish() {
+    if (!photos.length || aiWorking) return;
+    setAiWorking(true);
+    setAiMessage("");
+    try {
+      // Compress locally; do not transmit an oversized original image.
+      const bitmap = await createImageBitmap(photos[0]);
+      const scale = Math.min(1, 960 / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Не удалось подготовить фотографию.");
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      const image_data_url = canvas.toDataURL("image/jpeg", 0.72);
+      const { data, error: resultError } = await supabase.functions.invoke("identify-fish-photo", {
+        body: { image_data_url },
+      });
+      if (resultError) throw new Error(data?.error || resultError.message);
+      if (data?.error) throw new Error(data.error);
+      const found = typeof data?.species_common_name === "string" ? data.species_common_name.trim() : "";
+      if (found && data?.fish_detected && data?.confidence !== "low") {
+        setCatches(current => current.map((row, i) => i === 0 ? { ...row, species: found } : row));
+        setAiMessage("ИИ предполагает: " + found + " (уверенность: " +
+          (data.confidence === "high" ? "высокая" : "средняя") + "). Проверь название перед публикацией. Это не подтверждение ачивки.");
+      } else {
+        setAiMessage("ИИ не смог надёжно определить рыбу. Впиши вид вручную — отчёт можно публиковать.");
+      }
+    } catch (cause) {
+      setAiMessage(cause instanceof Error ? cause.message : "ИИ-подсказка пока недоступна. Впиши вид вручную.");
+    } finally {
+      setAiWorking(false);
+    }
+  }
+
+    const upd = (i: number, k: keyof Catch, v: string) =>
     setCatches((c) => c.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
 
   async function publish(e: React.FormEvent<HTMLFormElement>) {
@@ -170,6 +230,30 @@ function NewReport() {
         }
         setUploadedCount(i + 1);
       }
+      // Automatically request progress review when report, catch species and photo exist.
+      // Any issue with an optional badge must never block a successfully posted fishing report.
+      if (selectedWaterbody && photos.length > 0 && reportId) {
+        try {
+          setProgress("Синхронизируем Атлас рыболова…");
+          const [savedFish, savedPhotos] = await Promise.all([
+            supabase.from("catches").select("id,species").eq("report_id", reportId),
+            supabase.from("report_photos").select("id").eq("report_id", reportId).limit(1),
+          ]);
+          const photoId = savedPhotos.data?.[0]?.id;
+          if (photoId && savedFish.data?.length) {
+            for (const caught of savedFish.data) {
+              const species = catalogFishes.find(x => x.name.toLowerCase() === caught.species.trim().toLowerCase());
+              if (!species || !catalogMappings.some(x => x.waterbody_id === selectedWaterbody && x.species_id === species.id)) continue;
+              await (supabase as any).from("atlas_catch_claims").insert({
+                user_id: user.id, waterbody_id: selectedWaterbody, species_id: species.id,
+                catch_id: caught.id, evidence_photo_id: photoId,
+              });
+            }
+          }
+        } catch {
+          // Photo, catches and report are already saved; retrying the whole report would duplicate data.
+        }
+      }
       setProgress("");
       await navigate({ to: "/" });
     } catch (caught) {
@@ -190,7 +274,19 @@ function NewReport() {
             <Label t="Название отчёта *"><input className="field" placeholder="Например, утро на Кудьме" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} required /></Label>
           </div>
           <Label t="Вид рыбалки для достижений *"><select className="field" value={fishingMethod} required onChange={(e) => setFishingMethod(e.target.value)}><option value="" disabled>Выбери дисциплину…</option>{FISHING_DISCIPLINES.map((d) => <option key={d.code} value={d.code}>{d.title}</option>)}</select></Label>
-          <Label t="Водоём"><input className="field" placeholder="Например, Волга у Нижнего" value={location} onChange={(e) => setLocation(e.target.value)} /></Label>
+          <Label t="Водоём из Атласа (по желанию)">
+            <select className="field" value={selectedWaterbody} onChange={(e) => {
+              const id = e.target.value;
+              setSelectedWaterbody(id);
+              const water = catalogWaters.find(w => w.id === id);
+              if (water) setLocation(w.name + (water.region ? " · " + water.region : ""));
+            }}>
+              <option value="">Не выбирать — обычный отчёт</option>
+              {catalogWaters.map(w => <option key={w.id} value={w.id}>{w.name} · {w.region || w.country_code}</option>)}
+            </select>
+          </Label>
+          <Label t="Место (без точных координат)"><input className="field" placeholder="Например, Волга у Нижнего" value={location} onChange={(e) => setLocation(e.target.value)} /></Label>
+          <p className="md:col-span-2 text-xs leading-5 text-zinc-400">Для ачивки выбери водоём, укажи пойманный вид и приложи фото ниже. Заявка отправится автоматически после публикации. GPS и отдельные анкеты не нужны.</p>
           <Label t="Погода"><input className="field" placeholder="Пасмурно, небольшой дождь" value={weather} onChange={(e) => setWeather(e.target.value)} /></Label>
           <Label t="Температура, °C"><input className="field" type="number" step="0.1" placeholder="+12" value={temperature} onChange={(e) => setTemperature(e.target.value)} /></Label>
           <Label t="Давление, мм рт. ст."><input className="field" type="number" step="0.1" placeholder="752" value={pressure} onChange={(e) => setPressure(e.target.value)} /></Label>
@@ -249,6 +345,14 @@ function NewReport() {
               ))}
             </div>
           )}
+          {photos.length > 0 && <div className="rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-3">
+            <button className="btn-ghost inline-flex items-center gap-2" type="button" disabled={aiWorking}
+              onClick={() => void identifyFish()}>
+              <Sparkles className="size-4 text-[#D7FF35]" />{aiWorking ? "Рассматриваем фото…" : "Подсказать вид рыбы по фото (ИИ)"}
+            </button>
+            <p className="mt-2 text-xs text-zinc-400">Опционально: изображение отправляется ИИ только после твоего нажатия. Результат можно исправить.</p>
+            {aiMessage && <p className="mt-2 text-xs text-[#D7FF35]" role="status">{aiMessage}</p>}
+          </div>}
           <p className="text-xs leading-5 text-muted-foreground">
             Файлы сохраняются в защищённом хранилище. Фотографии общедоступных отчётов будут видны в ленте;
             фото закрытых отчётов останутся доступны только владельцу.
@@ -260,9 +364,10 @@ function NewReport() {
             <h2 className="text-base font-semibold">Улов</h2>
             <button type="button" className="btn-ghost" onClick={() => setCatches((c) => [...c, { species: "", weight: "", length: "" }])}>+ Рыба</button>
           </div>
+          <datalist id="zapruda-atlas-species">{catalogFishes.map(f => <option key={f.id} value={f.name} />)}</datalist>
           {catches.map((c, i) => (
             <div key={i} className="grid grid-cols-[1fr_auto] gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
-              <input className="field col-span-2 sm:col-span-1" placeholder="Вид (щука, окунь…)" value={c.species} onChange={(e) => upd(i, "species", e.target.value)} />
+              <input className="field col-span-2 sm:col-span-1" list="zapruda-atlas-species" placeholder="Вид (щука, окунь…)" value={c.species} onChange={(e) => upd(i, "species", e.target.value)} />
               <input className="field" type="number" min="0" step="0.01" placeholder="Вес, кг" value={c.weight} onChange={(e) => upd(i, "weight", e.target.value)} />
               <input className="field" type="number" min="0" step="0.1" placeholder="Длина, см" value={c.length} onChange={(e) => upd(i, "length", e.target.value)} />
               <button type="button" className="btn-ghost" aria-label="Удалить" onClick={() => setCatches((x) => x.filter((_, j) => j !== i))}>✕</button>
