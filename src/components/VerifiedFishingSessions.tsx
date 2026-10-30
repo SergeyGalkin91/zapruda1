@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Clock3, Play, Pause, Square, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { FishingSessionTracker, type FishingClockState } from "@/components/FishingSessionTracker";
+import { FishingJournal } from "@/components/FishingJournal";
 
 type Session = { id: string; started_at: string; running_since: string | null; active_seconds: number; status: "running" | "paused" | "finished" };
 const seconds = (row: Session, at: number) => Math.min(86400, row.active_seconds + (row.running_since ? Math.max(0, Math.floor((at - new Date(row.running_since).getTime()) / 1000)) : 0));
@@ -73,6 +74,7 @@ export function VerifiedFishingSessions({ userId }: { userId: string }) {
       })}</div>
       <p className="mt-4 text-xs leading-5 text-zinc-500">Сервер подтверждает длительность работы таймера, но не физическое присутствие на водоёме. Пройденное расстояние и GPS-маршрут пока остаются локальными и не дают XP. Журнал показывает последние 100 сессий.</p>
       <FishingSessionTracker userId={userId} serverSession={current as FishingClockState | null}/>
+      <FishingJournal userId={userId} finished={finished}/>
     </>}
   </section>;
 }
