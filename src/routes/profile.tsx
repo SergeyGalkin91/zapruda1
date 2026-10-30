@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BrainCircuit, Check, Compass, Fish, MapPin, Save, Settings2, ShieldCheck,
-  Sparkles, UserRound, Waves, LogOut, Pencil, X,
+  Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
@@ -517,23 +517,35 @@ function Profile() {
 
           <ActivityAchievements />
 
-          <section aria-label="Управление аккаунтом" className="mt-10 mb-6 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7">
+          <section aria-label="Обратная связь и управление аккаунтом" className="mt-10 mb-6 space-y-5 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h2 className="text-base font-bold text-white">Аккаунт ZAPRUDA</h2>
-                <p className="mt-1 text-sm text-zinc-400">Выйти из аккаунта на этом устройстве.</p>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-base font-bold text-white">Предложения и сотрудничество</h2>
+                <p className="mt-1 text-sm text-zinc-400">Идеи для ZAPRUDA, предложения по улучшению, сообщения об ошибках и партнёрство.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => void handleSignOut()}
-                disabled={signingOut}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-5 py-2.5 text-sm font-bold text-red-200 transition enabled:hover:border-red-300/60 enabled:hover:bg-red-500/20 disabled:cursor-wait disabled:opacity-60"
-              >
-                <LogOut className="size-4" aria-hidden="true" />
-                {signingOut ? "Выходим…" : "Выйти из аккаунта"}
-              </button>
+              <Link to="/feedback" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-5 py-2.5 text-sm font-bold text-[#D7FF35] transition hover:border-[#D7FF35]/70 hover:bg-[#D7FF35]/20">
+                <MessageSquareText className="size-4" aria-hidden="true" />
+                Предложения и сотрудничество
+              </Link>
             </div>
-            {signOutError && <p role="alert" className="mt-3 text-sm text-red-300">{signOutError}</p>}
+            <div className="border-t border-white/10 pt-5">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-base font-bold text-white">Аккаунт ZAPRUDA</h2>
+                  <p className="mt-1 text-sm text-zinc-400">Выйти из аккаунта на этом устройстве.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleSignOut()}
+                  disabled={signingOut}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-5 py-2.5 text-sm font-bold text-red-200 transition enabled:hover:border-red-300/60 enabled:hover:bg-red-500/20 disabled:cursor-wait disabled:opacity-60"
+                >
+                  <LogOut className="size-4" aria-hidden="true" />
+                  {signingOut ? "Выходим…" : "Выйти из аккаунта"}
+                </button>
+              </div>
+              {signOutError && <p role="alert" className="mt-3 text-sm text-red-300">{signOutError}</p>}
+            </div>
           </section>
         </>
       )}
