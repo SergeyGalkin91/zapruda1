@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Award, Clock3, Footprints, LockKeyhole, Trophy } from "lucide-react";
+import { ArrowLeft, Award, Footprints, LockKeyhole } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { ActivityAchievements } from "@/components/ActivityAchievements";
@@ -66,8 +66,6 @@ function AchievementsPage() {
   }, []);
   const local = userId ? readLocalTrips(userId) : { count: 0, hours: 0, km: 0 };
   const tripChallenges = [
-    { title: "Первый выход", target: 1, current: local.count, unit: "рыбалок", icon: Trophy },
-    { title: "Рыболовный марафон", target: 10, current: local.hours, unit: "часов", icon: Clock3 },
     { title: "Пешком за хищником", target: 25, current: local.km, unit: "км", icon: Footprints },
   ];
   return <Shell>
@@ -86,8 +84,8 @@ function AchievementsPage() {
       {!error && <FishingProgressTree progress={progress}/>}
       <section className="mb-7 mt-7 rounded-3xl border border-[#D7FF35]/20 bg-[#151915] p-5 sm:p-7">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-[#D7FF35]">Рыбалка в движении</p>
-        <h2 className="mt-2 text-xl font-extrabold">Достижения за время и дистанцию</h2>
-        <p className="mt-2 text-xs leading-5 text-zinc-400">Пока это предварительные показатели с текущего устройства. Они не подтверждены сервером, не дают XP и не считаются официально открытыми медалями.</p>
+        <h2 className="mt-2 text-xl font-extrabold">GPS-дистанция на этом устройстве</h2>
+        <p className="mt-2 text-xs leading-5 text-zinc-400">Серверные достижения за часы рыбалки находятся в едином трекере ниже. Здесь отображается только предварительная GPS-дистанция с текущего устройства без начисления XP.</p>
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           {tripChallenges.map(item => {
             const Icon = item.icon;
@@ -101,9 +99,9 @@ function AchievementsPage() {
             </div>;
           })}
         </div>
-        <Link to="/profile" className="btn-ghost mt-5 inline-flex">Открыть трекер рыбалки</Link>
+        <a href="#zapruda-server-tracker" className="btn-ghost mt-5 inline-flex">Открыть единый трекер рыбалки</a>
       </section>
-      <VerifiedFishingSessions userId={userId}/>
+      <div id="zapruda-server-tracker" className="scroll-mt-24"><VerifiedFishingSessions userId={userId}/></div>
       <ReputationAchievements userId={userId}/>
       <ActivityAchievements/>
     </>}
