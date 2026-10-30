@@ -15,6 +15,8 @@ export function ActivityAchievements() {
   const [stats, setStats] = useState<Stats>(zero);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
+  const [applicationStatus, setApplicationStatus] = useState<"pending" | "approved" | "declined" | null>(null);
+  const [applying, setApplying] = useState(false);
 
   const refresh = useCallback(async () => {
     setBusy(true);
@@ -23,10 +25,29 @@ export function ActivityAchievements() {
       .maybeSingle();
     if (e) setError("Не удалось обновить активность: " + e.message);
     else { setError(""); setStats(data || zero); }
+    const { data: application, error: applicationError } = await (supabase as any)
+      .from("beta_test_applications").select("status").maybeSingle();
+    if (!applicationError) setApplicationStatus(application?.status ?? null);
     setBusy(false);
   }, []);
 
   useEffect(() => { void refresh(); }, [refresh]);
+
+  async function apply() {
+    if (!stats.beta_eligible || applying || applicationStatus) return;
+    setApplying(true); setError("");
+    const { data: auth, error: ae } = await supabase.auth.getUser();
+    if (ae || !auth.user) {
+      setError("Для подачи заявки войди в аккаунт.");
+      setApplying(false); return;
+    }
+    const { error: insertError } = await (supabase as any).from("beta_test_applications")
+      .insert({ user_id: auth.user.id });
+    setApplying(false);
+    if (insertError) setError("Не получилось отправить заявку: " + insertError.message);
+    else await refresh();
+  }
+
   return <section className="mb-7 rounded-3xl border border-[#D7FF35]/20 bg-[#151915] p-5 sm:p-7" aria-labelledby="activity-achievements">
     <p className="text-xs font-extrabold uppercase tracking-[.19em] text-[#D7FF35]">ZAPRUDA / УРОВЕНЬ АКТИВНОСТИ</p>
     <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
@@ -48,5 +69,19 @@ export function ActivityAchievements() {
     <p className="mt-4 flex gap-2 text-xs text-zinc-400"><FlaskConical className="size-5 shrink-0 text-[#D7FF35]"/>
       {stats.beta_eligible ? "Ты соответствуешь критериям кандидата в бета-тестеры. Доступ к закрытому тесту предоставит команда ZAPRUDA после подтверждения, автоматически права не выдаются." : "При 30 активных днях и 10 часах появится право претендовать на закрытый бета-тест обновлений. Доступ не выдаётся автоматически."}
     </p>
+    {stats.beta_eligible && (
+      <div className="mt-4 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/5 p-4">
+        <p className="mb-3 text-sm text-zinc-200">
+          {applicationStatus === "pending" ? "Заявка отправлена и ожидает решения команды." :
+            applicationStatus === "approved" ? "Заявка на бета-тест одобрена. Дождись приглашения от администрации." :
+            applicationStatus === "declined" ? "Заявка рассмотрена. Пока доступ не предоставлен." :
+            "Ты выполнил условия. Можешь подать заявку на участие в закрытом тестировании."}
+        </p>
+        {!applicationStatus && <button type="button" onClick={() => void apply()}
+          disabled={applying} className="btn-primary inline-flex">
+          <FlaskConical className="size-4" />{applying ? "Отправляем…" : "Подать заявку в бета-тест"}
+        </button>}
+      </div>
+    )}
   </section>;
 }
