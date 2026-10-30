@@ -10,6 +10,7 @@ import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
 import { PrivateFishingMarks } from "@/components/PrivateFishingMarks";
+import { ActivityAchievements } from "@/components/ActivityAchievements";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import type { FishingSpecialization } from "@/lib/disciplines";
 import { supabase } from "@/integrations/supabase/client";
@@ -397,6 +398,8 @@ function Profile() {
           ) : (
             <div className="panel p-5 text-sm text-zinc-400">Пока не удалось загрузить ветку достижений. Попробуй обновить страницу.</div>
           )}
+
+          <ActivityAchievements />
 
           <section aria-label="Управление аккаунтом" className="mt-10 mb-6 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7">
             <div className="flex flex-wrap items-center justify-between gap-4">
