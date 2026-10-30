@@ -184,6 +184,13 @@ function Profile() {
       setShareChatCity(Boolean(profileResult.data.chat_city));
     }
 
+    // First-time angler onboarding: open the questionnaire automatically.
+    // Legacy accounts without an explicit role are unaffected.
+    if (auth.user.user_metadata?.account_role === "angler" &&
+        auth.user.user_metadata?.onboarding_complete !== true &&
+        !prefsResult.data?.home_city && !prefsResult.data?.fishing_notes) {
+      setEditing(true);
+    }
     if (prefsResult.error) {
       setError((prev) => prev + " Не удалось загрузить рыболовную анкету: " + prefsResult.error.message);
     } else if (prefsResult.data) {
@@ -317,6 +324,11 @@ function Profile() {
       setError("Имя сохранено, но настройки рыбалки не обновлены: " + prefsError.message);
       return;
     }
+    // A successful saved profile ends the new-member setup.
+    const { error: metadataError } = await supabase.auth.updateUser({
+      data: { onboarding_complete: true },
+    });
+    if (metadataError) console.warn("Не удалось отметить завершение анкеты:", metadataError.message);
     setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
     setEditing(false);
   }
