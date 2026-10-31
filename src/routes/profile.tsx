@@ -84,6 +84,62 @@ type FeaturedGear = {
   line: string | null;
 };
 
+
+type TrophyPhoto = { reportId: string; title: string; url: string };
+function TrophyGallery({ userId }: { userId: string }) {
+  const [photos, setPhotos] = useState<TrophyPhoto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      setLoading(true); setError("");
+      const reports = await supabase.from("fishing_reports")
+        .select("id,title").eq("user_id", userId).eq("is_public", true)
+        .order("created_at", { ascending: false }).limit(24);
+      if (reports.error) throw reports.error;
+      const list = reports.data ?? [];
+      if (!list.length) { if (active) setPhotos([]); return; }
+      const photoRows = await supabase.from("report_photos")
+        .select("report_id,storage_path,sort_order").in("report_id", list.map(x => x.id))
+        .order("sort_order", { ascending: true }).limit(36);
+      if (photoRows.error) throw photoRows.error;
+      const rows = photoRows.data ?? [];
+      if (!rows.length) { if (active) setPhotos([]); return; }
+      const signed = await supabase.storage.from("report-photos").createSignedUrls(rows.map(x => x.storage_path), 3600);
+      if (signed.error) throw signed.error;
+      const titles = new Map(list.map(x => [x.id, x.title]));
+      if (active) setPhotos(rows.flatMap((row, index) => {
+        const url = signed.data?.[index]?.signedUrl;
+        return url ? [{ reportId: row.report_id, title: titles.get(row.report_id) ?? "Трофей", url }] : [];
+      }));
+    })().catch(() => { if (active) setError("Фотографии пока недоступны."); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [userId]);
+  return <section aria-labelledby="zapruda-trophies" className="mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0C100E] p-5 sm:p-7">
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <div><p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#A78BFA]">ZAPRUDA / TROPHY WALL</p>
+      <h2 id="zapruda-trophies" className="mt-2 text-3xl font-black uppercase leading-none tracking-[-0.06em] text-white sm:text-4xl">ТРОФЕИ<span className="text-[#D7FF35]">.</span></h2></div>
+      <span className="rounded-full border border-[#A78BFA]/30 px-3 py-1.5 text-xs font-bold text-[#A78BFA]">{photos.length} фото</span>
+    </div>
+    {loading && <p className="text-sm text-zinc-400">Загружаем трофеи…</p>}
+    {error && <p className="text-sm text-zinc-400">{error}</p>}
+    {!loading && !error && !photos.length && <div className="rounded-2xl border border-dashed border-[#A78BFA]/30 bg-[#191522] p-6">
+      <p className="text-sm font-bold text-white">Твоя стена трофеев пока пуста.</p>
+      <p className="mt-1 text-xs text-zinc-400">Фотографии появятся из твоих публичных отчётов.</p>
+      <Link to="/reports/new" className="mt-4 inline-flex rounded-full bg-[#D7FF35] px-5 py-2.5 text-xs font-black uppercase text-black">Добавить выезд</Link>
+    </div>}
+    {!!photos.length && <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {photos.map((photo, index) => <a key={photo.reportId + "-" + index} href={photo.url} target="_blank" rel="noopener noreferrer" aria-label={"Открыть фото: " + photo.title}
+        className="group relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#1A1D19]">
+        <img src={photo.url} loading="lazy" alt={photo.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105"/>
+        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent px-3 pb-3 pt-10 text-[11px] font-bold text-white">{photo.title}</span>
+      </a>)}
+    </div>}
+  </section>;
+}
+
 function Profile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
@@ -567,6 +623,8 @@ function Profile() {
               </div>
             )}
           </section>
+
+          <TrophyGallery userId={userId} />
 
           <PrivateFishingMarks userId={userId} homeCity={preferences.home_city} homeRegion={preferences.home_region} />
 
