@@ -430,8 +430,8 @@ function GeographicChat() {
             </button>
           </span>)}
         </nav>
-        <div className="panel flex min-h-[650px] flex-col overflow-hidden">
-          <div className="border-b border-white/10 p-4">
+        <div className="flex min-h-[650px] flex-col overflow-hidden rounded-[24px] border border-[#34304D] bg-[#0B1019] shadow-[0_22px_60px_rgba(0,0,0,.32)]">
+          <div className="border-b border-[#34304D] bg-[linear-gradient(130deg,#171729,#0B1119)] p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-black text-white">
@@ -455,7 +455,7 @@ function GeographicChat() {
             </div>
             <p className="mt-3 text-xs text-zinc-500">{currentTopic.description}</p>
           </div>
-          <div className="zapruda-chat-window min-h-[360px] flex-1 space-y-5 overflow-y-auto bg-[#090C0B] p-4 sm:p-6" aria-live="polite">
+          <div className="zapruda-chat-window min-h-[360px] flex-1 space-y-5 overflow-y-auto bg-[#0A0C16] p-3 sm:p-6" aria-live="polite">
             {chatLoading&&<p className="text-sm text-zinc-400">Загружаем сообщения ветки…</p>}
             {chatError&&<p role="alert" className="rounded-xl border border-red-400/30 bg-red-950/15 p-3 text-sm text-red-200">{chatError}</p>}
             {!chatLoading&&!chatError&&!messages.length&&<p className="rounded-xl border border-dashed border-white/15 p-5 text-sm text-zinc-400">
