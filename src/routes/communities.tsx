@@ -33,8 +33,8 @@ function Communities() {
 
   return (
     <Shell>
-      <h1 className="text-3xl font-bold">Сообщества</h1>
-      <section className="mt-6 overflow-hidden rounded-3xl border border-[#D7FF35]/30 bg-gradient-to-br from-[#233219] via-[#172018] to-[#0D100C] p-5 sm:p-7">
+      <h1 className="z-underground-title text-4xl text-white sm:text-6xl">КОМЬЮНИТИ</h1>
+      <section className="z-underground mt-6 overflow-hidden bg-gradient-to-br from-[#1F1B29] via-[#101314] to-[#0B0D0E] p-5 sm:p-7">
         <div className="flex flex-wrap items-center gap-4">
           <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 text-[#D7FF35]">
             <Send className="size-7" aria-hidden="true" />
@@ -55,7 +55,7 @@ function Communities() {
           Личные контакты, заявки и жалобы не публикуются в публичной Telegram-группе. Для них предусмотрен закрытый чат администрации.
         </p>
       </section>
-      <Link to="/chat" className="panel mt-6 flex items-center justify-between p-5 hover:border-primary">
+      <Link to="/chat" className="z-underground mt-6 flex items-center justify-between p-5 transition hover:border-[#A78BFA]/50">
         <div>
           <p className="font-display font-bold">Весь ZAPRUDA</p>
           <p className="text-sm text-muted-foreground">Общий чат и переход к странам, областям, городам и тематическим веткам</p>
@@ -76,7 +76,7 @@ function Communities() {
           <Link to="/atlas" search={{country: sel.code}} className="inline-flex font-semibold text-zinc-300 underline">Атлас водоёмов →</Link>
         </div>
       </section>}
-      <Link to="/atlas" search={{ country: "" }} className="mt-6 flex items-center justify-between rounded-2xl border border-[#D7FF35]/30 bg-[#D7FF35]/5 p-5 transition hover:border-[#D7FF35]">
+      <Link to="/atlas" search={{ country: "" }} className="mt-6 flex items-center justify-between rounded-[22px] border border-[#A78BFA]/30 bg-[#A78BFA]/10 p-5 transition hover:border-[#D7FF35]">
         <span><strong className="block text-lg text-[#D7FF35]">Атлас рыболова</strong><span className="mt-1 block text-sm text-zinc-300">Водоёмы России и СНГ, карточки рыб и коллекции трофеев</span></span>
         <span className="text-[#D7FF35]">Открыть →</span>
       </Link>
