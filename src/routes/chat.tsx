@@ -66,6 +66,7 @@ function GeographicChat() {
   const [error, setError] = useState("");
   const [chatError, setChatError] = useState("");
   const [refreshIndex, setRefreshIndex] = useState(0);
+  const [threadOpen, setThreadOpen] = useState(Boolean(search.place));
 
   useEffect(() => {
     let alive = true;
@@ -119,6 +120,7 @@ function GeographicChat() {
       return;
     }
     setDraft(""); setPhoto(null); setPendingPhotoMessageId(null); setReplyTo(null); setChatError("");
+    setThreadOpen(true);
     void navigate({ to: "/chat", search: { place: id, topic: newTopic, country: "" } });
   }
 
@@ -285,7 +287,7 @@ function GeographicChat() {
   }
 
   return <Shell>
-    <header className="mb-5 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#1D2617] via-[#101410] to-[#080A08] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] sm:p-8">
+    {!threadOpen && <header className="mb-5 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#1D2617] via-[#101410] to-[#080A08] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] sm:p-8">
       <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#D7FF35]">
         <Globe2 className="size-4" /> ZAPRUDA / ЧАТЫ СООБЩЕСТВА
       </p>
@@ -294,7 +296,7 @@ function GeographicChat() {
         Выбирай свою страну, область и город. На каждом уровне свои ветки обсуждений.
         Общий чат всей ZAPRUDA остаётся отдельно — старые сообщения не пропали.
       </p>
-    </header>
+    </header>}
 
     {loading && <p className="mb-5 text-sm text-zinc-400">Загружаем разделы чатов…</p>}
     {error && <p role="alert" className="mb-4 rounded-xl border border-red-400/30 bg-red-950/20 p-4 text-sm text-red-200">{error}</p>}
@@ -303,7 +305,7 @@ function GeographicChat() {
     </p>}
 
     {uid && <div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
-      <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
+      {!threadOpen && <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-lg font-black uppercase tracking-tight text-white">Свои на связи</h2>
           <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-black tracking-widest text-[#D7FF35]">ZAPRUDA</span>
@@ -322,8 +324,8 @@ function GeographicChat() {
             </button>
           ))}
         </div>
-      </section>
-      <aside className="space-y-4 rounded-[24px] border border-white/10 bg-[#0E120F] p-4 lg:sticky lg:top-24">
+      </section>}
+      {!threadOpen && <aside className="space-y-4 rounded-[24px] border border-white/10 bg-[#0E120F] p-4 lg:sticky lg:top-24">
         <button type="button" onClick={() => go(GLOBAL_ID, "general")}
           aria-pressed={placeId === GLOBAL_ID}
           className={"flex w-full items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm font-bold transition " +
@@ -391,9 +393,10 @@ function GeographicChat() {
         <p className="border-t border-white/10 pt-3 text-xs leading-5 text-zinc-500">
           Нет своего города? Добавь регион, затем город. Новые разделы создаются участниками; названия пока не проверяются по географическому справочнику.
         </p>
-      </aside>
+      </aside>}
 
-      <div className="min-w-0 space-y-3 rounded-[22px]">
+      {threadOpen && <div className="min-w-0 space-y-3 rounded-[22px] lg:col-span-2">
+        <button type="button" onClick={() => { if (pendingPhotoMessageId) { setChatError("Сначала заверши или отмени загрузку фото."); return; } setThreadOpen(false); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-[#10131A] px-4 text-sm font-bold text-white hover:border-[#D7FF35]/60" aria-label="Вернуться к списку чатов">← Все чаты</button>
         <nav aria-label="Путь к чату" className="flex flex-wrap items-center gap-1 text-xs">
           {crumbs.map((p,i)=><span key={p.id} className="inline-flex items-center gap-1">
             {i>0&&<ChevronRight className="size-3.5 text-zinc-500" />}
@@ -518,7 +521,7 @@ function GeographicChat() {
           <span><strong className="block text-sm">Личные сообщения</strong><span className="text-xs text-zinc-400">Отдельные переписки по запросу, не видны другим участникам</span></span>
           <span className="flex items-center gap-1 text-xs font-semibold text-[#D7FF35]">Открыть <ChevronRight className="size-4"/></span>
         </Link>
-      </div>
+      </div>}
     </div>}
   </Shell>;
 }
