@@ -153,10 +153,10 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
           {loading && <p className="text-sm text-zinc-400">Загружаем метки…</p>}
           {!loading && !marks.length && <p className="rounded-xl border border-white/10 p-4 text-sm text-zinc-400">Пока нет меток. Добавь первую перспективную точку.</p>}
           {marks.map((mark) => (
-            <div key={mark.id} className={`flex items-start gap-2 rounded-xl border p-3 ${selected?.id === mark.id ? "border-[#D7FF35]/60 bg-[#D7FF35]/5" : "border-white/10"}`}>
+            <div key={mark.id} className={`flex items-start gap-2 rounded-xl border p-3 ${selected?.id === mark.id ? "border-[#D7FF35]/60 bg-[#D7FF35]/[0.09] shadow-[0_0_0_1px_rgba(215,255,53,0.08)]" : "border-[#A78BFA]/15 bg-[#14131A] hover:border-[#A78BFA]/40"}`}>
               <button type="button" onClick={() => setSelected(mark)} className="min-w-0 flex-1 text-left">
                 <span className="block text-xs font-semibold text-[#D7FF35]">{labels[mark.kind]}</span>
-                <span className="mt-1 block break-words text-sm font-bold text-white">{mark.title}</span>
+                <span className="mt-1 block break-words text-base font-black uppercase tracking-tight text-white">{mark.title}</span>
                 <span className="mt-1 block text-xs text-zinc-400">{mark.latitude.toFixed(6)}, {mark.longitude.toFixed(6)}</span>
                 {mark.note && <span className="mt-1 block whitespace-pre-wrap break-words text-xs text-zinc-400">{mark.note}</span>}
               </button>
