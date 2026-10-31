@@ -58,7 +58,7 @@ function ReportPhotoGallery({ photos, title }: { photos: string[]; title: string
   if (!photos.length) return null;
   return (
     <>
-      <div className={`grid gap-1.5 overflow-hidden rounded-2xl ${photos.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+      <div className={`grid gap-1.5 overflow-hidden rounded-[20px] border border-white/10 ${photos.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
         {photos.map((src, index) => (
           <button
             key={index}
@@ -327,17 +327,17 @@ function Feed() {
                 <div className="text-sm font-extrabold text-white">{name}</div>
                 <div className="text-xs text-muted-foreground">{new Date(report.created_at).toLocaleString("ru-RU")}</div>
               </div>
-              <span className="rounded-full bg-secondary px-2 py-1 text-xs">🐟 Отчёт</span>
+              <span className="rounded-full border border-[#A78BFA]/35 bg-[#A78BFA]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#C4B5FD]">Выезд / Отчёт</span>
             </div>
             <div>
-              <h2 className="text-xl font-black tracking-tight text-white sm:text-2xl">{report.title}</h2>
+              <h2 className="text-xl font-black uppercase tracking-[-0.035em] text-white sm:text-2xl">{report.title}</h2>
               {report.body && <p className="mt-2 whitespace-pre-wrap text-sm">{report.body}</p>}
             </div>
             <ReportPhotoGallery photos={photosByReport[report.id] ?? []} title={report.title} />
             <div className="flex flex-wrap gap-2 text-xs">
               {report.location_name && (
                 <div className="space-y-2">
-                  <a href={`https://yandex.ru/maps/?text=${encodeURIComponent(report.location_name)}`} target="_blank" rel="noreferrer" className="inline-flex rounded-full bg-secondary px-3 py-1.5 text-xs transition hover:text-primary">📍 {report.location_name} · Открыть в Яндекс Картах ↗</a>
+                  <a href={`https://yandex.ru/maps/?text=${encodeURIComponent(report.location_name)}`} target="_blank" rel="noreferrer" className="inline-flex rounded-full border border-[#A78BFA]/30 bg-[#A78BFA]/10 px-3 py-1.5 text-xs text-[#DDD6FE] transition hover:border-[#D7FF35]/40 hover:text-[#D7FF35]">📍 {report.location_name} · Открыть в Яндекс Картах ↗</a>
                   <div className="overflow-hidden rounded-xl border border-border/70">
                     <iframe
                       title={`Карта: ${report.location_name}`}
