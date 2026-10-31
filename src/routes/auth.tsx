@@ -35,12 +35,32 @@ function Auth() {
   useEffect(() => {
     // Never forcibly redirect users from registration to profile.
     // Existing sessions are checked after explicit login; password recovery is handled separately.
-    const recovering = new URLSearchParams(window.location.search).get("recovery") === "1";
+    const params = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const recovering = params.get("recovery") === "1";
+    const oauthReturn = params.get("oauth") === "1";
     if (recovering) setMode("new-password");
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const oauthError = params.get("error_description") || hash.get("error_description") || params.get("error") || hash.get("error");
+    if (oauthError) {
+      setError("Не удалось войти через внешний сервис: " + oauthError.slice(0, 250));
+    }
+    let active = true;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") setMode("new-password");
+      if (oauthReturn && !recovering && event === "SIGNED_IN" && session && active) {
+        void navigate({ to: "/profile", replace: true });
+      }
     });
-    return () => subscription.unsubscribe();
+    if (oauthReturn && !recovering && !oauthError) {
+      setNotice("Проверяем вход через выбранный сервис…");
+      void supabase.auth.getSession().then(({ data, error: sessionError }) => {
+        if (!active) return;
+        if (data.session) void navigate({ to: "/profile", replace: true });
+        else if (sessionError) setError("Не удалось завершить вход: " + sessionError.message);
+        else setNotice("Вход не завершён. Повтори попытку или воспользуйся email.");
+      }).catch(() => { if (active) setError("Не удалось проверить вход. Попробуй ещё раз."); });
+    }
+    return () => { active = false; subscription.unsubscribe(); };
   }, []);
 
   useEffect(() => {
