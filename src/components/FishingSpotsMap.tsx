@@ -25,7 +25,8 @@ function loadMapLibre():Promise<MapLibre>{
  }).catch(e=>{loadPromise=null;throw e});
  return loadPromise;
 }
-const colorFor=(kind:string)=>kind==="catch"?"#D7FF35":kind==="snag"?"#FFB454":"#68D9D0";
+const colorFor=(kind:string)=>kind==="catch"?"#D7FF35":["snag","hole","rock"].includes(kind)?"#FF6A00":"#A6DBCF";
+const symbolFor=(kind:string)=>({catch:"🐟",snag:"✕",dropoff:"↘",hole:"◉",vegetation:"♣",rock:"◆",other:"⌖"} as Record<string,string>)[kind]||"⌖";
 const kindLabels:Record<string,string>={catch:"Улов",snag:"Коряга",dropoff:"Бровка",hole:"Яма",vegetation:"Заросли",rock:"Камни",other:"Место"};
 export function FishingSpotsMap({points,onPick}:{points:FishingSpot[];onPick:(lat:number,lon:number)=>void}){
  const holder=useRef<HTMLDivElement>(null);
@@ -53,9 +54,13 @@ export function FishingSpotsMap({points,onPick}:{points:FishingSpot[];onPick:(la
   const lib=getMapLibre();
   points.forEach(p=>{
    const el=document.createElement("button");
-   el.type="button";el.textContent=kindLabels[p.kind]||"Место";
-   el.title=(kindLabels[p.kind]||"Место")+"; "+p.latitude+", "+p.longitude;
-   el.style.cssText="border:2px solid #101510;border-radius:999px;padding:5px 9px;cursor:pointer;font-weight:800;font-size:12px;color:#101510;white-space:nowrap;box-shadow:0 2px 9px #0008;background:"+colorFor(p.kind);
+   const label=kindLabels[p.kind]||"Место";
+   el.type="button";
+   el.className="zapruda-map-marker";
+   el.textContent=symbolFor(p.kind);
+   el.setAttribute("aria-label",label+(p.fish_species?", рыба: "+p.fish_species:""));
+   el.title=label+(p.fish_species?" · "+p.fish_species:"");
+   el.style.setProperty("--marker-accent",colorFor(p.kind));
    const popup=new lib.Popup({offset:16}).setText((kindLabels[p.kind]||"Место")+(p.fish_species?" · "+p.fish_species:"")+(p.note?" · "+p.note:""));
    const marker=new lib.Marker({element:el}).setLngLat([p.longitude,p.latitude]).setPopup(popup).addTo(map.current!);
    markers.current.push(marker);
@@ -68,7 +73,7 @@ export function FishingSpotsMap({points,onPick}:{points:FishingSpot[];onPick:(la
  },[points,ready]);
  return <div>
   {error?<p role="alert" className="rounded-xl border border-amber-300/20 p-3 text-sm text-amber-200">{error}. Список мест доступен ниже.</p>:null}
-  <div ref={holder} className="h-[370px] w-full overflow-hidden rounded-xl border border-white/10 bg-[#111d24] sm:h-[470px]" aria-label="Карта рыболовных мест"/>
-  <p className="mt-2 text-xs text-zinc-400">На карте {points.length} мест. Нажми на карту, чтобы выбрать координаты новой точки. © OpenFreeMap, OpenMapTiles, OpenStreetMap contributors.</p>
+  <div ref={holder} className="h-[420px] w-full overflow-hidden rounded-[22px] border border-[#D7FF35]/20 bg-[#081619] sm:h-[560px]" aria-label="Карта рыболовных мест"/>
+  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-zinc-400"><span><b className="text-[#D7FF35]">●</b> Улов</span><span><b className="text-[#FF6A00]">●</b> Рельеф и препятствия</span><span><b className="text-[#A6DBCF]">●</b> Прочие места</span><span className="ml-auto">{points.length} отметок</span></div><p className="mt-2 text-[11px] text-zinc-500">Нажми на карту для выбора координат. © OpenFreeMap, OpenMapTiles, OpenStreetMap contributors.</p>
  </div>;
 }
