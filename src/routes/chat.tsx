@@ -303,7 +303,7 @@ function GeographicChat() {
   }
 
   return <Shell>
-    {!threadOpen && <header className="mb-4 rounded-[26px] border border-[#252A38] bg-[#070B10] px-4 pb-5 pt-5 sm:px-7 sm:pt-7">
+    {!threadOpen && <header className="mb-4 rounded-[26px] border border-[#252A38] bg-[radial-gradient(ellipse_at_top,#141425_0%,#070B10_65%)] px-4 pb-5 pt-5 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
       <div className="mb-7 flex items-center justify-between gap-3">
         <div className="min-w-0 scale-110 origin-left"><Wordmark /></div>
         <div className="flex items-center gap-2">
@@ -337,8 +337,8 @@ function GeographicChat() {
               aria-pressed={topic === t.key}
               className={"flex w-full min-h-[98px] items-center gap-4 border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
                 (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")}>
-              <span className="relative flex size-[68px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34304D] bg-[#151925]" aria-hidden="true">
-                <img src={ROOM_PHOTOS[t.key]} loading="lazy" alt="" className="absolute inset-0 size-full object-cover" onError={e=>{ e.currentTarget.style.display="none"; }} />
+              <span className="relative flex size-[68px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34304D] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]" aria-hidden="true">
+                <img src={ROOM_PHOTOS[t.key]} loading="lazy" alt="" className="absolute inset-0 size-full object-cover" onError={e=>{ e.currentTarget.style.display="none"; e.currentTarget.nextElementSibling?.classList.remove("hidden"); }} />
                 <span className="relative z-10 hidden text-2xl text-[#D7FF35]">{t.icon}</span>
               </span>
               <span className="min-w-0">
