@@ -340,7 +340,7 @@ function GeographicChat() {
               <span className="relative flex size-[68px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34304D] bg-[#151925]" aria-hidden="true">
                 <img src={ROOM_PHOTOS[t.key]} loading="lazy" alt="" className="absolute inset-0 size-full object-cover" onError={e=>{ e.currentTarget.style.display="none"; }} />
                 <span className="relative z-10 hidden text-2xl text-[#D7FF35]">{t.icon}</span>
-              </span><span className="absolute inset-x-0 bottom-0 h-1 bg-[#D7FF35]/20" /></span>
+              </span>
               <span className="min-w-0">
                 <span className="block text-base font-black text-white">{t.label}</span>
                 <span className="mt-1 block text-xs leading-5 text-[#A99AD9]">{t.description}</span>
