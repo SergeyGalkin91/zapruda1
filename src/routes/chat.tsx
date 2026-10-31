@@ -304,8 +304,8 @@ function GeographicChat() {
 
   return <Shell>
     {!threadOpen && <header className="mb-4 rounded-[26px] border border-[#252A38] bg-[radial-gradient(ellipse_at_top,#141425_0%,#070B10_65%)] px-4 pb-5 pt-5 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
-      <div className="mb-7 flex items-center justify-between gap-3">
-        <div className="min-w-0 scale-110 origin-left"><Wordmark /></div>
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <div className="min-w-0 origin-left"><Wordmark /></div>
         <div className="flex items-center gap-2">
           <button type="button" onClick={() => { setRoomSearchOpen(open => !open); setRoomSearch(""); }} aria-expanded={roomSearchOpen} aria-label="Поиск тематических чатов" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-white hover:text-[#D7FF35]"><Search className="size-6" /></button>
           <Link to="/reports/new" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/75 text-2xl font-light text-white hover:border-[#D7FF35] hover:text-[#D7FF35]" aria-label="Создать отчёт"><Plus className="size-6" /></Link>
@@ -314,11 +314,11 @@ function GeographicChat() {
       {roomSearchOpen && <label className="mb-4 block text-xs text-zinc-300">Найти комнату
         <input autoFocus className="field mt-1 w-full" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} maxLength={80} placeholder="Трофеи, вода, напарники…" />
       </label>}
-      <h1 className="text-[clamp(1.7rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
+      <h1 className="break-words text-[clamp(1.65rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
       <div className="mt-6 grid grid-cols-[0.8fr_1.2fr_1.5fr] gap-2" role="group" aria-label="Фильтр чатов">
         <span className="flex min-h-11 items-center justify-center rounded-2xl bg-[#D7FF35] px-2 text-sm font-black text-[#10140A]" aria-current="true">Все</span>
-        <span className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9]" title="Фильтр появится после реализации учёта участия в чатах">Мои чаты</span>
-        <span className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9]" title="Появится после подключения учёта прочтений">Непрочитанные</span>
+        <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60" title="Появится после подключения истории участия">Мои чаты</button>
+        <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9] opacity-60" title="Появится после подключения учёта прочтений">Непрочитанные</button>
       </div>
     </header>}
 
@@ -331,13 +331,13 @@ function GeographicChat() {
     {uid && <div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
       {!threadOpen && <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#A99AD9]">Тематические комнаты · выбери обсуждение</p>
-        <div className="overflow-hidden rounded-[20px] border border-[#23283A] bg-[#070B10] px-3 sm:px-5">
+        <div className="overflow-hidden rounded-[24px] border border-[#323047] bg-[#080B13] px-3 sm:px-5">
           {TOPICS.filter(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))).map((t) => (
             <button key={t.key} type="button" onClick={() => go(placeId, t.key)}
               aria-pressed={topic === t.key}
               className={"flex w-full min-h-[98px] items-center gap-4 border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
                 (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")}>
-              <span className="relative flex size-[68px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34304D] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]" aria-hidden="true">
+              <span className="relative flex size-[68px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#514565] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]" aria-hidden="true">
                 <img src={ROOM_PHOTOS[t.key]} loading="lazy" alt="" className="absolute inset-0 size-full object-cover" onError={e=>{ e.currentTarget.style.display="none"; e.currentTarget.nextElementSibling?.classList.remove("hidden"); }} />
                 <span className="relative z-10 hidden text-2xl text-[#D7FF35]">{t.icon}</span>
               </span>
