@@ -99,17 +99,6 @@ export function SocialGroups(){
     await refresh();
   }
 
-  async function activateClub(request:Request){
-    if(busy||request.status!=="paid")return;
-    setBusy(true);setError("");
-    const {data,error:rpcError}=await db.rpc("activate_paid_club",{p_request_id:request.id});
-    setBusy(false);
-    if(rpcError){setError("Не удалось открыть оплаченный клуб: "+rpcError.message);return;}
-    setNotice("Клуб создан. Теперь можно приглашать участников и общаться в своём закрытом чате.");
-    setActiveGroup(data);setGroupId(data);
-    await refresh();
-  }
-
   async function invite(){
     if(!uid||!groupId||!inviteId||busy)return;
     if(groups.find(g=>g.id===groupId)?.owner_id!==uid){setError("Приглашать может только владелец клуба.");return;}
@@ -193,7 +182,7 @@ export function SocialGroups(){
           {requests.map(r=><div key={r.id} className="rounded-lg border border-white/10 bg-black/15 p-3 text-xs">
             <strong>{r.name}</strong> · {r.fee_rub} ₽
             <p className="mt-1 text-zinc-400">{r.status==="awaiting_payment"?"Ожидает подключения оплаты / подтверждения":r.status==="paid"?"Платёж подтверждён администратором":"Заявка закрыта"}</p>
-            {r.status==="paid"&&<button type="button" className="btn-primary mt-2" disabled={busy} onClick={()=>void activateClub(r)}>Активировать оплаченный клуб</button>}
+            
           </div>)}
         </form>
         <div className="space-y-3 rounded-xl border border-white/10 bg-black/10 p-4">
