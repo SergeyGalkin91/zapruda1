@@ -118,9 +118,12 @@ function ReportComments({ reportId }: { reportId: string }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const commentsRequestSeq = useRef(0);
 
   const loadComments = useCallback(async () => {
+    const request = ++commentsRequestSeq.current;
     const { data: auth } = await supabase.auth.getUser();
+    if (request !== commentsRequestSeq.current) return;
     setUserId(auth.user?.id ?? null);
     const { data, error: queryError } = await supabase
       .from("comments")
@@ -128,6 +131,7 @@ function ReportComments({ reportId }: { reportId: string }) {
       .eq("report_id", reportId)
       .order("created_at", { ascending: true })
       .limit(100);
+    if (request !== commentsRequestSeq.current) return;
     if (queryError) {
       setError("Не удалось загрузить комментарии: " + queryError.message);
       return;
@@ -142,7 +146,10 @@ function ReportComments({ reportId }: { reportId: string }) {
       .channel("report-comments-" + reportId)
       .on("postgres_changes", { event: "*", schema: "public", table: "comments", filter: "report_id=eq." + reportId }, () => void loadComments())
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    return () => {
+      commentsRequestSeq.current += 1;
+      void supabase.removeChannel(channel);
+    };
   }, [loadComments, reportId]);
 
   async function sendComment(e: React.FormEvent<HTMLFormElement>) {
