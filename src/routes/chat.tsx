@@ -4,6 +4,7 @@ import { ChevronRight, Globe2, MapPin, MessageCircle, Plus, RefreshCw, Reply, Se
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/lib/geo";
+import { chatPhotoError, chatPhotoPath, shouldCreateChatMessage } from "@/lib/chat-media";
 
 type ChatTopic = "general" | "reports" | "waters" | "partners" | "gear" | "tips";
 type Level = "global" | "country" | "region" | "city";
@@ -225,14 +226,13 @@ function GeographicChat() {
     if (!pendingPhotoMessageId && outgoing.length > 2000) {
       setChatError("Сообщение с цитатой не должно превышать 2000 символов."); return;
     }
-    if (photo && (!["image/jpeg", "image/png", "image/webp"].includes(photo.type) || photo.size > 5 * 1024 * 1024)) {
-      setChatError("Фото должно быть JPG, PNG или WebP до 5 МБ."); return;
-    }
+    const validationError = chatPhotoError(photo);
+    if (validationError) { setChatError(validationError); return; }
     setBusy(true);
     setChatError("");
     try {
       let messageId = pendingPhotoMessageId;
-      if (!messageId) {
+      if (shouldCreateChatMessage(messageId)) {
         const { data: message, error: sendError } = await api.from("chat_messages")
           .insert({ user_id: uid, body: outgoing || "📷 Фото", place_id: selectedPlace.id, topic })
           .select("id").single();
@@ -241,8 +241,7 @@ function GeographicChat() {
         if (photo) setPendingPhotoMessageId(messageId);
       }
       if (photo && messageId) {
-        const ext = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
-        const path = uid + "/" + messageId + "/" + crypto.randomUUID() + "." + ext;
+        const path = chatPhotoPath(uid, messageId, photo.type, crypto.randomUUID());
         const { error: uploadError } = await supabase.storage.from("chat-photos")
           .upload(path, photo, { contentType: photo.type, upsert: false });
         if (uploadError) throw new Error("Фото не загружено: " + uploadError.message);
@@ -455,9 +454,8 @@ function GeographicChat() {
                   onChange={e => {
                     const file = e.target.files?.[0] || null;
                     e.target.value = "";
-                    if (file && (file.size > 5*1024*1024 || !["image/jpeg","image/png","image/webp"].includes(file.type))) {
-                      setChatError("Фото должно быть JPG, PNG или WebP до 5 МБ."); return;
-                    }
+                    const validationError = chatPhotoError(file);
+                    if (validationError) { setChatError(validationError); return; }
                     setChatError(""); setPhoto(file);
                   }} />
               </label>
