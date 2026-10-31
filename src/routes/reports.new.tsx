@@ -171,7 +171,8 @@ const COMMON_CIS_FISH = [
   "Желтощёк",
   "Краснопёр монгольский",
   "Конь-губарь",
-  "Амурский чебачок"
+  "Амурский чебачок",
+  "Тюлька","Пузанок","Черноморская сельдь","Дунайская сельдь","Атерина","Морской язык","Глосса","Лиманда","Ершоватка","Камбала-речная","Камбала-звёздчатая","Камбала-желтоперая","Камбала-полярная","Камбала-ерш","Палтус белокорый","Палтус синекорый","Палтус стрелозубый","Морская лисица","Лакедра","Красный луциан","Дорадо","Сибас","Лаврак","Горбыль","Горбыль тёмный","Горбыль светлый","Спинорог","Зубатка полосатая","Зубатка пятнистая","Морской налим","Менёк","Пинагор","Сельдь атлантическая","Сельдь тихоокеанская","Сельдь каспийская","Каспийский лосось","Каспийская кумжа","Балтийский лосось","Балтийская кумжа","Азовский пузанок","Шпрот","Черноморский шпрот","Судак морской","Судак волжский","Бычок-мартовик","Бычок-ротан","Бычок-травяник","Бычок-цуцик","Бычок-головач","Бычок-ширман","Бычок-гонец","Бычок-кнут","Рыба-игла","Каменный окунь","Речной ерш","Речной рак","Золотистый окунь","Тиляпия мозамбикская","Рыба-сабля","Губан","Зеленуха","Ставрида черноморская","Бычок-подкаменщик","Подкаменщик обыкновенный","Пелядь сибирская","Байкальский сиг","Сиг-пыжьян","Сиг-лудога","Сиг-волховский","Сиг проходной","Белорыбица","Омуль арктический","Омуль сибирский","Корюшка азиатская","Корюшка европейская","Зубастая корюшка","Мойва","Сельдь-черноспинка","Волжская сельдь","Царский лосось","Микижа","Камчатская семга","Голец кунджа","Голец усатый","Голец даватчан","Голец белый","Голец желторотый","Голец озёрный","Краснопёрка дальневосточная","Краснопёрка-угай","Амурский язь","Амурская плотва","Амурский карась","Амурский пескарь","Амурская косатка","Косатка-скрипун","Косатка-плеть","Косатка Герценштейна","Пятнистый конь","Конь пёстрый","Черный лещ","Белый лещ","Мелкочешуйный желтопёр","Толстолобик","Чёрный амур","Белый амур","Шереспер","Судак обыкновенный","Судак каспийский","Берш волжский","Лещ восточный","Карась обыкновенный","Озёрный гольян","Гольян обыкновенный","Гольян-красавка","Гольян Чекановского","Гольян Лаговского","Быстрянка","Быстрянка русская","Быстрянка обыкновенная","Бирючок","Пескарь белопёрый","Пескарь длинноусый","Сибирский пескарь","Амурский пескарь","Жерех красногубый","Карабалык","Аральский усач","Туркестанский усач","Булат-маймай","Маринка обыкновенная","Илийская маринка","Балхашская маринка","Голый осман","Чешуйчатый осман","Балхашский окунь","Балхашский гольян","Иссык-кульский чебачок","Иссык-кульский осман","Иссык-кульская маринка","Аральская плотва","Аральский жерех","Сом Солдатова","Сом обыкновенный","Сом африканский","Амурский голавль","Хариус монгольский","Хариус байкальский","Хариус камчатский","Хариус западносибирский","Таймень сибирский","Ленок тупорылый","Ленок острорылый","Налим сибирский","Угорь европейский","Угорь японский","Солнечный окунь","Форель озёрная","Форель золотая","Радужная форель стальноголовая","Озёрная форель","Кумжа каспийская","Сельдь озёрная","Пузанок каспийский","Кутум каспийский","Рыбец черноморский","Шемая азовская","Шемая каспийская","Елец сибирский","Елец данилевского","Подуст волжский","Подуст обыкновенный","Быстрянка кавказская","Карась маньчжурский","Чебак сибирский","Золотой карась","Карась серебряный","Щука обыкновенная","Щука травянка","Треска атлантическая","Треска тихоокеанская","Терпуг однопёрый","Терпуг восьмилинейный","Терпуг северный","Навага дальневосточная","Навага северная","Нерка карликовая","Кижуч серебристый","Чавыча тихоокеанская","Кета осенняя","Кета летняя","Сима проходная","Сёмга атлантическая","Горбуша тихоокеанская"
 ] as const;
 
 type Catch = { species: string; weight: string; length: string };
@@ -190,7 +191,7 @@ function Label({ t, children }: { t: string; children: React.ReactNode }) {
 
 function NewReport() {
   const navigate = useNavigate();
-  const [catches, setCatches] = useState<Catch[]>([{ species: "", weight: "", length: "" }]);
+  const [catches, setCatches] = useState<Catch[]>([{ species: "", weight: "", length: "" }]);\n  const [speciesFocused,setSpeciesFocused]=useState<number|null>(null);
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [catalogWaters, setCatalogWaters] = useState<CatalogWater[]>([]);
@@ -521,10 +522,28 @@ function NewReport() {
             <h2 className="text-base font-semibold">Улов</h2>
             <button type="button" className="btn-ghost" onClick={() => setCatches((c) => [...c, { species: "", weight: "", length: "" }])}>+ Рыба</button>
           </div>
-          <datalist id="zapruda-atlas-species">{Array.from(new Set([...COMMON_CIS_FISH,...catalogFishes.map(f=>f.name)])).sort((a,b)=>a.localeCompare(b,"ru")).map(name => <option key={name} value={name} />)}</datalist>\n          <p className="text-xs text-zinc-400">Начни вводить название рыбы — появятся подсказки по России и СНГ. Редкий вид можно вписать вручную.</p>
+          <p className="text-xs text-zinc-400">Выбирай рыбу по названию — справочник включает речные, озёрные и морские виды России и СНГ. Для редких видов возможен ручной ввод. Соблюдай ограничения на вылов и охраняемые виды.</p>
           {catches.map((c, i) => (
             <div key={i} className="grid grid-cols-[1fr_auto] gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
-              <input className="field col-span-2 sm:col-span-1" list="zapruda-atlas-species" placeholder="Вид (щука, окунь…)" value={c.species} onChange={(e) => upd(i, "species", e.target.value)} />
+              <div className="relative col-span-2 sm:col-span-1">
+                <input className="field w-full" autoComplete="off" placeholder="Начни вводить вид рыбы…" value={c.species}
+                  onFocus={()=>setSpeciesFocused(i)} onBlur={()=>window.setTimeout(()=>setSpeciesFocused(current=>current===i?null:current),150)}
+                  onChange={(e)=>{upd(i,"species",e.target.value);setSpeciesFocused(i);}}/>
+                {speciesFocused===i&&(()=>{
+                  const all=Array.from(new Set([...COMMON_CIS_FISH,...catalogFishes.map(f=>f.name)]));
+                  const query=c.species.trim().toLocaleLowerCase("ru");
+                  const filtered=all.filter(name=>!query||name.toLocaleLowerCase("ru").includes(query)).sort((a,b)=>{
+                    const ap=query&&a.toLocaleLowerCase("ru").startsWith(query)?0:1;
+                    const bp=query&&b.toLocaleLowerCase("ru").startsWith(query)?0:1;
+                    return ap-bp||a.localeCompare(b,"ru");
+                  }).slice(0,25);
+                  return <div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-60 overflow-y-auto rounded-xl border border-[#D7FF35]/35 bg-[#111912] p-1 shadow-xl shadow-black/70">
+                    <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#D7FF35]">{query?"Найденные виды":"Выбери вид или начни ввод"} · {filtered.length}{!query?" из каталога":""}</p>
+                    {filtered.map(name=><button key={name} type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>{upd(i,"species",name);setSpeciesFocused(null);}} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-zinc-200 hover:bg-[#D7FF35]/15 hover:text-[#D7FF35]">{name}</button>)}
+                    {!filtered.length&&<p className="px-3 py-2 text-xs text-zinc-400">Нет в каталоге? Оставь введённое название.</p>}
+                  </div>;
+                })()}
+              </div>
               <input className="field" type="number" min="0" step="0.01" placeholder="Вес, кг" value={c.weight} onChange={(e) => upd(i, "weight", e.target.value)} />
               <input className="field" type="number" min="0" step="0.1" placeholder="Длина, см" value={c.length} onChange={(e) => upd(i, "length", e.target.value)} />
               <button type="button" className="btn-ghost" aria-label="Удалить" onClick={() => setCatches((x) => x.filter((_, j) => j !== i))}>✕</button>
