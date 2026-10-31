@@ -40,9 +40,9 @@ type Props={
 const defaultCoords:Point={latitude:56.3269,longitude:44.0059};
 const markStyles:Record<string,{name:string;preset:string;dot:string}>={
  promising:{name:"Перспективное",preset:"islands#limeCircleDotIcon",dot:"bg-lime-300"},
- snag:{name:"Коряга",preset:"islands#orangeCircleDotIcon",dot:"bg-orange-400"},
- dropoff:{name:"Бровка",preset:"islands#blueCircleDotIcon",dot:"bg-sky-400"},
- hole:{name:"Яма",preset:"islands#darkBlueCircleDotIcon",dot:"bg-blue-500"},
+ snag:{name:"Коряга",preset:"islands#violetCircleDotIcon",dot:"bg-violet-400"},
+ dropoff:{name:"Бровка",preset:"islands#violetCircleDotIcon",dot:"bg-violet-400"},
+ hole:{name:"Яма",preset:"islands#violetCircleDotIcon",dot:"bg-violet-400"},
  riffle:{name:"Перекат",preset:"islands#violetCircleDotIcon",dot:"bg-violet-400"},
  other:{name:"Другое",preset:"islands#grayCircleDotIcon",dot:"bg-zinc-400"},
 };
@@ -94,7 +94,7 @@ export function InteractiveFishingMap({marks,selected,onPick,onSelectMark}:Props
   }
   if(selected){
     const marker=new ymaps.Placemark([selected.latitude,selected.longitude],
-      {hintContent:"Выбранная точка"},{preset:"islands#redCircleDotIcon"});
+      {hintContent:"Выбранная точка"},{preset:"islands#limeCircleDotIcon"});
     m.geoObjects.add(marker);
   }
  },[marks,selected,ready]);
@@ -105,12 +105,12 @@ export function InteractiveFishingMap({marks,selected,onPick,onSelectMark}:Props
      Яндекс Карты · {key?"нажми на карту, чтобы выбрать точку":"просмотр точек — выбор кликом доступен после подключения ключа API"}
    </p>
    {key?<div ref={holder} aria-label="Яндекс Карты: выбери рыболовную точку"
-       className="h-[360px] w-full overflow-hidden rounded-2xl border border-[#D7FF35]/20 bg-[#111B1A] shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:h-[460px]"/>:
+       className="h-[420px] w-full overflow-hidden rounded-[24px] border border-[#A78BFA]/30 bg-[#0B0D10] shadow-[0_20px_60px_rgba(0,0,0,0.35)] sm:h-[500px]"/>:
      <iframe title="Яндекс Карты — личные рыболовные места" loading="lazy" src={src}
        referrerPolicy="strict-origin-when-cross-origin"
        className="h-[360px] w-full overflow-hidden rounded-2xl border border-[#D7FF35]/20 bg-[#111B1A] shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:h-[460px]"/>
    }
-   <div className="flex flex-wrap gap-2" aria-label="Типы рыболовных меток">{(visibleKinds.length?visibleKinds:Object.entries(markStyles)).map(([kind,style])=><span key={kind} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] text-zinc-300"><span aria-hidden="true" className={"size-2 rounded-full "+style.dot}/>{style.name}</span>)}{selected&&<span className="rounded-full border border-red-400/20 bg-red-400/10 px-3 py-1.5 text-[11px] text-red-200">● Новая точка</span>}</div>
+   <div className="flex flex-wrap gap-2" aria-label="Типы рыболовных меток">{(visibleKinds.length?visibleKinds:Object.entries(markStyles)).map(([kind,style])=><span key={kind} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] text-zinc-300"><span aria-hidden="true" className={"size-2 rounded-full "+style.dot}/>{style.name}</span>)}{selected&&<span className="rounded-full border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[11px] text-[#D7FF35]">● Новая точка</span>}</div>
    {error&&<p role="alert" className="text-xs text-amber-200">{error} Введи координаты точки вручную ниже.</p>}
    {!key&&<p className="text-xs leading-5 text-zinc-400">Используются Яндекс Карты (виджет). Для постановки меток одним нажатием нужен API-ключ JavaScript API Яндекс Карт в настройках разработчика. Пока можно внести широту и долготу вручную — метки сохраняются в личный профиль и не становятся публичными.</p>}
    <p className="text-[11px] text-zinc-500">Яндекс получает координаты при загрузке карты. Метки пользователя остаются в его аккаунте ZAPRUDA.</p>
