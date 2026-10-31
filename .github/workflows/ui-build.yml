@@ -71,12 +71,18 @@ jobs:
                 try {
                   const response = await page.goto('http://127.0.0.1:3000' + route, {waitUntil:'domcontentloaded', timeout:20000});
                   await page.waitForTimeout(600);
-                  const metrics = await page.evaluate(() => ({
-                    contentWidth: document.documentElement.scrollWidth,
-                    viewportWidth: document.documentElement.clientWidth,
-                    main: Boolean(document.querySelector('main'))
-                  }));
-                  const ok = response && response.status() < 500 && metrics.main && metrics.contentWidth <= metrics.viewportWidth + 2;
+                  const metrics = await page.evaluate(() => {
+                    const nav = document.querySelector('nav[aria-label="Мобильная навигация"]');
+                    const rect = nav?.getBoundingClientRect();
+                    return {
+                      contentWidth: document.documentElement.scrollWidth,
+                      viewportWidth: document.documentElement.clientWidth,
+                      main: Boolean(document.querySelector('main')),
+                      navigationVisible: Boolean(rect && rect.width > 0 && rect.bottom <= innerHeight + 2 && rect.bottom > innerHeight - 110),
+                      errorScreen: Boolean(document.querySelector('h1')?.textContent?.includes("This page didn't load"))
+                    };
+                  });
+                  const ok = response && response.status() < 500 && metrics.main && metrics.navigationVisible && !metrics.errorScreen && metrics.contentWidth <= metrics.viewportWidth + 2;
                   console.log(width + 'px ' + route + ': ' + (ok ? 'OK' : 'FAIL') + ' status=' + (response?.status() ?? 'none') + ' ' + JSON.stringify(metrics));
                   await page.screenshot({path: 'mobile-check/' + width + '-' + (route === '/' ? 'home' : route.slice(1)) + '.png', fullPage: true});
                   if (!ok) failures++;
