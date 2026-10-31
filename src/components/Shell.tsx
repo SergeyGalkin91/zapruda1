@@ -197,7 +197,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <Link key={target}
               to={target}
               activeOptions={{ exact: true }}
-              className="flex min-h-[68px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
+              className="flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
               activeProps={{ className: "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
               {to === "/profile" && !isSignedIn ? (
                 <LogIn className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
