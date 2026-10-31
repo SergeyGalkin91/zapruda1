@@ -203,6 +203,21 @@ function NewReport() {
       return;
     }
 
+    const numbers = [
+      { label: "Температура", value: temperature, min: -70, max: 65 },
+      { label: "Давление", value: pressure, min: 500, max: 900 },
+      { label: "Ветер", value: windSpeed, min: 0, max: 90 },
+      ...catches.flatMap((c, index) => [
+        { label: "Вес рыбы №" + (index + 1), value: c.weight, min: 0, max: 1000 },
+        { label: "Длина рыбы №" + (index + 1), value: c.length, min: 0, max: 1000 },
+      ]),
+    ];
+    const invalidNumber = numbers.find(({ value, min, max }) =>
+      value.trim() !== "" && (!Number.isFinite(Number(value)) || Number(value) < min || Number(value) > max));
+    if (invalidNumber) {
+      setError("Проверь поле «" + invalidNumber.label + "»: число вне допустимого диапазона.");
+      return;
+    }
     setSaving(true);
     try {
       const { data: authData, error: authError } = await supabase.auth.getUser();
