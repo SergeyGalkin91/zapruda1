@@ -183,7 +183,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
       <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080A09]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden">
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
-          {mobileNav.map(({ to, label, Icon }) => (
+          {mobileNav.map(({ to: navTo, label, Icon }) => { const to: string = navTo; return (
             <Link key={to}
               to={to === "/profile" && !isSignedIn ? "/auth" : to}
               activeOptions={{ exact: true }}
