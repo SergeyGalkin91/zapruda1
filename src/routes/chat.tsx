@@ -28,6 +28,14 @@ const TOPICS: ReadonlyArray<{ key: ChatTopic; label: string; icon: string; descr
   { key: "gear", label: "Стафф", icon: "🎣", description: "Спиннинги, катушки, приманки и оснастки" },
   { key: "tips", label: "Советы", icon: "💡", description: "Тактика, проводки и помощь новичкам" },
 ];
+const ROOM_PHOTOS: Record<ChatTopic, string> = {
+  general: "https://www.anacondastores.com/medias/how-to-wash-and-care-for-fishing-shirts-1-thumbnail.jpg?context=bWFzdGVyfHJvb3R8NDI0ODF8aW1hZ2UvanBlZ3xyb290L2g3Ny9oYzcvMjcyMzk3MTc2OTk2MTQvaG93LXRvLXdhc2gtYW5kLWNhcmUtZm9yLWZpc2hpbmctc2hpcnRzLTEtdGh1bWJuYWlsLmpwZ3w2M2RiZTk5OGU2NjJmN2YyMzgyYTMyODczOTY1ZDY4ZWQyYmVhMWE2OTdjMTMxZjZhNTliZTk2ZTQ3ZDYzMDQ4",
+  reports: "https://fs.tonkosti.ru/ap/yw/apyw29gjg2ogscks00sg400g8.jpg",
+  waters: "https://www.battlbox.com/cdn/shop/articles/what_size_hook_for_bluegill_fishing_the_ultimate_guide_1349ebde-d90e-4400-b006-39715d0a15cf.webp?v=1757669146",
+  partners: "https://www.anacondastores.com/medias/how-to-wash-and-care-for-fishing-shirts-1-thumbnail.jpg?context=bWFzdGVyfHJvb3R8NDI0ODF8aW1hZ2UvanBlZ3xyb290L2g3Ny9oYzcvMjcyMzk3MTc2OTk2MTQvaG93LXRvLXdhc2gtYW5kLWNhcmUtZm9yLWZpc2hpbmctc2hpcnRzLTEtdGh1bWJuYWlsLmpwZ3w2M2RiZTk5OGU2NjJmN2YyMzgyYTMyODczOTY1ZDY4ZWQyYmVhMWE2OTdjMTMxZjZhNTliZTk2ZTQ3ZDYzMDQ4",
+  gear: "https://images.squarespace-cdn.com/content/v1/54f57928e4b020ae7ada4a1a/9468b00e-30ef-4aa9-8c79-712b57c63437/CleanShot%2B2024-09-27%2Bat%2B11.09.26.jpg",
+  tips: "https://journal.rozetka.com.ua/_ipx/f_webp%26q_80%26fit_cover%26w_1000%26loading_lazy/pub-lx/numo/s3630/image-5468.png",
+};
 const quick = ["🎣", "🐟", "🔥", "👍", "😂", "💪", "❤️", "👏", "🤝", "🏆"];
 const VALID_TOPICS = TOPICS.map(t => t.key);
 const api = supabase as any;
@@ -329,14 +337,10 @@ function GeographicChat() {
               aria-pressed={topic === t.key}
               className={"flex w-full min-h-[98px] items-center gap-4 border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
                 (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")}>
-              <span className={"relative flex size-[68px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34304D] text-3xl shadow-[inset_0_-18px_30px_rgba(0,0,0,0.45)] " + ({
-                general:"bg-gradient-to-br from-[#253544] via-[#151D28] to-[#090E15]",
-                reports:"bg-gradient-to-br from-[#526442] via-[#25392C] to-[#091410]",
-                waters:"bg-gradient-to-br from-[#254E63] via-[#1A364D] to-[#08121D]",
-                partners:"bg-gradient-to-br from-[#735336] via-[#382E2C] to-[#10131B]",
-                gear:"bg-gradient-to-br from-[#524C47] via-[#25292C] to-[#0A1014]",
-                tips:"bg-gradient-to-br from-[#515B32] via-[#2B3624] to-[#0D1511]"
-              } as Record<ChatTopic,string>)[t.key]} aria-hidden="true"><span className="relative z-10 drop-shadow-lg">{t.icon}</span><span className="absolute inset-x-0 bottom-0 h-1 bg-[#D7FF35]/20" /></span>
+              <span className="relative flex size-[68px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34304D] bg-[#151925]" aria-hidden="true">
+                <img src={ROOM_PHOTOS[t.key]} loading="lazy" alt="" className="absolute inset-0 size-full object-cover" onError={e=>{ e.currentTarget.style.display="none"; }} />
+                <span className="relative z-10 hidden text-2xl text-[#D7FF35]">{t.icon}</span>
+              </span><span className="absolute inset-x-0 bottom-0 h-1 bg-[#D7FF35]/20" /></span>
               <span className="min-w-0">
                 <span className="block text-base font-black text-white">{t.label}</span>
                 <span className="mt-1 block text-xs leading-5 text-[#A99AD9]">{t.description}</span>
