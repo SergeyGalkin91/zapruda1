@@ -73,18 +73,18 @@ function AdminConsole() {
             ["Заявки на клубы", counts.clubs],
             ["Проверка гидов", counts.guides],
             ["Обращения", counts.requests],
-          ].map(([label, value]) => <div key={String(label)} className="rounded-2xl border border-[#34304D] bg-[#10141D] p-5">
+          ].map(([label, value]) => <div key={String(label)} className="rounded-2xl border border-[var(--z-stroke)] bg-[var(--z-card)] p-4 sm:p-5">
             <p className="text-xs text-zinc-400">{label}</p>
             <p className="mt-2 text-3xl font-black text-[#D7FF35]">{value === null ? "—" : value}</p>
           </div>)}
         </div>
         <div className="grid grid-cols-2 gap-3">
           {sections.map(({ title, description, href, Icon }) =>
-            <Link key={href} to={href} className="rounded-2xl border border-[#41395B] bg-[linear-gradient(140deg,#131724,#0B1018)] p-3 sm:p-5 transition hover:border-[#D7FF35]/60 hover:bg-[#1A1A2B]">
+            <Link key={href} to={href} className="flex min-h-[148px] flex-col rounded-2xl border border-[var(--z-stroke)] bg-[var(--z-card-elevated)] p-4 sm:p-5 transition hover:border-[#D7FF35]/60 hover:bg-[#1A1A2B]">
               <Icon className="size-6 text-[#D7FF35]" />
               <h2 className="mt-3 break-words text-sm font-black text-white sm:text-base">{title}</h2>
               <p className="mt-2 text-xs leading-5 text-[#B4A1D7] sm:text-sm">{description}</p>
-              <span className="mt-4 block text-sm font-bold text-[#D7FF35]">Открыть раздел →</span>
+              <span className="mt-auto block pt-4 text-sm font-bold text-[#D7FF35]">Открыть раздел →</span>
             </Link>
           )}
         </div>
