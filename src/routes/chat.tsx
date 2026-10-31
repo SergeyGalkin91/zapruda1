@@ -52,6 +52,8 @@ function GeographicChat() {
   const [reactions, setReactions] = useState<ChatReaction[]>([]);
   const [reactingTo, setReactingTo] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [regionName, setRegionName] = useState("");
   const [cityName, setCityName] = useState("");
@@ -110,7 +112,7 @@ function GeographicChat() {
   const currentTopic = TOPICS.find(t => t.key === topic) || TOPICS[0];
 
   function go(id: string, newTopic: ChatTopic = topic) {
-    setDraft(""); setReplyTo(null); setChatError("");
+    setDraft(""); setPhoto(null); setReplyTo(null); setChatError("");
     void navigate({ to: "/chat", search: { place: id, topic: newTopic, country: "" } });
   }
 
@@ -137,6 +139,16 @@ function GeographicChat() {
           const { data: liked, error: reactionError } = await api.from("chat_message_reactions")
             .select("id,message_id,user_id,emoji").in("message_id", fetched.map(m => m.id));
           if (alive && !reactionError) setReactions((liked || []) as ChatReaction[]);
+          const { data: attached } = await api.from("chat_message_photos")
+            .select("message_id,storage_path").in("message_id", fetched.map(m => m.id));
+          if (alive && attached?.length) {
+            const signed = await Promise.all(attached.map(async (p: {message_id:string; storage_path:string}) => {
+              const { data: link } = await supabase.storage.from("chat-photos").createSignedUrl(p.storage_path, 1800);
+              return [p.message_id, link?.signedUrl || ""] as const;
+            }));
+            if (alive) setPhotoUrls(Object.fromEntries(signed));
+          } else if (alive) setPhotoUrls({});
+
         } else setReactions([]);
       }
     };
@@ -205,17 +217,37 @@ function GeographicChat() {
   async function send(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const body = draft.trim();
-    if (!body || !uid || busy || !selectedPlace) return;
+    if ((!body && !photo) || !uid || busy || !selectedPlace) return;
     setBusy(true); setChatError("");
     const author = replyTo?.profiles?.display_name || replyTo?.profiles?.username || "Рыболов";
     const quoted = replyTo ? replyTo.body.slice(0, 180).replace(/\s+/g, " ").trim() : "";
     const outgoing = replyTo ? "↪ " + author.slice(0, 40) + ": " + quoted + "\n" + body : body;
     if (outgoing.length > 2000) { setChatError("Сообщение с цитатой не должно превышать 2000 символов."); return; }
-    const { error: sendError } = await api.from("chat_messages")
-      .insert({ user_id: uid, body: outgoing, place_id: selectedPlace.id, topic });
+    if (photo && (!["image/jpeg","image/png","image/webp"].includes(photo.type) || photo.size > 5*1024*1024)) {
+      setChatError("Фото должно быть JPG, PNG или WebP до 5 МБ."); setBusy(false); return;
+    }
+    const { data: message, error: sendError } = await api.from("chat_messages")
+      .insert({ user_id: uid, body: outgoing || "📷 Фото", place_id: selectedPlace.id, topic })
+      .select("id").single();
+    if (sendError) { setChatError("Сообщение не отправлено: " + sendError.message); setBusy(false); return; }
+    if (photo && message?.id) {
+      const ext = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
+      const path = uid + "/" + message.id + "/" + crypto.randomUUID() + "." + ext;
+      const { error: uploadError } = await supabase.storage.from("chat-photos").upload(path,photo,{contentType:photo.type,upsert:false});
+      if (uploadError) {
+        setChatError("Сообщение сохранено, но фото не загружено: " + uploadError.message);
+        setBusy(false); setRefreshIndex(i => i+1); return;
+      }
+      const { error: linkError } = await api.from("chat_message_photos")
+        .insert({message_id:message.id,user_id:uid,storage_path:path});
+      if (linkError) {
+        await supabase.storage.from("chat-photos").remove([path]);
+        setChatError("Сообщение сохранено без фото: " + linkError.message);
+        setBusy(false); setRefreshIndex(i => i+1); return;
+      }
+    }
     setBusy(false);
-    if (sendError) { setChatError("Сообщение не отправлено: " + sendError.message); return; }
-    setDraft(""); setReplyTo(null);
+    setDraft(""); setPhoto(null); setReplyTo(null);
     setRefreshIndex(i => i + 1);
   }
 
@@ -363,6 +395,9 @@ function GeographicChat() {
               </div>
               <div className={"zapruda-chat-bubble whitespace-pre-wrap break-words rounded-[20px] border px-4 py-3 text-sm leading-6 "+(message.user_id===uid?"zapruda-chat-own-bubble ":"zapruda-chat-incoming-bubble ")+(message.user_id===uid?"rounded-tr-sm border-[#D7FF35]/30 bg-[#D7FF35]/10 text-white":"rounded-tl-sm border-[#A78BFA]/20 bg-[#191722] text-zinc-100")}>
                 {message.body}
+                {photoUrls[message.id] && <a href={photoUrls[message.id]} target="_blank" rel="noopener noreferrer" className="mt-2 block">
+                  <img src={photoUrls[message.id]} alt="Фото из рыболовного чата" loading="lazy" className="max-h-72 max-w-full rounded-xl object-contain" />
+                </a>}
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
                 {REACTION_EMOJI.map(emoji => {
@@ -394,12 +429,27 @@ function GeographicChat() {
                 onClick={() => setDraft(d=>(d+q).slice(0,2000))}
                 className="rounded-md px-2 py-1 text-lg transition hover:-translate-y-0.5 hover:bg-white/10">{q}</button>)}
             </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="inline-flex cursor-pointer items-center rounded-lg border border-white/20 px-3 py-2 text-xs text-zinc-200 hover:border-[#D7FF35]">
+                📷 {photo ? photo.name : "Прикрепить фото"}
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!uid || busy}
+                  onChange={e => {
+                    const file = e.target.files?.[0] || null;
+                    e.target.value = "";
+                    if (file && (file.size > 5*1024*1024 || !["image/jpeg","image/png","image/webp"].includes(file.type))) {
+                      setChatError("Фото должно быть JPG, PNG или WebP до 5 МБ."); return;
+                    }
+                    setChatError(""); setPhoto(file);
+                  }} />
+              </label>
+              {photo && <button type="button" className="text-xs text-[#D7FF35]" onClick={() => setPhoto(null)}>Убрать фото</button>}
+            </div>
             <div className="flex gap-2">
               <input className="field min-w-0 flex-1" aria-label="Сообщение для выбранной ветки"
                 placeholder={"Написать в «"+currentTopic.label+"»…"}
                 value={draft} onChange={e => setDraft(e.target.value)} disabled={!uid||busy||chatLoading} maxLength={2000}/>
               <button type="submit" className="btn-primary inline-flex min-h-11 items-center gap-2"
-                disabled={!draft.trim()||!uid||busy||chatLoading}>
+                disabled={(!draft.trim() && !photo)||!uid||busy||chatLoading}>
                 <Send className="size-4"/> {busy?"Отправляем…":"Отправить"}
               </button>
             </div>
