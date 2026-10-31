@@ -103,6 +103,32 @@ function NewReport() {
   }, [draftReady, savedReportId, title, location, weather, temperature, pressure,
       windDirection, windSpeed, technique, fishingMethod, lures, story, selectedWaterbody, catches, isPublic]);
 
+  function importStreetSession() {
+    if (savedReportId || saving) return;
+    try {
+      const raw = localStorage.getItem("zapruda:street-session:v1");
+      if (!raw) { setError("Street-сессия не найдена в этом браузере."); return; }
+      const value: unknown = JSON.parse(raw);
+      if (!value || typeof value !== "object" || !("finishedAt" in value) || typeof value.finishedAt !== "string") {
+        setError("Сначала заверши Street-сессию, затем перенеси данные."); return;
+      }
+      const street = value as { startedAt?: unknown; area?: unknown; catches?: unknown; finishedAt: string };
+      if (typeof street.startedAt !== "string" || !Number.isFinite(Date.parse(street.startedAt))) { setError("Данные Street-сессии повреждены."); return; }
+      if ((title.trim() || location.trim() || story.trim() || catches.some(c => c.species.trim())) &&
+          !window.confirm("В форме уже есть данные. Заменить название, место и уловы данными Street-сессии?")) return;
+      const area = typeof street.area === "string" ? street.area.slice(0, 100) : "";
+      const items = Array.isArray(street.catches) ? street.catches.filter((c): c is {species:string;note?:string} =>
+        !!c && typeof c === "object" && typeof c.species === "string").slice(0, 20) : [];
+      setTitle(("Street Fishing · " + (area || "городской выход")).slice(0, 120));
+      setLocation(area);
+      setCatches(items.length ? items.map(c => ({ species: c.species.slice(0, 80), weight: "", length: "" })) : [{ species: "", weight: "", length: "" }]);
+      setStory("Street-сессия от " + new Date(street.startedAt).toLocaleString("ru-RU") +
+        ". Уловов: " + items.length + "." + items.map(c => "\\n• " + c.species + (c.note ? " — " + c.note : "")).join("").slice(0, 3000));
+      setIsPublic(false);
+      setError("");
+    } catch { setError("Не удалось прочитать Street-сессию. Исходные данные сохранены."); }
+  }
+
   function clearLocalDraft() {
     if (draftKey.current) { try { localStorage.removeItem(draftKey.current); } catch {} }
     setDraftRestored(false);
@@ -342,6 +368,10 @@ function NewReport() {
   return (
     <Shell>
       <h1 className="mb-6 text-2xl font-bold">Новый отчёт</h1>
+      {!savedReportId && <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D7FF35]/30 bg-[#161D13] p-4">
+        <div><p className="text-sm font-black text-[#D7FF35]">ZAPRUDA STREET</p><p className="mt-1 text-xs text-zinc-300">Перенести завершённую городскую сессию. Отчёт останется приватным до твоего решения.</p></div>
+        <button type="button" onClick={importStreetSession} disabled={!draftReady || saving} className="rounded-xl border border-[#D7FF35]/60 px-4 py-2 text-xs font-black text-[#D7FF35] disabled:opacity-40">Перенести Street-сессию</button>
+      </div>
       {savedReportId && <div role="status" className="mb-4 rounded-xl border border-[#A78BFA]/40 bg-[#A78BFA]/10 p-4 text-sm text-zinc-100">
         <p className="font-bold text-[#D7FF35]">Отчёт сохранён</p>
         <p className="mt-1">Загружено фотографий: {uploadedCount} из {photos.length}. Если загрузка прервалась, повтори её — второй отчёт не создаётся.</p>
