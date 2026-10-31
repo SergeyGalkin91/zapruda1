@@ -63,7 +63,13 @@ export function Shell({ children }: { children: ReactNode }) {
         setIsSignedIn(Boolean(data.session?.user));
       }).catch((error: unknown) => {
         if (!active) return;
-        setAuthError(error instanceof Error ? error.message : "Не удалось проверить авторизацию.");
+        // A visitor without a session is an expected state, not a UI failure.
+        if (error instanceof Error && /auth session missing/i.test(error.message)) {
+          setIsSignedIn(false);
+          setAuthError("");
+          return;
+        }
+        setAuthError("Не удалось проверить авторизацию. Обнови страницу или попробуй войти снова.");
       });
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Не удалось инициализировать авторизацию.");
