@@ -21,10 +21,10 @@ const desktopNav = [
 
 const mobileNav = [
   { to: "/", label: "Лента", Icon: House },
+  { to: "/communities", label: "Комьюнити", Icon: Compass },
   { to: "/reports/new", label: "Создать", Icon: Plus },
   { to: "/partners", label: "Выезды", Icon: Users },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
-  { to: "/profile", label: "Профиль", Icon: UserRound },
 ] as const;
 
 const otherNav = [
