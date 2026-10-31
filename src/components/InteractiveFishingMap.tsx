@@ -104,11 +104,11 @@ export function InteractiveFishingMap({marks,selected,onPick,onSelectMark}:Props
    <p className="text-xs font-semibold text-zinc-300">
      Яндекс Карты · {key?"нажми на карту, чтобы выбрать точку":"просмотр точек — выбор кликом доступен после подключения ключа API"}
    </p>
-   {key?<div ref={holder} aria-label="Яндекс Карты: выбери рыболовную точку"
-       className="h-[420px] w-full overflow-hidden rounded-[24px] border border-[#A78BFA]/30 bg-[#0B0D10] shadow-[0_20px_60px_rgba(0,0,0,0.35)] sm:h-[500px]"/>:
+   {key&&!error?<div ref={holder} aria-label="Яндекс Карты: выбери рыболовную точку"
+       className="h-[320px] w-full min-w-0 overflow-hidden rounded-[24px] border border-[#A78BFA]/30 bg-[#0B0D10] shadow-[0_20px_60px_rgba(0,0,0,0.35)] sm:h-[500px]"/>:
      <iframe title="Яндекс Карты — личные рыболовные места" loading="lazy" src={src}
        referrerPolicy="strict-origin-when-cross-origin"
-       className="h-[360px] w-full overflow-hidden rounded-2xl border border-[#D7FF35]/20 bg-[#111B1A] shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:h-[460px]"/>
+       className="h-[300px] w-full min-w-0 overflow-hidden rounded-2xl border border-[#D7FF35]/20 bg-[#111B1A] shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:h-[460px]"/>
    }
    <div className="flex flex-wrap gap-2" aria-label="Типы рыболовных меток">{(visibleKinds.length?visibleKinds:Object.entries(markStyles)).map(([kind,style])=><span key={kind} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] text-zinc-300"><span aria-hidden="true" className={"size-2 rounded-full "+style.dot}/>{style.name}</span>)}{selected&&<span className="rounded-full border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[11px] text-[#D7FF35]">● Новая точка</span>}</div>
    {error&&<p role="alert" className="text-xs text-amber-200">{error} Введи координаты точки вручную ниже.</p>}
