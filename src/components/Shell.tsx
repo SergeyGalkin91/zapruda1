@@ -145,10 +145,10 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             )}
             {isAdmin && (
-              <Link to="/finance"
+              <Link to="/admin"
                 className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.07]">
                 <ShieldCheck className="size-4 text-[#D7FF35]" aria-hidden="true" />
-                Финансы ZAPRUDA
+                Кабинет администрации
                 <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
               </Link>
             )}
