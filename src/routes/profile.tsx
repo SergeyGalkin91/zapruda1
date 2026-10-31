@@ -388,7 +388,7 @@ function Profile() {
           <div className="ml-auto flex min-w-[120px] flex-col items-center gap-2 rounded-2xl border border-[#D7FF35]/30 bg-[#D7FF35]/[.055] px-4 py-3 text-[#D7FF35]">
             <DisciplineIcon method={preferences.main_technique} className="size-10"/>
             <span className="text-center text-xs font-black uppercase">{accountRole==="guide"?"ГИД":preferences.main_technique}</span>
-            <span className="text-[9px] tracking-widest text-zinc-500">НАПРАВЛЕНИЕ</span>
+            
           </div>
         </div>
         {avatarPanelOpen&&<div className="mt-4 rounded-xl border border-[#D7FF35]/30 bg-black/20 p-4">
@@ -464,9 +464,9 @@ function Profile() {
                       const accent = index % 5 === 0 ? "#FF6A00" : "#D7FF35";
                       return <button key={item.code} type="button" aria-pressed={selected}
                         onClick={() => toggleMethod(item.code)}
-                        className={`group relative flex min-h-[166px] flex-col justify-end overflow-hidden rounded-[20px] border px-4 pb-4 pt-16 text-left transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] ${selected ? "border-[#D7FF35] bg-[#172315] shadow-[inset_0_0_0_1px_rgba(215,255,53,.18),0_8px_28px_rgba(0,0,0,.22)]" : "border-white/10 bg-[#0C1110] hover:border-[#D7FF35]/50 hover:bg-[#141A15]"}`}>
+                        className={`zapruda-method-tile group relative flex min-h-[136px] flex-col justify-end overflow-hidden rounded-[20px] border px-4 pb-4 pt-11 text-left transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] ${selected ? "border-[#D7FF35] bg-[#172315] shadow-[inset_0_0_0_1px_rgba(215,255,53,.18),0_8px_28px_rgba(0,0,0,.22)]" : "border-white/10 bg-[#0C1110] hover:border-[#D7FF35]/50 hover:bg-[#141A15]"}`}>
                         <span aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-80" style={{background:`radial-gradient(circle at 90% 8%,${accent}21,transparent 57%),repeating-radial-gradient(circle at 100% -10%,transparent 0px,transparent 28px,${accent}11 29px,transparent 30px)`}}/>
-                        <span className="pointer-events-none absolute right-3 top-3 flex size-12 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-[#D7FF35]/80 transition group-hover:scale-110" aria-hidden="true"><DisciplineIcon method={item.code} className="size-8"/></span>
+                        <span className="zapruda-method-icon pointer-events-none absolute right-3 top-3 flex size-11 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-[#D7FF35]/80 transition group-hover:scale-110" aria-hidden="true"><DisciplineIcon method={item.code} className="size-9"/></span>
                         <span className="relative mb-1 block text-base font-black leading-tight text-white">{item.title}</span>
                         <span className="relative block text-[11px] leading-[1.45] text-[#A8B5A6]">{item.detail}</span>
                         {selected && <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-[#D7FF35]/40 bg-[#D7FF35]/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#D7FF35]"><Check className="size-3"/> Выбрано</span>}
