@@ -113,6 +113,42 @@ jobs:
           })().catch(err => {console.error(err);process.exitCode=1});
           EOF
           node mobile-check/check.cjs
+      - name: Check mobile navigation links and form controls
+        shell: bash
+        env:
+          PORT: "3000"
+          HOST: "127.0.0.1"
+          VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+        run: |
+          set -euo pipefail
+          node .output/server/index.mjs > mobile-check/interaction-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/ -o /dev/null; then break; fi
+            sleep 2
+          done
+          node - <<'EOF'
+          const { chromium } = require('playwright');
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage({ viewport:{width:375,height:812}, isMobile:true, hasTouch:true });
+            await page.goto('http://127.0.0.1:3000/', { waitUntil:'domcontentloaded' });
+            const nav = page.getByRole('navigation', {name:'Мобильная навигация'});
+            await nav.waitFor({state:'visible'});
+            const expected = ['Лента','Создать','Выезды','Чат'];
+            for (const label of expected) {
+              if (await nav.getByRole('link', {name:new RegExp(label)}).count() !== 1) throw new Error('Navigation link missing: '+label);
+            }
+            await nav.getByRole('link', {name:/Выезды/}).click();
+            await page.waitForURL('**/partners', {timeout:12000});
+            const filters = await page.locator('input,select,textarea').count();
+            console.log('Mobile navigation OK; trip page inputs: '+filters);
+            await page.screenshot({path:'mobile-check/navigation-interaction.png',fullPage:true});
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          EOF
       - name: Upload mobile screenshots and logs
         if: always()
         uses: actions/upload-artifact@v4
