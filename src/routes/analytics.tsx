@@ -132,7 +132,7 @@ function SpotAnalytics(){
       {!loading&&!loggedIn&&<div className="rounded-2xl border border-white/10 bg-[#151915] p-5">
         <LockKeyhole className="size-6 text-[#D7FF35]"/><h2 className="mt-3 text-lg font-bold">Войди в ZAPRUDA</h2>
         <p className="mt-2 text-sm text-zinc-400">Для приватной аналитики необходим аккаунт с сохранёнными точками и комплектами.</p>
-        <Link to="/auth" className="btn-primary mt-4 inline-flex">Войти в аккаунт</Link>
+        <Link search={{ mode: "in" }} to="/auth" className="btn-primary mt-4 inline-flex">Войти в аккаунт</Link>
       </div>}
       {!loading&&loggedIn&&<>
         <div className={"flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-5 py-4 " +

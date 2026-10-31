@@ -396,7 +396,7 @@ function NewReport() {
               const id = e.target.value;
               setSelectedWaterbody(id);
               const water = catalogWaters.find(w => w.id === id);
-              if (water) setLocation(w.name + (water.region ? " · " + water.region : ""));
+              if (water) setLocation(water.name + (water.region ? " · " + water.region : ""));
             }}>
               <option value="">Не выбирать — обычный отчёт</option>
               {catalogWaters.map(w => <option key={w.id} value={w.id}>{w.name} · {w.region || w.country_code}</option>)}

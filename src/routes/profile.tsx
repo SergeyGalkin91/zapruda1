@@ -718,7 +718,7 @@ function Profile() {
           <Settings2 className="mx-auto size-9 text-[#D7FF35]" />
           <h2 className="mt-4 text-lg font-bold">Войди, чтобы прокачивать рыболова</h2>
           <p className="mt-2 text-sm text-zinc-400">Анкета, ранги, XP и достижения привязаны к твоему аккаунту.</p>
-          <Link to="/auth" className="btn-primary mt-5 inline-flex">Войти в ZAPRUDA</Link>
+          <Link search={{ mode: "in" }} to="/auth" className="btn-primary mt-5 inline-flex">Войти в ZAPRUDA</Link>
         </div>
       )}
     </Shell>

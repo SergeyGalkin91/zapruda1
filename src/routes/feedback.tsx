@@ -101,7 +101,7 @@ export function FeedbackPage() {
           )}
         </div>
         {authenticated===false && <div className="mt-5 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-4 text-sm text-zinc-300">
-          Чтобы отправить обращение, <Link to="/auth" className="font-bold text-[#D7FF35] underline">войди в аккаунт ZAPRUDA</Link>.
+          Чтобы отправить обращение, <Link search={{ mode: "in" }} to="/auth" className="font-bold text-[#D7FF35] underline">войди в аккаунт ZAPRUDA</Link>.
         </div>}
         {error && <p role="alert" className="mt-5 rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}
         {result && <div role="status" className="mt-5 rounded-xl border border-[#D7FF35]/35 bg-[#D7FF35]/10 p-4">

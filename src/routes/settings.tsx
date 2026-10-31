@@ -103,7 +103,7 @@ function SettingsPage() {
           })}
         </div>
         <div className="mt-4 flex flex-wrap gap-3 text-sm">
-          <Link to="/chat" className="font-semibold text-[#D7FF35] hover:underline">Открыть общий чат →</Link>
+          <Link search={{ place: "", topic: "general", country: "" }} to="/chat" className="font-semibold text-[#D7FF35] hover:underline">Открыть общий чат →</Link>
           <Link to="/messages" search={{ mark: "" }} className="font-semibold text-[#D7FF35] hover:underline">Открыть личные сообщения →</Link>
         </div>
       </section>

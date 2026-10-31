@@ -118,7 +118,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 </a>
               </>
             ) : (
-              <Link to="/auth" className="inline-flex rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white">
+              <Link search={{ mode: "in" }} to="/auth" className="inline-flex rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white">
                 Войти
               </Link>
             )}
@@ -140,7 +140,7 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             ))}
             {!isSignedIn && (
-              <Link to="/auth" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
+              <Link search={{ mode: "in" }} to="/auth" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
                 <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
               </Link>
             )}

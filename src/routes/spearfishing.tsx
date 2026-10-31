@@ -139,7 +139,7 @@ function Spearfishing() {
         <p className="text-xs font-black uppercase tracking-[0.18em] text-[#D7FF35]">01 / Профиль подводного охотника</p>
         <h2 className="mt-2 text-xl font-black">Моя анкета</h2>
         <p className="mt-2 text-sm leading-6 text-zinc-400">Заполни условия и предпочтения для поиска напарника. Анкета закрыта, пока ты не включишь показ сообществу.</p>
-        {!id ? <p className="mt-5 text-sm text-zinc-400">Чтобы заполнить анкету, <Link to="/auth" className="text-[#D7FF35] underline">войди в аккаунт</Link>.</p>
+        {!id ? <p className="mt-5 text-sm text-zinc-400">Чтобы заполнить анкету, <Link search={{ mode: "in" }} to="/auth" className="text-[#D7FF35] underline">войди в аккаунт</Link>.</p>
         : <form onSubmit={save} className="mt-5 space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <Field title="Город / регион"><input className="field" required value={form.home_city} maxLength={100} onChange={(e)=>update("home_city",e.target.value)} placeholder="Нижний Новгород" /></Field>
