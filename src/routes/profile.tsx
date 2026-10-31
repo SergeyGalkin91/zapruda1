@@ -243,7 +243,7 @@ function Profile() {
     if (authError || !auth.user) {
       setLoading(false);
       setUserId(null);
-      setError(authError?.message || "Чтобы заполнить профиль, войди в аккаунт.");
+      setError("Чтобы заполнить профиль, войди в аккаунт ZAPRUDA.");
       return;
     }
     setUserId(auth.user.id);
