@@ -163,3 +163,63 @@
   border-color: rgba(215,255,53,.36);
   background-color: rgba(56,71,25,.74);
 }
+
+/* ZAPRUDA Underground design system — shared presentation only. */
+:root {
+  --z-surface: #0B0D0E;
+  --z-card: #141D20;
+  --z-lime: #D7FF35;
+  --z-violet: #A78BFA;
+  --z-stroke: rgba(255,255,255,.11);
+}
+.z-underground {
+  color: #F5F7F5;
+  background: #0B0D0E;
+  border: 1px solid var(--z-stroke);
+  border-radius: 24px;
+}
+.z-underground-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1.03;
+  letter-spacing: -.045em;
+}
+.z-underground-eyebrow {
+  color: var(--z-lime);
+  font-size: .67rem;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.z-underground-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  border: 1px solid rgba(167,139,250,.3);
+  border-radius: 999px;
+  background: rgba(167,139,250,.09);
+  padding: .4rem .7rem;
+  font-size: .72rem;
+  color: #DDD6FE;
+}
+.z-underground-action {
+  border-radius: 999px;
+  background: var(--z-lime);
+  color: #080B06;
+  padding: .7rem 1.15rem;
+  font-size: .78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.z-underground-action:hover { background: white; }
+.zapruda-chat-window .zapruda-chat-bubble {
+  line-height: 1.55;
+}
+.zapruda-chat-window .zapruda-chat-bubble.border-\\[\\#D7FF35\\]\\/30 {
+  border-color: rgba(215,255,53,.3);
+  background-color: rgba(215,255,53,.1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .z-underground-action { transition: none; }
+}
