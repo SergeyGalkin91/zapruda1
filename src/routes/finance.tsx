@@ -56,17 +56,17 @@ function Finance(){
      {!loading&&!authorized&&<p className="rounded-xl border border-white/10 p-5 text-sm text-zinc-400">Раздел доступен только администратору ZAPRUDA.</p>}
      {error&&<p role="alert" className="rounded-xl border border-red-400/30 p-4 text-sm text-red-200">{error}</p>}
      {authorized&&<div className="space-y-6">
-       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+       <div className="grid grid-cols-2 gap-3">
          {([
            ["Выручка с выездов гидов",summary.total_guide_payments_rub,"Только подтверждённые провайдером платежи",CreditCard],
            ["Комиссия ZAPRUDA",summary.platform_commission_rub,"10% подтверждённых выездов до банковских и иных расходов",CircleDollarSign],
            ["Начислено гидам",summary.guide_amount_rub,"Обязательства перед исполнителями, не выводимый остаток",Wallet],
            ["Создание клубов",summary.club_payment_confirmed_rub,"Подтверждения платных заявок на клубы, требуют сверки с банком",ReceiptText],
            ["Неоплаченные бронирования",summary.pending_booking_amount_rub,"Согласованные суммы, не являются доходом",ShieldCheck],
-         ] as const).map(([title,value,subtitle,Icon])=><div key={String(title)} className="rounded-2xl border border-white/10 bg-[#151915] p-4">
-           <div className="flex items-center gap-2 text-sm font-bold text-zinc-300"><Icon className="size-4 text-[#D7FF35]"/>{String(title)}</div>
-           <p className="mt-3 text-2xl font-black text-white">{currency(Number(value))}</p>
-           <p className="mt-2 text-xs leading-5 text-zinc-500">{String(subtitle)}</p>
+         ] as const).map(([title,value,subtitle,Icon])=><div key={String(title)} className="min-w-0 rounded-2xl border border-[#34304D] bg-[#10141D] p-3 sm:p-4">
+           <div className="flex items-start gap-2 text-xs font-bold text-[#B4A1D7] sm:text-sm"><Icon className="size-4 text-[#D7FF35]"/>{String(title)}</div>
+           <p className="mt-3 break-words text-xl font-black text-[#D7FF35] sm:text-2xl">{currency(Number(value))}</p>
+           <p className="mt-2 text-[11px] leading-4 text-[#A99AD9]">{String(subtitle)}</p>
          </div>)}
        </div>
        <section className="rounded-2xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-5">
