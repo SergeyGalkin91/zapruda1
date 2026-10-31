@@ -36,6 +36,69 @@ jobs:
           set -o pipefail
           bun run build 2>&1 | tee build-output.log
           test -f .output/server/index.mjs
+      - name: Install browser for mobile smoke test
+        run: |
+          bun add --no-save playwright
+          bunx playwright install --with-deps chromium
+      - name: Start application and check mobile screens
+        shell: bash
+        env:
+          PORT: "3000"
+          HOST: "127.0.0.1"
+          VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+        run: |
+          set -euo pipefail
+          mkdir -p mobile-check
+          node .output/server/index.mjs > mobile-check/server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3000/ -o /dev/null; then break; fi
+            sleep 2
+          done
+          cat > mobile-check/check.cjs <<'EOF'
+          const { chromium } = require('playwright');
+          (async () => {
+            const browser = await chromium.launch({headless:true});
+            const routes = ['/', '/communities', '/partners', '/chat', '/profile'];
+            const widths = [320, 375, 430];
+            let failures = 0;
+            for (const width of widths) {
+              const context = await browser.newContext({viewport: {width, height: 800}, isMobile: true, hasTouch: true});
+              for (const route of routes) {
+                const page = await context.newPage();
+                try {
+                  const response = await page.goto('http://127.0.0.1:3000' + route, {waitUntil:'domcontentloaded', timeout:20000});
+                  await page.waitForTimeout(600);
+                  const metrics = await page.evaluate(() => ({
+                    contentWidth: document.documentElement.scrollWidth,
+                    viewportWidth: document.documentElement.clientWidth,
+                    main: Boolean(document.querySelector('main'))
+                  }));
+                  const ok = response && response.status() < 500 && metrics.main && metrics.contentWidth <= metrics.viewportWidth + 2;
+                  console.log(width + 'px ' + route + ': ' + (ok ? 'OK' : 'FAIL') + ' status=' + (response?.status() ?? 'none') + ' ' + JSON.stringify(metrics));
+                  await page.screenshot({path: 'mobile-check/' + width + '-' + (route === '/' ? 'home' : route.slice(1)) + '.png', fullPage: true});
+                  if (!ok) failures++;
+                } catch (error) {
+                  failures++;
+                  console.error(width + 'px ' + route + ': ' + error.message);
+                } finally { await page.close(); }
+              }
+              await context.close();
+            }
+            await browser.close();
+            if (failures) process.exitCode = 1;
+          })().catch(err => {console.error(err);process.exitCode=1});
+          EOF
+          node mobile-check/check.cjs
+      - name: Upload mobile screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zapruda-mobile-check
+          path: mobile-check/
+          if-no-files-found: ignore
       - name: Save build diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@v4
