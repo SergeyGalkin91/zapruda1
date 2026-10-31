@@ -191,7 +191,8 @@ function Label({ t, children }: { t: string; children: React.ReactNode }) {
 
 function NewReport() {
   const navigate = useNavigate();
-  const [catches, setCatches] = useState<Catch[]>([{ species: "", weight: "", length: "" }]);\n  const [speciesFocused,setSpeciesFocused]=useState<number|null>(null);
+  const [catches, setCatches] = useState<Catch[]>([{ species: "", weight: "", length: "" }]);
+  const [speciesFocused,setSpeciesFocused]=useState<number|null>(null);
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [catalogWaters, setCatalogWaters] = useState<CatalogWater[]>([]);
@@ -332,7 +333,9 @@ function NewReport() {
           .insert({
             user_id: user.id,
             title: cleanTitle,
-            body: [story.trim(), technique.trim() ? "Техника: " + technique.trim() : "", lures.trim() ? "Приманки: " + lures.trim() : ""].filter(Boolean).join("\n\n") || null,
+            body: [story.trim(), technique.trim() ? "Техника: " + technique.trim() : "", lures.trim() ? "Приманки: " + lures.trim() : ""].filter(Boolean).join("
+
+") || null,
             location_name: location.trim() || null,
             weather_summary: weather.trim() || null,
             air_temperature_c: temperature.trim() ? Number(temperature) : null,
