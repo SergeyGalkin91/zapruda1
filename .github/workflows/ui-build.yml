@@ -25,7 +25,13 @@ jobs:
       - name: Runtime versions
         run: node --version && npm --version
       - name: Install dependencies
-        run: npm install --no-audit --no-fund --loglevel verbose
+        shell: bash
+        run: |
+          npm install --no-audit --no-fund --loglevel verbose || {
+            echo 'Normal npm resolution failed. Retrying with legacy peer dependency handling.'
+            rm -rf node_modules
+            npm install --legacy-peer-deps --no-audit --no-fund --loglevel verbose
+          }
       - name: Upload npm debug log on failure
         if: failure()
         uses: actions/upload-artifact@v4
