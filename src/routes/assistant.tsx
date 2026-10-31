@@ -76,7 +76,7 @@ function Assistant(){
      <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">Опиши место и цель, а ИИ учтёт технику и снасти из анкеты. Один успешно полученный совет за календарный день по Москве, без бесконечных генераций.</p>
    </header>
    {loading&&<p className="mt-5 text-sm text-zinc-400">Проверяем дневной лимит…</p>}
-   {!loading&&!uid&&<p className="panel mt-5 p-5 text-sm">Для ИИ-совета <Link to="/auth" className="text-[#D7FF35] underline">войти в аккаунт</Link>.</p>}
+   {!loading&&!uid&&<p className="panel mt-5 p-5 text-sm">Для ИИ-совета <Link search={{ mode: "in" }} to="/auth" className="text-[#D7FF35] underline">войти в аккаунт</Link>.</p>}
    {uid&&<div className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
      <div className="space-y-4">
        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 px-4 py-3">

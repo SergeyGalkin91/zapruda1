@@ -49,8 +49,8 @@ export function loadAppearance(): Appearance {
 
 export function applyAppearance(appearance: Appearance) {
   if (typeof document === "undefined") return;
-  document.documentElement.dataset.zaprudaBackground = appearance.background;
-  document.documentElement.dataset.zaprudaChat = appearance.chat;
+  document.documentElement.dataset["zaprudaBackground"] = appearance.background;
+  document.documentElement.dataset["zaprudaChat"] = appearance.chat;
 }
 
 export function saveAppearance(appearance: Appearance): boolean {

@@ -46,9 +46,9 @@ export const Route = createFileRoute("/chat")({
     { name: "description", content: "Общение рыболовов по странам, областям, городам и тематическим веткам." },
   ] }),
   validateSearch: (query: Record<string, unknown>) => ({
-    place: typeof query.place === "string" ? query.place : "",
-    topic: VALID_TOPICS.includes(query.topic as ChatTopic) ? query.topic as ChatTopic : "general" as ChatTopic,
-    country: typeof query.country === "string" ? query.country : "",
+    place: typeof query["place"] === "string" ? query["place"] : "",
+    topic: VALID_TOPICS.includes(query["topic"] as ChatTopic) ? query["topic"] as ChatTopic : "general" as ChatTopic,
+    country: typeof query["country"] === "string" ? query["country"] : "",
   }),
   component: GeographicChat,
 });
@@ -325,7 +325,7 @@ function GeographicChat() {
     {loading && <p className="mb-5 text-sm text-zinc-400">Загружаем разделы чатов…</p>}
     {error && <p role="alert" className="mb-4 rounded-xl border border-red-400/30 bg-red-950/20 p-4 text-sm text-red-200">{error}</p>}
     {!loading && !uid && <p className="mb-5 rounded-xl border border-white/15 p-4 text-sm text-zinc-300">
-      Для просмотра чатов и отправки сообщений <Link to="/auth" className="font-bold text-[#D7FF35] underline">войди в аккаунт</Link>.
+      Для просмотра чатов и отправки сообщений <Link search={{ mode: "in" }} to="/auth" className="font-bold text-[#D7FF35] underline">войди в аккаунт</Link>.
     </p>}
 
     {uid && <div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">

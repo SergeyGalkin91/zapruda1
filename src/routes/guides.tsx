@@ -307,7 +307,7 @@ function GuideCabinet() {
 
     {!loading && !userId && <div className="panel mt-6 p-8 text-center">
       <p className="font-bold">Для создания анкеты гида войди в аккаунт.</p>
-      <Link to="/auth" className="btn-primary mt-4">Войти</Link>
+      <Link search={{ mode: "in" }} to="/auth" className="btn-primary mt-4">Войти</Link>
     </div>}
 
     {!loading && userId && <>

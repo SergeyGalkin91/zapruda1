@@ -15,7 +15,7 @@ export const Route = createFileRoute("/specializations")({
     {name: "description", content: "Уровни, XP, достижения, задачи и прогресс рыболовных специализаций."},
   ]}),
   validateSearch: (query: Record<string, unknown>) => ({
-    method: typeof query.method === "string" ? query.method : "Спиннинг",
+    method: typeof query["method"] === "string" ? query["method"] : "Спиннинг",
   }),
   component: SpecializationPage,
 });
@@ -136,7 +136,7 @@ function SpecializationPage() {
         </div>)}
       </div>
     </section>
-    {error && <p role="alert" className="mt-5 rounded-xl border border-red-400/30 bg-red-950/25 p-4 text-sm text-red-200">{error} {!userPresent && <Link className="text-[#D7FF35] underline" to="/auth">Войти</Link>}</p>}
+    {error && <p role="alert" className="mt-5 rounded-xl border border-red-400/30 bg-red-950/25 p-4 text-sm text-red-200">{error} {!userPresent && <Link search={{ mode: "in" }} className="text-[#D7FF35] underline" to="/auth">Войти</Link>}</p>}
     {loading && <p className="mt-5 text-sm text-zinc-400">Загружаем прогресс…</p>}
     {!loading && userPresent && !error && <>
       <section className="mt-6 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7">

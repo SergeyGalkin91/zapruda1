@@ -11,7 +11,7 @@ export const Route = createFileRoute("/atlas")({
     { name: "description", content: "Каталог водоёмов России и СНГ и коллекции подтверждённых видов рыбы." },
   ] }),
   validateSearch: (search: Record<string, unknown>) => ({
-    country: typeof search.country === "string" ? search.country : "",
+    country: typeof search["country"] === "string" ? search["country"] : "",
   }),
   component: Atlas,
 });

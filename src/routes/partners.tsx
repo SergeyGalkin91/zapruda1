@@ -328,7 +328,7 @@ function Partners() {
             <h2 className="text-xl font-bold">Новый выезд</h2>
             <button type="button" onClick={() => setShowForm(false)} aria-label="Закрыть форму" className={ghostButton}><X className="size-4" /></button>
           </div>
-          {!userId && <p className="rounded-xl border border-amber-300/20 p-3 text-sm text-amber-200">Для публикации нужно <Link to="/auth" className="underline">войти в аккаунт</Link>.</p>}
+          {!userId && <p className="rounded-xl border border-amber-300/20 p-3 text-sm text-amber-200">Для публикации нужно <Link search={{ mode: "in" }} to="/auth" className="underline">войти в аккаунт</Link>.</p>}
           <div className="grid gap-4 sm:grid-cols-2">
             <Field title="Город отправления *"><input className="field" required minLength={2} maxLength={100} value={city} onChange={(e) => setCity(e.target.value)} placeholder="Нижний Новгород" /></Field>
             <Field title="Водоём / район *"><input className="field" required minLength={2} maxLength={150} value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Ока, Кудьма, Волга…" /></Field>
@@ -502,7 +502,7 @@ function Partners() {
                         Откликнуться <ArrowRight className="size-4" />
                       </button>
                     ) : (
-                      <Link to="/auth" className={actionButton + " w-full"}>Войди, чтобы откликнуться <ArrowRight className="size-4" /></Link>
+                      <Link search={{ mode: "in" }} to="/auth" className={actionButton + " w-full"}>Войди, чтобы откликнуться <ArrowRight className="size-4" /></Link>
                     )}
                     {myRequest?.status === "accepted" && chatRequest === myRequest.id && chatPanel(myRequest.id)}
                     {applyTo === trip.id && (

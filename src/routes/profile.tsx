@@ -251,9 +251,9 @@ function Profile() {
       setError("Не удалось загрузить профиль: " + profileResult.error.message);
     } else if (profileResult.data) {
       const meta = auth.user.user_metadata ?? {};
-      const providerName = [meta.full_name, meta.name, meta.display_name]
+      const providerName = [meta["full_name"], meta["name"], meta["display_name"]]
         .find((value): value is string => typeof value === "string" && value.trim().length > 0)?.trim();
-      const providerAvatar = [meta.avatar_url, meta.picture]
+      const providerAvatar = [meta["avatar_url"], meta["picture"]]
         .find((value): value is string => typeof value === "string" && /^https:\/\//i.test(value)) ?? null;
       const emailPrefix = auth.user.email?.split("@")[0] ?? "";
       const currentName = profileResult.data.display_name?.trim() ?? "";
@@ -718,7 +718,7 @@ function Profile() {
           <Settings2 className="mx-auto size-9 text-[#D7FF35]" />
           <h2 className="mt-4 text-lg font-bold">Войди, чтобы прокачивать рыболова</h2>
           <p className="mt-2 text-sm text-zinc-400">Анкета, ранги, XP и достижения привязаны к твоему аккаунту.</p>
-          <Link to="/auth" className="btn-primary mt-5 inline-flex">Войти в ZAPRUDA</Link>
+          <Link search={{ mode: "in" }} to="/auth" className="btn-primary mt-5 inline-flex">Войти в ZAPRUDA</Link>
         </div>
       )}
     </Shell>
