@@ -119,13 +119,13 @@ jobs:
                       await page.reload({waitUntil:'domcontentloaded'});
                       await page.getByText('Окунь', {exact:false}).first().waitFor({timeout:10000});
                       const count = await page.locator('body').innerText();
-                      if (!/уловов за сессию:\\s*1/i.test(count)) { failures++; console.error(width + 'px /street: local session not restored'); }
+                      if (!/уловов за сессию:\s*1/i.test(count)) { failures++; console.error(width + 'px /street: local session not restored'); }
                       await page.getByRole('button', {name: /завершить сессию/i}).click();
                       await page.reload({waitUntil:'domcontentloaded'});
                       if (!await page.getByText('Сессия завершена').isVisible()) { failures++; console.error(width + 'px /street: completion not restored'); }
                     }
                   }
-                                    const ok = response && response.status() >= 200 && response.status() < 400 && metrics.main && metrics.navigationVisible && !metrics.errorScreen && browserErrors.length === 0 && metrics.contentWidth <= metrics.viewportWidth + 2;
+                  const ok = response && response.status() >= 200 && response.status() < 400 && metrics.main && metrics.navigationVisible && !metrics.errorScreen && browserErrors.length === 0 && metrics.contentWidth <= metrics.viewportWidth + 2;
                   console.log(width + 'px ' + route + ': ' + (ok ? 'OK' : 'FAIL') + ' status=' + (response?.status() ?? 'none') + ' ' + JSON.stringify(metrics));
                   if (browserErrors.length) console.error('Browser JS errors: ' + browserErrors.join(' | '));
                   await page.screenshot({path: 'mobile-check/' + width + '-' + (route === '/' ? 'home' : route.slice(1).replaceAll('/', '-')) + '.png', fullPage: true});
