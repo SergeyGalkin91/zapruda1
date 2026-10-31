@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Check, MapPin, MessageCircle, RefreshCw, Send, UserPlus, X } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,10 +18,18 @@ const db = supabase as any;
 const display = (p?: Person) => p?.display_name || p?.username || "Рыболов";
 const datetime = (s: string) => new Date(s).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Escape ilike wildcards so user input is matched literally.
+const escapeLike = (s: string) => s.replace(/[\\%_]/g, ch => "\\" + ch);
+const PERSON_COLS = "id,username,display_name";
+
 function Messages() {
   const { mark: initialMark, to: requestedPerson } = Route.useSearch();
   const [uid, setUid] = useState("");
-  const [people, setPeople] = useState<Person[]>([]);
+  const [peerProfiles, setPeerProfiles] = useState<Person[]>([]);
+  const [followProfiles, setFollowProfiles] = useState<Person[]>([]);
+  const [searchResults, setSearchResults] = useState<Person[]>([]);
+  const [target, setTarget] = useState<Person | null>(null);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [following, setFollowing] = useState<string[]>([]);
   const [marks, setMarks] = useState<Mark[]>([]);
@@ -34,9 +42,17 @@ function Messages() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const activeRef = useRef("");
+  const msgSeq = useRef(0);
+  const refreshSeq = useRef(0);
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  useEffect(() => { activeRef.current = activeId; }, [activeId]);
 
   const refresh = useCallback(async () => {
+    const seq = ++refreshSeq.current;
     const { data: auth, error: ae } = await supabase.auth.getUser();
+    if (!mounted.current || seq !== refreshSeq.current) return;
     if (ae || !auth.user) {
       setUid(""); setLoading(false);
       setError("Для личных сообщений войди в аккаунт.");
@@ -44,61 +60,123 @@ function Messages() {
     }
     const id = auth.user.id;
     setUid(id);
-    const [u, t, f, m] = await Promise.all([
-      supabase.from("profiles").select("id,username,display_name").neq("id", id).order("created_at", { ascending: false }).limit(200),
+    const [t, f, m] = await Promise.all([
       db.from("social_threads").select("id,requester_id,recipient_id,status,created_at").or("requester_id.eq." + id + ",recipient_id.eq." + id).order("created_at", { ascending: false }),
       supabase.from("follows").select("following_id").eq("follower_id", id),
       supabase.from("private_fishing_marks").select("id,title,latitude,longitude").eq("user_id", id).order("created_at", { ascending: false }).limit(100),
     ]);
-    const failure = [u.error, t.error, f.error, m.error].find(Boolean);
+    if (!mounted.current || seq !== refreshSeq.current) return;
+    const threadRows = (t.data ?? []) as Thread[];
+    const followIds = (f.data ?? []).map(row => row.following_id as string);
+    const peerIds = [...new Set(threadRows.map(r => r.requester_id === id ? r.recipient_id : r.requester_id))];
+    const [pp, fp] = await Promise.all([
+      peerIds.length ? supabase.from("profiles").select(PERSON_COLS).in("id", peerIds) : Promise.resolve({ data: [], error: null }),
+      followIds.length ? supabase.from("profiles").select(PERSON_COLS).in("id", followIds.slice(0, 200)) : Promise.resolve({ data: [], error: null }),
+    ]);
+    if (!mounted.current || seq !== refreshSeq.current) return;
+    const failure = [t.error, f.error, m.error, pp.error, fp.error].find(Boolean);
     if (failure) setError("Ошибка загрузки данных: " + failure.message);
     else setError("");
-    setPeople((u.data ?? []) as Person[]);
-    setThreads((t.data ?? []) as Thread[]);
-    setFollowing((f.data ?? []).map(row => row.following_id));
+    setThreads(threadRows);
+    setFollowing(followIds);
     setMarks((m.data ?? []) as Mark[]);
+    setPeerProfiles((pp.data ?? []) as Person[]);
+    setFollowProfiles(((fp.data ?? []) as Person[]).filter(p => p.id !== id));
     setLoading(false);
   }, []);
 
   const fetchMessages = useCallback(async (id: string) => {
+    const seq = ++msgSeq.current;
     const { data, error: qerr } = await db.from("social_messages")
       .select("id,thread_id,sender_id,kind,body,location_title,latitude,longitude,created_at")
       .eq("thread_id", id).order("created_at", { ascending: true }).limit(200);
+    // Drop stale responses (thread switched, newer request, or unmounted).
+    if (!mounted.current || seq !== msgSeq.current || activeRef.current !== id) return;
     if (qerr) setError("Не удалось загрузить переписку: " + qerr.message);
     else setMessages((data ?? []) as Dm[]);
   }, []);
 
+  // Inbox: initial load + realtime only for threads involving the current user.
+  useEffect(() => { void refresh(); }, [refresh]);
   useEffect(() => {
-    void refresh();
-    const channel = supabase.channel("zapruda-social-inbox")
-      .on("postgres_changes", { event: "*", schema: "public", table: "social_threads" }, () => void refresh())
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "social_messages" }, () => {
-        if (activeId) void fetchMessages(activeId);
-      }).subscribe();
-    const update = () => { void refresh(); if (activeId) void fetchMessages(activeId); };
-    window.addEventListener("focus", update);
-    return () => { window.removeEventListener("focus", update); void supabase.removeChannel(channel); };
-  }, [refresh, fetchMessages, activeId]);
+    if (!uid) return;
+    const onChange = () => void refresh();
+    const channel = supabase.channel("zapruda-social-inbox-" + uid)
+      .on("postgres_changes", { event: "*", schema: "public", table: "social_threads", filter: "requester_id=eq." + uid }, onChange)
+      .on("postgres_changes", { event: "*", schema: "public", table: "social_threads", filter: "recipient_id=eq." + uid }, onChange)
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [uid, refresh]);
+
+  const active = threads.find(t => t.id === activeId);
+  const activeAccepted = active?.status === "accepted" ? active.id : "";
+
+  // Active thread: load + realtime INSERTs only for the accepted active thread.
+  useEffect(() => {
+    if (!activeAccepted) { msgSeq.current++; setMessages([]); return; }
+    setMessages([]);
+    void fetchMessages(activeAccepted);
+    const channel = supabase.channel("zapruda-dm-" + activeAccepted)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "social_messages", filter: "thread_id=eq." + activeAccepted }, () => void fetchMessages(activeAccepted))
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [activeAccepted, fetchMessages]);
 
   useEffect(() => {
-    if (activeId && threads.find(t => t.id === activeId)?.status === "accepted") void fetchMessages(activeId);
-    else setMessages([]);
-  }, [activeId, threads, fetchMessages]);
+    const update = () => { void refresh(); if (activeRef.current) void fetchMessages(activeRef.current); };
+    window.addEventListener("focus", update);
+    return () => window.removeEventListener("focus", update);
+  }, [refresh, fetchMessages]);
 
   useEffect(() => { if (initialMark) setSelectedMark(initialMark); }, [initialMark]);
 
-  const getPeer = (t: Thread) => t.requester_id === uid ? t.recipient_id : t.requester_id;
+  // Deep link ?to=UUID: fetch that exact profile, never substitute a search match.
   useEffect(() => {
-    const person = people.find(p => p.id === requestedPerson);
-    if (person) setFilter(person.username || person.display_name || "");
-  }, [people, requestedPerson]);
+    if (!uid || !requestedPerson || !UUID_RE.test(requestedPerson) || requestedPerson === uid) { setTarget(null); return; }
+    let cancelled = false;
+    void supabase.from("profiles").select(PERSON_COLS).eq("id", requestedPerson).maybeSingle().then(({ data }) => {
+      if (!cancelled && mounted.current) setTarget((data as Person | null) ?? null);
+    });
+    return () => { cancelled = true; };
+  }, [uid, requestedPerson]);
 
-  const names = useMemo(() => new Map(people.map(p => [p.id, display(p)])), [people]);
-  const active = threads.find(t => t.id === activeId);
+  // Server search: debounced 350ms, limit 25, excludes self, ignores stale responses.
+  useEffect(() => {
+    const q = filter.trim();
+    if (!uid || !q) { setSearchResults([]); return; }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      const pattern = "%" + escapeLike(q.slice(0, 64)) + "%";
+      // Two separate ilike queries instead of .or() so special chars cannot break the filter.
+      const [a, b] = await Promise.all([
+        supabase.from("profiles").select(PERSON_COLS).neq("id", uid).ilike("username", pattern).limit(25),
+        supabase.from("profiles").select(PERSON_COLS).neq("id", uid).ilike("display_name", pattern).limit(25),
+      ]);
+      if (cancelled || !mounted.current) return;
+      const merged = new Map<string, Person>();
+      for (const p of [...((a.data ?? []) as Person[]), ...((b.data ?? []) as Person[])]) merged.set(p.id, p);
+      setSearchResults([...merged.values()].slice(0, 25));
+      const e = a.error || b.error;
+      if (e) setError("Ошибка поиска: " + e.message);
+    }, 350);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [filter, uid]);
+
+  const getPeer = (t: Thread) => t.requester_id === uid ? t.recipient_id : t.requester_id;
+
+  const names = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of [...searchResults, ...followProfiles, ...(target ? [target] : []), ...peerProfiles]) map.set(p.id, display(p));
+    return map;
+  }, [peerProfiles, followProfiles, searchResults, target]);
   const incoming = threads.filter(t => t.status === "pending" && t.recipient_id === uid);
   const outgoing = threads.filter(t => t.status === "pending" && t.requester_id === uid);
   const accepted = threads.filter(t => t.status === "accepted");
-  const visiblePeople = people.filter(p => [p.username, p.display_name].some(v => (v ?? "").toLowerCase().includes(filter.trim().toLowerCase())));
+  const visiblePeople = useMemo(() => {
+    const base = filter.trim() ? searchResults : followProfiles;
+    const list = target ? [target, ...base.filter(p => p.id !== target.id)] : base;
+    return list.filter(p => p.id !== uid);
+  }, [filter, searchResults, followProfiles, target, uid]);
 
   async function request(person: Person) {
     if (!uid || busy) return;
