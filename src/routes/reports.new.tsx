@@ -462,19 +462,19 @@ function NewReport() {
           </label>
         </section>
 
-        <section className="panel space-y-4 p-5">
+        <section className="zapruda-photo-editor panel space-y-4 p-5">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl border border-lime-300/30 bg-lime-300/10 text-lime-300">
               <Camera className="size-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Фотографии с рыбалки</h2>
+              <h2 className="text-lg font-black tracking-tight text-white">Твоя рыбалка в кадре</h2>
               <p className="text-xs text-muted-foreground">До 6 фотографий · JPG, PNG, WebP · до 8 МБ каждая</p>
             </div>
           </div>
           <label className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-lime-300/35 bg-lime-300/[0.035] px-4 py-5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10 ${savedReportId ? "pointer-events-none opacity-50" : ""}`}>
             <ImagePlus className="size-5" aria-hidden="true" />
-            {photos.length ? "Заменить выбранные фотографии" : "Выбрать фотографии"}
+            {photos.length ? "Заменить фотографии" : "Добавить фотографии к истории"}
             <input
               aria-label="Выбрать фотографии с рыбалки"
               type="file"
@@ -486,9 +486,9 @@ function NewReport() {
             />
           </label>
           {previews.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {previews.map((src, index) => (
-                <div key={src} className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10">
+                <div key={src} className={`group relative overflow-hidden rounded-xl border border-white/10 ${index===0?"col-span-3 aspect-[16/10] sm:col-span-6":"aspect-square"}`}>
                   <img src={src} alt={`Фото к отчёту ${index + 1}`} className="size-full object-cover" />
                   {!savedReportId && (
                     <button
@@ -520,7 +520,7 @@ function NewReport() {
 
         <section className="panel space-y-3 p-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold">Улов</h2>
+            <h2 className="text-lg font-black tracking-tight text-white">Что поймал?</h2>
             <button type="button" className="btn-ghost" onClick={() => setCatches((c) => [...c, { species: "", weight: "", length: "" }])}>+ Рыба</button>
           </div>
           <p className="text-xs text-zinc-400">Выбирай рыбу по названию — справочник включает речные, озёрные и морские виды России и СНГ. Для редких видов возможен ручной ввод. Соблюдай ограничения на вылов и охраняемые виды.</p>
