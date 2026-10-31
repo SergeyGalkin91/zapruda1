@@ -58,7 +58,7 @@ export function SocialAuthButtons({ onError }: { onError: (message: string) => v
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider as Parameters<typeof supabase.auth.signInWithOAuth>[0]["provider"],
-        options: { redirectTo: window.location.origin + "/profile" },
+        options: { redirectTo: window.location.origin + "/auth?oauth=1" },
       });
       if (error) throw error;
     } catch (error) {
