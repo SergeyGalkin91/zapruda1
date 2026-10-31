@@ -179,11 +179,11 @@ function GeographicChat() {
   }
 
   return <Shell>
-    <header className="mb-5 rounded-3xl border border-[#D7FF35]/20 bg-gradient-to-br from-[#1D2918] to-[#10150F] p-5 sm:p-7">
+    <header className="mb-5 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#1D2617] via-[#101410] to-[#080A08] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] sm:p-8">
       <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#D7FF35]">
         <Globe2 className="size-4" /> ZAPRUDA / ЧАТЫ СООБЩЕСТВА
       </p>
-      <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">Рыболовы по странам, регионам и городам</h1>
+      <h1 className="mt-3 text-[clamp(2rem,5vw,3.7rem)] font-black uppercase leading-[0.98] tracking-[-0.05em] text-white">Рыболовы по странам, регионам и городам</h1>
       <p className="mt-2 text-sm leading-6 text-zinc-300">
         Выбирай свою страну, область и город. На каждом уровне свои ветки обсуждений.
         Общий чат всей ZAPRUDA остаётся отдельно — старые сообщения не пропали.
@@ -197,7 +197,7 @@ function GeographicChat() {
     </p>}
 
     {uid && <div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
-      <aside className="space-y-4 rounded-2xl border border-white/10 bg-[#141914] p-4 lg:sticky lg:top-24">
+      <aside className="space-y-4 rounded-[24px] border border-white/10 bg-[#0E120F] p-4 lg:sticky lg:top-24">
         <button type="button" onClick={() => go(GLOBAL_ID, "general")}
           aria-pressed={placeId === GLOBAL_ID}
           className={"flex w-full items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm font-bold transition " +
@@ -267,7 +267,7 @@ function GeographicChat() {
         </p>
       </aside>
 
-      <div className="min-w-0 space-y-3">
+      <div className="min-w-0 space-y-3 rounded-[22px]">
         <nav aria-label="Путь к чату" className="flex flex-wrap items-center gap-1 text-xs">
           {crumbs.map((p,i)=><span key={p.id} className="inline-flex items-center gap-1">
             {i>0&&<ChevronRight className="size-3.5 text-zinc-500" />}
