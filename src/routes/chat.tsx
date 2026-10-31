@@ -122,17 +122,21 @@ function GeographicChat() {
     if (!uid || !selectedPlace) return;
     let alive = true;
     setMessages([]);
+    setReactions([]);
+    setPhotoUrls({});
     setChatError("");
     setChatLoading(true);
 
+    let requestNumber = 0;
     const fetchMessages = async () => {
+      const thisRequest = ++requestNumber;
       const { data, error: queryError } = await api.from("chat_messages")
         .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url,chat_city)")
         .eq("place_id", selectedPlace.id).eq("topic", topic)
         .order("created_at", { ascending: false }).limit(100);
-      if (!alive) return;
+      if (!alive || thisRequest !== requestNumber) return;
       setChatLoading(false);
-      if (queryError) setChatError("Не удалось открыть ветку: " + queryError.message);
+      if (queryError) { setChatError("Не удалось открыть ветку: " + queryError.message); return; }
       else {
         setChatError("");
         const fetched = ((data || []) as ChatMessage[]).reverse();
@@ -140,18 +144,18 @@ function GeographicChat() {
         if (fetched.length) {
           const { data: liked, error: reactionError } = await api.from("chat_message_reactions")
             .select("id,message_id,user_id,emoji").in("message_id", fetched.map(m => m.id));
-          if (alive && !reactionError) setReactions((liked || []) as ChatReaction[]);
+          if (alive && thisRequest === requestNumber && !reactionError) setReactions((liked || []) as ChatReaction[]);
           const { data: attached } = await api.from("chat_message_photos")
             .select("message_id,storage_path").in("message_id", fetched.map(m => m.id));
-          if (alive && attached?.length) {
+          if (alive && thisRequest === requestNumber && attached?.length) {
             const signed = await Promise.all(attached.map(async (p: {message_id:string; storage_path:string}) => {
               const { data: link } = await supabase.storage.from("chat-photos").createSignedUrl(p.storage_path, 1800);
               return [p.message_id, link?.signedUrl || ""] as const;
             }));
-            if (alive) setPhotoUrls(Object.fromEntries(signed));
-          } else if (alive) setPhotoUrls({});
+            if (alive && thisRequest === requestNumber) setPhotoUrls(Object.fromEntries(signed));
+          } else if (alive && thisRequest === requestNumber) setPhotoUrls({});
 
-        } else setReactions([]);
+        } else { setReactions([]); setPhotoUrls({}); }
       }
     };
     void fetchMessages();
