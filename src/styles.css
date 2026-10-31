@@ -223,3 +223,12 @@
 @media (prefers-reduced-motion: reduce) {
   .z-underground-action { transition: none; }
 }
+
+/* Mobile layout safeguards for the shared Underground screens. */
+@media (max-width: 639px) {
+  .z-underground { min-width: 0; border-radius: 20px; }
+  .z-underground-title { overflow-wrap: anywhere; }
+  .z-underground-chip { max-width: 100%; }
+  .z-underground-action { min-height: 44px; }
+  .zapruda-chat-window { overscroll-behavior: contain; }
+}
