@@ -210,21 +210,21 @@ function Profile() {
     } else if (prefsResult.data) {
       const row = prefsResult.data;
       setPreferences({
-        home_city: row.home_city,
-        home_region: row.home_region,
-        main_technique: row.main_technique,
+        home_city: row.home_city ?? "",
+        home_region: row.home_region ?? "",
+        main_technique: row.main_technique || "Спиннинг",
         fishing_methods: Array.from(new Set([
           row.main_technique,
           ...((row.fishing_methods ?? []) as string[]),
         ].filter(Boolean))),
-        target_species: row.target_species,
-        fishing_access: row.fishing_access,
-        transport: row.transport,
-        favorite_lures: row.favorite_lures,
-        tackle_text: row.tackle_text,
-        preferred_water: row.preferred_water,
-        fishing_notes: row.fishing_notes,
-        search_radius_km: row.search_radius_km,
+        target_species: row.target_species ?? [],
+        fishing_access: row.fishing_access ?? "Берег",
+        transport: row.transport ?? "Без машины",
+        favorite_lures: row.favorite_lures ?? "",
+        tackle_text: row.tackle_text ?? "",
+        preferred_water: row.preferred_water ?? "",
+        fishing_notes: row.fishing_notes ?? "",
+        search_radius_km: row.search_radius_km ?? 30,
       });
     }
 
@@ -366,9 +366,9 @@ function Profile() {
       data: { onboarding_complete: true },
     });
     if (metadataError) console.warn("Не удалось отметить завершение анкеты:", metadataError.message);
-    setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
     setEditing(false);
     await loadProfile();
+    setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
   }
 
   return (
