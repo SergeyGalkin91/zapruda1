@@ -293,20 +293,22 @@ function Feed() {
       <div className="mx-auto mb-7 max-w-5xl space-y-5">
         <section className="relative isolate overflow-hidden rounded-[28px] border border-[#D7FF35]/25 bg-[#0B0F0E] shadow-[0_18px_75px_rgba(0,0,0,.25)]">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-60" style={{background:"radial-gradient(ellipse at 87% 10%, rgba(215,255,53,.19), transparent 46%), radial-gradient(ellipse at 0% 100%, rgba(255,106,0,.12), transparent 48%), repeating-radial-gradient(circle at 78% 62%, transparent 0px, transparent 39px, rgba(215,255,53,.065) 40px, transparent 41px)"}}/>
-          <div className="relative grid min-h-[290px] gap-8 p-6 sm:p-10 md:grid-cols-[1fr_220px] md:items-center">
+          <div className="relative grid min-h-[310px] gap-8 p-6 sm:p-10 md:grid-cols-[1fr_250px] md:items-center">
             <div>
               <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.22em] text-[#D7FF35]"><span className="size-1.5 animate-pulse rounded-full bg-[#D7FF35]"/> ZAPRUDA COMMUNITY · FISHING CULTURE</p>
-              <h1 className="max-w-xl text-[clamp(2.5rem,7.5vw,5.3rem)] font-black uppercase leading-[.88] tracking-[-.065em] text-white">БОЛЬШЕ<br/><span className="text-[#D7FF35]">ЧЕМ РЫБАЛКА.</span></h1>
+              <h1 className="max-w-xl text-[clamp(2.6rem,7.5vw,5.5rem)] font-black uppercase leading-[.88] tracking-[-.07em] text-white">БОЛЬШЕ<br/><span className="text-[#D7FF35]">ЧЕМ РЫБАЛКА.</span></h1>
               <p className="mt-5 max-w-xl text-sm leading-6 text-[#B5C1B4] sm:text-base">Отчёты, трофеи, люди на одной волне. Твоя рыбалка — твои правила. Найди своих, покажи результат, исследуй новые места.</p>
               <div className="mt-6 flex flex-wrap gap-2.5">
                 <Link to="/reports/new" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#D7FF35] px-5 py-3 text-xs font-black uppercase tracking-wider text-[#0B0F0E] transition hover:bg-[#ECFF92]">+ Новый отчёт <ArrowUpRight className="size-4"/></Link>
                 <Link to="/fishing-map" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:border-[#FF6A00]/60"><Compass className="size-4 text-[#FF6A00]"/> Карта мест</Link>
               </div>
             </div>
-            <div className="relative hidden items-center justify-center md:flex">
-              <div className="absolute size-52 rounded-full border border-[#D7FF35]/15"/><div className="absolute size-36 rounded-full border border-[#FF6A00]/25"/>
-              <Fish className="relative size-32 -rotate-12 text-[#D7FF35]" strokeWidth={.7} />
-              <span className="absolute bottom-2 -rotate-6 rounded-md bg-[#FF6A00] px-3 py-1 text-xs font-black uppercase tracking-widest text-black">NO ORDINARY CLUB</span>
+            <div className="relative hidden min-h-[245px] flex-col items-center justify-center overflow-hidden rounded-[22px] border border-[#D7FF35]/20 bg-[#11180F] p-6 md:flex">
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-60" style={{background:"repeating-radial-gradient(circle at 55% 50%, transparent 0, transparent 22px, rgba(215,255,53,.13) 23px, transparent 24px), radial-gradient(circle at 50% 46%,rgba(215,255,53,.12),transparent 65%)"}}/>
+              <span className="relative inline-flex items-center gap-2 rounded-full border border-[#FF6A00]/60 bg-[#FF6A00]/10 px-3 py-1 text-[10px] font-black tracking-[.2em] text-[#FF6A00]"><span className="size-1.5 rounded-full bg-[#FF6A00]"/> LIVE / COMMUNITY</span>
+              <div className="relative mt-5 text-center text-[68px] font-black leading-none tracking-[-.1em] text-[#D7FF35]">Z<span className="text-white">/</span>C</div>
+              <p className="relative mt-2 text-center text-[10px] font-black uppercase tracking-[.28em] text-white">ТВОИ ЛЮДИ. ТВОЯ ВОДА.</p>
+              <div className="relative mt-6 flex w-full justify-between border-t border-[#D7FF35]/20 pt-3 text-[9px] font-bold uppercase tracking-wider text-[#8EA18A]"><span>EST. 2026</span><span>RUSSIA / CIS</span></div>
             </div>
           </div>
         </section>
@@ -334,10 +336,10 @@ function Feed() {
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">{error}</div>}
       {!loading && !error && reports.length === 0 && (
-        <div className="panel p-8 text-center">
-          <div className="text-3xl">🎣</div>
-          <h2 className="mt-3 font-semibold">Пока тихо, как на бесклёвье</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Будь первым — опубликуй отчёт о рыбалке.</p>
+        <div className="rounded-[24px] border border-[#D7FF35]/25 bg-[#141B13] p-9 text-center">
+          <Fish className="mx-auto size-11 text-[#D7FF35]" strokeWidth={1.4}/>
+          <h2 className="mt-4 text-xl font-black uppercase text-white">Первая история начинается с тебя</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-zinc-400">Расскажи про свою рыбалку, покажи улов или поделись наблюдениями с теми, кто на одной волне.</p>
           <Link to="/reports/new" className="btn-primary mt-4 inline-flex">Создать отчёт</Link>
         </div>
       )}
