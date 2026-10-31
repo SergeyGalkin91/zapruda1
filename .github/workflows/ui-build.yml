@@ -53,10 +53,21 @@ jobs:
           node .output/server/index.mjs > mobile-check/server.log 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
           for i in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:3000/ -o /dev/null; then break; fi
+            if curl -fsS http://127.0.0.1:3000/ -o /dev/null; then READY=1; break; fi
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "Application server exited before it became ready"
+              cat mobile-check/server.log
+              exit 1
+            fi
             sleep 2
           done
+          if [ "$READY" != "1" ]; then
+            echo "Application server did not become ready"
+            cat mobile-check/server.log
+            exit 1
+          fi
           cat > mobile-check/check.cjs <<'EOF'
           const { chromium } = require('playwright');
           (async () => {
@@ -72,6 +83,7 @@ jobs:
                 page.on('pageerror', error => browserErrors.push(error.message));
                 try {
                   const response = await page.goto('http://127.0.0.1:3000' + route, {waitUntil:'domcontentloaded', timeout:20000});
+                  await page.waitForSelector('nav[aria-label="Мобильная навигация"]', {state:'visible', timeout:12000});
                   await page.waitForTimeout(600);
                   const metrics = await page.evaluate(() => {
                     const nav = document.querySelector('nav[aria-label="Мобильная навигация"]');
