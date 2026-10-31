@@ -38,7 +38,7 @@ jobs:
           const {chromium}=require('playwright');
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            for(const [name,path] of [['feed','/'],['chat','/chat'],['communities','/communities'],['auth','/auth'],['admin','/admin']]){
+            for(const [name,path] of [['feed','/'],['chat','/chat'],['communities','/communities'],['auth','/auth'],['admin','/admin'],['finance','/finance'],['profile','/profile']]){
               const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
               const pageErrors=[];
               page.on('pageerror',error=>pageErrors.push(error.message));
