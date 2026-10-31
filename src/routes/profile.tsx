@@ -529,9 +529,7 @@ function Profile() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Label name="Дополнительные заметки о снастях" hint="Для выбора брендов, моделей и размеров используй каталог ниже.">
-                  <textarea className="field min-h-32" maxLength={1600} value={preferences.tackle_text} onChange={(e) => update("tackle_text", e.target.value)} placeholder={"Narval Euphoria 10–42 г
-Daiwa Prorex LT 3000
-Шнур PE #1.2"} />
+                  <textarea className="field min-h-32" maxLength={1600} value={preferences.tackle_text} onChange={(e) => update("tackle_text", e.target.value)} placeholder={"Narval Euphoria 10–42 г\nDaiwa Prorex LT 3000\nШнур PE #1.2"} />
                 </Label>
                 <Label name="Любимые приманки" hint="Важен вес и тип: поможет подобрать технику.">
                   <textarea className="field min-h-32" maxLength={800} value={preferences.favorite_lures} onChange={(e) => update("favorite_lures", e.target.value)} placeholder="Джиг 10–22 г, силикон 4–6”, колебалки, пилькеры…" />
