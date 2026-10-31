@@ -99,10 +99,10 @@ export function AnglerTackleCabinet({
   }
 
   const suggestions=TACKLE_MODELS[brand]??[];
-  return <section className="space-y-5 rounded-3xl border border-[#D7FF35]/20 bg-[#151B14] p-5 sm:p-7">
+  return <section className="z-underground space-y-5 p-5 sm:p-7">
     <div>
       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D7FF35]">Личный арсенал</p>
-      <h2 className="mt-2 text-xl font-black text-white sm:text-2xl">Мои снасти</h2>
+      <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.045em] text-white sm:text-4xl">СТАФФ</h2>
       <p className="mt-2 text-sm leading-6 text-zinc-400">
         Выбери тип снасти, производителя, модель и размер. Можно добавлять сколько угодно комплектов;
         этот список доступен только тебе и будет использоваться в персональных рекомендациях.
@@ -111,7 +111,7 @@ export function AnglerTackleCabinet({
 
     {error&&<p className="rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-200" role="alert">{error}</p>}
     {notice&&<p className="flex items-center gap-2 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 p-3 text-xs text-[#D7FF35]" role="status"><Check className="size-4"/>{notice}</p>}
-    <form onSubmit={addItem} className="space-y-4 rounded-2xl border border-white/10 bg-black/15 p-4 sm:p-5">
+    <form onSubmit={addItem} className="space-y-4 rounded-[22px] border border-[#A78BFA]/20 bg-[#17151E] p-4 sm:p-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block space-y-1.5 text-xs font-bold text-zinc-300">
           <span>Тип снасти</span>
