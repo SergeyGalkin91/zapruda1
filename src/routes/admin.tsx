@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ShieldCheck, Wallet, ClipboardList, Inbox, LogIn, LockKeyhole } from "lucide-react";
+import { ShieldCheck, Wallet, ClipboardList, Inbox, LogIn, LockKeyhole, History } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,11 +9,12 @@ export const Route = createFileRoute("/admin")({
   component: AdminConsole,
 });
 
-type Section = { title: string; description: string; href: "/moderation" | "/finance" | "/admin/feedback"; Icon: typeof ShieldCheck };
+type Section = { title: string; description: string; href: "/moderation" | "/finance" | "/admin/feedback" | "/admin/operations"; Icon: typeof ShieldCheck };
 const sections: Section[] = [
   { title: "Заявки и модерация", description: "Заявки на клубы, подтверждение платежей, проверка гидов и документов.", href: "/moderation", Icon: ClipboardList },
   { title: "Финансы ZAPRUDA", description: "Подтверждённые платежи клубов, бронирования гидов, комиссии и обязательства.", href: "/finance", Icon: Wallet },
   { title: "Обращения пользователей", description: "Предложения, сотрудничество, сообщения об ошибках и доставка уведомлений.", href: "/admin/feedback", Icon: Inbox },
+  { title: "Журнал заявок и бронирований", description: "История заявок клубов, бронирований гидов и обращений. Не журнал действий модератора.", href: "/admin/operations", Icon: History },
 ];
 
 function AdminConsole() {
