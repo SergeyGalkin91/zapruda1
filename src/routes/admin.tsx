@@ -78,12 +78,12 @@ function AdminConsole() {
             <p className="mt-2 text-3xl font-black text-[#D7FF35]">{value === null ? "—" : value}</p>
           </div>)}
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3">
           {sections.map(({ title, description, href, Icon }) =>
-            <Link key={href} to={href} className="rounded-2xl border border-[#41395B] bg-[linear-gradient(140deg,#131724,#0B1018)] p-5 transition hover:border-[#D7FF35]/60 hover:bg-[#1A1A2B]">
+            <Link key={href} to={href} className="rounded-2xl border border-[#41395B] bg-[linear-gradient(140deg,#131724,#0B1018)] p-3 sm:p-5 transition hover:border-[#D7FF35]/60 hover:bg-[#1A1A2B]">
               <Icon className="size-6 text-[#D7FF35]" />
-              <h2 className="mt-4 font-black text-white">{title}</h2>
-              <p className="mt-2 text-sm leading-6 text-zinc-400">{description}</p>
+              <h2 className="mt-3 break-words text-sm font-black text-white sm:text-base">{title}</h2>
+              <p className="mt-2 text-xs leading-5 text-[#B4A1D7] sm:text-sm">{description}</p>
               <span className="mt-4 block text-sm font-bold text-[#D7FF35]">Открыть раздел →</span>
             </Link>
           )}
