@@ -56,7 +56,9 @@ const EMPTY_FORM: AnglerForm = {
   search_radius_km: 30,
 };
 
-const DISCIPLINE_ICONS=[Fish,Target,CircleDot,Feather,Snowflake,Tent,Anchor,Waves,Ship,Sailboat,Crosshair,Droplets,Mountain,Flag,Sparkles] as const;\nfunction DisciplineIcon({method,className="size-7"}:{method:string;className?:string}){const i=Math.max(0,FISHING_DISCIPLINES.findIndex(d=>d.code===method));const Icon=DISCIPLINE_ICONS[i];return <Icon className={className} strokeWidth={1.55} aria-hidden="true"/>;}\nconst SPECIES = ["Щука", "Судак", "Окунь", "Жерех", "Голавль", "Форель", "Карп", "Сом", "Лещ", "Карась"] as const;
+const DISCIPLINE_ICONS=[Fish,Target,CircleDot,Feather,Snowflake,Tent,Anchor,Waves,Ship,Sailboat,Crosshair,Droplets,Mountain,Flag,Sparkles] as const;
+function DisciplineIcon({method,className="size-7"}:{method:string;className?:string}){const i=Math.max(0,FISHING_DISCIPLINES.findIndex(d=>d.code===method));const Icon=DISCIPLINE_ICONS[i];return <Icon className={className} strokeWidth={1.55} aria-hidden="true"/>;}
+const SPECIES = ["Щука", "Судак", "Окунь", "Жерех", "Голавль", "Форель", "Карп", "Сом", "Лещ", "Карась"] as const;
 
 function Label({ name, children, hint }: { name: string; children: React.ReactNode; hint?: string }) {
   return (
@@ -92,7 +94,10 @@ function Profile() {
   const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
   const [shareChatCity, setShareChatCity] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);\n  const [avatarSymbol,setAvatarSymbol]=useState<string|null>(null);\n  const [avatarBusy,setAvatarBusy]=useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarSymbol,setAvatarSymbol]=useState<string|null>(null);
+  const [avatarBusy,setAvatarBusy]=useState(false);
+  const [avatarPanelOpen,setAvatarPanelOpen]=useState(false);
   const [featuredGear, setFeaturedGear] = useState<FeaturedGear | null>(null);
   const [savedTackle, setSavedTackle] = useState<string[]>([]);
   const [preferences, setPreferences] = useState<AnglerForm>(EMPTY_FORM);
@@ -188,7 +193,8 @@ function Profile() {
       setUsername(profileResult.data.username ?? "");
       setDisplayName(profileResult.data.display_name ?? "");
       setBio(profileResult.data.bio ?? "");
-      setAvatarUrl(profileResult.data.avatar_url);\n      setAvatarSymbol((profileResult.data as any).avatar_symbol??null);
+      setAvatarUrl(profileResult.data.avatar_url);
+      setAvatarSymbol((profileResult.data as any).avatar_symbol??null);
       setShareChatCity(Boolean(profileResult.data.chat_city));
     }
 
@@ -362,7 +368,7 @@ function Profile() {
     if (metadataError) console.warn("Не удалось отметить завершение анкеты:", metadataError.message);
     setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
     setEditing(false);
-    await loadFeaturedGear(userId);
+    await loadProfile();
   }
 
   return (
@@ -373,6 +379,7 @@ function Profile() {
             ? <img src={avatarUrl} alt="" className="size-16 rounded-lg border border-[#D7FF35]/30 object-cover" />
             : <div className="flex size-16 items-center justify-center rounded-lg border border-[#D7FF35]/30 bg-[#D7FF35]/5">{avatarSymbol?<DisciplineIcon method={avatarSymbol} className="size-9 text-[#D7FF35]"/>:<UserRound className="size-8 text-[#D7FF35]" />}</div>}
           <div className="min-w-0 flex-1">
+            <button type="button" onClick={()=>setAvatarPanelOpen(x=>!x)} className="mb-1 inline-flex items-center gap-1.5 text-xs font-bold text-[#D7FF35] underline underline-offset-4"><ImagePlus className="size-3.5"/> Изменить аватар</button>
             <p className="text-[11px] font-black uppercase tracking-[.20em] text-[#D7FF35]">ZAPRUDA / {accountRole==="guide"?"ГИД":"РЫБАК"}</p>
             <h1 className="mt-1 text-2xl font-black text-white">{displayName||username||"Мой профиль"}</h1>
             <p className="mt-1 text-sm text-zinc-400">{username?"@"+username:"Никнейм не указан"}{(accountRole==="guide"?guideSummary?.home_city:preferences.home_city)?" · "+(accountRole==="guide"?guideSummary?.home_city:preferences.home_city):""}</p>
@@ -384,6 +391,16 @@ function Profile() {
             <span className="text-[9px] tracking-widest text-zinc-500">НАПРАВЛЕНИЕ</span>
           </div>
         </div>
+        {avatarPanelOpen&&<div className="mt-4 rounded-xl border border-[#D7FF35]/30 bg-black/20 p-4">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[#D7FF35]/40 px-4 py-2 text-xs font-bold text-[#D7FF35]"><ImagePlus className="size-4"/>{avatarBusy?"Загружаем…":"Выбрать фото"}<input className="sr-only" type="file" accept="image/png,image/jpeg,image/webp" disabled={avatarBusy} onChange={e=>{void uploadAvatar(e.target.files?.[0]);e.target.value="";}}/></label>
+          <p className="mt-2 text-xs text-zinc-500">JPG / PNG / WebP до 3 МБ. Либо выбери рыболовный символ:</p>
+          <div className="mt-3 grid grid-cols-5 gap-2 sm:grid-cols-8">{FISHING_DISCIPLINES.map(item=><button type="button" key={item.code} title={item.title} disabled={avatarBusy} onClick={()=>void chooseAvatarSymbol(item.code)} className="flex min-h-12 items-center justify-center rounded-lg border border-white/15 text-[#D7FF35] hover:border-[#D7FF35]"><DisciplineIcon method={item.code} className="size-7"/></button>)}</div>
+        </div>}
+        {accountRole!=="guide"&&<div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4">
+          <span className="mr-2 text-[10px] font-bold uppercase text-zinc-500">Специализации</span>
+          {preferences.fishing_methods.map(method=><span key={method} className="inline-flex items-center gap-1 rounded-full border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-1 text-xs font-bold text-[#D7FF35]"><DisciplineIcon method={method} className="size-4"/>{method}</span>)}
+          <button type="button" className="text-xs text-zinc-400 underline" onClick={()=>setEditing(true)}>Изменить</button>
+        </div>}
         {accountRole==="guide" ? (
           guideSummary ? <div className="mt-5 border-t border-white/10 pt-5">
             <h2 className="text-xl font-black">{guideSummary.title}</h2>
@@ -512,7 +529,9 @@ function Profile() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Label name="Дополнительные заметки о снастях" hint="Для выбора брендов, моделей и размеров используй каталог ниже.">
-                  <textarea className="field min-h-32" maxLength={1600} value={preferences.tackle_text} onChange={(e) => update("tackle_text", e.target.value)} placeholder={"Narval Euphoria 10–42 г\nDaiwa Prorex LT 3000\nШнур PE #1.2"} />
+                  <textarea className="field min-h-32" maxLength={1600} value={preferences.tackle_text} onChange={(e) => update("tackle_text", e.target.value)} placeholder={"Narval Euphoria 10–42 г
+Daiwa Prorex LT 3000
+Шнур PE #1.2"} />
                 </Label>
                 <Label name="Любимые приманки" hint="Важен вес и тип: поможет подобрать технику.">
                   <textarea className="field min-h-32" maxLength={800} value={preferences.favorite_lures} onChange={(e) => update("favorite_lures", e.target.value)} placeholder="Джиг 10–22 г, силикон 4–6”, колебалки, пилькеры…" />
