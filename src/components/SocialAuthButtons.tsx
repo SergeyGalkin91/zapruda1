@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-type SocialProvider = "google" | "apple" | "custom:yandex";
+type SocialProvider = "google" | "custom:yandex";
 type ProviderSettings = {
-  external?: { google?: boolean; apple?: boolean; email?: boolean };
+  external?: { google?: boolean; email?: boolean };
   disable_signup?: boolean;
 };
 
 const providers: ReadonlyArray<{ provider: SocialProvider; title: string; symbol: string; native: boolean }> = [
   { provider: "google", title: "Google", symbol: "G", native: true },
   { provider: "custom:yandex", title: "Яндекс", symbol: "Я", native: false },
-  { provider: "apple", title: "Apple", symbol: "●", native: true },
 ];
 
 function getAuthError(error: unknown): string {
@@ -79,10 +78,10 @@ export function SocialAuthButtons({ onError }: { onError: (message: string) => v
         Или через аккаунт
         <span className="h-px flex-1 bg-white/10" />
       </div>
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         {providers.map(({ provider, title, symbol, native }) => {
           const available = native
-            ? checked && settings?.external?.[provider as "google" | "apple"] === true
+            ? checked && settings?.external?.[provider as "google"] === true
             : checked && customEnabled[provider];
           const label = available ? "Продолжить с " + title : title + " — не подключён";
           return (
@@ -104,7 +103,7 @@ export function SocialAuthButtons({ onError }: { onError: (message: string) => v
         })}
       </div>
       <p className="mt-3 text-xs leading-5 text-zinc-500">
-        Google и Apple включаются через Supabase Auth Providers. Яндекс ID подключается как Custom OAuth/OIDC.
+        Google включается через Supabase Auth Providers. Яндекс ID подключается как Custom OAuth/OIDC.
         До настройки сервиса кнопка не выполняет вход.
       </p>
       {checked && settings?.external?.email === false && (
