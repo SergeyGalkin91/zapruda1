@@ -29,3 +29,9 @@ CI or live authorization failures, legacy RPC duplicate path, unintended UI visu
 
 ## CI diagnostic checkpoint 2026-10-31
 At commit de9b08a6a52aad48690b30ae3ba1a04c1f430107 GitHub commit-linked PR workflow lookup returned no runs. Both workflow YAML files in this branch already allow push integration/p0-admin-beta-rc1. Triggering a new documentation commit provides a fresh SHA for checks; if none register, inspect repository Actions settings and workflow permissions. This is not a CI pass.
+
+## Verified GitHub check-runs on integration SHA 7240b4b7f291
+- Direct GitHub Check Runs API `/commits/7240b4b7f291.../check-runs`: `build` = **success**, `quality` = **success**. These are CI smoke/build checks, NOT runtime dual-JWT E2E.
+- GitHub Pull Request API `/pulls/10`: `mergeable=false`, `mergeable_state=dirty`; main at `0d787d8e615d`. This conflict is a separate merge blocker despite green check-runs.
+- The older notes marked UNKNOWN for earlier SHAs; they are historical only. For this precise HEAD, CI is verified PASS.
+- Pending: conflict resolution in an isolated integration successor branch, real JWT role testing, staging migration/idempotency test and owner sign-off before merge.
