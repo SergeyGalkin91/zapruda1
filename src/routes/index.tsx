@@ -288,19 +288,30 @@ function Feed() {
     <Shell>
       <section className="relative mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0B0D0B] px-5 py-7 sm:px-8 sm:py-9">
         <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#D7FF35]/[0.09] blur-3xl" />
-        <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D7FF35]">ZAPRUDA / COMMUNITY / 01</p>
-            <h1 className="mt-3 text-[clamp(2.8rem,8vw,5.5rem)] font-black uppercase leading-[0.88] tracking-[-0.065em] text-white">ЛЕНТА<span className="text-[#D7FF35]">.</span></h1>
-            <p className="mt-4 max-w-lg text-sm leading-6 text-zinc-400">Люди. Места. Истории. Реальные выезды и трофеи без лишнего шума.</p>
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400">
-              <span className="rounded-full border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-3 py-1.5 text-[#D7FF35]">Все отчёты</span>
-              <Link to="/communities" className="rounded-full border border-white/15 px-3 py-1.5 hover:text-white">Сообщества</Link>
-              <Link to="/partners" className="rounded-full border border-white/15 px-3 py-1.5 hover:text-white">Напарники</Link>
-              <Link to="/profile" hash="private-fishing-marks" className="rounded-full border border-[#A78BFA]/35 bg-[#A78BFA]/10 px-3 py-1.5 text-[#C4B5FD] hover:border-[#A78BFA]">Мои споты</Link>
-            </div>
+        <div className="relative">
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D7FF35]">ZAPRUDA COMMUNITY / CONCEPT 01</p>
+          <h1 className="mt-4 max-w-[880px] text-[clamp(2.6rem,6vw,5.5rem)] font-black uppercase leading-[0.97] tracking-[-0.06em] text-[#F5F7F5]">
+            НЕ ПРОСТО ЛЕНТА.<span className="block text-[#D7FF35]">ТВОЯ ВОДА.</span>
+          </h1>
+          <p className="mt-5 max-w-2xl text-sm leading-6 text-zinc-300">Живые отчёты, трофеи друзей, местные сообщества и свои люди на воде. Рыбалка начинается здесь.</p>
+          <div className="mt-7 grid gap-3 md:grid-cols-3">
+            <Link to="/assistant" className="group rounded-2xl border border-[#D7FF35]/35 bg-[#D7FF35]/10 p-5 transition hover:border-[#D7FF35] hover:bg-[#D7FF35]/15">
+              <span className="text-2xl" aria-hidden="true">🎣</span>
+              <span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">Выйти на воду</span>
+              <span className="mt-1 block text-xs text-zinc-400">Подбор места и тактики</span>
+            </Link>
+            <Link to="/reports/new" className="group rounded-2xl border border-white/15 bg-[#141D20] p-5 transition hover:border-[#D7FF35]">
+              <span className="text-2xl" aria-hidden="true">🐟</span>
+              <span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">Новый трофей</span>
+              <span className="mt-1 block text-xs text-zinc-400">Опубликовать улов</span>
+            </Link>
+            <Link to="/communities" className="group rounded-2xl border border-[#A78BFA]/35 bg-[#141D20] p-5 transition hover:border-[#A78BFA]">
+              <span className="text-2xl" aria-hidden="true">⚡</span>
+              <span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">Рядом с тобой</span>
+              <span className="mt-1 block text-xs text-zinc-400">Люди, клубы и события</span>
+            </Link>
           </div>
-          <Link to="/reports/new" className="inline-flex shrink-0 items-center justify-center rounded-full bg-[#D7FF35] px-6 py-3 text-xs font-black uppercase tracking-[0.09em] text-black transition hover:bg-white">+ Новый отчёт</Link>
+          <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">DARK / ACID / STREET FISHING</p>
         </div>
       </section>
       <DailyFishingBrief />
