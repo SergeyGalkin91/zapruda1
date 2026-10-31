@@ -259,7 +259,13 @@ function NewReport() {
       }
 
       if (!savedCatches) {
-        const validCatches = catches.filter((c) => c.species.trim()).map((c) => ({
+        // If the previous insert succeeded but its response was lost, do not insert the same catch twice.
+        // The batch insert is atomic, so an existing catch means this report already has its saved batch.
+        const { data: existingCatches, error: existingError } = await supabase.from("catches")
+          .select("id").eq("report_id", reportId).limit(1);
+        if (existingError) throw new Error("Не удалось проверить сохранённый улов: " + existingError.message);
+        const alreadyStored = Boolean(existingCatches?.length);
+        const validCatches = alreadyStored ? [] : catches.filter((c) => c.species.trim()).map((c) => ({
           report_id: reportId,
           user_id: user.id,
           species: c.species.trim(),
