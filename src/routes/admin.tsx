@@ -52,7 +52,7 @@ function AdminConsole() {
 
   return <Shell>
     <div className="mx-auto max-w-5xl space-y-6">
-      <header className="overflow-hidden rounded-3xl border border-[#313044] bg-[#080C10] p-5 shadow-[0_20px_50px_rgba(0,0,0,.35)] sm:p-8">
+      <header className="z-card-hero overflow-hidden p-5 shadow-[0_20px_50px_rgba(0,0,0,.35)] sm:p-8">
         <p className="text-xs font-black uppercase tracking-widest text-[#D7FF35]">ZAPRUDA / PRIVATE ADMIN</p>
         <h1 className="mt-3 flex items-center gap-3 text-2xl font-black text-white sm:text-3xl">
           <ShieldCheck className="size-8 text-[#D7FF35]" /> Кабинет администрации
@@ -68,19 +68,19 @@ function AdminConsole() {
       {state === "forbidden" && <div role="alert" className="panel p-6 text-sm text-zinc-300">Доступ закрыт. Твой аккаунт не назначен администратором ZAPRUDA.</div>}
       {state === "error" && <div role="alert" className="rounded-xl border border-red-400/30 p-5 text-sm text-red-200">{error}</div>}
       {state === "ready" && <>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-3">
           {[
             ["Заявки на клубы", counts.clubs],
             ["Проверка гидов", counts.guides],
             ["Обращения", counts.requests],
-          ].map(([label, value]) => <div key={String(label)} className="rounded-2xl border border-[var(--z-stroke)] bg-[var(--z-card)] p-4 sm:p-5">
+          ].map(([label, value]) => <div key={String(label)} className="z-card min-h-[112px] p-4 sm:p-5">
             <p className="text-xs text-zinc-400">{label}</p>
             <p className="mt-2 text-3xl font-black text-[#D7FF35]">{value === null ? "—" : value}</p>
           </div>)}
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           {sections.map(({ title, description, href, Icon }) =>
-            <Link key={href} to={href} className="flex min-h-[148px] flex-col rounded-2xl border border-[var(--z-stroke)] bg-[var(--z-card-elevated)] p-4 sm:p-5 transition hover:border-[#D7FF35]/60 hover:bg-[#1A1A2B]">
+            <Link key={href} to={href} className="z-card flex min-h-[140px] flex-col p-5 transition hover:border-[#D7FF35]/60 hover:bg-[#1A1A2B]">
               <Icon className="size-6 text-[#D7FF35]" />
               <h2 className="mt-3 break-words text-sm font-black text-white sm:text-base">{title}</h2>
               <p className="mt-2 text-xs leading-5 text-[#B4A1D7] sm:text-sm">{description}</p>
