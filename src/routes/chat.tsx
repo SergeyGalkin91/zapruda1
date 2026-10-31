@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { ChevronRight, Globe2, MapPin, MessageCircle, Plus, RefreshCw, Send, Users } from "lucide-react";
+import { ChevronRight, Globe2, MapPin, MessageCircle, Plus, RefreshCw, Reply, Send, Users } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/lib/geo";
@@ -48,6 +48,7 @@ function GeographicChat() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
+  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [regionName, setRegionName] = useState("");
   const [cityName, setCityName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -105,7 +106,7 @@ function GeographicChat() {
   const currentTopic = TOPICS.find(t => t.key === topic) || TOPICS[0];
 
   function go(id: string, newTopic: ChatTopic = topic) {
-    setDraft(""); setChatError("");
+    setDraft(""); setReplyTo(null); setChatError("");
     void navigate({ to: "/chat", search: { place: id, topic: newTopic, country: "" } });
   }
 
@@ -170,11 +171,15 @@ function GeographicChat() {
     const body = draft.trim();
     if (!body || !uid || busy || !selectedPlace) return;
     setBusy(true); setChatError("");
+    const author = replyTo?.profiles?.display_name || replyTo?.profiles?.username || "Рыболов";
+    const quoted = replyTo ? replyTo.body.slice(0, 180).replace(/\s+/g, " ").trim() : "";
+    const outgoing = replyTo ? "↪ " + author.slice(0, 40) + ": " + quoted + "\n" + body : body;
+    if (outgoing.length > 2000) { setChatError("Сообщение с цитатой не должно превышать 2000 символов."); return; }
     const { error: sendError } = await api.from("chat_messages")
-      .insert({ user_id: uid, body, place_id: selectedPlace.id, topic });
+      .insert({ user_id: uid, body: outgoing, place_id: selectedPlace.id, topic });
     setBusy(false);
     if (sendError) { setChatError("Сообщение не отправлено: " + sendError.message); return; }
-    setDraft("");
+    setDraft(""); setReplyTo(null);
     setRefreshIndex(i => i + 1);
   }
 
@@ -323,10 +328,18 @@ function GeographicChat() {
               <div className={"zapruda-chat-bubble whitespace-pre-wrap break-words rounded-[20px] border px-4 py-3 text-sm leading-6 "+(message.user_id===uid?"zapruda-chat-own-bubble ":"zapruda-chat-incoming-bubble ")+(message.user_id===uid?"rounded-tr-sm border-[#D7FF35]/30 bg-[#D7FF35]/10 text-white":"rounded-tl-sm border-[#A78BFA]/20 bg-[#191722] text-zinc-100")}>
                 {message.body}
               </div>
+              {uid && <button type="button" onClick={() => setReplyTo(message)}
+                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-zinc-400 hover:bg-white/10 hover:text-[#D7FF35]">
+                <Reply className="size-3.5" /> Ответить
+              </button>}
             </article>)}
           </div>
           {!loading && !uid && <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#A78BFA]/20 bg-[#211B2D] px-4 py-3 text-sm text-[#DDD6FE]"><span>Чтобы писать в чаты ZAPRUDA, войди в аккаунт.</span><Link to="/auth" search={{ mode: "in" }} className="inline-flex min-h-10 items-center rounded-full bg-[#D7FF35] px-4 text-xs font-black uppercase text-black">Войти</Link></div>}
           <form className="space-y-3 border-t border-[#A78BFA]/15 bg-[#101211] p-3 sm:p-4" onSubmit={send}>
+            {replyTo && <div className="flex items-start justify-between gap-3 rounded-xl border-l-2 border-[#D7FF35] bg-white/5 px-3 py-2 text-xs text-zinc-300">
+              <span className="min-w-0 truncate">Ответ: {replyTo.profiles?.display_name || replyTo.profiles?.username || "Рыболов"} — {replyTo.body.slice(0, 100)}</span>
+              <button type="button" onClick={() => setReplyTo(null)} className="shrink-0 font-semibold text-[#D7FF35]">Отмена</button>
+            </div>
             <div className="flex flex-wrap gap-1">
               {quick.map(q=><button key={q} type="button" title={"Вставить "+q}
                 onClick={() => setDraft(d=>(d+q).slice(0,2000))}
