@@ -20,3 +20,9 @@ Do not merge main, deploy, or mutate production Supabase from this document.
 
 ## Merge blockers
 CI or live authorization failures, legacy RPC duplicate path, unintended UI visual regression, missing tests under actual authenticated JWTs.
+## 2026-10-31 live audit addendum (read-only)
+- Integration HEAD at audit start: 8cf4254221799b2b70728bb005b5fa02e8af9452. No workflow run or combined commit statuses returned by GitHub connector for this SHA; this is UNKNOWN, not PASS.
+- Current Supabase public.activate_paid_club(uuid) has SECURITY DEFINER and `authenticated` EXECUTE privilege. Security branch `security/revoke-legacy-club-rpc-execute` proposes REVOKE; existing pull request confirmed by GitHub API, NOT merged or applied.
+- public.admin_finance_summary() and public.confirm_club_creation_payment(uuid,text) also grant authenticated EXECUTE, with internal administrator checks. Execute privilege alone does not imply access to data; must test with non-admin JWT.
+- Do not modify app database or use a real payment to verify club creation. Staging tests need disposable approved request, synthetic reference, trigger side-effects and one-group/owner-membership invariant.
+- PR #10 remains blocked from main by missing CI evidence on integration HEAD, real authenticated JWT tests, and removal/restriction of legacy RPC after independent approval.
