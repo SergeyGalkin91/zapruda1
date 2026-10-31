@@ -74,7 +74,7 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
       setSelected(data as Mark);
     }
     setTitle(""); setNote(""); setLatitude(""); setLongitude(""); setDraftPoint(null);
-    setStatus("Точка сохранена только в твоём профиле.");
+    setStatus("Спот сохранён. Его видишь только ты.");
   }
 
   async function remove(mark: Mark) {
@@ -85,7 +85,7 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
     if (deleteError) { setError("Не удалось удалить метку: " + deleteError.message); return; }
     setMarks((prev) => prev.filter((item) => item.id !== mark.id));
     if (selected?.id === mark.id) setSelected(null);
-    setStatus("Метка удалена.");
+    setStatus("Спот удалён.");
   }
 
   const coords = selected ? `${selected.longitude},${selected.latitude}` : "";
@@ -99,8 +99,8 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
       <div className="flex items-start gap-3">
         <MapPin className="mt-1 size-6 shrink-0 text-[#D7FF35]" aria-hidden="true" />
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D7FF35]">Личная карта · только для тебя</p>
-          <h2 id="private-fishing-marks" className="mt-2 text-2xl font-black uppercase tracking-[-0.035em] text-white sm:text-3xl">Мои рыболовные метки</h2>
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D7FF35]">ZAPRUDA / PRIVATE SPOTS</p>
+          <h2 id="private-fishing-marks" className="mt-2 text-2xl font-black uppercase tracking-[-0.035em] text-white sm:text-3xl">Мои споты</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
             Нажми на карту ниже, выбери тип точки и сохрани корягу, бровку, яму или перспективное место.
             Другие пользователи ZAPRUDA не видят твои метки. При открытии карты координаты передаются Яндексу.
@@ -119,11 +119,11 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
           setLatitude(point.latitude.toFixed(6));
           setLongitude(point.longitude.toFixed(6));
           setError("");
-          setStatus("Точка выбрана. Укажи название и нажми «Сохранить личную метку».");
+          setStatus("Точка выбрана. Укажи название и нажми «Сохранить спот».");
         }}
         onSelectMark={(id) => {
           const mark = marks.find((item) => item.id === id);
-          if (mark) { setSelected(mark); setStatus("Выбрана сохранённая метка «" + mark.title + "»."); }
+          if (mark) { setSelected(mark); setStatus("Выбран спот «" + mark.title + "»."); }
         }}
       /></div>
       <form onSubmit={save} className="mt-5 grid gap-3 rounded-[22px] border border-white/10 bg-[#171C17] p-4 sm:grid-cols-2">
@@ -132,7 +132,7 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
             {kinds.map((code) => <option key={code} value={code}>{labels[code]}</option>)}
           </select>
         </label>
-        <label className="text-xs font-semibold text-zinc-300">Название *
+        <label className="text-xs font-semibold text-zinc-300">Название спота *
           <input className="field mt-1 w-full" required minLength={2} maxLength={80} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Например, коряжник у берега" />
         </label>
         <label className="text-xs font-semibold text-zinc-300">Широта *
@@ -145,7 +145,7 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
           <textarea className="field mt-1 min-h-20 w-full" maxLength={700} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Глубина, приманка, зацепы, вид рыбы…" />
         </label>
         <button className="btn-primary justify-center sm:col-span-2" disabled={saving} type="submit">
-          <Plus className="size-4" /> {saving ? "Сохраняем…" : "Сохранить личную метку"}
+          <Plus className="size-4" /> {saving ? "Сохраняем…" : "Сохранить спот"}
         </button>
       </form>
       <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
@@ -187,7 +187,7 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
               </div>
             </div>
           ) : (
-            <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-white/15 text-center text-sm text-zinc-500">Выбери метку, чтобы посмотреть её на карте.</div>
+            <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-white/15 text-center text-sm text-zinc-500">Выбери спот — здесь появится его карточка.</div>
           )}
         </div>
       </div>
