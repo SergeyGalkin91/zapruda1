@@ -444,22 +444,6 @@ function Profile() {
 
             {editing ? (
               <form onSubmit={saveProfile} className="space-y-5">
-              <section className="rounded-2xl border border-[#D7FF35]/20 bg-[#0B100D] p-4">
-                <p className="mb-1 text-sm font-black">Аватар рыболова</p>
-                <p className="mb-3 text-xs text-zinc-400">Загрузи фото или выбери рыболовный символ. Выбор сохраняется сразу.</p>
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#D7FF35]/45 bg-[#D7FF35]/10 px-4 py-3 text-xs font-bold text-[#D7FF35]">
-                  <ImagePlus className="size-4"/>{avatarBusy?"Сохраняем…":"Загрузить фото"}
-                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={avatarBusy} onChange={e=>{void uploadAvatar(e.target.files?.[0]);e.target.value="";}}/>
-                </label>
-                <p className="mt-2 text-[11px] text-zinc-500">JPG, PNG, WebP · до 3 МБ</p>
-                <p className="mb-2 mt-5 text-xs font-bold text-zinc-400">Или выбери тематический значок:</p>
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-                  {FISHING_DISCIPLINES.map(item=><button type="button" key={item.code} disabled={avatarBusy} aria-label={"Аватар: "+item.title} aria-pressed={!avatarUrl&&avatarSymbol===item.code} onClick={()=>void chooseAvatarSymbol(item.code)}
-                    className={`flex min-h-[77px] flex-col items-center justify-center gap-2 rounded-xl border p-2 text-xs transition ${!avatarUrl&&avatarSymbol===item.code?"border-[#D7FF35] bg-[#D7FF35]/15 text-[#D7FF35]":"border-white/10 bg-black/20 text-zinc-400 hover:border-[#D7FF35]/50 hover:text-white"}`}>
-                    <DisciplineIcon method={item.code} className="size-7"/><span className="text-center text-[10px]">{item.title}</span>
-                  </button>)}
-                </div>
-              </section>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Label name="Никнейм"><input className="field" maxLength={30} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="например, zaprudafish" /></Label>
                 <Label name="Отображаемое имя"><input className="field" maxLength={100} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Как тебя называть?" /></Label>
