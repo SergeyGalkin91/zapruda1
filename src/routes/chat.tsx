@@ -53,6 +53,7 @@ function GeographicChat() {
   const [reactingTo, setReactingTo] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
+  const [pendingPhotoMessageId, setPendingPhotoMessageId] = useState<string | null>(null);
   const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [regionName, setRegionName] = useState("");
@@ -112,7 +113,7 @@ function GeographicChat() {
   const currentTopic = TOPICS.find(t => t.key === topic) || TOPICS[0];
 
   function go(id: string, newTopic: ChatTopic = topic) {
-    setDraft(""); setPhoto(null); setReplyTo(null); setChatError("");
+    setDraft(""); setPhoto(null); setPendingPhotoMessageId(null); setReplyTo(null); setChatError("");
     void navigate({ to: "/chat", search: { place: id, topic: newTopic, country: "" } });
   }
 
@@ -222,24 +223,32 @@ function GeographicChat() {
     const author = replyTo?.profiles?.display_name || replyTo?.profiles?.username || "Рыболов";
     const quoted = replyTo ? replyTo.body.slice(0, 180).replace(/\s+/g, " ").trim() : "";
     const outgoing = replyTo ? "↪ " + author.slice(0, 40) + ": " + quoted + "\n" + body : body;
-    if (outgoing.length > 2000) { setChatError("Сообщение с цитатой не должно превышать 2000 символов."); return; }
+    if (outgoing.length > 2000) { setChatError("Сообщение с цитатой не должно превышать 2000 символов."); setBusy(false); return; }
     if (photo && (!["image/jpeg","image/png","image/webp"].includes(photo.type) || photo.size > 5*1024*1024)) {
       setChatError("Фото должно быть JPG, PNG или WebP до 5 МБ."); setBusy(false); return;
     }
-    const { data: message, error: sendError } = await api.from("chat_messages")
-      .insert({ user_id: uid, body: outgoing || "📷 Фото", place_id: selectedPlace.id, topic })
-      .select("id").single();
-    if (sendError) { setChatError("Сообщение не отправлено: " + sendError.message); setBusy(false); return; }
-    if (photo && message?.id) {
+    let messageId = pendingPhotoMessageId;
+    if (!messageId) {
+      const { data: message, error: sendError } = await api.from("chat_messages")
+        .insert({ user_id: uid, body: outgoing || "📷 Фото", place_id: selectedPlace.id, topic })
+        .select("id").single();
+      if (sendError || !message?.id) {
+        setChatError("Сообщение не отправлено: " + (sendError?.message || "сервер не вернул ID"));
+        setBusy(false); return;
+      }
+      messageId = message.id as string;
+      if (photo) setPendingPhotoMessageId(messageId);
+    }
+    if (photo && messageId) {
       const ext = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
-      const path = uid + "/" + message.id + "/" + crypto.randomUUID() + "." + ext;
+      const path = uid + "/" + messageId + "/" + crypto.randomUUID() + "." + ext;
       const { error: uploadError } = await supabase.storage.from("chat-photos").upload(path,photo,{contentType:photo.type,upsert:false});
       if (uploadError) {
         setChatError("Сообщение сохранено, но фото не загружено: " + uploadError.message);
         setBusy(false); setRefreshIndex(i => i+1); return;
       }
       const { error: linkError } = await api.from("chat_message_photos")
-        .insert({message_id:message.id,user_id:uid,storage_path:path});
+        .insert({message_id:messageId,user_id:uid,storage_path:path});
       if (linkError) {
         await supabase.storage.from("chat-photos").remove([path]);
         setChatError("Сообщение сохранено без фото: " + linkError.message);
@@ -247,7 +256,7 @@ function GeographicChat() {
       }
     }
     setBusy(false);
-    setDraft(""); setPhoto(null); setReplyTo(null);
+    setDraft(""); setPhoto(null); setPendingPhotoMessageId(null); setReplyTo(null);
     setRefreshIndex(i => i + 1);
   }
 
@@ -429,6 +438,9 @@ function GeographicChat() {
                 onClick={() => setDraft(d=>(d+q).slice(0,2000))}
                 className="rounded-md px-2 py-1 text-lg transition hover:-translate-y-0.5 hover:bg-white/10">{q}</button>)}
             </div>
+            {pendingPhotoMessageId && <p role="status" className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-xs text-amber-100">
+              Сообщение уже отправлено. Повторная попытка загрузит фото к нему, не создавая нового сообщения.
+            </p>}
             <div className="flex flex-wrap items-center gap-2">
               <label className="inline-flex cursor-pointer items-center rounded-lg border border-white/20 px-3 py-2 text-xs text-zinc-200 hover:border-[#D7FF35]">
                 📷 {photo ? photo.name : "Прикрепить фото"}
@@ -442,7 +454,7 @@ function GeographicChat() {
                     setChatError(""); setPhoto(file);
                   }} />
               </label>
-              {photo && <button type="button" className="text-xs text-[#D7FF35]" onClick={() => setPhoto(null)}>Убрать фото</button>}
+              {photo && <button type="button" className="text-xs text-[#D7FF35]" onClick={() => { setPhoto(null); setPendingPhotoMessageId(null); }}>Убрать фото</button>}
             </div>
             <div className="flex gap-2">
               <input className="field min-w-0 flex-1" aria-label="Сообщение для выбранной ветки"
