@@ -52,8 +52,11 @@ function createSupabaseClient() {
   // Browser previews do not provide Node's process global. Keep the SSR
   // fallback only on the server to avoid a ReferenceError in Lovable Preview.
   const serverEnv = typeof process !== 'undefined' ? process.env : undefined;
-  const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || serverEnv?.['SUPABASE_URL'];
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || serverEnv?.['SUPABASE_PUBLISHABLE_KEY'];
+  // Public project configuration fallback for Lovable hosting, which does not inject
+  // VITE_* values or Node environment variables in all deployment modes.
+  // This is a publishable client key, NOT a Supabase secret/service-role key.
+  const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || serverEnv?.['SUPABASE_URL'] || 'https://sonvniuwtvzzyuglscah.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || serverEnv?.['SUPABASE_PUBLISHABLE_KEY'] || 'sb_publishable_86B9kOH2BUNOuHyYoHX4qw_FbuLHl5E';
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
