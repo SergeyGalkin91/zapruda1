@@ -528,24 +528,13 @@ function NewReport() {
           <p className="text-xs text-zinc-400">Выбирай рыбу по названию — справочник включает речные, озёрные и морские виды России и СНГ. Для редких видов возможен ручной ввод. Соблюдай ограничения на вылов и охраняемые виды.</p>
           {catches.map((c, i) => (
             <div key={i} className="grid grid-cols-[1fr_auto] gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
-              <div className="relative col-span-2 sm:col-span-1">
-                <input className="field w-full" autoComplete="off" placeholder="Начни вводить вид рыбы…" value={c.species}
-                  onFocus={()=>setSpeciesFocused(i)} onBlur={()=>window.setTimeout(()=>setSpeciesFocused(current=>current===i?null:current),150)}
-                  onChange={(e)=>{upd(i,"species",e.target.value);setSpeciesFocused(i);}}/>
-                {speciesFocused===i&&(()=>{
-                  const all=Array.from(new Set([...COMMON_CIS_FISH,...catalogFishes.map(f=>f.name)]));
-                  const query=c.species.trim().toLocaleLowerCase("ru");
-                  const filtered=all.filter(name=>!query||name.toLocaleLowerCase("ru").includes(query)).sort((a,b)=>{
-                    const ap=query&&a.toLocaleLowerCase("ru").startsWith(query)?0:1;
-                    const bp=query&&b.toLocaleLowerCase("ru").startsWith(query)?0:1;
-                    return ap-bp||a.localeCompare(b,"ru");
-                  }).slice(0,25);
-                  return <div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-60 overflow-y-auto rounded-xl border border-[#D7FF35]/35 bg-[#111912] p-1 shadow-xl shadow-black/70">
-                    <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#D7FF35]">{query?"Найденные виды":"Выбери вид или начни ввод"} · {filtered.length}{!query?" из каталога":""}</p>
-                    {filtered.map(name=><button key={name} type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>{upd(i,"species",name);setSpeciesFocused(null);}} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-zinc-200 hover:bg-[#D7FF35]/15 hover:text-[#D7FF35]">{name}</button>)}
-                    {!filtered.length&&<p className="px-3 py-2 text-xs text-zinc-400">Нет в каталоге? Оставь введённое название.</p>}
-                  </div>;
-                })()}
+              <div className="col-span-2 space-y-2 sm:col-span-1">
+                <select className="field w-full cursor-pointer border-[#D7FF35]/35" aria-label="Выбрать вид рыбы" value={Array.from(new Set([...COMMON_CIS_FISH,...catalogFishes.map(f=>f.name)])).includes(c.species)?c.species:""} onChange={e=>upd(i,"species",e.target.value)}>
+                  <option value="">🐟 Выбрать рыбу из списка</option>
+                  {Array.from(new Set([...COMMON_CIS_FISH,...catalogFishes.map(f=>f.name)])).sort((a,b)=>a.localeCompare(b,"ru")).map(name=><option key={name} value={name}>{name}</option>)}
+                </select>
+                <input className="field w-full" type="text" placeholder="Или введи название для поиска / вручную" value={c.species} onChange={e=>upd(i,"species",e.target.value)} list="fish-name-suggestions"/>
+                <datalist id="fish-name-suggestions">{Array.from(new Set([...COMMON_CIS_FISH,...catalogFishes.map(f=>f.name)])).map(name=><option key={name} value={name}/>)}</datalist>
               </div>
               <input className="field" type="number" min="0" step="0.01" placeholder="Вес, кг" value={c.weight} onChange={(e) => upd(i, "weight", e.target.value)} />
               <input className="field" type="number" min="0" step="0.1" placeholder="Длина, см" value={c.length} onChange={(e) => upd(i, "length", e.target.value)} />
