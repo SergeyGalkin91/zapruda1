@@ -526,13 +526,11 @@ function NewReport() {
           <p className="text-xs text-zinc-400">Выбирай рыбу по названию — справочник включает речные, озёрные и морские виды России и СНГ. Для редких видов возможен ручной ввод. Соблюдай ограничения на вылов и охраняемые виды.</p>
           {catches.map((c, i) => (
             <div key={i} className="grid grid-cols-[1fr_auto] gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
-              <div className="col-span-2 space-y-2 sm:col-span-1">
+              <div className="col-span-2 sm:col-span-1">
                 <select className="field w-full cursor-pointer border-[#D7FF35]/35" aria-label="Выбрать вид рыбы" value={Array.from(new Set([...COMMON_CIS_FISH,...catalogFishes.map(f=>f.name)])).includes(c.species)?c.species:""} onChange={e=>upd(i,"species",e.target.value)}>
                   <option value="">🐟 Выбрать рыбу из списка</option>
                   {Array.from(new Set([...COMMON_CIS_FISH,...catalogFishes.map(f=>f.name)])).sort((a,b)=>a.localeCompare(b,"ru")).map(name=><option key={name} value={name}>{name}</option>)}
                 </select>
-                <input className="field w-full" type="text" placeholder="Или введи название для поиска / вручную" value={c.species} onChange={e=>upd(i,"species",e.target.value)} list="fish-name-suggestions"/>
-                <datalist id="fish-name-suggestions">{Array.from(new Set([...COMMON_CIS_FISH,...catalogFishes.map(f=>f.name)])).map(name=><option key={name} value={name}/>)}</datalist>
               </div>
               <input className="field" type="number" min="0" step="0.01" placeholder="Вес, кг" value={c.weight} onChange={(e) => upd(i, "weight", e.target.value)} />
               <input className="field" type="number" min="0" step="0.1" placeholder="Длина, см" value={c.length} onChange={(e) => upd(i, "length", e.target.value)} />
