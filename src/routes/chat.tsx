@@ -114,6 +114,10 @@ function GeographicChat() {
   const currentTopic = TOPICS.find(t => t.key === topic) || TOPICS[0];
 
   function go(id: string, newTopic: ChatTopic = topic) {
+    if (pendingPhotoMessageId) {
+      setChatError("Сначала повтори загрузку фотографии или нажми «Оставить сообщение без фото». Переключение чата пока заблокировано.");
+      return;
+    }
     setDraft(""); setPhoto(null); setPendingPhotoMessageId(null); setReplyTo(null); setChatError("");
     void navigate({ to: "/chat", search: { place: id, topic: newTopic, country: "" } });
   }
