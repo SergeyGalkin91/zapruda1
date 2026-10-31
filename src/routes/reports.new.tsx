@@ -371,7 +371,7 @@ function NewReport() {
       {!savedReportId && <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D7FF35]/30 bg-[#161D13] p-4">
         <div><p className="text-sm font-black text-[#D7FF35]">ZAPRUDA STREET</p><p className="mt-1 text-xs text-zinc-300">Перенести завершённую городскую сессию. Отчёт останется приватным до твоего решения.</p></div>
         <button type="button" onClick={importStreetSession} disabled={!draftReady || saving} className="rounded-xl border border-[#D7FF35]/60 px-4 py-2 text-xs font-black text-[#D7FF35] disabled:opacity-40">Перенести Street-сессию</button>
-      </div>
+      </div>}
       {savedReportId && <div role="status" className="mb-4 rounded-xl border border-[#A78BFA]/40 bg-[#A78BFA]/10 p-4 text-sm text-zinc-100">
         <p className="font-bold text-[#D7FF35]">Отчёт сохранён</p>
         <p className="mt-1">Загружено фотографий: {uploadedCount} из {photos.length}. Если загрузка прервалась, повтори её — второй отчёт не создаётся.</p>
