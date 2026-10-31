@@ -31,22 +31,22 @@
 
 :root {
   --radius: 0.75rem;
-  --background: oklch(0.13 0 0);
+  --background: #090B0C;
   --foreground: oklch(0.97 0 0);
-  --card: oklch(0.17 0 0);
+  --card: #141A1E;
   --card-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.897 0.196 126.665);
-  --primary-foreground: oklch(0.13 0 0);
-  --secondary: oklch(0.22 0 0);
+  --primary: #D7FF35;
+  --primary-foreground: #090B0C;
+  --secondary: #22212B;
   --secondary-foreground: oklch(0.95 0 0);
-  --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.66 0 0);
+  --muted: #1B2024;
+  --muted-foreground: #B8AACB;
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.13 0 0);
   --destructive: oklch(0.65 0.2 25);
-  --border: oklch(0.27 0 0);
-  --input: oklch(0.27 0 0);
-  --ring: oklch(0.897 0.196 126.665);
+  --border: #343640;
+  --input: #343640;
+  --ring: #D7FF35;
 }
 
 @layer base {
@@ -169,7 +169,7 @@
   --z-surface: #0B0D0E;
   --z-card: #141D20;
   --z-lime: #D7FF35;
-  --z-violet: #A78BFA;
+  --z-violet: #B4A1D7;
   --z-stroke: rgba(255,255,255,.11);
 }
 .z-underground {
