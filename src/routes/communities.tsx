@@ -33,7 +33,7 @@ function Communities() {
 
   return (
     <Shell>
-      <h1 className="z-underground-title text-4xl text-white sm:text-6xl">КОМЬЮНИТИ</h1>
+      <h1 className="z-underground-title break-words text-[clamp(1.8rem,8vw,3.75rem)] text-white [overflow-wrap:anywhere]">КОМЬЮНИТИ</h1>
       <section className="z-underground mt-6 overflow-hidden bg-gradient-to-br from-[#1F1B29] via-[#101314] to-[#0B0D0E] p-5 sm:p-7">
         <div className="flex flex-wrap items-center gap-4">
           <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 text-[#D7FF35]">
@@ -55,8 +55,8 @@ function Communities() {
           Личные контакты, заявки и жалобы не публикуются в публичной Telegram-группе. Для них предусмотрен закрытый чат администрации.
         </p>
       </section>
-      <Link search={{ place: "", topic: "general", country: "" }} to="/chat" className="z-underground mt-6 flex items-center justify-between p-5 transition hover:border-[#A78BFA]/50">
-        <div>
+      <Link search={{ place: "", topic: "general", country: "" }} to="/chat" className="z-underground mt-6 flex min-w-0 items-center justify-between gap-3 p-5 transition hover:border-[#A78BFA]/50">
+        <div className="min-w-0">
           <p className="font-display font-bold">Весь ZAPRUDA</p>
           <p className="text-sm text-muted-foreground">Общий чат и переход к странам, областям, городам и тематическим веткам</p>
         </div>
