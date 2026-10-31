@@ -95,12 +95,12 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
   const openUrl = selected ? `https://yandex.ru/maps/?ll=${encodeURIComponent(coords)}&z=14&pt=${encodeURIComponent(coords + ",pm2rdm")}` : null;
 
   return (
-    <section aria-labelledby="private-fishing-marks" className="mb-7 rounded-3xl border border-[#D7FF35]/20 bg-[#151915] p-5 sm:p-7">
+    <section aria-labelledby="private-fishing-marks" className="mb-7 rounded-[28px] border border-white/10 bg-[#0D110E] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] sm:p-7">
       <div className="flex items-start gap-3">
         <MapPin className="mt-1 size-6 shrink-0 text-[#D7FF35]" aria-hidden="true" />
         <div>
           <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D7FF35]">Личная карта · только для тебя</p>
-          <h2 id="private-fishing-marks" className="mt-1 text-xl font-extrabold text-white">Мои рыболовные метки</h2>
+          <h2 id="private-fishing-marks" className="mt-2 text-2xl font-black uppercase tracking-[-0.035em] text-white sm:text-3xl">Мои рыболовные метки</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
             Нажми на карту ниже, выбери тип точки и сохрани корягу, бровку, яму или перспективное место.
             Другие пользователи ZAPRUDA не видят твои метки. При открытии карты координаты передаются Яндексу.
@@ -126,7 +126,7 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
           if (mark) { setSelected(mark); setStatus("Выбрана сохранённая метка «" + mark.title + "»."); }
         }}
       /></div>
-      <form onSubmit={save} className="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-black/15 p-4 sm:grid-cols-2">
+      <form onSubmit={save} className="mt-5 grid gap-3 rounded-[22px] border border-white/10 bg-[#171C17] p-4 sm:grid-cols-2">
         <label className="text-xs font-semibold text-zinc-300">Тип метки
           <select className="field mt-1 w-full" value={kind} onChange={(e) => setKind(e.target.value as Kind)}>
             {kinds.map((code) => <option key={code} value={code}>{labels[code]}</option>)}
