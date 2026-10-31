@@ -112,8 +112,9 @@ function NewReport() {
       if (!value || typeof value !== "object" || !("finishedAt" in value) || typeof value.finishedAt !== "string") {
         setError("Сначала заверши Street-сессию, затем перенеси данные."); return;
       }
-      const street = value as { startedAt?: unknown; area?: unknown; catches?: unknown; finishedAt: string };
+      const street = value as { startedAt?: unknown; area?: unknown; notes?: unknown; catches?: unknown; finishedAt: string; importedAt?: unknown };
       if (typeof street.startedAt !== "string" || !Number.isFinite(Date.parse(street.startedAt))) { setError("Данные Street-сессии повреждены."); return; }
+      if (typeof street.importedAt === "string" && !window.confirm("Эта Street-сессия уже переносилась. Импортировать повторно?")) return;
       if ((title.trim() || location.trim() || story.trim() || catches.some(c => c.species.trim())) &&
           !window.confirm("В форме уже есть данные. Заменить название, место и уловы данными Street-сессии?")) return;
       const area = typeof street.area === "string" ? street.area.slice(0, 100) : "";
@@ -122,10 +123,14 @@ function NewReport() {
       setTitle(("Street Fishing · " + (area || "городской выход")).slice(0, 120));
       setLocation(area);
       setCatches(items.length ? items.map(c => ({ species: c.species.slice(0, 80), weight: "", length: "" })) : [{ species: "", weight: "", length: "" }]);
-      setStory("Street-сессия от " + new Date(street.startedAt).toLocaleString("ru-RU") +
-        ". Уловов: " + items.length + "." + items.map(c => "\\n• " + c.species + (c.note ? " — " + c.note : "")).join("").slice(0, 3000));
+      const notes = typeof street.notes === "string" ? street.notes.slice(0, 1000) : "";
+      setStory(("Street-сессия от " + new Date(street.startedAt).toLocaleString("ru-RU") +
+        ". Уловов: " + items.length + (notes ? "\\nЗаметки: " + notes : "") +
+        items.map(c => "\\n• " + c.species + (c.note ? " — " + c.note : "")).join("")).slice(0, 3000));
       setIsPublic(false);
       setError("");
+      try { localStorage.setItem("zapruda:street-session:v1", JSON.stringify({ ...street, importedAt: new Date().toISOString() })); }
+      catch { /* Warning is best effort; source session remains intact. */ }
     } catch { setError("Не удалось прочитать Street-сессию. Исходные данные сохранены."); }
   }
 
