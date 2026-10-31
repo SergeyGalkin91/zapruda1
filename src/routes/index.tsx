@@ -291,12 +291,12 @@ function Feed() {
   return (
     <Shell>
       <div className="mx-auto mb-7 max-w-5xl space-y-5">
-        <section className="relative isolate overflow-hidden rounded-[28px] border border-[#D7FF35]/25 bg-[#0B0F0E] shadow-[0_18px_75px_rgba(0,0,0,.25)]">
+        <section className="zapruda-editorial-hero relative isolate overflow-hidden rounded-[28px] border border-[#D7FF35]/25 bg-[#0B0F0E] shadow-[0_18px_75px_rgba(0,0,0,.25)]">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-60" style={{background:"radial-gradient(ellipse at 87% 10%, rgba(215,255,53,.19), transparent 46%), radial-gradient(ellipse at 0% 100%, rgba(255,106,0,.12), transparent 48%), repeating-radial-gradient(circle at 78% 62%, transparent 0px, transparent 39px, rgba(215,255,53,.065) 40px, transparent 41px)"}}/>
           <div className="relative grid min-h-[310px] gap-8 p-6 sm:p-10 md:grid-cols-[1fr_250px] md:items-center">
             <div>
               <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.22em] text-[#D7FF35]"><span className="size-1.5 animate-pulse rounded-full bg-[#D7FF35]"/> ZAPRUDA COMMUNITY · FISHING CULTURE</p>
-              <h1 className="max-w-xl text-[clamp(2.6rem,7.5vw,5.5rem)] font-black uppercase leading-[.88] tracking-[-.07em] text-white">БОЛЬШЕ<br/><span className="text-[#D7FF35]">ЧЕМ РЫБАЛКА.</span></h1>
+              <h1 className="max-w-xl text-[clamp(2.6rem,7.5vw,5.5rem)] font-black uppercase leading-[.88] tracking-[-.07em] text-white">БОЛЬШЕ<br/><span className="text-[#D7FF35]">ЧЕМ РЫБАЛКА.</span></h1>\n              <span className="zapruda-hand-note mt-3 inline-block text-[#FF8128]">СВОИ НА ОДНОЙ ВОЛНЕ ↗</span>
               <p className="mt-5 max-w-xl text-sm leading-6 text-[#B5C1B4] sm:text-base">Отчёты, трофеи, люди на одной волне. Твоя рыбалка — твои правила. Найди своих, покажи результат, исследуй новые места.</p>
               <div className="mt-6 flex flex-wrap gap-2.5">
                 <Link to="/reports/new" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#D7FF35] px-5 py-3 text-xs font-black uppercase tracking-wider text-[#0B0F0E] transition hover:bg-[#ECFF92]">+ Новый отчёт <ArrowUpRight className="size-4"/></Link>
@@ -313,7 +313,7 @@ function Feed() {
           </div>
         </section>
         <section className="grid gap-3 sm:grid-cols-3">
-          <Link to="/communities" className="group relative overflow-hidden rounded-[22px] border border-[#D7FF35]/25 bg-[#182013] p-5 transition hover:border-[#D7FF35]/60">
+          <Link to="/communities" className="zapruda-editorial-card group relative overflow-hidden rounded-[22px] border border-[#D7FF35]/25 bg-[#182013] p-5 transition hover:border-[#D7FF35]/60">
             <div className="absolute -right-5 -top-5 size-32 rounded-full border border-[#D7FF35]/15"/>
             <Compass className="size-7 text-[#D7FF35]"/><p className="mt-5 text-[10px] font-black uppercase tracking-[.2em] text-[#D7FF35]">01 / COMMUNITY</p>
             <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-white">Найди своих</h2><p className="mt-2 text-xs leading-5 text-zinc-400">Рыболовные клубы, местные команды и новые знакомства.</p>
@@ -348,7 +348,7 @@ function Feed() {
       {reports.map((report) => {
         const name = report.profiles?.display_name || report.profiles?.username || "Рыболов";
         return (
-          <article key={report.id} className="panel mb-4 space-y-3 border-white/10 bg-[#141814] p-4 sm:p-5">
+          <article key={report.id} className="zapruda-report-card panel mb-4 space-y-3 border-white/10 bg-[#141814] p-4 sm:p-5">
             <div className="flex items-start gap-3">
               {report.profiles?.avatar_url
                 ? <img src={report.profiles.avatar_url} alt="" className="size-11 rounded-full object-cover" />
