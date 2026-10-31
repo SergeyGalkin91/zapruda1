@@ -167,10 +167,14 @@
 /* ZAPRUDA Underground design system — shared presentation only. */
 :root {
   --z-surface: #0B0D0E;
-  --z-card: #141D20;
+  --z-card: #12161A;
+  --z-card-elevated: #171C22;
+  --z-radius-card: 1rem;
+  --z-radius-hero: 1.5rem;
+  --z-gap-section: 1.5rem;
   --z-lime: #D7FF35;
   --z-violet: #B4A1D7;
-  --z-stroke: rgba(255,255,255,.11);
+  --z-stroke: rgba(255,255,255,.10);
 }
 .z-underground {
   color: #F5F7F5;
