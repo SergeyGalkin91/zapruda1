@@ -339,7 +339,7 @@ function GeographicChat() {
             {replyTo && <div className="flex items-start justify-between gap-3 rounded-xl border-l-2 border-[#D7FF35] bg-white/5 px-3 py-2 text-xs text-zinc-300">
               <span className="min-w-0 truncate">Ответ: {replyTo.profiles?.display_name || replyTo.profiles?.username || "Рыболов"} — {replyTo.body.slice(0, 100)}</span>
               <button type="button" onClick={() => setReplyTo(null)} className="shrink-0 font-semibold text-[#D7FF35]">Отмена</button>
-            </div>
+            </div>}
             <div className="flex flex-wrap gap-1">
               {quick.map(q=><button key={q} type="button" title={"Вставить "+q}
                 onClick={() => setDraft(d=>(d+q).slice(0,2000))}
