@@ -79,7 +79,7 @@ function Moderation(){
     });
     setBusy(false);
     if(approvalError){setError("Подтверждение не выполнено: "+approvalError.message);return;}
-    setNotice("Платёж подтверждён. Пользователь теперь может активировать свой клуб.");
+    setNotice("Платёж подтверждён. Клуб создаётся автоматически после подтверждения. Проверь его в списке клубов.");
     await refresh();
   }
 
