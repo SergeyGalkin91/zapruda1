@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { Wordmark } from "@/components/Wordmark";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -131,19 +132,19 @@ function Auth() {
 
   return (
     <Shell>
-      <div className="mx-auto grid max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-card shadow-2xl md:grid-cols-2">
-        <aside className="relative hidden min-h-[440px] flex-col justify-between overflow-hidden bg-gradient-to-br from-[#1C3119] via-[#101610] to-[#0A0E0A] p-8 md:flex">
+      <div className="mx-auto grid max-w-4xl overflow-hidden rounded-3xl border border-[#34304D] bg-[#080C10] shadow-2xl md:grid-cols-2">
+        <aside className="relative flex min-h-[210px] flex-col justify-between overflow-hidden bg-[radial-gradient(ellipse_at_65%_75%,#C86E36_0%,#49323F_24%,#151B29_55%,#070B10_100%)] p-6 md:min-h-[440px] md:p-8">
           <div className="absolute -right-16 -top-16 size-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="relative">
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#D7FF35]">ZAPRUDA COMMUNITY</p>
-            <h1 className="mt-8 text-4xl font-bold leading-tight">Свои люди.<br />Свои водоёмы.<br />Свои истории.</h1>
+            <Wordmark />
+            <h1 className="mt-7 max-w-sm text-2xl font-black leading-tight text-white md:mt-8 md:text-4xl">Вход в сообщество рыболовов</h1>
             <p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">Записывай выезды, делись уловом и обсуждай рыбалку с теми, кто в теме.</p>
           </div>
           <p className="relative text-xs text-muted-foreground">Рыболовное сообщество без лишнего шума 🎣</p>
         </aside>
-        <section className="p-6 sm:p-9">
+        <section className="p-5 sm:p-9">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Рыболовное сообщество</p>
-          <h2 className="mt-2 text-2xl font-bold text-white">{mode === "in" ? "С возвращением" : mode === "up" ? "Создать аккаунт" : mode === "forgot" ? "Восстановить пароль" : "Новый пароль"}</h2>
+          <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">{mode === "in" ? "С возвращением" : mode === "up" ? "Создать аккаунт" : mode === "forgot" ? "Восстановить пароль" : "Новый пароль"}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{mode === "in" ? "Войди по email и паролю или выбери подключённый сервис." : mode === "up" ? "Заполни данные и подтверди адрес электронной почты." : mode === "forgot" ? "Отправим ссылку для сброса пароля на почту." : "Придумай новый пароль для своего аккаунта."}</p>
 
           <div className="my-6 grid grid-cols-2 rounded-xl bg-[#20271D] p-1 text-sm">
