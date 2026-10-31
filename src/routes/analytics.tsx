@@ -9,7 +9,7 @@ export const Route=createFileRoute("/analytics")({
     {title:"Аналитика места · Beta — ZAPRUDA"},
     {name:"description",content:"Приватная VIP-аналитика рыболовной точки и личного комплекта снастей."},
   ]}),
-  validateSearch:(q:Record<string,unknown>)=>({mark:typeof q.mark==="string"?q.mark:""}),
+  validateSearch:(q:Record<string,unknown>)=>({mark:typeof q["mark"]==="string"?q["mark"]:""}),
   component:SpotAnalytics,
 });
 

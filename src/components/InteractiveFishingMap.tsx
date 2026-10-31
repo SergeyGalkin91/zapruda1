@@ -8,7 +8,7 @@ type YandexApi={ready:(fn:()=>void)=>void;Map:new(node:HTMLElement,opts:{center:
 declare global {interface Window {ymaps?:YandexApi}}
 const getKey=()=>{
  if(typeof window==="undefined")return "";
- const bundled=(import.meta.env.VITE_YANDEX_MAPS_API_KEY||"").trim();
+ const bundled=(import.meta.env["VITE_YANDEX_MAPS_API_KEY"]||"").trim();
  let browserKey="";
  try{browserKey=window.localStorage.getItem("zapruda.yandex_maps_api_key")?.trim()||"";}catch{}
  return bundled||browserKey;
@@ -88,7 +88,7 @@ export function InteractiveFishingMap({marks,selected,onPick,onSelectMark}:Props
     const placemark=new ymaps.Placemark([mark.latitude,mark.longitude],{
       balloonContentHeader:mark.title,
       hintContent:mark.title,
-    },{preset:markStyles[mark.kind]?.preset||markStyles.other.preset});
+    },{preset:markStyles[mark.kind]?.preset||markStyles["other"].preset});
     (placemark as any).events.add("click",()=>markRef.current(mark.id));
     m.geoObjects.add(placemark);
   }

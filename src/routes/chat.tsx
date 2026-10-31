@@ -46,9 +46,9 @@ export const Route = createFileRoute("/chat")({
     { name: "description", content: "Общение рыболовов по странам, областям, городам и тематическим веткам." },
   ] }),
   validateSearch: (query: Record<string, unknown>) => ({
-    place: typeof query.place === "string" ? query.place : "",
-    topic: VALID_TOPICS.includes(query.topic as ChatTopic) ? query.topic as ChatTopic : "general" as ChatTopic,
-    country: typeof query.country === "string" ? query.country : "",
+    place: typeof query["place"] === "string" ? query["place"] : "",
+    topic: VALID_TOPICS.includes(query["topic"] as ChatTopic) ? query["topic"] as ChatTopic : "general" as ChatTopic,
+    country: typeof query["country"] === "string" ? query["country"] : "",
   }),
   component: GeographicChat,
 });

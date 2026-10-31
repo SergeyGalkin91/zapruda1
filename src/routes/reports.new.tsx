@@ -80,10 +80,10 @@ function NewReport() {
             setWindDirection(val("windDirection")); setWindSpeed(val("windSpeed"));
             setTechnique(val("technique")); setFishingMethod(val("fishingMethod"));
             setLures(val("lures")); setStory(val("story")); setSelectedWaterbody(val("selectedWaterbody"));
-            if (Array.isArray(saved.catches)) setCatches(saved.catches.filter((c): c is Catch =>
+            if (Array.isArray(saved["catches"])) setCatches(saved["catches"].filter((c): c is Catch =>
               !!c && typeof c === "object" && typeof c.species === "string" &&
               typeof c.weight === "string" && typeof c.length === "string").slice(0, 20));
-            if (typeof saved.isPublic === "boolean") setIsPublic(saved.isPublic);
+            if (typeof saved["isPublic"] === "boolean") setIsPublic(saved["isPublic"]);
             setDraftRestored(true);
           }
         } catch { /* Invalid drafts never block reporting. */ }

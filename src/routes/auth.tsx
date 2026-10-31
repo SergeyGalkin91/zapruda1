@@ -14,7 +14,7 @@ export const Route = createFileRoute("/auth")({
       { property: "og:description", content: "Войдите или создайте аккаунт рыболова в ZAPRUDA." },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>) => ({ mode: search.mode === "up" ? "up" as const : "in" as const }),
+  validateSearch: (search: Record<string, unknown>) => ({ mode: search["mode"] === "up" ? "up" as const : "in" as const }),
   component: Auth,
 });
 

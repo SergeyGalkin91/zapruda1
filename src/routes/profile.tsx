@@ -251,9 +251,9 @@ function Profile() {
       setError("Не удалось загрузить профиль: " + profileResult.error.message);
     } else if (profileResult.data) {
       const meta = auth.user.user_metadata ?? {};
-      const providerName = [meta.full_name, meta.name, meta.display_name]
+      const providerName = [meta["full_name"], meta["name"], meta["display_name"]]
         .find((value): value is string => typeof value === "string" && value.trim().length > 0)?.trim();
-      const providerAvatar = [meta.avatar_url, meta.picture]
+      const providerAvatar = [meta["avatar_url"], meta["picture"]]
         .find((value): value is string => typeof value === "string" && /^https:\/\//i.test(value)) ?? null;
       const emailPrefix = auth.user.email?.split("@")[0] ?? "";
       const currentName = profileResult.data.display_name?.trim() ?? "";

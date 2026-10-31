@@ -15,7 +15,7 @@ export const Route = createFileRoute("/specializations")({
     {name: "description", content: "Уровни, XP, достижения, задачи и прогресс рыболовных специализаций."},
   ]}),
   validateSearch: (query: Record<string, unknown>) => ({
-    method: typeof query.method === "string" ? query.method : "Спиннинг",
+    method: typeof query["method"] === "string" ? query["method"] : "Спиннинг",
   }),
   component: SpecializationPage,
 });
