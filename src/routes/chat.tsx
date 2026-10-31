@@ -446,9 +446,9 @@ function GeographicChat() {
                   {new Date(message.created_at).toLocaleString("ru-RU",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
                 </time>
               </div>
-              <div className={"zapruda-chat-bubble whitespace-pre-wrap break-words rounded-[20px] border px-4 py-3 text-sm leading-6 "+(message.user_id===uid?"zapruda-chat-own-bubble ":"zapruda-chat-incoming-bubble ")+(message.user_id===uid?"rounded-tr-sm border-[#D7FF35]/30 bg-[#D7FF35]/10 text-white":"rounded-tl-sm border-[#A78BFA]/20 bg-[#191722] text-zinc-100")}>
+              <div className={"zapruda-chat-bubble whitespace-pre-wrap break-words rounded-[20px] border px-4 py-3 text-sm leading-6 "+(message.user_id===uid?"zapruda-chat-own-bubble ":"zapruda-chat-incoming-bubble ")+(message.user_id===uid?"rounded-tr-sm border-[#D7FF35] bg-[#D7FF35] text-[#11170A] shadow-[0_8px_28px_rgba(215,255,53,0.12)]":"rounded-tl-sm border-[#3E345B] bg-[#292140] text-[#F5F2FF]")}>
                 {message.body}
-                {photoUrls[message.id] && <a href={photoUrls[message.id]} target="_blank" rel="noopener noreferrer" className="mt-2 block">
+                {photoUrls[message.id] && <a href={photoUrls[message.id]} target="_blank" rel="noopener noreferrer" className="mt-3 block overflow-hidden rounded-xl border border-black/10">
                   <img src={photoUrls[message.id]} alt="Фото из рыболовного чата" loading="lazy" className="max-h-72 max-w-full rounded-xl object-contain" />
                 </a>}
               </div>
@@ -472,7 +472,7 @@ function GeographicChat() {
             </article>)}
           </div>
           {!loading && !uid && <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#A78BFA]/20 bg-[#211B2D] px-4 py-3 text-sm text-[#DDD6FE]"><span>Чтобы писать в чаты ZAPRUDA, войди в аккаунт.</span><Link to="/auth" search={{ mode: "in" }} className="inline-flex min-h-10 items-center rounded-full bg-[#D7FF35] px-4 text-xs font-black uppercase text-black">Войти</Link></div>}
-          <form className="space-y-3 border-t border-[#A78BFA]/15 bg-[#101211] p-3 sm:p-4" onSubmit={send}>
+          <form className="space-y-3 border-t border-[#383048] bg-[#11131B] p-3 sm:p-4" onSubmit={send}>
             {replyTo && <div className="flex items-start justify-between gap-3 rounded-xl border-l-2 border-[#D7FF35] bg-white/5 px-3 py-2 text-xs text-zinc-300">
               <span className="min-w-0 truncate">Ответ: {replyTo.profiles?.display_name || replyTo.profiles?.username || "Рыболов"} — {replyTo.body.slice(0, 100)}</span>
               <button type="button" onClick={() => setReplyTo(null)} className="shrink-0 font-semibold text-[#D7FF35]">Отмена</button>
@@ -501,10 +501,10 @@ function GeographicChat() {
               {pendingPhotoMessageId && <button type="button" disabled={busy} className="text-xs text-amber-200 underline" onClick={abandonPendingPhoto}>Оставить сообщение без фото</button>}
             </div>
             <div className="flex gap-2">
-              <input className="field min-w-0 flex-1" aria-label="Сообщение для выбранной ветки"
+              <input className="field min-w-0 flex-1 rounded-2xl border-[#39334A] bg-[#1B1B2A] text-[#F6F5FF] placeholder:text-[#8B88A3] focus:border-[#D7FF35]" aria-label="Сообщение для выбранной ветки"
                 placeholder={"Написать в «"+currentTopic.label+"»…"}
                 value={draft} onChange={e => setDraft(e.target.value)} disabled={!uid||busy||chatLoading||!!pendingPhotoMessageId} maxLength={2000}/>
-              <button type="submit" className="btn-primary inline-flex min-h-11 items-center gap-2"
+              <button type="submit" className="btn-primary inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#D7FF35] px-4 font-black text-[#11170A]"
                 disabled={(!draft.trim() && !photo)||!uid||busy||chatLoading}>
                 <Send className="size-4"/> {busy?"Отправляем…":"Отправить"}
               </button>
