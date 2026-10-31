@@ -12,10 +12,23 @@ if (missing.length) {
   console.error("Missing private environment variables:", missing.join(", "));
   process.exit(1);
 }
-const client = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, {
+const key = process.env.SUPABASE_SECRET_KEY.trim();
+if (!/^sb_secret_[A-Za-z0-9_-]+$/.test(key) && !/^eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/.test(key)) {
+  console.error("Supabase admin key invalid: expected sb_secret_... or legacy service_role JWT. No request sent.");
+  process.exit(1);
+}
+for (const field of ["YANDEX_CLIENT_ID", "YANDEX_CLIENT_SECRET"]) {
+  if (/[\\r\\n\\x00-\\x1f]/.test(process.env[field])) {
+    console.error(field + " contains control characters. No request sent.");
+    process.exit(1);
+  }
+}
+const client = createClient(process.env.SUPABASE_URL.trim(), key, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
-const { data, error } = await client.auth.admin.customProviders.createProvider({
+let data, error;
+try {
+  ({ data, error } = await client.auth.admin.customProviders.createProvider({
   provider_type: "oauth2",
   identifier: "custom:yandex",
   name: "Яндекс ID",
@@ -26,7 +39,11 @@ const { data, error } = await client.auth.admin.customProviders.createProvider({
   userinfo_url: "https://login.yandex.ru/info",
   scopes: ["login:email", "login:info"],
   email_optional: false,
-});
+  }));
+} catch (err) {
+  console.error("Provider request failed:", err instanceof Error ? err.message : String(err));
+  process.exit(1);
+}
 if (error) {
   console.error("Yandex provider setup failed:", error.message);
   process.exit(1);
