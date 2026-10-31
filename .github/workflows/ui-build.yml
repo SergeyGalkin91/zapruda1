@@ -122,7 +122,7 @@ jobs:
                       if (!/уловов за сессию:\s*1/i.test(count)) { failures++; console.error(width + 'px /street: local session not restored'); }
                       await page.getByRole('button', {name: /завершить сессию/i}).click();
                       await page.reload({waitUntil:'domcontentloaded'});
-                      if (!await page.getByText('Сессия завершена').isVisible()) { failures++; console.error(width + 'px /street: completion not restored'); }
+                      try { await page.getByText('Сессия завершена', {exact:true}).waitFor({state:'visible', timeout:10000}); } catch { failures++; console.error(width + 'px /street: completion not restored after hydration'); }
                     }
                   }
                   const ok = response && response.status() >= 200 && response.status() < 400 && metrics.main && metrics.navigationVisible && !metrics.errorScreen && browserErrors.length === 0 && metrics.contentWidth <= metrics.viewportWidth + 2;
