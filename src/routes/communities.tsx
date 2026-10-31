@@ -55,7 +55,7 @@ function Communities() {
           Личные контакты, заявки и жалобы не публикуются в публичной Telegram-группе. Для них предусмотрен закрытый чат администрации.
         </p>
       </section>
-      <Link to="/chat" className="z-underground mt-6 flex items-center justify-between p-5 transition hover:border-[#A78BFA]/50">
+      <Link to="/chat" search={{ place: "", topic: "general", country: "" }} className="z-underground mt-6 flex items-center justify-between p-5 transition hover:border-[#A78BFA]/50">
         <div>
           <p className="font-display font-bold">Весь ZAPRUDA</p>
           <p className="text-sm text-muted-foreground">Общий чат и переход к странам, областям, городам и тематическим веткам</p>

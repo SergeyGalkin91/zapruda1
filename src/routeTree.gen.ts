@@ -10,27 +10,45 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AssistantRouteImport } from './routes/assistant'
+import { Route as AtlasRouteImport } from './routes/atlas'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CommunitiesRouteImport } from './routes/communities'
+import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as FinanceRouteImport } from './routes/finance'
+import { Route as GuidesRouteImport } from './routes/guides'
+import { Route as MarketRouteImport } from './routes/market'
+import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as ModerationRouteImport } from './routes/moderation'
+import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SpearfishingRouteImport } from './routes/spearfishing'
+import { Route as SpecializationsRouteImport } from './routes/specializations'
+import { Route as StreetRouteImport } from './routes/street'
+import { Route as AdminFeedbackRouteImport } from './routes/admin.feedback'
 import { Route as ReportsNewRouteImport } from './routes/reports.new'
 
-const FeedbackRoute = FeedbackRouteImport.update({
-  id: '/feedback',
-  path: '/feedback',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssistantRoute = AssistantRouteImport.update({
   id: '/assistant',
   path: '/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtlasRoute = AtlasRouteImport.update({
+  id: '/atlas',
+  path: '/atlas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -48,9 +66,69 @@ const CommunitiesRoute = CommunitiesRouteImport.update({
   path: '/communities',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceRoute = FinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesRoute = GuidesRouteImport.update({
+  id: '/guides',
+  path: '/guides',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketRoute = MarketRouteImport.update({
+  id: '/market',
+  path: '/market',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModerationRoute = ModerationRouteImport.update({
+  id: '/moderation',
+  path: '/moderation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnersRoute = PartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpearfishingRoute = SpearfishingRouteImport.update({
+  id: '/spearfishing',
+  path: '/spearfishing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpecializationsRoute = SpecializationsRouteImport.update({
+  id: '/specializations',
+  path: '/specializations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StreetRoute = StreetRouteImport.update({
+  id: '/street',
+  path: '/street',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFeedbackRoute = AdminFeedbackRouteImport.update({
+  id: '/admin/feedback',
+  path: '/admin/feedback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsNewRoute = ReportsNewRouteImport.update({
@@ -60,89 +138,173 @@ const ReportsNewRoute = ReportsNewRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/feedback': typeof FeedbackRoute
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/assistant': typeof AssistantRoute
+  '/atlas': typeof AtlasRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/communities': typeof CommunitiesRoute
+  '/feedback': typeof FeedbackRoute
+  '/finance': typeof FinanceRoute
+  '/guides': typeof GuidesRoute
+  '/market': typeof MarketRoute
+  '/messages': typeof MessagesRoute
+  '/moderation': typeof ModerationRoute
+  '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
+  '/spearfishing': typeof SpearfishingRoute
+  '/specializations': typeof SpecializationsRoute
+  '/street': typeof StreetRoute
+  '/admin/feedback': typeof AdminFeedbackRoute
   '/reports/new': typeof ReportsNewRoute
 }
 export interface FileRoutesByTo {
-  '/feedback': typeof FeedbackRoute
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/assistant': typeof AssistantRoute
+  '/atlas': typeof AtlasRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/communities': typeof CommunitiesRoute
+  '/feedback': typeof FeedbackRoute
+  '/finance': typeof FinanceRoute
+  '/guides': typeof GuidesRoute
+  '/market': typeof MarketRoute
+  '/messages': typeof MessagesRoute
+  '/moderation': typeof ModerationRoute
+  '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
+  '/spearfishing': typeof SpearfishingRoute
+  '/specializations': typeof SpecializationsRoute
+  '/street': typeof StreetRoute
+  '/admin/feedback': typeof AdminFeedbackRoute
   '/reports/new': typeof ReportsNewRoute
 }
 export interface FileRoutesById {
-  '/feedback': typeof FeedbackRoute
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/assistant': typeof AssistantRoute
+  '/atlas': typeof AtlasRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/communities': typeof CommunitiesRoute
+  '/feedback': typeof FeedbackRoute
+  '/finance': typeof FinanceRoute
+  '/guides': typeof GuidesRoute
+  '/market': typeof MarketRoute
+  '/messages': typeof MessagesRoute
+  '/moderation': typeof ModerationRoute
+  '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
+  '/spearfishing': typeof SpearfishingRoute
+  '/specializations': typeof SpecializationsRoute
+  '/street': typeof StreetRoute
+  '/admin/feedback': typeof AdminFeedbackRoute
   '/reports/new': typeof ReportsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/feedback'
     | '/'
+    | '/analytics'
     | '/assistant'
+    | '/atlas'
     | '/auth'
     | '/chat'
     | '/communities'
+    | '/feedback'
+    | '/finance'
+    | '/guides'
+    | '/market'
+    | '/messages'
+    | '/moderation'
+    | '/partners'
     | '/profile'
+    | '/settings'
+    | '/spearfishing'
+    | '/specializations'
+    | '/street'
+    | '/admin/feedback'
     | '/reports/new'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/feedback'
     | '/'
+    | '/analytics'
     | '/assistant'
+    | '/atlas'
     | '/auth'
     | '/chat'
     | '/communities'
+    | '/feedback'
+    | '/finance'
+    | '/guides'
+    | '/market'
+    | '/messages'
+    | '/moderation'
+    | '/partners'
     | '/profile'
+    | '/settings'
+    | '/spearfishing'
+    | '/specializations'
+    | '/street'
+    | '/admin/feedback'
     | '/reports/new'
   id:
-    | '/feedback'
     | '__root__'
     | '/'
+    | '/analytics'
     | '/assistant'
+    | '/atlas'
     | '/auth'
     | '/chat'
     | '/communities'
+    | '/feedback'
+    | '/finance'
+    | '/guides'
+    | '/market'
+    | '/messages'
+    | '/moderation'
+    | '/partners'
     | '/profile'
+    | '/settings'
+    | '/spearfishing'
+    | '/specializations'
+    | '/street'
+    | '/admin/feedback'
     | '/reports/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  FeedbackRoute: typeof FeedbackRoute
   IndexRoute: typeof IndexRoute
+  AnalyticsRoute: typeof AnalyticsRoute
   AssistantRoute: typeof AssistantRoute
+  AtlasRoute: typeof AtlasRoute
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
   CommunitiesRoute: typeof CommunitiesRoute
+  FeedbackRoute: typeof FeedbackRoute
+  FinanceRoute: typeof FinanceRoute
+  GuidesRoute: typeof GuidesRoute
+  MarketRoute: typeof MarketRoute
+  MessagesRoute: typeof MessagesRoute
+  ModerationRoute: typeof ModerationRoute
+  PartnersRoute: typeof PartnersRoute
   ProfileRoute: typeof ProfileRoute
+  SettingsRoute: typeof SettingsRoute
+  SpearfishingRoute: typeof SpearfishingRoute
+  SpecializationsRoute: typeof SpecializationsRoute
+  StreetRoute: typeof StreetRoute
+  AdminFeedbackRoute: typeof AdminFeedbackRoute
   ReportsNewRoute: typeof ReportsNewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/feedback': {
-      id: '/feedback'
-      path: '/feedback'
-      fullPath: '/feedback'
-      preLoaderRoute: typeof FeedbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -150,11 +312,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assistant': {
       id: '/assistant'
       path: '/assistant'
       fullPath: '/assistant'
       preLoaderRoute: typeof AssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atlas': {
+      id: '/atlas'
+      path: '/atlas'
+      fullPath: '/atlas'
+      preLoaderRoute: typeof AtlasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -178,11 +354,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/finance': {
+      id: '/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof FinanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides': {
+      id: '/guides'
+      path: '/guides'
+      fullPath: '/guides'
+      preLoaderRoute: typeof GuidesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market': {
+      id: '/market'
+      path: '/market'
+      fullPath: '/market'
+      preLoaderRoute: typeof MarketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moderation': {
+      id: '/moderation'
+      path: '/moderation'
+      fullPath: '/moderation'
+      preLoaderRoute: typeof ModerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partners': {
+      id: '/partners'
+      path: '/partners'
+      fullPath: '/partners'
+      preLoaderRoute: typeof PartnersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/spearfishing': {
+      id: '/spearfishing'
+      path: '/spearfishing'
+      fullPath: '/spearfishing'
+      preLoaderRoute: typeof SpearfishingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/specializations': {
+      id: '/specializations'
+      path: '/specializations'
+      fullPath: '/specializations'
+      preLoaderRoute: typeof SpecializationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/street': {
+      id: '/street'
+      path: '/street'
+      fullPath: '/street'
+      preLoaderRoute: typeof StreetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/feedback': {
+      id: '/admin/feedback'
+      path: '/admin/feedback'
+      fullPath: '/admin/feedback'
+      preLoaderRoute: typeof AdminFeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports/new': {
@@ -196,13 +456,26 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  FeedbackRoute: FeedbackRoute,
   IndexRoute: IndexRoute,
+  AnalyticsRoute: AnalyticsRoute,
   AssistantRoute: AssistantRoute,
+  AtlasRoute: AtlasRoute,
   AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
   CommunitiesRoute: CommunitiesRoute,
+  FeedbackRoute: FeedbackRoute,
+  FinanceRoute: FinanceRoute,
+  GuidesRoute: GuidesRoute,
+  MarketRoute: MarketRoute,
+  MessagesRoute: MessagesRoute,
+  ModerationRoute: ModerationRoute,
+  PartnersRoute: PartnersRoute,
   ProfileRoute: ProfileRoute,
+  SettingsRoute: SettingsRoute,
+  SpearfishingRoute: SpearfishingRoute,
+  SpecializationsRoute: SpecializationsRoute,
+  StreetRoute: StreetRoute,
+  AdminFeedbackRoute: AdminFeedbackRoute,
   ReportsNewRoute: ReportsNewRoute,
 }
 export const routeTree = rootRouteImport
