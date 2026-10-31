@@ -292,15 +292,20 @@ function GeographicChat() {
   }
 
   return <Shell>
-    {!threadOpen && <header className="mb-5 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#1D2617] via-[#101410] to-[#080A08] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] sm:p-8">
-      <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#D7FF35]">
-        <Globe2 className="size-4" /> ZAPRUDA / ЧАТЫ СООБЩЕСТВА
-      </p>
-      <h1 className="mt-3 text-[clamp(2rem,5vw,3.7rem)] font-black uppercase leading-[0.98] tracking-[-0.05em] text-white">СВОИ НА СВЯЗИ</h1>
-      <p className="mt-2 text-sm leading-6 text-zinc-300">
-        Выбирай свою страну, область и город. На каждом уровне свои ветки обсуждений.
-        Общий чат всей ZAPRUDA остаётся отдельно — старые сообщения не пропали.
-      </p>
+    {!threadOpen && <header className="mb-4 rounded-[26px] border border-[#252A38] bg-[#070B10] px-4 pb-5 pt-5 sm:px-7 sm:pt-7">
+      <div className="mb-7 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-2xl font-black italic leading-none tracking-[-0.075em] text-[#D7FF35] sm:text-3xl">ZAPRUDA <span aria-hidden="true">♧</span></p>
+          <p className="mt-1 pl-5 text-[9px] font-bold uppercase tracking-[0.48em] text-[#D7FF35]">COMMUNITY</p>
+        </div>
+        <Link to="/reports/new" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/75 text-2xl font-light text-white hover:border-[#D7FF35] hover:text-[#D7FF35]" aria-label="Создать отчёт"><Plus className="size-6" /></Link>
+      </div>
+      <h1 className="text-[clamp(1.7rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
+      <div className="mt-6 grid grid-cols-[0.8fr_1.2fr_1.5fr] gap-2" role="group" aria-label="Фильтр чатов">
+        <span className="flex min-h-11 items-center justify-center rounded-2xl bg-[#D7FF35] px-2 text-sm font-black text-[#10140A]" aria-current="true">Все</span>
+        <span className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9]" title="Фильтр появится после реализации учёта участия в чатах">Мои чаты</span>
+        <span className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9]" title="Появится после подключения учёта прочтений">Непрочитанные</span>
+      </div>
     </header>}
 
     {loading && <p className="mb-5 text-sm text-zinc-400">Загружаем разделы чатов…</p>}
