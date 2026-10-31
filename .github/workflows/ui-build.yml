@@ -2,7 +2,7 @@ name: ZAPRUDA Frontend Build
 
 on:
   push:
-    branches: [main]
+    branches: [main, integration/p0-admin-beta-rc1]
   pull_request:
     branches: [main]
   workflow_dispatch:
