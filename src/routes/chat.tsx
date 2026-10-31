@@ -66,7 +66,7 @@ function GeographicChat() {
   const [error, setError] = useState("");
   const [chatError, setChatError] = useState("");
   const [refreshIndex, setRefreshIndex] = useState(0);
-  const [threadOpen, setThreadOpen] = useState(Boolean(search.place));
+  const threadOpen = Boolean(search.place);
 
   useEffect(() => {
     let alive = true;
@@ -120,12 +120,17 @@ function GeographicChat() {
       return;
     }
     setDraft(""); setPhoto(null); setPendingPhotoMessageId(null); setReplyTo(null); setChatError("");
-    setThreadOpen(true);
     void navigate({ to: "/chat", search: { place: id, topic: newTopic, country: "" } });
   }
 
+  function closeThread() {
+    if (pendingPhotoMessageId) { setChatError("Сначала заверши или отмени загрузку фото."); return; }
+    setDraft(""); setPhoto(null); setReplyTo(null); setChatError("");
+    void navigate({ to: "/chat", search: { place: "", topic, country: "" } });
+  }
+
   useEffect(() => {
-    if (!uid || !selectedPlace) return;
+    if (!uid || !selectedPlace || !threadOpen) return;
     let alive = true;
     setMessages([]);
     setReactions([]);
@@ -177,7 +182,7 @@ function GeographicChat() {
       window.removeEventListener("focus", onFocus);
       void supabase.removeChannel(channel);
     };
-  }, [uid, selectedPlace?.id, topic, refreshIndex]);
+  }, [uid, selectedPlace?.id, topic, refreshIndex, threadOpen]);
 
   async function createPlace(e: FormEvent<HTMLFormElement>, level: "region" | "city") {
     e.preventDefault();
@@ -396,7 +401,7 @@ function GeographicChat() {
       </aside>}
 
       {threadOpen && <div className="min-w-0 space-y-3 rounded-[22px] lg:col-span-2">
-        <button type="button" onClick={() => { if (pendingPhotoMessageId) { setChatError("Сначала заверши или отмени загрузку фото."); return; } setThreadOpen(false); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-[#10131A] px-4 text-sm font-bold text-white hover:border-[#D7FF35]/60" aria-label="Вернуться к списку чатов">← Все чаты</button>
+        <button type="button" onClick={closeThread} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-[#10131A] px-4 text-sm font-bold text-white hover:border-[#D7FF35]/60" aria-label="Вернуться к списку чатов">← Все чаты</button>
         <nav aria-label="Путь к чату" className="flex flex-wrap items-center gap-1 text-xs">
           {crumbs.map((p,i)=><span key={p.id} className="inline-flex items-center gap-1">
             {i>0&&<ChevronRight className="size-3.5 text-zinc-500" />}
