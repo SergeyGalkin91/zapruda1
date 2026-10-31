@@ -72,7 +72,7 @@ jobs:
           const { chromium } = require('playwright');
           (async () => {
             const browser = await chromium.launch({headless:true});
-            const routes = ['/', '/auth', '/communities', '/partners', '/chat', '/profile', '/reports/new', '/assistant', '/settings', '/feedback', '/atlas'];
+            const routes = ['/', '/auth', '/communities', '/partners', '/chat', '/profile', '/reports/new', '/assistant', '/settings', '/feedback', '/atlas', '/street'];
             const widths = [320, 375, 430];
             let failures = 0;
             for (const width of widths) {
@@ -96,7 +96,36 @@ jobs:
                       errorScreen: Boolean(document.querySelector('h1')?.textContent?.includes("This page didn't load"))
                     };
                   });
-                  const ok = response && response.status() >= 200 && response.status() < 400 && metrics.main && metrics.navigationVisible && !metrics.errorScreen && browserErrors.length === 0 && metrics.contentWidth <= metrics.viewportWidth + 2;
+                  // Read-only core journey smoke checks: never write to production Supabase.
+                  if (route === '/auth') {
+                    const text = await page.locator('body').innerText();
+                    if (!/войти|вход|регистрац/i.test(text)) {
+                      failures++; console.error(width + 'px /auth: missing login/registration entry');
+                    }
+                  }
+                  if (route === '/reports/new') {
+                    const text = await page.locator('body').innerText();
+                    if (!/новый отчёт/i.test(text) || !/название отчёта/i.test(text)) {
+                      failures++; console.error(width + 'px /reports/new: report form not rendered');
+                    }
+                  }
+                  if (route === '/street') {
+                    const start = page.getByRole('button', {name: /начать сессию/i});
+                    if (!await start.isVisible()) { failures++; console.error(width + 'px /street: start action missing'); }
+                    else {
+                      await start.click();
+                      await page.getByRole('textbox', {name: /вид пойманной рыбы/i}).fill('Окунь');
+                      await page.getByRole('button', {name: /добавить улов/i}).click();
+                      await page.reload({waitUntil:'domcontentloaded'});
+                      await page.getByText('Окунь', {exact:false}).first().waitFor({timeout:10000});
+                      const count = await page.locator('body').innerText();
+                      if (!/уловов за сессию:\\s*1/i.test(count)) { failures++; console.error(width + 'px /street: local session not restored'); }
+                      await page.getByRole('button', {name: /завершить сессию/i}).click();
+                      await page.reload({waitUntil:'domcontentloaded'});
+                      if (!await page.getByText('Сессия завершена').isVisible()) { failures++; console.error(width + 'px /street: completion not restored'); }
+                    }
+                  }
+                                    const ok = response && response.status() >= 200 && response.status() < 400 && metrics.main && metrics.navigationVisible && !metrics.errorScreen && browserErrors.length === 0 && metrics.contentWidth <= metrics.viewportWidth + 2;
                   console.log(width + 'px ' + route + ': ' + (ok ? 'OK' : 'FAIL') + ' status=' + (response?.status() ?? 'none') + ' ' + JSON.stringify(metrics));
                   if (browserErrors.length) console.error('Browser JS errors: ' + browserErrors.join(' | '));
                   await page.screenshot({path: 'mobile-check/' + width + '-' + (route === '/' ? 'home' : route.slice(1).replaceAll('/', '-')) + '.png', fullPage: true});
