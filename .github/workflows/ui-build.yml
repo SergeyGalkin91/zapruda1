@@ -68,6 +68,8 @@ jobs:
               const context = await browser.newContext({viewport: {width, height: 800}, isMobile: true, hasTouch: true});
               for (const route of routes) {
                 const page = await context.newPage();
+                const browserErrors = [];
+                page.on('pageerror', error => browserErrors.push(error.message));
                 try {
                   const response = await page.goto('http://127.0.0.1:3000' + route, {waitUntil:'domcontentloaded', timeout:20000});
                   await page.waitForTimeout(600);
@@ -82,8 +84,9 @@ jobs:
                       errorScreen: Boolean(document.querySelector('h1')?.textContent?.includes("This page didn't load"))
                     };
                   });
-                  const ok = response && response.status() < 500 && metrics.main && metrics.navigationVisible && !metrics.errorScreen && metrics.contentWidth <= metrics.viewportWidth + 2;
+                  const ok = response && response.status() >= 200 && response.status() < 400 && metrics.main && metrics.navigationVisible && !metrics.errorScreen && browserErrors.length === 0 && metrics.contentWidth <= metrics.viewportWidth + 2;
                   console.log(width + 'px ' + route + ': ' + (ok ? 'OK' : 'FAIL') + ' status=' + (response?.status() ?? 'none') + ' ' + JSON.stringify(metrics));
+                  if (browserErrors.length) console.error('Browser JS errors: ' + browserErrors.join(' | '));
                   await page.screenshot({path: 'mobile-check/' + width + '-' + (route === '/' ? 'home' : route.slice(1)) + '.png', fullPage: true});
                   if (!ok) failures++;
                 } catch (error) {
