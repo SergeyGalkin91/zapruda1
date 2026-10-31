@@ -95,7 +95,7 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
   const openUrl = selected ? `https://yandex.ru/maps/?ll=${encodeURIComponent(coords)}&z=14&pt=${encodeURIComponent(coords + ",pm2rdm")}` : null;
 
   return (
-    <section aria-labelledby="private-fishing-marks" className="mb-7 rounded-[28px] border border-white/10 bg-[#0D110E] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] sm:p-7">
+    <section aria-labelledby="private-fishing-marks" className="z-underground mb-7 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] sm:p-7">
       <div className="flex items-start gap-3">
         <MapPin className="mt-1 size-6 shrink-0 text-[#D7FF35]" aria-hidden="true" />
         <div>
