@@ -324,15 +324,15 @@ function Profile() {
 
   return (
     <Shell>
-      <section className="relative mb-6 overflow-hidden rounded-3xl border border-[#D7FF35]/20 bg-gradient-to-r from-[#1B2416] via-[#121712] to-[#0D100C] p-5 sm:p-7">
+      <section className="relative mb-6 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#1E251A] via-[#101310] to-[#070908] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:p-8">
         <div className="pointer-events-none absolute -right-16 -top-20 size-60 rounded-full bg-[#D7FF35]/10 blur-3xl" />
         <p className="relative text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">ZAPRUDA / Профиль рыболова</p>
         <div className="relative mt-4 flex flex-wrap items-center gap-4">
           {avatarUrl
-            ? <img src={avatarUrl} alt="" className="size-20 rounded-full border-2 border-[#D7FF35]/40 object-cover" />
+            ? <img src={avatarUrl} alt="" className="size-24 rounded-full border-[3px] border-[#D7FF35]/70 object-cover shadow-[0_0_28px_rgba(215,255,53,0.13)]" />
             : <div className="flex size-20 items-center justify-center rounded-full border border-[#D7FF35]/35 bg-[#D7FF35]/10"><UserRound className="size-9 text-[#D7FF35]" /></div>}
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-extrabold text-white sm:text-3xl">{displayName || username || "Мой рыболовный профиль"}</h1>
+            <h1 className="text-[clamp(1.9rem,5vw,3.3rem)] font-black uppercase leading-[0.98] tracking-[-0.055em] text-white">{displayName || username || "Мой рыболовный профиль"}</h1>
             <p className="mt-1 text-sm text-[#A6B1A0]">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
             <p className="mt-2 text-xs text-zinc-400">{bio || "Расскажи, где и на что любишь ловить."}</p>
           </div>
@@ -371,7 +371,7 @@ function Profile() {
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">01 / Анкета</p>
-                <h2 className="mt-2 text-xl font-extrabold sm:text-2xl">Твой рыболовный профиль</h2>
+                <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.035em] sm:text-3xl">Твой рыболовный профиль</h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">Именно эти данные используются для персонального подбора мест: город, транспорт, способы ловли, приманки и снасти.</p>
               </div>
               <div className="flex flex-wrap gap-2">
