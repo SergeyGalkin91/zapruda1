@@ -216,7 +216,7 @@
 .zapruda-chat-window .zapruda-chat-bubble {
   line-height: 1.55;
 }
-.zapruda-chat-window .zapruda-chat-bubble.border-\\[\\#D7FF35\\]\\/30 {
+.zapruda-chat-window .zapruda-chat-bubble.border-\[\#D7FF35\]\/30 {
   border-color: rgba(215,255,53,.3);
   background-color: rgba(215,255,53,.1);
 }
