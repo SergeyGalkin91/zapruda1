@@ -3,9 +3,20 @@
 Design version: v0.6.0-admin-rc.1. Owner approval: 2026-10-31.
 Status: visually approved; not a production software release or Git tag.
 
+
+## FINAL OWNER VISUAL APPROVAL — 2026-11-01 (OVERRIDES ALL PREVIOUS MOODBOARDS)
+The ONLY approved look is the five-phone hero image generated in the current ZAPRUDA project conversation, named **zapruda_community_неоновый_рыбацкий_интерфейс.png**. It depicts, left to right: login over sunset fishing landscape; «СВОИ НА СВЯЗИ» room list; «СПОТЫ И ВОДА» violet/lime room conversation; admin dashboard with sunset fishing hero; finance dashboard. **Use this exact image as the visual target for all subsequent app screens**. Preserve the following appearance across login, feed, communities, chat, street, profile, admin, applications and finance:
+- near-black graphite/blue-black #070B10 and #090B0C; cool outlined cards, rounded corners, deep layered panels;
+- vivid electric lime #D7FF35 for brand, active navigation, primary buttons and outgoing messages;
+- muted lilac #A99AD9 and deep purple for secondary type, unread counters, incoming messages, metadata;
+- angular italic neon ZAPRUDA wordmark, outlined fish mark, small tracked COMMUNITY;
+- editorial white Russian headings, realistic fishing photography, compact high-density mobile interface;
+- bottom public nav Лента / Комьюнити / + / Выезды / Чат; admin tab for authorized staff only.
+Any earlier HTML demo, generic image-search examples, white/purple financial app screenshots, and alternate design mockups are **REJECTED** and must not be referenced as design. Existing older PDFs/images may inform functionality only when consistent with the five-phone image. Do not invent user data or receipts when implementing visual elements. The five-phone graphic itself is a reference/mockup, not proof that application screens have been implemented. Do not silently change this lock without new explicit owner approval.
+
 ## Reference priority
-1. Latest owner-approved three-mobile-screen admin image from 2026-10-31 (admin dashboard, club requests, finance). This supersedes previous collage and generic admin theme.
-2. Owner-supplied «СВОИ НА СВЯЗИ» mobile mockups (chat list and rooms).
+1. FINAL five-phone ZAPRUDA neon fishing interface image approved 2026-11-01; overrides the previous admin triptych.
+2. The earlier owner-supplied chat and admin mockups only as supporting functional specifications, when consistent with reference #1.
 3. Owner-supplied «ГЛАВНОЕ МЕНЮ ДИЗАЙН», «ОСНОВА приложения», auth, admin, streetfishing references.
 4. Actual application code determines behavior and factual data, not a reason to replace the visuals.
 
