@@ -302,11 +302,11 @@ function Partners() {
 
   return (
     <Shell>
-      <section className="relative overflow-hidden rounded-3xl border border-lime-300/20 bg-[#10140e] px-5 py-8 sm:px-8 sm:py-11">
+      <section className="z-underground relative overflow-hidden px-5 py-8 sm:px-8 sm:py-11">
         <div className="pointer-events-none absolute -right-10 -top-24 size-72 rounded-full bg-lime-300/[0.09] blur-3xl" />
         <div className="relative">
           <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-lime-300">ZAPRUDA / FISHING MATCH</p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-5xl">Рыбалка лучше <span className={lime}>вместе.</span></h1>
+          <h1 className="mt-3 text-4xl font-black uppercase tracking-[-0.05em] text-white sm:text-6xl">Рыбалка лучше <span className={lime}>вместе.</span></h1>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-300 sm:text-base">
             Найди напарника на выезд. Смотри, куда и когда собираются, сколько мест в машине
             и сколько стоит участие. Откликайся — организатор решает, кого взять.
@@ -322,7 +322,7 @@ function Partners() {
       </section>
 
       {showForm && (
-        <form onSubmit={submitTrip} className="mt-5 space-y-5 rounded-2xl border border-lime-300/25 bg-[#171b13] p-5 sm:p-6">
+        <form onSubmit={submitTrip} className="mt-5 space-y-5 rounded-[24px] border border-[#A78BFA]/25 bg-[#17151D] p-5 sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-xl font-bold">Новый выезд</h2>
             <button type="button" onClick={() => setShowForm(false)} aria-label="Закрыть форму" className={ghostButton}><X className="size-4" /></button>
@@ -364,7 +364,7 @@ function Partners() {
         ))}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-[#151812] p-3">
+      <div className="mt-4 flex flex-wrap items-center gap-2 rounded-[22px] border border-white/10 bg-[#101314] p-3">
         <SlidersHorizontal className="ml-1 size-4 text-lime-300" aria-hidden="true" />
         <input className="field min-w-0 flex-1 sm:max-w-56" aria-label="Поиск по городу и водоёму" value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} placeholder="Город или водоём…" />
         <select className="field w-full sm:w-auto" aria-label="Формат выезда" value={kindFilter} onChange={(e) => setKindFilter(e.target.value)}>
