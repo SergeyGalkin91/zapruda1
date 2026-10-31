@@ -324,7 +324,7 @@ function NewReport() {
       {savedReportId && <div role="status" className="mb-4 rounded-xl border border-[#A78BFA]/40 bg-[#A78BFA]/10 p-4 text-sm text-zinc-100">
         <p className="font-bold text-[#D7FF35]">Отчёт сохранён</p>
         <p className="mt-1">Загружено фотографий: {uploadedCount} из {photos.length}. Если загрузка прервалась, повтори её — второй отчёт не создаётся.</p>
-      </div>
+      </div>}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 px-4 py-3 text-xs text-zinc-300">
         <span>{draftRestored ? "Черновик восстановлен на этом устройстве. Фотографии нужно добавить снова." : "Текст отчёта автоматически сохраняется на этом устройстве после входа. Фото не сохраняются."}</span>
         {draftRestored && !savedReportId && <button type="button" onClick={clearLocalDraft} className="font-bold text-[#D7FF35] hover:underline">Очистить черновик</button>}
