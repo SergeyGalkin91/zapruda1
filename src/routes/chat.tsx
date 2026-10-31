@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { ChevronRight, Globe2, MapPin, MessageCircle, Plus, RefreshCw, Reply, Send, Users } from "lucide-react";
+import { ChevronRight, Globe2, MapPin, MessageCircle, Plus, Search, RefreshCw, Reply, Send, Users } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,6 +67,8 @@ function GeographicChat() {
   const [error, setError] = useState("");
   const [chatError, setChatError] = useState("");
   const [refreshIndex, setRefreshIndex] = useState(0);
+  const [roomSearchOpen, setRoomSearchOpen] = useState(false);
+  const [roomSearch, setRoomSearch] = useState("");
   const threadOpen = Boolean(search.place);
 
   useEffect(() => {
@@ -296,8 +298,14 @@ function GeographicChat() {
     {!threadOpen && <header className="mb-4 rounded-[26px] border border-[#252A38] bg-[#070B10] px-4 pb-5 pt-5 sm:px-7 sm:pt-7">
       <div className="mb-7 flex items-center justify-between gap-3">
         <div className="min-w-0 scale-110 origin-left"><Wordmark /></div>
-        <Link to="/reports/new" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/75 text-2xl font-light text-white hover:border-[#D7FF35] hover:text-[#D7FF35]" aria-label="Создать отчёт"><Plus className="size-6" /></Link>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => { setRoomSearchOpen(open => !open); setRoomSearch(""); }} aria-expanded={roomSearchOpen} aria-label="Поиск тематических чатов" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-white hover:text-[#D7FF35]"><Search className="size-6" /></button>
+          <Link to="/reports/new" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/75 text-2xl font-light text-white hover:border-[#D7FF35] hover:text-[#D7FF35]" aria-label="Создать отчёт"><Plus className="size-6" /></Link>
+        </div>
       </div>
+      {roomSearchOpen && <label className="mb-4 block text-xs text-zinc-300">Найти комнату
+        <input autoFocus className="field mt-1 w-full" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} maxLength={80} placeholder="Трофеи, вода, напарники…" />
+      </label>}
       <h1 className="text-[clamp(1.7rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
       <div className="mt-6 grid grid-cols-[0.8fr_1.2fr_1.5fr] gap-2" role="group" aria-label="Фильтр чатов">
         <span className="flex min-h-11 items-center justify-center rounded-2xl bg-[#D7FF35] px-2 text-sm font-black text-[#10140A]" aria-current="true">Все</span>
@@ -316,7 +324,7 @@ function GeographicChat() {
       {!threadOpen && <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#A99AD9]">Тематические комнаты · выбери обсуждение</p>
         <div className="overflow-hidden rounded-[20px] border border-[#23283A] bg-[#070B10] px-3 sm:px-5">
-          {TOPICS.map((t) => (
+          {TOPICS.filter(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))).map((t) => (
             <button key={t.key} type="button" onClick={() => go(placeId, t.key)}
               aria-pressed={topic === t.key}
               className={"flex w-full min-h-[98px] items-center gap-4 border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
