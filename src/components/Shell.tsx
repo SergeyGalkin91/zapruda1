@@ -184,9 +184,9 @@ export function Shell({ children }: { children: ReactNode }) {
       <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080A09]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden">
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
           {mobileNav.map(({ to, label, Icon }) => {
-            const target = isAdmin && to === "/chat" ? "/admin" : to;
-            const shownLabel = isAdmin && to === "/chat" ? "Админ" : label;
-            const ShownIcon = isAdmin && to === "/chat" ? ShieldCheck : Icon;
+            const target = to;
+            const shownLabel = label;
+            const ShownIcon = Icon;
             return (
             <Link key={target}
               to={target}
@@ -202,6 +202,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </Link>
           ); })}
         </div>
+        {isAdmin && <div className="mx-auto max-w-xl px-3 pb-2"><Link to="/admin" className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#A99AD9]/40 bg-[#171527] text-xs font-black text-[#D7FF35]"><ShieldCheck className="size-4" /> Админ-панель</Link></div>}
       </nav>
     </div>
   );
