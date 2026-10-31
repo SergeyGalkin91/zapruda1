@@ -316,16 +316,13 @@ function GeographicChat() {
 
     {uid && <div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
       {!threadOpen && <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-black uppercase tracking-tight text-white">Свои на связи</h2>
-          <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-black tracking-widest text-[#D7FF35]">ZAPRUDA</span>
-        </div>
-        <div className="overflow-hidden rounded-[24px] border border-[#23283A] bg-[#090D13] px-3 sm:grid sm:grid-cols-2 sm:gap-3 sm:border-0 sm:bg-transparent sm:p-0 xl:grid-cols-3">
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#A99AD9]">Тематические комнаты · выбери обсуждение</p>
+        <div className="overflow-hidden rounded-[20px] border border-[#23283A] bg-[#070B10] px-3 sm:px-5">
           {TOPICS.map((t) => (
             <button key={t.key} type="button" onClick={() => go(placeId, t.key)}
               aria-pressed={topic === t.key}
-              className={"flex w-full min-h-[88px] items-center gap-3 border-b border-[#202535] p-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 sm:rounded-2xl sm:border " +
-                (topic === t.key ? "bg-[#171528] sm:border-[#D7FF35]/60" : "bg-transparent sm:border-[#34304D] sm:bg-[#0B1014]")}>
+              className={"flex w-full min-h-[98px] items-center gap-4 border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
+                (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")}>
               <span className="flex size-[66px] shrink-0 items-center justify-center rounded-2xl border border-[#34304D] bg-[#131925] text-3xl" aria-hidden="true">{t.icon}</span>
               <span className="min-w-0">
                 <span className="block text-base font-black text-white">{t.label}</span>
