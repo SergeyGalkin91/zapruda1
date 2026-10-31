@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { ChevronRight, Globe2, MapPin, MessageCircle, Plus, RefreshCw, Reply, Send, Users } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/lib/geo";
 import { chatPhotoError, chatPhotoPath, shouldCreateChatMessage } from "@/lib/chat-media";
@@ -294,10 +295,7 @@ function GeographicChat() {
   return <Shell>
     {!threadOpen && <header className="mb-4 rounded-[26px] border border-[#252A38] bg-[#070B10] px-4 pb-5 pt-5 sm:px-7 sm:pt-7">
       <div className="mb-7 flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-2xl font-black italic leading-none tracking-[-0.075em] text-[#D7FF35] sm:text-3xl">ZAPRUDA <span aria-hidden="true">♧</span></p>
-          <p className="mt-1 pl-5 text-[9px] font-bold uppercase tracking-[0.48em] text-[#D7FF35]">COMMUNITY</p>
-        </div>
+        <div className="min-w-0 scale-110 origin-left"><Wordmark /></div>
         <Link to="/reports/new" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/75 text-2xl font-light text-white hover:border-[#D7FF35] hover:text-[#D7FF35]" aria-label="Создать отчёт"><Plus className="size-6" /></Link>
       </div>
       <h1 className="text-[clamp(1.7rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
@@ -323,7 +321,14 @@ function GeographicChat() {
               aria-pressed={topic === t.key}
               className={"flex w-full min-h-[98px] items-center gap-4 border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
                 (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")}>
-              <span className="flex size-[66px] shrink-0 items-center justify-center rounded-2xl border border-[#34304D] bg-[#131925] text-3xl" aria-hidden="true">{t.icon}</span>
+              <span className={"relative flex size-[68px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34304D] text-3xl shadow-[inset_0_-18px_30px_rgba(0,0,0,0.45)] " + ({
+                general:"bg-gradient-to-br from-[#253544] via-[#151D28] to-[#090E15]",
+                reports:"bg-gradient-to-br from-[#526442] via-[#25392C] to-[#091410]",
+                waters:"bg-gradient-to-br from-[#254E63] via-[#1A364D] to-[#08121D]",
+                partners:"bg-gradient-to-br from-[#735336] via-[#382E2C] to-[#10131B]",
+                gear:"bg-gradient-to-br from-[#524C47] via-[#25292C] to-[#0A1014]",
+                tips:"bg-gradient-to-br from-[#515B32] via-[#2B3624] to-[#0D1511]"
+              } as Record<ChatTopic,string>)[t.key]} aria-hidden="true"><span className="relative z-10 drop-shadow-lg">{t.icon}</span><span className="absolute inset-x-0 bottom-0 h-1 bg-[#D7FF35]/20" /></span>
               <span className="min-w-0">
                 <span className="block text-base font-black text-white">{t.label}</span>
                 <span className="mt-1 block text-xs leading-5 text-[#A99AD9]">{t.description}</span>
