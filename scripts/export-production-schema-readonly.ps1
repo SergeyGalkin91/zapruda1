@@ -1,23 +1,40 @@
-# ZAPRUDA: production SCHEMA ONLY. Never exports table rows, auth users or storage files.
-# Requires: Supabase CLI, Docker and operator authentication with READ-ONLY permission.
-# Run locally from repository root after reviewing permissions. Never commit the generated dump.
+# ZAPRUDA staging bootstrap: export public schema only, NO row data.
+# Read-only *operation*, not a guarantee that database credentials lack write privileges.
+# Requires an authenticated Supabase CLI and Docker. Do not commit or upload raw dumps.
 $ErrorActionPreference = 'Stop'
-$prod = 'sonvniuwtvzzyuglscah'
-$expected = 'EXPORT ZAPRUDA SCHEMA ONLY'
-if ($env:ZAPRUDA_SCHEMA_EXPORT_CONFIRM -cne $expected) { throw "Set ZAPRUDA_SCHEMA_EXPORT_CONFIRM exactly to '$expected' before proceeding." }
-if (-not (Get-Command supabase -ErrorAction SilentlyContinue)) { throw 'Supabase CLI missing. Install and review supabase db dump --help first.' }
-if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { throw 'Docker is required for Supabase CLI db dump.' }
-$dir = Join-Path $PWD 'private-schema-export'
-New-Item -ItemType Directory -Force -Path $dir | Out-Null
-$file = Join-Path $dir 'zapruda-production-public-schema.sql'
-if (Test-Path $file) { throw 'Export already exists; inspect or move it before rerunning. No overwrite.' }
-Write-Host 'Check Supabase CLI flags before linking:'
-supabase db dump --help
-Write-Host 'Linking to production project for READ-ONLY export. Do not execute db push/reset.'
-supabase link --project-ref $prod
-supabase db dump --linked --schema public --file $file
-if ($LASTEXITCODE -ne 0) { throw 'Schema dump failed.' }
-$raw = Get-Content -Raw -Path $file
-if ($raw -match '(?im)^\\s*(INSERT\\s+INTO|COPY\\s+[^;]+FROM\\s+stdin|UPDATE\\s+|DELETE\\s+FROM)') { throw 'Possible data statements found; QUARANTINE file, do not upload.' }
-Write-Host 'Schema-only public export created locally. It is NOT a complete restore: check auth/storage customizations, grants, bucket configuration and security before staging import.'
-Write-Host 'Do not commit or share the dump until it has been reviewed for embedded secrets.'
+$project = 'sonvniuwtvzzyuglscah'
+if ($env:ZAPRUDA_SCHEMA_EXPORT_CONFIRM -cne 'EXPORT ZAPRUDA SCHEMA ONLY') {
+  throw 'Explicit confirmation missing: set ZAPRUDA_SCHEMA_EXPORT_CONFIRM to EXPORT ZAPRUDA SCHEMA ONLY.'
+}
+foreach ($command in @('supabase', 'docker')) {
+  if (-not (Get-Command $command -ErrorAction SilentlyContinue)) {
+    throw "Missing prerequisite: $command"
+  }
+}
+$target = Join-Path (Get-Location) 'private-schema-export'
+$output = Join-Path $target 'zapruda-production-public-schema.sql'
+if (Test-Path $output) { throw 'Existing schema dump detected: will not overwrite it.' }
+New-Item -ItemType Directory -Force -Path $target | Out-Null
+# --schema public intentionally excludes auth/storage internal schemas.
+# Do not run db push/db reset/db diff against production.
+Write-Host "Preparing schema-only export from production $project"
+supabase db dump --help | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'Cannot read supabase db dump help.' }
+supabase link --project-ref $project
+if ($LASTEXITCODE -ne 0) { throw 'Supabase link failed; nothing exported.' }
+try {
+  supabase db dump --linked --schema public --file $output
+  if ($LASTEXITCODE -ne 0) { throw 'Schema-only export failed.' }
+  $raw = Get-Content -LiteralPath $output -Raw
+  if ([string]::IsNullOrWhiteSpace($raw)) { throw 'Schema export is empty.' }
+  $forbidden = '(?im)^\s*(?:INSERT\s+INTO|COPY\s+\S+\s+FROM\s+stdin|UPDATE\s+\S+\s+SET|DELETE\s+FROM)\b'
+  if ([regex]::IsMatch($raw, $forbidden)) {
+    throw 'Potential data-modification/data-copy statement detected. Quarantine export; do not share.'
+  }
+  Write-Host 'Public schema-only export ready for PRIVATE human review.'
+  Write-Host 'Still missing: auth triggers, storage schema policies/buckets, grants, secrets review.'
+  Write-Host 'Do NOT run this file against staging until a dependency and security audit is complete.'
+} catch {
+  Write-Warning 'Export failed review; inspect locally and DO NOT upload generated file.'
+  throw
+}
