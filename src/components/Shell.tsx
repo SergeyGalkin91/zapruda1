@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship,
-  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined, ShieldCheck,
+  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship, MessagesSquare,
+  MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined, ShieldCheck, Trophy,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,25 +11,30 @@ import { applyAppearance, loadAppearance } from "@/lib/appearance";
 
 const desktopNav = [
   { to: "/", label: "Лента", Icon: House },
-  { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
+  { to: "/fishing-map", label: "Карта", Icon: Compass },
   { to: "/partners", label: "Напарники", Icon: Users },
   { to: "/communities", label: "Клубы", Icon: Compass },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
-  { to: "/messages", label: "Личные", Icon: MessageCircle },
-  { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
+  { to: "/messages", label: "Личные", Icon: MessagesSquare },
 ] as const;
 
 const mobileNav = [
   { to: "/", label: "Лента", Icon: House },
   { to: "/reports/new", label: "Отчёт", Icon: Plus },
+  { to: "/fishing-map", label: "Карта", Icon: Compass },
   { to: "/partners", label: "Напарники", Icon: Users },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
   { to: "/profile", label: "Профиль", Icon: UserRound },
 ] as const;
 
 const otherNav = [
-  { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
+  { to: "/achievements", label: "Достижения", Icon: Trophy },
+  { to: "/atlas", label: "Атлас рыболова", Icon: Fish },
+  { to: "/messages", label: "Личные сообщения", Icon: MessagesSquare },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
+  { to: "/reviews", label: "Отзывы и репутация", Icon: ShieldCheck },
+  { to: "/beta", label: "Тестирование и обратная связь", Icon: ShieldCheck },
+
   { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
   { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
@@ -40,6 +45,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [authError, setAuthError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pendingClubs, setPendingClubs] = useState(0);
 
   useEffect(() => { applyAppearance(loadAppearance()); }, []);
 
@@ -86,36 +92,39 @@ export function Shell({ children }: { children: ReactNode }) {
     return () => { active = false; };
   }, [isSignedIn]);
 
+  useEffect(() => {
+    if (!isAdmin) { setPendingClubs(0); return; }
+    let live = true;
+    const refresh = async () => {
+      const { count, error } = await (supabase as any).from("club_creation_requests")
+        .select("id", { count: "exact", head: true }).eq("status", "awaiting_payment").eq("admin_approved", false);
+      if (live && !error) setPendingClubs(count ?? 0);
+    };
+    void refresh();
+    const interval = window.setInterval(() => { if (!document.hidden) void refresh(); }, 30000);
+    const channel = supabase.channel("admin-club-requests")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "club_creation_requests" }, () => void refresh())
+      .subscribe();
+    return () => { live = false; window.clearInterval(interval); void supabase.removeChannel(channel); };
+  }, [isAdmin]);
+
   return (
     <div className="min-h-screen pb-24 xl:pb-0">
+      <a href="#zapruda-main-content" className="zapruda-skip-link">Перейти к содержимому</a>
       <ActivityTracker />
-      <header className="sticky top-0 z-50 border-b border-white/[0.09] bg-[#0D100C]/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
+      <header className="sticky top-0 z-50 border-b border-[#D7FF35]/15 bg-[#090C09]/98">
+        <div className="mx-auto flex h-[64px] max-w-5xl items-center justify-between gap-2 px-4 sm:px-5">
           <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0">
             <Wordmark />
           </Link>
-          <nav aria-label="Основная навигация" className="hidden items-center gap-1 xl:flex">
-            {desktopNav.map(({ to, label, Icon }) => (
-              <Link
-                key={to}
-                to={to}
-                activeOptions={{ exact: true }}
-                className="group relative inline-flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[13px] font-semibold text-[#A5ADA1] transition hover:bg-white/[0.05] hover:text-white"
-                activeProps={{ className: "group relative inline-flex items-center gap-1.5 rounded-xl bg-[#D7FF35]/10 px-2.5 py-2 text-[13px] font-bold text-[#D7FF35]" }}
-              >
-                <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />
-                {label}
-
-              </Link>
-            ))}
-          </nav>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5">
+            {isAdmin && pendingClubs > 0 && <Link to="/moderation" className="inline-flex items-center gap-1 rounded-lg border border-[#D7FF35]/50 px-2 py-2 text-xs font-bold text-[#D7FF35]" aria-label={"Новые заявки на клубы: "+pendingClubs}>Клубы · {pendingClubs}</Link>}
             {isSignedIn ? (
               <>
-                <a href="/profile" className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3">
+                <Link to="/profile" className="inline-flex items-center gap-1.5 rounded-lg border border-[#D7FF35]/45 bg-[#D7FF35]/10 shadow-[0_0_12px_rgba(215,255,53,0.07)] px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition-colors hover:border-[#D7FF35] hover:bg-[#D7FF35]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] active:bg-[#D7FF35]/25 sm:gap-2 sm:px-3">
                   <UserRound className="size-4" aria-hidden="true" />
                   Профиль
-                </a>
+                </Link>
               </>
             ) : (
               <Link to="/auth" className="inline-flex rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white">
@@ -123,7 +132,7 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             )}
             <details className="relative group">
-              <summary aria-label="Открыть список разделов" aria-controls="zapruda-extra-nav" className="inline-flex size-10 cursor-pointer list-none items-center justify-center rounded-xl border border-white/15 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 [&::-webkit-details-marker]:hidden">
+              <summary aria-label="Открыть список разделов" aria-controls="zapruda-extra-nav" className="inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-lg border border-[#D7FF35]/30 text-[#D7FF35] transition-colors hover:border-[#D7FF35] hover:bg-[#D7FF35]/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] active:bg-[#D7FF35]/25 [&::-webkit-details-marker]:hidden">
                 <Menu className="size-5 group-open:hidden" aria-hidden="true" />
                 <X className="hidden size-5 group-open:block" aria-hidden="true" />
               </summary>
@@ -156,7 +165,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <Link to="/moderation"
                 className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.07]">
                 <ShieldCheck className="size-4 text-[#D7FF35]" aria-hidden="true" />
-                Модерация заявок
+                Модерация заявок {pendingClubs > 0 ? "(" + pendingClubs + ")" : ""}
                 <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
               </Link>
             )}
@@ -170,25 +179,42 @@ export function Shell({ children }: { children: ReactNode }) {
             </details>
           </div>
         </div>
-        {authError && <div role="alert" className="mx-auto max-w-7xl px-4 py-2 text-sm text-red-300">{authError}</div>}
+        <div className="mx-auto hidden max-w-5xl px-4 pb-2 sm:px-5 xl:block">
+          <nav aria-label="Основная навигация" className="hidden w-full items-stretch gap-1 rounded-lg border border-[#D7FF35]/35 bg-[#10150D] p-1.5 shadow-[0_0_12px_rgba(215,255,53,0.07)] xl:grid xl:grid-cols-6">
+            {desktopNav.map(({ to, label, Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                activeOptions={{ exact: true }}
+                className="group relative inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-2 text-[14px] font-bold text-[#A5ADA1] transition-colors duration-150 hover:border-[#D7FF35]/25 hover:bg-[#D7FF35]/10 hover:text-[#D7FF35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7FF35] active:bg-[#D7FF35]/20"
+                activeProps={{ className: "!border-[#D7FF35]/50 !bg-[#D7FF35]/15 !font-bold !text-[#D7FF35]" }}
+              >
+                <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />
+                {label}
+
+              </Link>
+            ))}
+          </nav>
+        </div>
+        {authError && <div role="alert" className="mx-auto max-w-5xl px-4 py-2 text-sm text-red-300">{authError}</div>}
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
-      <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-white/10 px-4 py-5 text-xs text-zinc-500 sm:px-6">
+      <main id="zapruda-main-content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-5 sm:px-5 sm:py-8">{children}</main>
+      <footer className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 border-t border-white/10 px-4 py-5 text-xs text-zinc-500 sm:px-6">
         <span>ZAPRUDA COMMUNITY · Свои на одной волне</span>
         <div className="flex flex-wrap items-center gap-4">
           <a href="https://t.me/ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer" className="hover:text-white">Telegram ZAPRUDA</a>
         </div>
       </footer>
 
-      <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#0D100C]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.32)] backdrop-blur-xl xl:hidden">
-        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
+      <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-[#D7FF35]/20 bg-[#080D09]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.32)] backdrop-blur-xl xl:hidden">
+        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2 pt-1">
           {mobileNav.map(({ to, label, Icon }) => (
             <Link key={to}
               to={to === "/profile" && !isSignedIn ? "/auth" : to}
               activeOptions={{ exact: true }}
               className="flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
-              activeProps={{ className: "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
+              activeProps={{ className: "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl border-t-2 border-[#D7FF35] bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
               {to === "/profile" && !isSignedIn ? (
                 <LogIn className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
               ) : (

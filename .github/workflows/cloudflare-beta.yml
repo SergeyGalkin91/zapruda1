@@ -1,0 +1,21 @@
+name: Cloudflare beta build
+on:
+  push:
+    branches: [deploy/cloudflare-beta]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.3
+      - name: Install dependencies without stale lockfile
+        run: bun install --no-frozen-lockfile
+      - name: Validate Cloudflare build
+        run: bun run build:cloudflare
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}

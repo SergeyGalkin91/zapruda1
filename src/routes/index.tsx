@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Images, X, ArrowUpRight, Compass, Fish, Sparkles, Target, Waves } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { ReactionBar } from "@/components/ReactionBar";
-import { DailyFishingBrief } from "@/components/DailyFishingBrief";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -197,6 +196,7 @@ function Feed() {
   const PAGE_SIZE = 15;
   const [reports, setReports] = useState<Report[]>([]);
   const [photosByReport, setPhotosByReport] = useState<Record<string, string[]>>({});
+  const [commentCounts,setCommentCounts]=useState<Record<string,number>>({});
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -232,6 +232,10 @@ function Feed() {
 
       if (reset) setPhotosByReport({});
       if (page.length) {
+        const {data:commentRows}=await supabase.from("comments").select("report_id").in("report_id",page.map(r=>r.id));
+        const nextCounts:Record<string,number>={};
+        for(const comment of commentRows??[]) nextCounts[comment.report_id]=(nextCounts[comment.report_id]??0)+1;
+        setCommentCounts(old=>reset?nextCounts:{...old,...nextCounts});
         // The photo table is optional until its migration is applied.
         // Never let a missing gallery backend prevent fishing reports from loading.
         const { data: photoRows, error: photoError } = await supabase
@@ -286,77 +290,90 @@ function Feed() {
 
   return (
     <Shell>
-      <section className="relative mb-8 overflow-hidden rounded-3xl border border-lime-300/15 bg-[#10120c] px-5 py-6 sm:px-7 sm:py-8">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-lime-300/[0.07] blur-3xl" />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">🎣 Спиннинг · отчёты</p>
-          <h1 className="mt-2 text-3xl font-bold md:text-4xl">Лента рыбалок 🐟</h1>
-          <p className="mt-2 max-w-md text-muted-foreground">Реальные выезды: где, на что и при какой погоде клевало. Делись победами и фейлами 😂</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link to="/reports/new" className="btn-primary self-start">🎣 Новый отчёт</Link>
-          <Link to="/partners" className="inline-flex items-center justify-center rounded-xl border border-lime-300/35 px-4 py-2.5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10">🤝 Найти напарника</Link>
-        </div>
-        </div>
-      </section>
-      <DailyFishingBrief />
+      <div className="mx-auto mb-7 max-w-5xl space-y-5">
+        <section className="zapruda-editorial-hero relative isolate overflow-hidden rounded-[28px] border border-[#D7FF35]/25 bg-[#0B0F0E] shadow-[0_18px_75px_rgba(0,0,0,.25)]">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-60" style={{background:"radial-gradient(ellipse at 87% 10%, rgba(215,255,53,.19), transparent 46%), radial-gradient(ellipse at 0% 100%, rgba(255,106,0,.12), transparent 48%), repeating-radial-gradient(circle at 78% 62%, transparent 0px, transparent 39px, rgba(215,255,53,.065) 40px, transparent 41px)"}}/>
+          <div className="relative grid min-h-[310px] gap-8 p-6 sm:p-10 md:grid-cols-[1fr_250px] md:items-center">
+            <div>
+              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.22em] text-[#D7FF35]"><span className="size-1.5 animate-pulse rounded-full bg-[#D7FF35]"/> ZAPRUDA COMMUNITY · FISHING CULTURE</p>
+              <h1 className="max-w-xl text-[clamp(2.6rem,7.5vw,5.5rem)] font-black uppercase leading-[.88] tracking-[-.07em] text-white">БОЛЬШЕ<br/><span className="text-[#D7FF35]">ЧЕМ РЫБАЛКА.</span></h1>
+              <span className="zapruda-hand-note mt-3 inline-block text-[#FF8128]">СВОИ НА ОДНОЙ ВОЛНЕ ↗</span>
+              <p className="mt-5 max-w-xl text-sm leading-6 text-[#B5C1B4] sm:text-base">Отчёты, трофеи, люди на одной волне. Твоя рыбалка — твои правила. Найди своих, покажи результат, исследуй новые места.</p>
+              <div className="mt-6 flex flex-wrap gap-2.5">
+                <Link to="/reports/new" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#D7FF35] px-5 py-3 text-xs font-black uppercase tracking-wider text-[#0B0F0E] transition hover:bg-[#ECFF92]">+ Новый отчёт <ArrowUpRight className="size-4"/></Link>
+                <Link to="/fishing-map" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:border-[#FF6A00]/60"><Compass className="size-4 text-[#FF6A00]"/> Карта мест</Link>
+              </div>
+            </div>
+            <div className="relative hidden min-h-[270px] flex-col justify-end overflow-hidden rounded-[20px] border border-white/15 bg-[#111911] p-5 md:flex">
+              {reports.length>0 && (photosByReport[reports[0].id]?.length??0)>0 ? (
+                <img src={photosByReport[reports[0].id][0]} alt="Фото из последнего рыболовного отчёта" className="absolute inset-0 size-full object-cover" />
+              ) : (
+                <div aria-hidden="true" className="absolute inset-0" style={{background:"radial-gradient(ellipse at 75% 15%,rgba(215,255,53,.16),transparent 42%),repeating-radial-gradient(circle at 60% 50%,transparent 0,transparent 27px,rgba(215,255,53,.12) 28px,transparent 29px)"}}/>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050805] via-[#050805]/30 to-transparent"/>
+              <span className="relative mb-3 w-fit rotate-[-5deg] rounded-sm bg-[#FF6A00] px-3 py-1 font-black text-[10px] uppercase tracking-wider text-black">ZAPRUDA / LIVE</span>
+              <p className="relative text-2xl font-black uppercase leading-tight text-white">{reports.length ? "Истории с воды" : "Здесь будут твои истории"}</p>
+              <p className="relative mt-2 text-xs leading-5 text-[#CFD5CA]">{reports.length ? "Настоящие отчёты участников сообщества" : "Фото, уловы, рыболовные места — без выдуманных трофеев"}</p>
+              {reports.length ? <Link to="/reports/$id" params={{id:reports[0].id}} className="relative mt-4 inline-flex items-center gap-1.5 text-xs font-extrabold text-[#D7FF35]">Смотреть свежий отчёт <ArrowUpRight className="size-4"/></Link> : <Link to="/reports/new" className="relative mt-4 inline-flex items-center gap-1.5 text-xs font-extrabold text-[#D7FF35]">Опубликовать первый отчёт <ArrowUpRight className="size-4"/></Link>}
+            </div>
+          </div>
+        </section>
+        <section className="grid gap-3 sm:grid-cols-3">
+          <Link to="/communities" className="zapruda-editorial-card group relative overflow-hidden rounded-[22px] border border-[#D7FF35]/25 bg-[#182013] p-5 transition hover:border-[#D7FF35]/60">
+            <div className="absolute -right-5 -top-5 size-32 rounded-full border border-[#D7FF35]/15"/>
+            <Compass className="size-7 text-[#D7FF35]"/><p className="mt-5 text-[10px] font-black uppercase tracking-[.2em] text-[#D7FF35]">01 / COMMUNITY</p>
+            <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-white">Найди своих</h2><p className="mt-2 text-xs leading-5 text-zinc-400">Рыболовные клубы, местные команды и новые знакомства.</p>
+            <ArrowUpRight className="absolute bottom-5 right-5 size-5 text-[#D7FF35] transition group-hover:translate-x-1 group-hover:-translate-y-1"/>
+          </Link>
+          <Link to="/fishing-map" className="group relative overflow-hidden rounded-[22px] border border-white/15 bg-[#131916] p-5 transition hover:border-[#FF6A00]/60">
+            <div className="absolute inset-0 opacity-30" style={{background:"repeating-radial-gradient(circle at 90% 10%,transparent 0px,transparent 24px,rgba(255,106,0,.23) 25px,transparent 26px)"}}/>
+            <Target className="relative size-7 text-[#FF6A00]"/><p className="relative mt-5 text-[10px] font-black uppercase tracking-[.2em] text-[#FF6A00]">02 / EXPLORE</p>
+            <h2 className="relative mt-1 text-2xl font-black uppercase tracking-tight text-white">Исследуй воду</h2><p className="relative mt-2 text-xs leading-5 text-zinc-400">Карта, акватории и рыболовные маршруты.</p>
+            <ArrowUpRight className="absolute bottom-5 right-5 size-5 text-[#FF6A00] transition group-hover:translate-x-1 group-hover:-translate-y-1"/>
+          </Link>
+          <Link to="/profile" className="group relative overflow-hidden rounded-[22px] border border-white/15 bg-[#171917] p-5 transition hover:border-[#D7FF35]/60">
+            <Fish className="size-7 text-[#D7FF35]"/><p className="mt-5 text-[10px] font-black uppercase tracking-[.2em] text-[#D7FF35]">03 / FISHING ID</p>
+            <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-white">Твой стиль</h2><p className="mt-2 text-xs leading-5 text-zinc-400">Способы ловли, любимые снасти и достижения — в профиле.</p>
+            <ArrowUpRight className="absolute bottom-5 right-5 size-5 text-[#D7FF35] transition group-hover:translate-x-1 group-hover:-translate-y-1"/>
+          </Link>
+        </section>
+        <div className="flex items-center justify-between gap-3 px-1"><div><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#FF6A00]">ZAPRUDA LIVE</p><h2 className="text-xl font-black uppercase text-white">Лента сообщества</h2></div><Link to="/communities" className="text-xs font-bold text-[#D7FF35] hover:underline">Найти своих →</Link></div>
+      </div>
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">{error}</div>}
       {!loading && !error && reports.length === 0 && (
-        <div className="panel p-8 text-center">
-          <div className="text-3xl">🎣</div>
-          <h2 className="mt-3 font-semibold">Пока тихо, как на бесклёвье</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Будь первым — опубликуй отчёт о рыбалке.</p>
+        <div className="rounded-[24px] border border-[#D7FF35]/25 bg-[#141B13] p-9 text-center">
+          <Fish className="mx-auto size-11 text-[#D7FF35]" strokeWidth={1.4}/>
+          <h2 className="mt-4 text-xl font-black uppercase text-white">Первая история начинается с тебя</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-zinc-400">Расскажи про свою рыбалку, покажи улов или поделись наблюдениями с теми, кто на одной волне.</p>
           <Link to="/reports/new" className="btn-primary mt-4 inline-flex">Создать отчёт</Link>
         </div>
       )}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+      <div className="mx-auto max-w-5xl">
         <div className="min-w-0">
       {reports.map((report) => {
         const name = report.profiles?.display_name || report.profiles?.username || "Рыболов";
         return (
-          <article key={report.id} className="panel mb-5 space-y-4 p-5">
+          <article key={report.id} className="zapruda-report-card panel mb-5 space-y-4 overflow-hidden border-white/10 bg-[#111711] p-4 sm:p-6">
             <div className="flex items-start gap-3">
               {report.profiles?.avatar_url
                 ? <img src={report.profiles.avatar_url} alt="" className="size-11 rounded-full object-cover" />
                 : <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-xl">🎣</div>}
               <div className="min-w-0 flex-1">
-                <div className="font-semibold">{name}</div>
+                <div className="font-black tracking-tight text-white">{name}</div>
                 <div className="text-xs text-muted-foreground">{new Date(report.created_at).toLocaleString("ru-RU")}</div>
               </div>
-              <span className="rounded-full bg-secondary px-2 py-1 text-xs">🐟 Отчёт</span>
+              <span className="rounded-full border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[#D7FF35]">ZAPRUDA / ОТЧЁТ</span>
             </div>
             <div>
-              <h2 className="text-lg font-bold">{report.title}</h2>
-              {report.body && <p className="mt-2 whitespace-pre-wrap text-sm">{report.body}</p>}
+              <h2 className="text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">{report.title}</h2>
+              {report.body && <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm text-zinc-300">{report.body}</p>}
+              <Link to="/reports/$id" params={{id:report.id}} className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-[#D7FF35]">Читать историю <ArrowUpRight className="size-4"/></Link>
             </div>
             <ReportPhotoGallery photos={photosByReport[report.id] ?? []} title={report.title} />
-            <div className="flex flex-wrap gap-2 text-xs">
-              {report.location_name && (
-                <div className="space-y-2">
-                  <a href={`https://yandex.ru/maps/?text=${encodeURIComponent(report.location_name)}`} target="_blank" rel="noreferrer" className="inline-flex rounded-full bg-secondary px-3 py-1.5 text-xs transition hover:text-primary">📍 {report.location_name} · Открыть в Яндекс Картах ↗</a>
-                  <div className="overflow-hidden rounded-xl border border-border/70">
-                    <iframe
-                      title={`Карта: ${report.location_name}`}
-                      src={`https://yandex.ru/map-widget/v1/?text=${encodeURIComponent(report.location_name)}`}
-                      width="100%"
-                      height="220"
-                      frameBorder="0"
-                      allowFullScreen
-                      loading="lazy"
-                      className="block w-full"
-                    />
-                  </div>
-                </div>
-              )}
-              {report.weather_summary && <span className="rounded-full bg-secondary px-3 py-1.5">🌦️ {report.weather_summary}</span>}
-              {report.air_temperature_c != null && <span className="rounded-full bg-secondary px-3 py-1.5">🌡️ {report.air_temperature_c}°C</span>}
-              {report.wind_direction && <span className="rounded-full bg-secondary px-3 py-1.5">💨 {report.wind_direction}{report.wind_speed_ms != null ? `, ${report.wind_speed_ms} м/с` : ""}</span>}
-              {report.pressure_hpa != null && <span className="rounded-full bg-secondary px-3 py-1.5">🧭 {Math.round(report.pressure_hpa / 1.33322)} мм рт. ст.</span>}
-            </div>
+            {report.location_name && <p className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-zinc-300">📍 {report.location_name}</p>}
             <ReactionBar reportId={report.id} />
-            <ReportComments reportId={report.id} />
+            <Link to="/reports/$id" params={{id:report.id}} className="inline-flex min-h-10 items-center text-sm font-semibold text-zinc-300 underline decoration-[#D7FF35]/30 underline-offset-4 hover:text-[#D7FF35]">💬 Обсудить ({commentCounts[report.id]??0})</Link>
           </article>
         );
       })}
@@ -365,7 +382,7 @@ function Feed() {
       {!loading && !loadingMore && !hasMore && reports.length > 0 && <p className="py-6 text-center text-xs text-muted-foreground">Ты в курсе всех отчётов на данный момент 🎣</p>}
       {error && !loading && <button type="button" className="btn-ghost mt-3" onClick={() => void loadPage(reports.length === 0)}>Повторить загрузку</button>}
         </div>
-        <aside className="hidden space-y-4 lg:block">
+        <aside className="hidden">
           <div className="panel border-lime-300/15 p-5"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">НАШЕ СООБЩЕСТВО</p><h2 className="mt-3 text-xl font-bold [text-shadow:0_1px_8px_rgba(215,255,0,0.10)]">Не просто улов. Свои на одной волне.</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Обмениваемся опытом, честно рассказываем о рыбалках, находим напарников и помогаем друг другу становиться лучше.</p><Link to="/reports/new" className="btn-primary mt-4 w-full">＋ Поделиться историей</Link></div>
           <div className="panel p-4"><h3 className="font-semibold">Подсказка дня 🎯</h3><p className="mt-2 text-sm text-muted-foreground">Укажи приманку, глубину и проводку в отчёте — другим рыболовам будет проще повторить результат.</p></div>
         </aside>

@@ -30,14 +30,14 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.13 0 0);
+  --radius: 0.375rem;
+  --background: #0D100D;
   --foreground: oklch(0.97 0 0);
-  --card: oklch(0.17 0 0);
+  --card: #171B17;
   --card-foreground: oklch(0.97 0 0);
   --primary: oklch(0.897 0.196 126.665);
   --primary-foreground: oklch(0.13 0 0);
-  --secondary: oklch(0.22 0 0);
+  --secondary: #1E241D;
   --secondary-foreground: oklch(0.95 0 0);
   --muted: oklch(0.2 0 0);
   --muted-foreground: oklch(0.66 0 0);
@@ -163,3 +163,114 @@
   border-color: rgba(215,255,53,.36);
   background-color: rgba(56,71,25,.74);
 }
+
+
+/* Progressive UX polish: keyboard access, comfortable touch targets and reduced motion. */
+.zapruda-skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: .75rem;
+  left: .75rem;
+  transform: translateY(-180%);
+  border: 1px solid #d7ff35;
+  border-radius: .75rem;
+  background: #151c12;
+  color: #d7ff35;
+  padding: .75rem 1rem;
+  font-weight: 700;
+  box-shadow: 0 8px 24px #0009;
+}
+.zapruda-skip-link:focus-visible { transform: translateY(0); }
+:where(a, button, input, select, textarea, summary, [role="button"]):focus-visible {
+  outline: 2px solid #d7ff35;
+  outline-offset: 3px;
+}
+:where(button, a, summary) { -webkit-tap-highlight-color: transparent; }
+:where(button, input, select, textarea):disabled { cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ZAPRUDA minimal industrial visual system. */
+.panel { border-radius: 10px; box-shadow: none; }
+.btn-primary, .btn-ghost { border-radius: 7px; box-shadow: none; }
+:where(.panel,article) { backdrop-filter: none; }
+::selection { background: #D7FF35; color: #101410; }
+
+/* ZAPRUDA / street-fishing editorial system. Existing logo and accessibility remain unchanged. */
+.zapruda-hand-note {
+  font-family: "Caveat", "Segoe Print", cursive;
+  font-weight: 700;
+  font-size: clamp(1.55rem, 3vw, 2.1rem);
+  line-height: 1.3;
+  letter-spacing: -.045em;
+  transform: rotate(-3deg);
+  text-shadow: 0 3px 15px rgba(255,106,0,.18);
+}
+.zapruda-editorial-hero::after {
+  content: "";
+  position: absolute;
+  width: 130px;
+  height: 23px;
+  right: 11%;
+  bottom: 8px;
+  z-index: -1;
+  border-bottom: 2px solid #ff6a00;
+  border-radius: 50%;
+  transform: rotate(-5deg);
+  pointer-events: none;
+}
+.zapruda-editorial-card {
+  isolation: isolate;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
+}
+.zapruda-editorial-card::after {
+  content: "↗";
+  position: absolute;
+  right: 14px;
+  top: 11px;
+  color: rgba(215,255,53,.22);
+  font-family: "Segoe Print", cursive;
+  font-size: 38px;
+  font-weight: 900;
+  transform: rotate(-12deg);
+  pointer-events: none;
+}
+.zapruda-editorial-card:nth-child(2)::after { color: rgba(255,106,0,.32); }
+.zapruda-report-card { border-radius: 20px; box-shadow: 0 14px 45px rgba(0,0,0,.12); }
+.zapruda-report-card h2 { letter-spacing: -.025em; }
+.zapruda-method-tile { min-height: 136px; }
+.zapruda-method-tile .zapruda-method-icon { width: 44px; height: 44px; }
+@media (max-width: 600px) {
+  .zapruda-hand-note { font-size: 1.65rem; }
+  .zapruda-method-tile { min-height: 122px; }
+}
+
+/* Branded fishing-map pins: keep geographic accuracy and existing map click behavior. */
+.zapruda-map-marker {
+  display:flex;align-items:center;justify-content:center;
+  width:43px;height:43px;border-radius:50%;
+  border:3px solid #0b110d;
+  background:var(--marker-accent,#D7FF35);
+  color:#07100b;font-size:19px;font-weight:900;
+  box-shadow:0 0 0 2px var(--marker-accent,#D7FF35),0 7px 17px #000a;
+  cursor:pointer;transition:transform .16s ease,box-shadow .16s ease;
+}
+.zapruda-map-marker:hover,.zapruda-map-marker:focus-visible {
+  transform:scale(1.13);box-shadow:0 0 0 3px var(--marker-accent,#D7FF35),0 10px 22px #000c;
+}
+.maplibregl-popup-content {
+  background:#111912 !important;color:#f5f6ee !important;
+  border:1px solid #D7FF3560;border-radius:13px !important;
+  font-family:Manrope,sans-serif;font-size:12px;line-height:1.55;
+  box-shadow:0 14px 35px #000b !important;padding:12px 15px !important;
+  max-width:260px;overflow-wrap:anywhere;
+}
+.maplibregl-popup-tip { border-top-color:#111912 !important; }
+.maplibregl-popup-close-button { color:#D7FF35 !important;font-size:18px !important;padding:1px 6px !important; }
+@media(prefers-reduced-motion:reduce){.zapruda-map-marker{transition:none}}
