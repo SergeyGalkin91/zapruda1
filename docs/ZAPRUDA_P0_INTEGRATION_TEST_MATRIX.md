@@ -26,3 +26,6 @@ CI or live authorization failures, legacy RPC duplicate path, unintended UI visu
 - public.admin_finance_summary() and public.confirm_club_creation_payment(uuid,text) also grant authenticated EXECUTE, with internal administrator checks. Execute privilege alone does not imply access to data; must test with non-admin JWT.
 - Do not modify app database or use a real payment to verify club creation. Staging tests need disposable approved request, synthetic reference, trigger side-effects and one-group/owner-membership invariant.
 - PR #10 remains blocked from main by missing CI evidence on integration HEAD, real authenticated JWT tests, and removal/restriction of legacy RPC after independent approval.
+
+## CI diagnostic checkpoint 2026-10-31
+At commit de9b08a6a52aad48690b30ae3ba1a04c1f430107 GitHub commit-linked PR workflow lookup returned no runs. Both workflow YAML files in this branch already allow push integration/p0-admin-beta-rc1. Triggering a new documentation commit provides a fresh SHA for checks; if none register, inspect repository Actions settings and workflow permissions. This is not a CI pass.
