@@ -333,9 +333,7 @@ function NewReport() {
           .insert({
             user_id: user.id,
             title: cleanTitle,
-            body: [story.trim(), technique.trim() ? "Техника: " + technique.trim() : "", lures.trim() ? "Приманки: " + lures.trim() : ""].filter(Boolean).join("
-
-") || null,
+            body: [story.trim(), technique.trim() ? "Техника: " + technique.trim() : "", lures.trim() ? "Приманки: " + lures.trim() : ""].filter(Boolean).join("\n\n") || null,
             location_name: location.trim() || null,
             weather_summary: weather.trim() || null,
             air_temperature_c: temperature.trim() ? Number(temperature) : null,
