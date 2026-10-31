@@ -87,7 +87,7 @@ export function Shell({ children }: { children: ReactNode }) {
   }, [isSignedIn]);
 
   return (
-    <div className="min-h-screen pb-24 xl:pb-0">
+    <div className="min-h-screen overflow-x-clip pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-0">
       <ActivityTracker />
       <header className="sticky top-0 z-50 border-b border-white/[0.09] bg-[#0D100C]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
@@ -173,7 +173,7 @@ export function Shell({ children }: { children: ReactNode }) {
         {authError && <div role="alert" className="mx-auto max-w-7xl px-4 py-2 text-sm text-red-300">{authError}</div>}
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
+      <main className="mx-auto min-w-0 max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
       <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-white/10 px-4 py-5 text-xs text-zinc-500 sm:px-6">
         <span>ZAPRUDA COMMUNITY · Свои на одной волне</span>
         <div className="flex flex-wrap items-center gap-4">
