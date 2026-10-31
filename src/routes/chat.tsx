@@ -302,14 +302,14 @@ function GeographicChat() {
             </div>
             <p className="mt-3 text-xs text-zinc-500">{currentTopic.description}</p>
           </div>
-          <div className="zapruda-chat-window min-h-[310px] flex-1 space-y-4 overflow-y-auto p-4 sm:p-5" aria-live="polite">
+          <div className="zapruda-chat-window min-h-[360px] flex-1 space-y-5 overflow-y-auto bg-[#090C0B] p-4 sm:p-6" aria-live="polite">
             {chatLoading&&<p className="text-sm text-zinc-400">Загружаем сообщения ветки…</p>}
             {chatError&&<p role="alert" className="rounded-xl border border-red-400/30 bg-red-950/15 p-3 text-sm text-red-200">{chatError}</p>}
             {!chatLoading&&!chatError&&!messages.length&&<p className="rounded-xl border border-dashed border-white/15 p-5 text-sm text-zinc-400">
               Здесь ещё нет сообщений. Начни обсуждение в ветке «{currentTopic.label}» для «{selectedPlace?.name||"Вся ZAPRUDA"}»!
             </p>}
-            {messages.map(message=><article key={message.id} className="max-w-[95%] space-y-1.5 sm:max-w-[85%]">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+            {messages.map(message=><article key={message.id} className={message.user_id===uid?"ml-auto max-w-[90%] space-y-1.5 sm:max-w-[78%]":"mr-auto max-w-[90%] space-y-1.5 sm:max-w-[78%]"}>
+              <div className={"flex flex-wrap items-center gap-2 text-xs text-zinc-400 "+(message.user_id===uid?"justify-end":"")}>
                 <span className="flex size-7 items-center justify-center rounded-full bg-white/10 text-sm">🎣</span>
                 <span className="font-bold text-white">
                   {message.profiles?.display_name||message.profiles?.username||(message.user_id===uid?"Вы":"Рыболов")}
@@ -320,12 +320,12 @@ function GeographicChat() {
                   {new Date(message.created_at).toLocaleString("ru-RU",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
                 </time>
               </div>
-              <div className="zapruda-chat-bubble whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-zinc-100">
+              <div className={"zapruda-chat-bubble whitespace-pre-wrap break-words rounded-[20px] border px-4 py-3 text-sm leading-6 "+(message.user_id===uid?"rounded-tr-sm border-[#D7FF35]/30 bg-[#D7FF35]/10 text-white":"rounded-tl-sm border-[#A78BFA]/20 bg-[#191722] text-zinc-100")}>
                 {message.body}
               </div>
             </article>)}
           </div>
-          <form className="space-y-2 border-t border-white/10 p-3 sm:p-4" onSubmit={send}>
+          <form className="space-y-3 border-t border-[#A78BFA]/15 bg-[#101211] p-3 sm:p-4" onSubmit={send}>
             <div className="flex flex-wrap gap-1">
               {quick.map(q=><button key={q} type="button" title={"Вставить "+q}
                 onClick={() => setDraft(d=>(d+q).slice(0,2000))}
