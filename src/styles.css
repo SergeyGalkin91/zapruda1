@@ -232,3 +232,13 @@
   .z-underground-action { min-height: 44px; }
   .zapruda-chat-window { overscroll-behavior: contain; }
 }
+
+/* Explicit message direction overrides background preferences without altering chat data. */
+.zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-incoming-bubble {
+  background-color: #211B2D;
+  border-color: rgba(167,139,250,.32);
+}
+.zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-own-bubble {
+  background-color: #283419;
+  border-color: rgba(215,255,53,.38);
+}
