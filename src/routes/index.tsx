@@ -294,6 +294,10 @@ function Feed() {
             НЕ ПРОСТО ЛЕНТА.<span className="block text-[#D7FF35]">ТВОЯ ВОДА.</span>
           </h1>
           <p className="mt-5 max-w-2xl text-sm leading-6 text-zinc-300">Живые отчёты, трофеи друзей, местные сообщества и свои люди на воде. Рыбалка начинается здесь.</p>
+          <Link to="/street" className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-[#D7FF35]/40 bg-[#121A12] px-5 py-4 transition hover:border-[#D7FF35]">
+            <span><strong className="block text-lg font-black uppercase tracking-tight text-[#D7FF35]">ZAPRUDA STREET · Город — твоя акватория</strong><span className="mt-1 block text-xs text-zinc-300">Street Fishing: начать городскую сессию и записывать уловы</span></span>
+            <span className="shrink-0 rounded-xl bg-[#D7FF35] px-3 py-2 font-black text-black">STREET</span>
+          </Link>
           <div className="mt-7 grid gap-3 md:grid-cols-3">
             <Link to="/assistant" className="group rounded-2xl border border-[#D7FF35]/35 bg-[#D7FF35]/10 p-5 transition hover:border-[#D7FF35] hover:bg-[#D7FF35]/15">
               <span className="text-2xl" aria-hidden="true">🎣</span>
