@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, ImagePlus, Trash2, Sparkles } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,6 +60,58 @@ function NewReport() {
   const [savedCatches, setSavedCatches] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(0);
   const [progress, setProgress] = useState("");
+  const draftKey = useRef<string | null>(null);
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (!active) return;
+      if (data.user) {
+        const key = "zapruda-report-draft-v1-" + data.user.id;
+        draftKey.current = key;
+        try {
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            const saved = JSON.parse(raw) as Record<string, unknown>;
+            const val = (k: string) => typeof saved[k] === "string" ? saved[k] as string : "";
+            setTitle(val("title")); setLocation(val("location")); setWeather(val("weather"));
+            setTemperature(val("temperature")); setPressure(val("pressure"));
+            setWindDirection(val("windDirection")); setWindSpeed(val("windSpeed"));
+            setTechnique(val("technique")); setFishingMethod(val("fishingMethod"));
+            setLures(val("lures")); setStory(val("story")); setSelectedWaterbody(val("selectedWaterbody"));
+            if (Array.isArray(saved.catches)) setCatches(saved.catches.filter((c): c is Catch =>
+              !!c && typeof c === "object" && typeof c.species === "string" &&
+              typeof c.weight === "string" && typeof c.length === "string").slice(0, 20));
+            if (typeof saved.isPublic === "boolean") setIsPublic(saved.isPublic);
+            setDraftRestored(true);
+          }
+        } catch { /* Invalid drafts never block reporting. */ }
+      }
+      setDraftReady(true);
+    }).catch(() => { if (active) setDraftReady(true); });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    if (!draftReady || !draftKey.current || savedReportId) return;
+    try {
+      localStorage.setItem(draftKey.current, JSON.stringify({
+        title, location, weather, temperature, pressure, windDirection, windSpeed,
+        technique, fishingMethod, lures, story, selectedWaterbody, catches, isPublic,
+      }));
+    } catch { /* Storage may be unavailable. */ }
+  }, [draftReady, savedReportId, title, location, weather, temperature, pressure,
+      windDirection, windSpeed, technique, fishingMethod, lures, story, selectedWaterbody, catches, isPublic]);
+
+  function clearLocalDraft() {
+    if (draftKey.current) { try { localStorage.removeItem(draftKey.current); } catch {} }
+    setDraftRestored(false);
+    setTitle(""); setLocation(""); setWeather(""); setTemperature(""); setPressure("");
+    setWindDirection(""); setWindSpeed(""); setTechnique(""); setFishingMethod("");
+    setLures(""); setStory(""); setSelectedWaterbody("");
+    setCatches([{ species: "", weight: "", length: "" }]); setIsPublic(true);
+  }
+
 
   useEffect(() => {
     let live = true;
@@ -255,6 +307,7 @@ function NewReport() {
         }
       }
       setProgress("");
+      if (draftKey.current) { try { localStorage.removeItem(draftKey.current); } catch {} }
       await navigate({ to: "/" });
     } catch (caught) {
       setProgress("");
@@ -268,6 +321,10 @@ function NewReport() {
   return (
     <Shell>
       <h1 className="mb-6 text-2xl font-bold">Новый отчёт</h1>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 px-4 py-3 text-xs text-zinc-300">
+        <span>{draftRestored ? "Черновик восстановлен на этом устройстве. Фотографии нужно добавить снова." : "Текст отчёта автоматически сохраняется на этом устройстве после входа. Фото не сохраняются."}</span>
+        {draftRestored && !savedReportId && <button type="button" onClick={clearLocalDraft} className="font-bold text-[#D7FF35] hover:underline">Очистить черновик</button>}
+      </div>
       <form className="space-y-6" onSubmit={publish}>
         <section className="panel grid gap-4 p-5 md:grid-cols-2">
           <div className="md:col-span-2">
