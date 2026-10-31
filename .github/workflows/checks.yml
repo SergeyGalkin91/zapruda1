@@ -18,9 +18,8 @@ jobs:
           bun-version: latest
       - name: Install dependencies
         run: bun install --no-frozen-lockfile
-      - name: Audit migration versions (report existing conflicts)
+      - name: Audit migration versions (block new conflicts)
         run: node scripts/check-migration-versions.mjs
-        continue-on-error: true
       - name: Lint (report existing issues)
         run: bun run lint
         continue-on-error: true
