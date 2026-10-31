@@ -155,7 +155,7 @@ export function SocialGroups(){
     <p className="mt-2 text-sm text-zinc-400">Создавай маленькую команду рыбаков, приглашай друзей, планируй совместный стритфишинг или обсуждай выезд с проверенным гидом на лодке с Panoptix.</p>
     {error&&<p role="alert" className="my-3 rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-sm text-red-200">{error}</p>}
     {notice&&<p role="status" className="my-3 rounded-xl border border-[#D7FF35]/30 p-3 text-sm text-[#D7FF35]">{notice}</p>}
-    {!uid?<p className="mt-4 text-sm text-zinc-400">Чтобы участвовать в клубах, <Link to="/auth" className="font-semibold text-[#D7FF35] underline">войти в аккаунт</Link>.</p>:
+    {!uid?<p className="mt-4 text-sm text-zinc-400">Чтобы участвовать в клубах, <Link to="/auth" search={{ mode: "in" }} className="font-semibold text-[#D7FF35] underline">войти в аккаунт</Link>.</p>:
     <div className="mt-5 grid gap-6 lg:grid-cols-2">
       <div className="space-y-5">
         <div>

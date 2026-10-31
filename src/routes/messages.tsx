@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/messages")({
   head: () => ({ meta: [{ title: "Личные сообщения — ZAPRUDA" }, { name: "description", content: "Личные переписки по согласию и обмен выбранными рыболовными метками." }] }),
-  validateSearch: (query: Record<string, unknown>) => ({ mark: typeof query.mark === "string" ? query.mark : "", ...(typeof query.to === "string" ? { to: query.to } : {}) }),
+  validateSearch: (query: Record<string, unknown>) => ({ mark: typeof query["mark"] === "string" ? query["mark"] : "", ...(typeof query["to"] === "string" ? { to: query["to"] } : {}) }),
   component: Messages,
 });
 
@@ -247,7 +247,7 @@ function Messages() {
       <div><p className="text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">ZAPRUDA / ОБЩЕНИЕ</p><h1 className="mt-1 text-3xl font-black text-white">Личные сообщения</h1><p className="mt-2 text-sm text-zinc-400">Переписка только после принятия запроса. Подписки не открывают личный чат автоматически.</p></div>
       <button className="btn-ghost inline-flex" type="button" onClick={() => void refresh()}><RefreshCw className="size-4"/> Обновить</button>
     </div>
-    {error && <p role="alert" className="mb-4 rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-sm text-red-200">{error} {!uid && <Link to="/auth" className="underline">Войти</Link>}</p>}
+    {error && <p role="alert" className="mb-4 rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-sm text-red-200">{error} {!uid && <Link to="/auth" search={{ mode: "in" }} className="underline">Войти</Link>}</p>}
     {notice && <p role="status" className="mb-4 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/5 p-3 text-sm text-[#D7FF35]">{notice}</p>}
     {loading && <p className="text-zinc-400">Загружаем переписки…</p>}
     {!!uid && <div className="grid gap-5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
