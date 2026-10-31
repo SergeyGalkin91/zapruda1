@@ -135,7 +135,8 @@ function Partners() {
     setError("");
     try {
       const { data: auth, error: authError } = await supabase.auth.getUser();
-      if (authError) throw authError;
+      // Guests may browse public trips; an absent session is not a data-loading failure.
+      if (authError && authError.name !== "AuthSessionMissingError") throw authError;
       setUserId(auth.user?.id ?? null);
       const { data, error: tripsError } = await supabase
         .from("partner_trips")
