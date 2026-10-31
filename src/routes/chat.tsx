@@ -299,6 +299,26 @@ function GeographicChat() {
     </p>}
 
     {uid && <div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
+      <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-black uppercase tracking-tight text-white">Свои на связи</h2>
+          <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-black tracking-widest text-[#D7FF35]">ZAPRUDA</span>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          {TOPICS.map((t) => (
+            <button key={t.key} type="button" onClick={() => go(placeId, t.key)}
+              aria-pressed={topic === t.key}
+              className={"flex min-h-24 items-center gap-4 rounded-2xl border p-3 text-left transition hover:border-[#D7FF35]/60 " +
+                (topic === t.key ? "border-[#D7FF35] bg-[#D7FF35]/10" : "border-[#34304D] bg-[#0B1014]")}>
+              <span className="flex size-14 shrink-0 items-center justify-center rounded-xl border border-[#34304D] bg-[#131925] text-2xl" aria-hidden="true">{t.icon}</span>
+              <span className="min-w-0">
+                <span className="block text-sm font-black text-white">{t.label}</span>
+                <span className="mt-1 block text-xs leading-5 text-[#A99AD9]">{t.description}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
       <aside className="space-y-4 rounded-[24px] border border-white/10 bg-[#0E120F] p-4 lg:sticky lg:top-24">
         <button type="button" onClick={() => go(GLOBAL_ID, "general")}
           aria-pressed={placeId === GLOBAL_ID}
