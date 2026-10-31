@@ -14,14 +14,14 @@ export const Route = createFileRoute("/auth")({
       { property: "og:description", content: "Войдите или создайте аккаунт рыболова в ZAPRUDA." },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>) => ({ mode: search["mode"] === "up" ? "up" as const : "in" as const } as { mode?: "up" | "in" }),
+  validateSearch: (search: Record<string, unknown>) => ({ mode: search.mode === "up" ? "up" as const : "in" as const }),
   component: Auth,
 });
 
 function Auth() {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const [mode, setMode] = useState<"in" | "up" | "forgot" | "new-password">(search.mode ?? "in");
+  const [mode, setMode] = useState<"in" | "up" | "forgot" | "new-password">(search.mode);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,7 +64,7 @@ function Auth() {
   }, []);
 
   useEffect(() => {
-    if (mode === "in" || mode === "up") setMode(search.mode ?? "in");
+    if (mode === "in" || mode === "up") setMode(search.mode);
   }, [search.mode]);
 
 
