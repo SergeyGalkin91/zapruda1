@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BrainCircuit, Check, Compass, Fish, MapPin, Save, Settings2, ShieldCheck,
@@ -226,10 +226,20 @@ function Profile() {
     }
   }
 
+  const loadSequence = useRef(0);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; loadSequence.current += 1; };
+  }, []);
+
   const loadProfile = useCallback(async () => {
+    const sequence = ++loadSequence.current;
+    const isCurrent = () => mountedRef.current && sequence === loadSequence.current;
     setLoading(true);
     setError("");
     const { data: auth, error: authError } = await supabase.auth.getUser();
+    if (!isCurrent()) return;
     if (authError || !auth.user) {
       setLoading(false);
       setUserId(null);
@@ -247,6 +257,7 @@ function Profile() {
       supabase.rpc("my_fishing_specializations_v2"),
     ]);
 
+    if (!isCurrent()) return;
     if (profileResult.error) {
       setError("Не удалось загрузить профиль: " + profileResult.error.message);
     } else if (profileResult.data) {
@@ -264,6 +275,7 @@ function Profile() {
       if (canFillAvatar && providerAvatar) additions.avatar_url = providerAvatar;
       if (Object.keys(additions).length) {
         const { error: syncError } = await supabase.from("profiles").update(additions).eq("id", auth.user.id);
+        if (!isCurrent()) return;
         if (syncError) console.warn("OAuth profile import skipped:", syncError.message);
         else profileResult.data = { ...profileResult.data, ...additions };
       }
@@ -366,6 +378,8 @@ function Profile() {
   async function saveProfile(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!userId || saving) return;
+    // An older profile fetch must not overwrite edits while saving.
+    loadSequence.current += 1;
     const requestedUsername = username.trim();
     if (requestedUsername && !/^[a-zA-Z0-9_.-]{3,30}$/.test(requestedUsername)) {
       setError("Никнейм: от 3 до 30 символов, латинские буквы, цифры, точка, дефис или подчёркивание.");
@@ -409,6 +423,7 @@ function Profile() {
     }
     setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
     setEditing(false);
+    await loadProfile();
   }
 
   return (
