@@ -18,10 +18,10 @@ type ChatMessage = {
 const GLOBAL_ID = "00000000-0000-4000-8000-000000000001";
 const TOPICS: ReadonlyArray<{ key: ChatTopic; label: string; icon: string; description: string }> = [
   { key: "general", label: "Общий", icon: "💬", description: "Знакомства, разговоры и рыбацкие истории" },
-  { key: "reports", label: "Отчёты и уловы", icon: "🐟", description: "Кто, что и где поймал — без обязательной публикации точных координат" },
-  { key: "waters", label: "Водоёмы", icon: "🌊", description: "Реки, озёра, условия и обсуждение подходов" },
+  { key: "reports", label: "Трофеи и отчёты", icon: "🐟", description: "Кто, что и где поймал — без обязательной публикации точных координат" },
+  { key: "waters", label: "Споты и вода", icon: "🌊", description: "Реки, озёра, условия и обсуждение подходов" },
   { key: "partners", label: "Напарники", icon: "🤝", description: "С кем поехать на рыбалку и как договориться" },
-  { key: "gear", label: "Снасти", icon: "🎣", description: "Спиннинги, катушки, приманки и оснастки" },
+  { key: "gear", label: "Стафф", icon: "🎣", description: "Спиннинги, катушки, приманки и оснастки" },
   { key: "tips", label: "Советы", icon: "💡", description: "Тактика, проводки и помощь новичкам" },
 ];
 const quick = ["🎣", "🐟", "🔥", "👍", "😂", "💪", "❤️", "👏", "🤝", "🏆"];
@@ -30,7 +30,7 @@ const api = supabase as any;
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [
-    { title: "Чаты стран, регионов и городов — ZAPRUDA" },
+    { title: "Чаты комьюнити — ZAPRUDA" },
     { name: "description", content: "Общение рыболовов по странам, областям, городам и тематическим веткам." },
   ] }),
   validateSearch: (query: Record<string, unknown>) => ({
@@ -183,7 +183,7 @@ function GeographicChat() {
       <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#D7FF35]">
         <Globe2 className="size-4" /> ZAPRUDA / ЧАТЫ СООБЩЕСТВА
       </p>
-      <h1 className="mt-3 text-[clamp(2rem,5vw,3.7rem)] font-black uppercase leading-[0.98] tracking-[-0.05em] text-white">Рыболовы по странам, регионам и городам</h1>
+      <h1 className="mt-3 text-[clamp(2rem,5vw,3.7rem)] font-black uppercase leading-[0.98] tracking-[-0.05em] text-white">СВОИ НА СВЯЗИ</h1>
       <p className="mt-2 text-sm leading-6 text-zinc-300">
         Выбирай свою страну, область и город. На каждом уровне свои ветки обсуждений.
         Общий чат всей ZAPRUDA остаётся отдельно — старые сообщения не пропали.
