@@ -286,18 +286,20 @@ function Feed() {
 
   return (
     <Shell>
-      <section className="relative mb-8 overflow-hidden rounded-3xl border border-lime-300/15 bg-[#10120c] px-5 py-6 sm:px-7 sm:py-8">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-lime-300/[0.07] blur-3xl" />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">🎣 Спиннинг · отчёты</p>
-          <h1 className="mt-2 text-3xl font-bold md:text-4xl">Лента рыбалок 🐟</h1>
-          <p className="mt-2 max-w-md text-muted-foreground">Реальные выезды: где, на что и при какой погоде клевало. Делись победами и фейлами 😂</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link to="/reports/new" className="btn-primary self-start">🎣 Новый отчёт</Link>
-          <Link to="/partners" className="inline-flex items-center justify-center rounded-xl border border-lime-300/35 px-4 py-2.5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10">🤝 Найти напарника</Link>
-        </div>
+      <section className="relative mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0B0D0B] px-5 py-7 sm:px-8 sm:py-9">
+        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#D7FF35]/[0.09] blur-3xl" />
+        <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D7FF35]">ZAPRUDA / COMMUNITY / 01</p>
+            <h1 className="mt-3 text-[clamp(2.8rem,8vw,5.5rem)] font-black uppercase leading-[0.88] tracking-[-0.065em] text-white">ЛЕНТА<span className="text-[#D7FF35]">.</span></h1>
+            <p className="mt-4 max-w-lg text-sm leading-6 text-zinc-400">Люди. Места. Истории. Реальные выезды и трофеи без лишнего шума.</p>
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400">
+              <span className="rounded-full border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-3 py-1.5 text-[#D7FF35]">Все отчёты</span>
+              <Link to="/communities" className="rounded-full border border-white/15 px-3 py-1.5 hover:text-white">Сообщества</Link>
+              <Link to="/partners" className="rounded-full border border-white/15 px-3 py-1.5 hover:text-white">Напарники</Link>
+            </div>
+          </div>
+          <Link to="/reports/new" className="inline-flex shrink-0 items-center justify-center rounded-full bg-[#D7FF35] px-6 py-3 text-xs font-black uppercase tracking-[0.09em] text-black transition hover:bg-white">+ Новый отчёт</Link>
         </div>
       </section>
       <DailyFishingBrief />
@@ -316,19 +318,19 @@ function Feed() {
       {reports.map((report) => {
         const name = report.profiles?.display_name || report.profiles?.username || "Рыболов";
         return (
-          <article key={report.id} className="panel mb-5 space-y-4 p-5">
+          <article key={report.id} className="mb-5 space-y-4 overflow-hidden rounded-[24px] border border-white/10 bg-[#111411] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.14)] sm:p-5">
             <div className="flex items-start gap-3">
               {report.profiles?.avatar_url
                 ? <img src={report.profiles.avatar_url} alt="" className="size-11 rounded-full object-cover" />
                 : <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-xl">🎣</div>}
               <div className="min-w-0 flex-1">
-                <div className="font-semibold">{name}</div>
+                <div className="text-sm font-extrabold text-white">{name}</div>
                 <div className="text-xs text-muted-foreground">{new Date(report.created_at).toLocaleString("ru-RU")}</div>
               </div>
               <span className="rounded-full bg-secondary px-2 py-1 text-xs">🐟 Отчёт</span>
             </div>
             <div>
-              <h2 className="text-lg font-bold">{report.title}</h2>
+              <h2 className="text-xl font-black tracking-tight text-white sm:text-2xl">{report.title}</h2>
               {report.body && <p className="mt-2 whitespace-pre-wrap text-sm">{report.body}</p>}
             </div>
             <ReportPhotoGallery photos={photosByReport[report.id] ?? []} title={report.title} />
