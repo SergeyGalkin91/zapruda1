@@ -1,0 +1,59 @@
+name: ZAPRUDA Design Preview (isolated)
+on:
+  push:
+    branches: [design/approved-v060-mobile-implementation]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      NITRO_PRESET: node-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.3
+      - run: bun install --no-frozen-lockfile
+      - run: bun run build
+      - run: bun add --dev playwright
+      - run: bunx playwright install --with-deps chromium
+      - name: Capture mobile design screens
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p screenshots
+          PORT=3000 HOST=127.0.0.1 node .output/server/index.mjs > screenshots/server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then break; fi
+            sleep 2
+          done
+          cat > capture.cjs <<'EOF'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            for(const [name,path] of [['feed','/'],['chat','/chat'],['communities','/communities'],['auth','/auth'],['admin','/admin']]){
+              const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
+              await page.goto('http://127.0.0.1:3000'+path,{waitUntil:'domcontentloaded',timeout:30000});
+              await page.waitForTimeout(800);
+              await page.screenshot({path:'screenshots/'+name+'-390px.png',fullPage:true});
+              const background=await page.evaluate(()=>getComputedStyle(document.body).backgroundColor);
+              console.log(name,background);
+              await page.close();
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          EOF
+          node capture.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zapruda-design-390px
+          path: screenshots/*.png
+          retention-days: 7
