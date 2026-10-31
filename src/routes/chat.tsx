@@ -325,6 +325,7 @@ function GeographicChat() {
               </div>
             </article>)}
           </div>
+          {!loading && !uid && <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#A78BFA]/20 bg-[#211B2D] px-4 py-3 text-sm text-[#DDD6FE]"><span>Чтобы писать в чаты ZAPRUDA, войди в аккаунт.</span><Link to="/auth" search={{ mode: "in" }} className="inline-flex min-h-10 items-center rounded-full bg-[#D7FF35] px-4 text-xs font-black uppercase text-black">Войти</Link></div>}
           <form className="space-y-3 border-t border-[#A78BFA]/15 bg-[#101211] p-3 sm:p-4" onSubmit={send}>
             <div className="flex flex-wrap gap-1">
               {quick.map(q=><button key={q} type="button" title={"Вставить "+q}
