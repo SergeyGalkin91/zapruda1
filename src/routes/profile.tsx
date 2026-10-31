@@ -140,6 +140,22 @@ function TrophyGallery({ userId }: { userId: string }) {
   </section>;
 }
 
+function ProfileSections() {
+  const items = [
+    { label: "ТРОФЕИ", detail: "Фото уловов", href: "#zapruda-trophies", color: "#D7FF35" },
+    { label: "СПОТЫ", detail: "Личные точки", href: "#private-fishing-marks", color: "#A78BFA" },
+    { label: "СТАФФ", detail: "Твои комплекты", href: "#my-gear-sets", color: "#D7FF35" },
+    { label: "ПРОГРЕСС", detail: "Ранги и достижения", href: "#angler-progress", color: "#A78BFA" },
+  ];
+  return <nav aria-label="Разделы профиля" className="mb-7 grid grid-cols-2 gap-2 sm:grid-cols-4">
+    {items.map((item,index)=><a key={item.href} href={item.href} className="group rounded-[20px] border border-white/10 bg-[#111511] p-4 transition hover:border-[#D7FF35]/50 hover:bg-[#1A2016]">
+      <span className="text-[10px] font-black tracking-widest" style={{color:item.color}}>0{index+1} / ZAPRUDA</span>
+      <span className="mt-3 block text-lg font-black uppercase tracking-tight text-white sm:text-xl">{item.label}</span>
+      <span className="mt-1 block text-xs text-zinc-400">{item.detail} ↗</span>
+    </a>)}
+  </nav>;
+}
+
 function Profile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
@@ -624,6 +640,8 @@ function Profile() {
             )}
           </section>
 
+          <ProfileSections />
+
           <TrophyGallery userId={userId} />
 
           <PrivateFishingMarks userId={userId} homeCity={preferences.home_city} homeRegion={preferences.home_region} />
@@ -639,7 +657,7 @@ function Profile() {
             <Link to="/spearfishing" className="btn-ghost inline-flex">Подводная охота</Link>
           </div>
           {progress ? (
-            <><FishingProgressTree progress={progress} /><FishingDisciplineTree stats={specializations} preferredMethod={preferences.main_technique} /></>
+            <div id="angler-progress"><FishingProgressTree progress={progress} /><FishingDisciplineTree stats={specializations} preferredMethod={preferences.main_technique} /></div>
           ) : (
             <div className="panel p-5 text-sm text-zinc-400">Пока не удалось загрузить ветку достижений. Попробуй обновить страницу.</div>
           )}
