@@ -207,14 +207,14 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
       </footer>
 
-      <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#0D100C]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.32)] backdrop-blur-xl xl:hidden">
-        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
+      <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-[#D7FF35]/20 bg-[#080D09]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.32)] backdrop-blur-xl xl:hidden">
+        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2 pt-1">
           {mobileNav.map(({ to, label, Icon }) => (
             <Link key={to}
               to={to === "/profile" && !isSignedIn ? "/auth" : to}
               activeOptions={{ exact: true }}
               className="flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
-              activeProps={{ className: "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
+              activeProps={{ className: "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl border-t-2 border-[#D7FF35] bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
               {to === "/profile" && !isSignedIn ? (
                 <LogIn className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
               ) : (
