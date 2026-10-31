@@ -219,45 +219,52 @@ function GeographicChat() {
     e.preventDefault();
     const body = draft.trim();
     if ((!body && !photo) || !uid || busy || !selectedPlace) return;
-    setBusy(true); setChatError("");
     const author = replyTo?.profiles?.display_name || replyTo?.profiles?.username || "Рыболов";
     const quoted = replyTo ? replyTo.body.slice(0, 180).replace(/\s+/g, " ").trim() : "";
     const outgoing = replyTo ? "↪ " + author.slice(0, 40) + ": " + quoted + "\n" + body : body;
-    if (outgoing.length > 2000) { setChatError("Сообщение с цитатой не должно превышать 2000 символов."); setBusy(false); return; }
-    if (photo && (!["image/jpeg","image/png","image/webp"].includes(photo.type) || photo.size > 5*1024*1024)) {
-      setChatError("Фото должно быть JPG, PNG или WebP до 5 МБ."); setBusy(false); return;
+    if (!pendingPhotoMessageId && outgoing.length > 2000) {
+      setChatError("Сообщение с цитатой не должно превышать 2000 символов."); return;
     }
-    let messageId = pendingPhotoMessageId;
-    if (!messageId) {
-      const { data: message, error: sendError } = await api.from("chat_messages")
-        .insert({ user_id: uid, body: outgoing || "📷 Фото", place_id: selectedPlace.id, topic })
-        .select("id").single();
-      if (sendError || !message?.id) {
-        setChatError("Сообщение не отправлено: " + (sendError?.message || "сервер не вернул ID"));
-        setBusy(false); return;
-      }
-      messageId = message.id as string;
-      if (photo) setPendingPhotoMessageId(messageId);
+    if (photo && (!["image/jpeg", "image/png", "image/webp"].includes(photo.type) || photo.size > 5 * 1024 * 1024)) {
+      setChatError("Фото должно быть JPG, PNG или WebP до 5 МБ."); return;
     }
-    if (photo && messageId) {
-      const ext = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
-      const path = uid + "/" + messageId + "/" + crypto.randomUUID() + "." + ext;
-      const { error: uploadError } = await supabase.storage.from("chat-photos").upload(path,photo,{contentType:photo.type,upsert:false});
-      if (uploadError) {
-        setChatError("Сообщение сохранено, но фото не загружено: " + uploadError.message);
-        setBusy(false); setRefreshIndex(i => i+1); return;
+    setBusy(true);
+    setChatError("");
+    try {
+      let messageId = pendingPhotoMessageId;
+      if (!messageId) {
+        const { data: message, error: sendError } = await api.from("chat_messages")
+          .insert({ user_id: uid, body: outgoing || "📷 Фото", place_id: selectedPlace.id, topic })
+          .select("id").single();
+        if (sendError || !message?.id) throw new Error("Сообщение не отправлено: " + (sendError?.message || "сервер не вернул ID"));
+        messageId = message.id as string;
+        if (photo) setPendingPhotoMessageId(messageId);
       }
-      const { error: linkError } = await api.from("chat_message_photos")
-        .insert({message_id:messageId,user_id:uid,storage_path:path});
-      if (linkError) {
-        await supabase.storage.from("chat-photos").remove([path]);
-        setChatError("Сообщение сохранено без фото: " + linkError.message);
-        setBusy(false); setRefreshIndex(i => i+1); return;
+      if (photo && messageId) {
+        const ext = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
+        const path = uid + "/" + messageId + "/" + crypto.randomUUID() + "." + ext;
+        const { error: uploadError } = await supabase.storage.from("chat-photos")
+          .upload(path, photo, { contentType: photo.type, upsert: false });
+        if (uploadError) throw new Error("Фото не загружено: " + uploadError.message);
+        const { error: linkError } = await api.from("chat_message_photos")
+          .insert({ message_id: messageId, user_id: uid, storage_path: path });
+        if (linkError) {
+          await supabase.storage.from("chat-photos").remove([path]).catch(() => undefined);
+          throw new Error("Фото не прикреплено: " + linkError.message);
+        }
       }
+      setDraft("");
+      setPhoto(null);
+      setPendingPhotoMessageId(null);
+      setReplyTo(null);
+      setRefreshIndex(i => i + 1);
+    } catch (cause) {
+      setChatError((pendingPhotoMessageId ? "Попробуй повторить загрузку. " : "") +
+        (cause instanceof Error ? cause.message : "Неожиданная ошибка отправки."));
+      setRefreshIndex(i => i + 1);
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
-    setDraft(""); setPhoto(null); setPendingPhotoMessageId(null); setReplyTo(null);
-    setRefreshIndex(i => i + 1);
   }
 
   return <Shell>
