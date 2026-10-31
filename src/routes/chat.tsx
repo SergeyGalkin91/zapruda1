@@ -59,6 +59,7 @@ function GeographicChat() {
   const [uid, setUid] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [roomLastMessages, setRoomLastMessages] = useState<Partial<Record<ChatTopic, { body: string; created_at: string }>>>({});
   const [reactions, setReactions] = useState<ChatReaction[]>([]);
   const [reactingTo, setReactingTo] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -124,6 +125,30 @@ function GeographicChat() {
   const regions = places.filter(p => p.parent_id === country?.id && p.level === "region");
   const cities = places.filter(p => p.parent_id === region?.id && p.level === "city");
   const currentTopic = TOPICS.find(t => t.key === topic) || TOPICS[0];
+
+  // Read-only last-message previews for the selected geographic scope.
+  // No invented unread counts or mock messages; errors leave the descriptive fallback.
+  useEffect(() => {
+    if (!uid || threadOpen) { setRoomLastMessages({}); return; }
+    let active = true;
+    setRoomLastMessages({});
+    void (async () => {
+      const { data, error: previewError } = await api.from("chat_messages")
+        .select("topic,body,created_at")
+        .eq("place_id", placeId)
+        .order("created_at", { ascending: false })
+        .limit(250);
+      if (!active || previewError) return;
+      const latest: Partial<Record<ChatTopic, { body: string; created_at: string }>> = {};
+      for (const row of data || []) {
+        if (VALID_TOPICS.includes(row.topic as ChatTopic) && !latest[row.topic as ChatTopic]) {
+          latest[row.topic as ChatTopic] = { body: row.body, created_at: row.created_at };
+        }
+      }
+      setRoomLastMessages(latest);
+    })();
+    return () => { active = false; };
+  }, [uid, placeId, threadOpen, refreshIndex]);
 
   function go(id: string, newTopic: ChatTopic = topic) {
     if (pendingPhotoMessageId) {
@@ -343,7 +368,8 @@ function GeographicChat() {
               </span>
               <span className="min-w-0">
                 <span className="block text-base font-black text-white">{t.label}</span>
-                <span className="mt-1 block text-xs leading-5 text-[#A99AD9]">{t.description}</span>
+                <span className="mt-1 block truncate text-xs leading-5 text-[#A99AD9]">{roomLastMessages[t.key]?.body || t.description}</span>
+                {roomLastMessages[t.key] && <time dateTime={roomLastMessages[t.key]!.created_at} className="mt-1 block text-[10px] text-[#B4A1D7]">{new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</time>}
               </span>
             </button>
           ))}
