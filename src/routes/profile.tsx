@@ -250,6 +250,23 @@ function Profile() {
     if (profileResult.error) {
       setError("Не удалось загрузить профиль: " + profileResult.error.message);
     } else if (profileResult.data) {
+      const meta = auth.user.user_metadata ?? {};
+      const providerName = [meta.full_name, meta.name, meta.display_name]
+        .find((value): value is string => typeof value === "string" && value.trim().length > 0)?.trim();
+      const providerAvatar = [meta.avatar_url, meta.picture]
+        .find((value): value is string => typeof value === "string" && /^https:\/\//i.test(value)) ?? null;
+      const emailPrefix = auth.user.email?.split("@")[0] ?? "";
+      const currentName = profileResult.data.display_name?.trim() ?? "";
+      const canFillName = !!providerName && (!currentName || currentName === emailPrefix || currentName === "angler");
+      const canFillAvatar = !!providerAvatar && !profileResult.data.avatar_url;
+      const additions: { display_name?: string; avatar_url?: string } = {};
+      if (canFillName) additions.display_name = providerName;
+      if (canFillAvatar && providerAvatar) additions.avatar_url = providerAvatar;
+      if (Object.keys(additions).length) {
+        const { error: syncError } = await supabase.from("profiles").update(additions).eq("id", auth.user.id);
+        if (syncError) console.warn("OAuth profile import skipped:", syncError.message);
+        else profileResult.data = { ...profileResult.data, ...additions };
+      }
       setUsername(profileResult.data.username ?? "");
       setDisplayName(profileResult.data.display_name ?? "");
       setBio(profileResult.data.bio ?? "");
