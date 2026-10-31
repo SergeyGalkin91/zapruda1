@@ -15,6 +15,8 @@ type ChatMessage = {
   id: string; user_id: string; body: string; created_at: string;
   profiles?: { username: string | null; display_name: string | null; avatar_url: string | null; chat_city: string | null } | null;
 };
+type ChatReaction = { id: string; message_id: string; user_id: string; emoji: string };
+const REACTION_EMOJI = ["❤️", "👍", "🔥", "😂"] as const;
 const GLOBAL_ID = "00000000-0000-4000-8000-000000000001";
 const TOPICS: ReadonlyArray<{ key: ChatTopic; label: string; icon: string; description: string }> = [
   { key: "general", label: "Общий", icon: "💬", description: "Знакомства, разговоры и рыбацкие истории" },
@@ -47,6 +49,8 @@ function GeographicChat() {
   const [uid, setUid] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [reactions, setReactions] = useState<ChatReaction[]>([]);
+  const [reactingTo, setReactingTo] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [regionName, setRegionName] = useState("");
@@ -125,7 +129,16 @@ function GeographicChat() {
       if (!alive) return;
       setChatLoading(false);
       if (queryError) setChatError("Не удалось открыть ветку: " + queryError.message);
-      else { setChatError(""); setMessages(((data || []) as ChatMessage[]).reverse()); }
+      else {
+        setChatError("");
+        const fetched = ((data || []) as ChatMessage[]).reverse();
+        setMessages(fetched);
+        if (fetched.length) {
+          const { data: liked, error: reactionError } = await api.from("chat_message_reactions")
+            .select("id,message_id,user_id,emoji").in("message_id", fetched.map(m => m.id));
+          if (alive && !reactionError) setReactions((liked || []) as ChatReaction[]);
+        } else setReactions([]);
+      }
     };
     void fetchMessages();
     const channel = supabase.channel("zapruda-chat-" + selectedPlace.id + "-" + topic)
@@ -164,6 +177,29 @@ function GeographicChat() {
     setPlaces((loaded || []) as Place[]);
     setRegionName(""); setCityName("");
     if (typeof data === "string") go(data, "general");
+  }
+
+  async function toggleReaction(messageId: string, emoji: string) {
+    if (!uid || reactingTo) return;
+    setReactingTo(messageId);
+    const mine = reactions.find(r => r.message_id === messageId && r.user_id === uid);
+    try {
+      if (mine) {
+        const { error: removeError } = await api.from("chat_message_reactions").delete().eq("id", mine.id).eq("user_id", uid);
+        if (removeError) throw removeError;
+        setReactions(current => current.filter(r => r.id !== mine.id));
+      }
+      if (!mine || mine.emoji !== emoji) {
+        const { data: added, error: addError } = await api.from("chat_message_reactions")
+          .insert({ message_id: messageId, user_id: uid, emoji })
+          .select("id,message_id,user_id,emoji").single();
+        if (addError) throw addError;
+        if (added) setReactions(current => [...current.filter(r => r.message_id !== messageId || r.user_id !== uid), added as ChatReaction]);
+      }
+    } catch (cause) {
+      setChatError(cause instanceof Error ? cause.message : "Не удалось сохранить реакцию.");
+      setRefreshIndex(n => n + 1);
+    } finally { setReactingTo(null); }
   }
 
   async function send(e: FormEvent<HTMLFormElement>) {
@@ -327,6 +363,19 @@ function GeographicChat() {
               </div>
               <div className={"zapruda-chat-bubble whitespace-pre-wrap break-words rounded-[20px] border px-4 py-3 text-sm leading-6 "+(message.user_id===uid?"zapruda-chat-own-bubble ":"zapruda-chat-incoming-bubble ")+(message.user_id===uid?"rounded-tr-sm border-[#D7FF35]/30 bg-[#D7FF35]/10 text-white":"rounded-tl-sm border-[#A78BFA]/20 bg-[#191722] text-zinc-100")}>
                 {message.body}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {REACTION_EMOJI.map(emoji => {
+                  const likes = reactions.filter(r => r.message_id === message.id && r.emoji === emoji);
+                  const selected = likes.some(r => r.user_id === uid);
+                  return <button key={emoji} type="button" disabled={!uid || !!reactingTo}
+                    onClick={() => void toggleReaction(message.id, emoji)}
+                    aria-label={"Реакция " + emoji + " на сообщение"}
+                    aria-pressed={selected}
+                    className={"rounded-full border px-2 py-1 text-xs transition " + (selected ? "border-[#D7FF35]/70 bg-[#D7FF35]/15 text-white" : "border-white/10 bg-white/5 text-zinc-300 hover:border-white/30")}>
+                    {emoji}{likes.length ? " " + likes.length : ""}
+                  </button>;
+                })}
               </div>
               {uid && <button type="button" onClick={() => setReplyTo(message)}
                 className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-zinc-400 hover:bg-white/10 hover:text-[#D7FF35]">
