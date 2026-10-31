@@ -251,3 +251,9 @@
 .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-own-bubble a {
   color: inherit;
 }
+
+/* v0.7.0 shared mobile geometry; keeps approved brand colors. */
+.z-card { border: 1px solid var(--z-stroke); background: var(--z-card); border-radius: var(--z-radius-card); }
+.z-card-hero { border: 1px solid var(--z-stroke); background: var(--z-card-elevated); border-radius: var(--z-radius-hero); }
+.z-room-row { display: grid; grid-template-columns: 64px minmax(0,1fr) auto; align-items: center; gap: 1rem; min-height: 88px; width: 100%; text-align: left; }
+@media(max-width:639px) { .z-room-row { min-height: 80px; gap: .75rem; } }
