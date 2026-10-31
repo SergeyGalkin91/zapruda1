@@ -169,7 +169,6 @@ function GeographicChat() {
     e.preventDefault();
     const body = draft.trim();
     if (!body || !uid || busy || !selectedPlace) return;
-    if (topic !== "general") { setChatError("Отправка пока доступна только в общей ветке. Выбери «Общий» — там сообщения работают."); return; }
     setBusy(true); setChatError("");
     const { error: sendError } = await api.from("chat_messages")
       .insert({ user_id: uid, body, place_id: selectedPlace.id, topic });
@@ -326,7 +325,6 @@ function GeographicChat() {
               </div>
             </article>)}
           </div>
-          {topic !== "general" && <p role="status" className="border-t border-[#A78BFA]/20 bg-[#211B2D] px-4 py-3 text-xs text-[#DDD6FE]">Эта тематическая ветка пока доступна для чтения. Чтобы написать сообщение, переключись на «Общий».</p>}
           <form className="space-y-3 border-t border-[#A78BFA]/15 bg-[#101211] p-3 sm:p-4" onSubmit={send}>
             <div className="flex flex-wrap gap-1">
               {quick.map(q=><button key={q} type="button" title={"Вставить "+q}
@@ -336,9 +334,9 @@ function GeographicChat() {
             <div className="flex gap-2">
               <input className="field min-w-0 flex-1" aria-label="Сообщение для выбранной ветки"
                 placeholder={"Написать в «"+currentTopic.label+"»…"}
-                value={draft} onChange={e => setDraft(e.target.value)} disabled={!uid||busy||chatLoading||topic!=="general"} maxLength={2000}/>
+                value={draft} onChange={e => setDraft(e.target.value)} disabled={!uid||busy||chatLoading} maxLength={2000}/>
               <button type="submit" className="btn-primary inline-flex min-h-11 items-center gap-2"
-                disabled={!draft.trim()||!uid||busy||chatLoading||topic!=="general"}>
+                disabled={!draft.trim()||!uid||busy||chatLoading}>
                 <Send className="size-4"/> {busy?"Отправляем…":"Отправить"}
               </button>
             </div>
