@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Check, MessageCircle, Plus, Send, UserPlus, Users, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,10 +47,21 @@ export function SocialGroups(){
     setRequests((q.data??[]) as Request[]);
   },[]);
 
+  // Client-side access guard (RLS remains the real control): owner or accepted member.
+  const accessRef=useRef<(id:string)=>boolean>(()=>false);
+  accessRef.current=(id:string)=>!!uid&&(groups.some(g=>g.id===id&&g.owner_id===uid)||members.some(m=>m.group_id===id&&m.user_id===uid&&m.status==="accepted"));
+  const activeGroupRef=useRef("");
+  useEffect(()=>{activeGroupRef.current=activeGroup;},[activeGroup]);
+  const loadSeq=useRef(0);
+
   const loadMessages=useCallback(async(id:string)=>{
     if(!id)return;
+    const seq=++loadSeq.current;
+    if(!accessRef.current(id)){setMessages([]);return;}
     const {data,error:e}=await db.from("social_group_messages")
       .select("id,user_id,body,created_at").eq("group_id",id).order("created_at",{ascending:false}).limit(120);
+    // Drop stale responses after switching club or losing access.
+    if(seq!==loadSeq.current||activeGroupRef.current!==id||!accessRef.current(id))return;
     if(e)setError("Не удалось прочитать закрытый клубный чат: "+e.message);
     else setMessages(((data??[]) as GroupMessage[]).reverse());
   },[]);
@@ -64,14 +75,15 @@ export function SocialGroups(){
     window.addEventListener("focus",focus);
     return()=>{window.removeEventListener("focus",focus);void supabase.removeChannel(channel);};
   },[refresh]);
+  const hasActiveAccess=!!activeGroup&&accessRef.current(activeGroup);
   useEffect(()=>{
-    if(!activeGroup){setMessages([]);return;}
+    if(!activeGroup||!hasActiveAccess){loadSeq.current++;setMessages([]);return;}
     void loadMessages(activeGroup);
     const channel=supabase.channel("zapruda-club-chat-"+activeGroup)
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"social_group_messages",filter:"group_id=eq."+activeGroup},
         ()=>void loadMessages(activeGroup)).subscribe();
     return()=>{void supabase.removeChannel(channel);};
-  },[activeGroup,loadMessages]);
+  },[activeGroup,hasActiveAccess,loadMessages]);
 
   async function requestClub(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
@@ -123,6 +135,7 @@ export function SocialGroups(){
   async function send(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
     if(!activeGroup||!uid||!draft.trim()||busy)return;
+    if(!accessRef.current(activeGroup)){setError("Нет доступа к чату этого клуба.");return;}
     setBusy(true);setError("");
     const {error:sendError}=await db.from("social_group_messages").insert({
       group_id:activeGroup,user_id:uid,body:draft.trim(),
