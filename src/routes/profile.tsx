@@ -436,7 +436,7 @@ function Profile() {
             ? <img src={avatarUrl} alt="" className="size-24 rounded-full border-[3px] border-[#D7FF35]/70 object-cover shadow-[0_0_28px_rgba(215,255,53,0.13)]" />
             : <div className="flex size-20 items-center justify-center rounded-full border border-[#D7FF35]/35 bg-[#D7FF35]/10"><UserRound className="size-9 text-[#D7FF35]" /></div>}
           <div className="min-w-0 flex-1">
-            <h1 className="max-w-full break-words text-[clamp(1.45rem,5vw,3.3rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white [overflow-wrap:anywhere]">{displayName || username || "Мой рыболовный профиль"}</h1>
+            <h1 className="max-w-full text-[clamp(1.05rem,4.3vw,3.3rem)] font-black uppercase leading-[1.12] tracking-[-0.035em] text-white [overflow-wrap:normal] break-normal">{displayName || username || "Мой рыболовный профиль"}</h1>
             <p className="mt-1 text-sm text-[#A6B1A0]">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
             <p className="mt-2 text-xs text-zinc-400">{bio || "Расскажи, где и на что любишь ловить."}</p>
           </div>
