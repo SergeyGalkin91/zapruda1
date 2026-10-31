@@ -297,6 +297,7 @@ function Feed() {
               <span className="rounded-full border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-3 py-1.5 text-[#D7FF35]">Все отчёты</span>
               <Link to="/communities" className="rounded-full border border-white/15 px-3 py-1.5 hover:text-white">Сообщества</Link>
               <Link to="/partners" className="rounded-full border border-white/15 px-3 py-1.5 hover:text-white">Напарники</Link>
+              <Link to="/profile" hash="private-fishing-marks" className="rounded-full border border-[#A78BFA]/35 bg-[#A78BFA]/10 px-3 py-1.5 text-[#C4B5FD] hover:border-[#A78BFA]">Мои споты</Link>
             </div>
           </div>
           <Link to="/reports/new" className="inline-flex shrink-0 items-center justify-center rounded-full bg-[#D7FF35] px-6 py-3 text-xs font-black uppercase tracking-[0.09em] text-black transition hover:bg-white">+ Новый отчёт</Link>
