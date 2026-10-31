@@ -318,7 +318,7 @@ function Feed() {
       {reports.map((report) => {
         const name = report.profiles?.display_name || report.profiles?.username || "Рыболов";
         return (
-          <article key={report.id} className="mb-5 space-y-4 overflow-hidden rounded-[24px] border border-white/10 bg-[#111411] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.14)] sm:p-5">
+          <article key={report.id} className="z-underground mb-5 space-y-4 overflow-hidden p-4 shadow-[0_18px_45px_rgba(0,0,0,0.14)] sm:p-5">
             <div className="flex items-start gap-3">
               {report.profiles?.avatar_url
                 ? <img src={report.profiles.avatar_url} alt="" className="size-11 rounded-full object-cover" />
