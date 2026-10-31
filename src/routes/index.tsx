@@ -354,26 +354,26 @@ function Feed() {
       {reports.map((report) => {
         const name = report.profiles?.display_name || report.profiles?.username || "Рыболов";
         return (
-          <article key={report.id} className="zapruda-report-card panel mb-4 space-y-3 border-white/10 bg-[#141814] p-4 sm:p-5">
+          <article key={report.id} className="zapruda-report-card panel mb-5 space-y-4 overflow-hidden border-white/10 bg-[#111711] p-4 sm:p-6">
             <div className="flex items-start gap-3">
               {report.profiles?.avatar_url
                 ? <img src={report.profiles.avatar_url} alt="" className="size-11 rounded-full object-cover" />
                 : <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-xl">🎣</div>}
               <div className="min-w-0 flex-1">
-                <div className="font-semibold">{name}</div>
+                <div className="font-black tracking-tight text-white">{name}</div>
                 <div className="text-xs text-muted-foreground">{new Date(report.created_at).toLocaleString("ru-RU")}</div>
               </div>
-              <span className="rounded-full bg-secondary px-2 py-1 text-xs">🐟 Отчёт</span>
+              <span className="rounded-full border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[#D7FF35]">ZAPRUDA / ОТЧЁТ</span>
             </div>
             <div>
-              <h2 className="text-lg font-bold">{report.title}</h2>
+              <h2 className="text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">{report.title}</h2>
               {report.body && <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm text-zinc-300">{report.body}</p>}
-              <Link to="/reports/$id" params={{id:report.id}} className="mt-3 inline-flex text-sm font-semibold text-[#D7FF35]">Читать отчёт и обсуждение →</Link>
+              <Link to="/reports/$id" params={{id:report.id}} className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-[#D7FF35]">Читать историю <ArrowUpRight className="size-4"/></Link>
             </div>
             <ReportPhotoGallery photos={photosByReport[report.id] ?? []} title={report.title} />
-            {report.location_name && <p className="text-xs text-zinc-400">📍 {report.location_name}</p>}
+            {report.location_name && <p className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-zinc-300">📍 {report.location_name}</p>}
             <ReactionBar reportId={report.id} />
-            <Link to="/reports/$id" params={{id:report.id}} className="inline-flex text-sm text-zinc-300 underline underline-offset-4">💬 Комментарии ({commentCounts[report.id]??0}) · вопросы</Link>
+            <Link to="/reports/$id" params={{id:report.id}} className="inline-flex min-h-10 items-center text-sm font-semibold text-zinc-300 underline decoration-[#D7FF35]/30 underline-offset-4 hover:text-[#D7FF35]">💬 Обсудить ({commentCounts[report.id]??0})</Link>
           </article>
         );
       })}
