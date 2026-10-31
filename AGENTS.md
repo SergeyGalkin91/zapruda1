@@ -8,3 +8,4 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+- tsconfig keeps noUncheckedIndexedAccess, noPropertyAccessFromIndexSignature and exactOptionalPropertyTypes off and lib at ES2023: the existing code was not written for those flags, and they blocked the preview's typecheck.
