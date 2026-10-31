@@ -52,12 +52,12 @@ function AdminConsole() {
 
   return <Shell>
     <div className="mx-auto max-w-5xl space-y-6">
-      <header className="rounded-3xl border border-[#D7FF35]/25 bg-[#151915] p-6 sm:p-8">
+      <header className="overflow-hidden rounded-3xl border border-[#313044] bg-[#080C10] p-5 shadow-[0_20px_50px_rgba(0,0,0,.35)] sm:p-8">
         <p className="text-xs font-black uppercase tracking-widest text-[#D7FF35]">ZAPRUDA / PRIVATE ADMIN</p>
         <h1 className="mt-3 flex items-center gap-3 text-2xl font-black text-white sm:text-3xl">
           <ShieldCheck className="size-8 text-[#D7FF35]" /> Кабинет администрации
         </h1>
-        <p className="mt-3 text-sm text-zinc-400">Закрытый центр управления заявками, финансами и обращениями. Действия доступны только назначенным администраторам.</p>
+        <p className="mt-3 text-sm text-[#B4A1D7]">Управление платформой ZAPRUDA COMMUNITY. Действия доступны только назначенным администраторам.</p><div aria-hidden="true" className="relative mt-5 h-36 overflow-hidden rounded-[20px] border border-[#333A47] bg-[radial-gradient(ellipse_at_65%_92%,#B46A37_0%,#463B48_29%,#151D29_62%,#080D13_100%)] sm:h-48"><div className="absolute inset-x-0 bottom-0 h-[38%] bg-[linear-gradient(180deg,transparent,#0B171D)]" /><div className="absolute bottom-[34%] left-0 right-0 h-px bg-[#F6B76F]/30" /><div className="absolute right-7 top-6 size-12 rounded-full bg-[#FFCC85]/70 blur-[11px]" /></div>
       </header>
       {state === "loading" && <div className="panel p-6 text-sm text-zinc-400">Проверяем авторизацию и права…</div>}
       {state === "login" && <div className="panel space-y-4 p-6">
@@ -73,14 +73,14 @@ function AdminConsole() {
             ["Заявки на клубы", counts.clubs],
             ["Проверка гидов", counts.guides],
             ["Обращения", counts.requests],
-          ].map(([label, value]) => <div key={String(label)} className="rounded-2xl border border-white/10 bg-[#151915] p-5">
+          ].map(([label, value]) => <div key={String(label)} className="rounded-2xl border border-[#34304D] bg-[#10141D] p-5">
             <p className="text-xs text-zinc-400">{label}</p>
             <p className="mt-2 text-3xl font-black text-[#D7FF35]">{value === null ? "—" : value}</p>
           </div>)}
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {sections.map(({ title, description, href, Icon }) =>
-            <Link key={href} to={href} className="rounded-2xl border border-[#D7FF35]/20 bg-[#151915] p-5 transition hover:border-[#D7FF35]/60">
+            <Link key={href} to={href} className="rounded-2xl border border-[#41395B] bg-[linear-gradient(140deg,#131724,#0B1018)] p-5 transition hover:border-[#D7FF35]/60 hover:bg-[#1A1A2B]">
               <Icon className="size-6 text-[#D7FF35]" />
               <h2 className="mt-4 font-black text-white">{title}</h2>
               <p className="mt-2 text-sm leading-6 text-zinc-400">{description}</p>
