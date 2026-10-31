@@ -216,6 +216,16 @@ function GeographicChat() {
     } finally { setReactingTo(null); }
   }
 
+  function abandonPendingPhoto() {
+    // The text message is already persisted. Only cancel its unfinished attachment.
+    setPendingPhotoMessageId(null);
+    setPhoto(null);
+    setDraft("");
+    setReplyTo(null);
+    setChatError("");
+    setRefreshIndex(index => index + 1);
+  }
+
   async function send(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const body = draft.trim();
@@ -450,7 +460,7 @@ function GeographicChat() {
             <div className="flex flex-wrap items-center gap-2">
               <label className="inline-flex cursor-pointer items-center rounded-lg border border-white/20 px-3 py-2 text-xs text-zinc-200 hover:border-[#D7FF35]">
                 📷 {photo ? photo.name : "Прикрепить фото"}
-                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!uid || busy}
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!uid || busy || !!pendingPhotoMessageId}
                   onChange={e => {
                     const file = e.target.files?.[0] || null;
                     e.target.value = "";
@@ -459,12 +469,13 @@ function GeographicChat() {
                     setChatError(""); setPhoto(file);
                   }} />
               </label>
-              {photo && <button type="button" className="text-xs text-[#D7FF35]" onClick={() => { setPhoto(null); setPendingPhotoMessageId(null); }}>Убрать фото</button>}
+              {photo && !pendingPhotoMessageId && <button type="button" className="text-xs text-[#D7FF35]" onClick={() => setPhoto(null)}>Убрать фото</button>}
+              {pendingPhotoMessageId && <button type="button" disabled={busy} className="text-xs text-amber-200 underline" onClick={abandonPendingPhoto}>Оставить сообщение без фото</button>}
             </div>
             <div className="flex gap-2">
               <input className="field min-w-0 flex-1" aria-label="Сообщение для выбранной ветки"
                 placeholder={"Написать в «"+currentTopic.label+"»…"}
-                value={draft} onChange={e => setDraft(e.target.value)} disabled={!uid||busy||chatLoading} maxLength={2000}/>
+                value={draft} onChange={e => setDraft(e.target.value)} disabled={!uid||busy||chatLoading||!!pendingPhotoMessageId} maxLength={2000}/>
               <button type="submit" className="btn-primary inline-flex min-h-11 items-center gap-2"
                 disabled={(!draft.trim() && !photo)||!uid||busy||chatLoading}>
                 <Send className="size-4"/> {busy?"Отправляем…":"Отправить"}
