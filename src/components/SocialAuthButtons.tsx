@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-type SocialProvider = "google" | "apple" | "custom:vk" | "custom:yandex";
+type SocialProvider = "google" | "apple" | "custom:yandex";
 type ProviderSettings = {
   external?: { google?: boolean; apple?: boolean; email?: boolean };
   disable_signup?: boolean;
@@ -9,9 +9,8 @@ type ProviderSettings = {
 
 const providers: ReadonlyArray<{ provider: SocialProvider; title: string; symbol: string; native: boolean }> = [
   { provider: "google", title: "Google", symbol: "G", native: true },
-  { provider: "apple", title: "Apple", symbol: "●", native: true },
-  { provider: "custom:vk", title: "ВКонтакте", symbol: "VK", native: false },
   { provider: "custom:yandex", title: "Яндекс", symbol: "Я", native: false },
+  { provider: "apple", title: "Apple", symbol: "●", native: true },
 ];
 
 function getAuthError(error: unknown): string {
@@ -70,7 +69,6 @@ export function SocialAuthButtons({ onError }: { onError: (message: string) => v
   }
 
   const customEnabled: Record<string, boolean> = {
-    "custom:vk": import.meta.env["VITE_SOCIAL_VK_ENABLED"] === "true",
     "custom:yandex": import.meta.env["VITE_SOCIAL_YANDEX_ENABLED"] === "true",
   };
 
@@ -81,11 +79,11 @@ export function SocialAuthButtons({ onError }: { onError: (message: string) => v
         Или через аккаунт
         <span className="h-px flex-1 bg-white/10" />
       </div>
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
         {providers.map(({ provider, title, symbol, native }) => {
           const available = native
             ? checked && settings?.external?.[provider as "google" | "apple"] === true
-            : customEnabled[provider];
+            : checked && customEnabled[provider];
           const label = available ? "Продолжить с " + title : title + " — не подключён";
           return (
             <button
@@ -106,7 +104,7 @@ export function SocialAuthButtons({ onError }: { onError: (message: string) => v
         })}
       </div>
       <p className="mt-3 text-xs leading-5 text-zinc-500">
-        Google и Apple включаются через Supabase Auth Providers. VK ID и Яндекс ID подключаются как Custom OAuth/OIDC.
+        Google и Apple включаются через Supabase Auth Providers. Яндекс ID подключается как Custom OAuth/OIDC.
         До настройки сервиса кнопка не выполняет вход.
       </p>
       {checked && settings?.external?.email === false && (
