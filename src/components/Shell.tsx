@@ -12,8 +12,8 @@ import { applyAppearance, loadAppearance } from "@/lib/appearance";
 const desktopNav = [
   { to: "/", label: "Лента", Icon: House },
   { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
-  { to: "/partners", label: "Напарники", Icon: Users },
-  { to: "/communities", label: "Клубы", Icon: Compass },
+  { to: "/partners", label: "Выезды", Icon: Users },
+  { to: "/communities", label: "Комьюнити", Icon: Compass },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
   { to: "/messages", label: "Личные", Icon: MessageCircle },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
@@ -21,8 +21,8 @@ const desktopNav = [
 
 const mobileNav = [
   { to: "/", label: "Лента", Icon: House },
-  { to: "/reports/new", label: "Отчёт", Icon: Plus },
-  { to: "/partners", label: "Напарники", Icon: Users },
+  { to: "/reports/new", label: "Создать", Icon: Plus },
+  { to: "/partners", label: "Выезды", Icon: Users },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
   { to: "/profile", label: "Профиль", Icon: UserRound },
 ] as const;
@@ -30,7 +30,7 @@ const mobileNav = [
 const otherNav = [
   { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
-  { to: "/communities", label: "Клубы и сообщества", Icon: Compass },
+  { to: "/communities", label: "Комьюнити и клубы", Icon: Compass },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
   { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
