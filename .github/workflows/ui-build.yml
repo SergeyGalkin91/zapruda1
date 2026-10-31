@@ -38,7 +38,7 @@ jobs:
           test -f .output/server/index.mjs
       - name: Install browser for mobile smoke test
         run: |
-          bun add --no-save playwright
+          bun add --dev playwright
           bunx playwright install --with-deps chromium
       - name: Start application and check mobile screens
         shell: bash
