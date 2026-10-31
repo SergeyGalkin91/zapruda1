@@ -168,10 +168,24 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
         </div>
         <div>
           {selected && mapUrl ? (
-            <>
-              <iframe key={selected.id} title={"Карта: " + selected.title} src={mapUrl} loading="lazy" className="h-[280px] w-full rounded-xl border border-white/10" referrerPolicy="strict-origin-when-cross-origin" />
-              {openUrl && <a className="btn-ghost mt-2 inline-flex" href={openUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /> Открыть точку в Яндекс Картах</a>}
-            </>
+            <div className="overflow-hidden rounded-[24px] border border-[#A78BFA]/25 bg-[#101210]">
+              <div className="relative">
+                <iframe key={selected.id} title={"Карта: " + selected.title} src={mapUrl} loading="lazy" className="h-[230px] w-full border-0" referrerPolicy="strict-origin-when-cross-origin" />
+                <span className="pointer-events-none absolute left-3 top-3 rounded-full border border-[#D7FF35]/40 bg-[#0A0D09]/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[#D7FF35]">ZAPRUDA / SPOT</span>
+              </div>
+              <div className="space-y-3 p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#A78BFA]">{labels[selected.kind]}</p>
+                    <h3 className="mt-1 text-xl font-black uppercase leading-tight tracking-tight text-white">{selected.title}</h3>
+                  </div>
+                  <MapPin className="size-6 shrink-0 text-[#D7FF35]" aria-hidden="true" />
+                </div>
+                {selected.note && <p className="whitespace-pre-wrap break-words text-sm leading-6 text-zinc-300">{selected.note}</p>}
+                <p className="font-mono text-[11px] text-zinc-400">{selected.latitude.toFixed(6)}, {selected.longitude.toFixed(6)}</p>
+                {openUrl && <a className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#D7FF35] px-5 py-3 text-xs font-black uppercase tracking-wide text-black transition hover:bg-white" href={openUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /> Открыть на карте</a>}
+              </div>
+            </div>
           ) : (
             <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-white/15 text-center text-sm text-zinc-500">Выбери метку, чтобы посмотреть её на карте.</div>
           )}
