@@ -396,35 +396,44 @@ function Profile() {
     setSaving(true);
     setError("");
     setNotice("");
+    let profileSaved = false;
     try {
-    const { error: profileError } = await supabase.from("profiles")
-      .update({ username: requestedUsername || null, display_name: displayName.trim() || null, bio: bio.trim() || null, chat_city: shareChatCity ? preferences.home_city.trim() : null })
-      .eq("id", userId);
-    if (profileError) {
-      setError("Не удалось сохранить имя и описание: " + profileError.message);
-      return;
-    }
+      const { error: profileError } = await supabase.from("profiles")
+        .update({
+          username: requestedUsername || null,
+          display_name: displayName.trim() || null,
+          bio: bio.trim() || null,
+          chat_city: shareChatCity ? preferences.home_city.trim() : null,
+        })
+        .eq("id", userId);
+      if (profileError) {
+        setError("Не удалось сохранить имя и описание: " + profileError.message);
+        return;
+      }
+      profileSaved = true;
 
-    const { error: prefsError } = await supabase.from("angler_preferences").upsert({
-      user_id: userId,
-      ...preferences,
-      home_city: preferences.home_city.trim(),
-      home_region: preferences.home_region.trim(),
-      favorite_lures: preferences.favorite_lures.trim(),
-      tackle_text: preferences.tackle_text.trim(),
-      preferred_water: preferences.preferred_water.trim(),
-      fishing_notes: preferences.fishing_notes.trim(),
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
-    if (prefsError) {
-      setError("Имя сохранено, но настройки рыбалки не обновлены: " + prefsError.message);
-      return;
-    }
-    setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
-    setEditing(false);
-    // Reload is a separate step: its failure must not be reported as a failed save.
+      const { error: prefsError } = await supabase.from("angler_preferences").upsert({
+        user_id: userId,
+        ...preferences,
+        home_city: preferences.home_city.trim(),
+        home_region: preferences.home_region.trim(),
+        favorite_lures: preferences.favorite_lures.trim(),
+        tackle_text: preferences.tackle_text.trim(),
+        preferred_water: preferences.preferred_water.trim(),
+        fishing_notes: preferences.fishing_notes.trim(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+      if (prefsError) {
+        setError("Имя сохранено, но настройки рыбалки не обновлены: " + prefsError.message);
+        return;
+      }
+      setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
+      setEditing(false);
     } catch (cause) {
-      setError("Ошибка сети при сохранении профиля. Проверь подключение и повтори попытку. " + (cause instanceof Error ? cause.message : ""));
+      const detail = cause instanceof Error ? " " + cause.message : "";
+      setError(profileSaved
+        ? "Имя сохранено, но настройки рыбалки не удалось обновить из-за ошибки сети. Повтори сохранение." + detail
+        : "Не удалось сохранить профиль из-за ошибки сети. Проверь подключение и повтори попытку." + detail);
     } finally {
       setSaving(false);
     }
