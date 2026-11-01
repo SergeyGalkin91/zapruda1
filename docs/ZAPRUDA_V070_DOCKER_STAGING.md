@@ -10,7 +10,13 @@ STAGING_SUPABASE_PUBLISHABLE_KEY=<STAGING publishable/anon key, NEVER a service-
 ZAPRUDA_GIT_SHA=<actual checked out commit SHA>
 ```
 
-From the repository root:
+Recommended Windows launch (checks the exact STAGING project URL and rejects obvious secret-key formats before running Docker):
+
+```powershell
+.\scripts\start-staging-docker.ps1
+```
+
+Manual alternative from the repository root:
 
 ```powershell
 docker compose --env-file .env.staging.local -f compose.staging.yaml config --quiet
