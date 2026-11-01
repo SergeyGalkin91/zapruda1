@@ -12,8 +12,8 @@ export function Wordmark() {
         <path d="M20 10.8 Q25 15.6 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" opacity=".8" />
       </svg>
       <span className="flex flex-col justify-center">
-        <span className="font-display text-[14px] font-extrabold tracking-[0.015em] text-[#D7FF35] sm:text-lg">ZAPRUDA</span>
-        <span className="-mt-0.5 text-[8px] font-extrabold uppercase tracking-[0.25em] text-[#818B7B] sm:text-[9px]">Community</span>
+        <span className="font-display -skew-x-6 text-[14px] font-black italic tracking-[-0.065em] text-[#D7FF35] sm:text-lg">ZAPRUDA</span>
+        <span className="-mt-0.5 text-[8px] font-extrabold uppercase tracking-[0.25em] text-[#B8AACB] sm:text-[9px]">Community</span>
       </span>
     </span>
   );

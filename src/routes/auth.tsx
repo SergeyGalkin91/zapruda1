@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { Wordmark } from "@/components/Wordmark";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -118,7 +119,7 @@ function Auth() {
       if (normalized.includes("failed to fetch") || normalized.includes("network") || normalized.includes("connection") || normalized.includes("fetch failed")) {
         setError("Не удалось соединиться с сервером авторизации Supabase. Проверь подключение к интернету или VPN и повтори попытку.");
       } else if (normalized.includes("invalid login credentials")) {
-        setError("Неверный email или пароль. Проверь адрес, под которым регистрировался.");
+        setError("Не удалось войти. Alpha использует отдельную тестовую базу: аккаунты предыдущей версии сюда не перенесены. Создай тестовый аккаунт через «Регистрация» или проверь данные нового аккаунта.");
       } else if (normalized.includes("email not confirmed")) {
         setError("Почта ещё не подтверждена. Открой письмо подтверждения и повтори вход.");
       } else {
@@ -131,26 +132,26 @@ function Auth() {
 
   return (
     <Shell>
-      <div className="mx-auto grid max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-card shadow-2xl md:grid-cols-2">
-        <aside className="relative hidden min-h-[440px] flex-col justify-between overflow-hidden bg-gradient-to-br from-[#1C3119] via-[#101610] to-[#0A0E0A] p-8 md:flex">
-          <div className="absolute -right-16 -top-16 size-64 rounded-full bg-primary/20 blur-3xl" />
+      <div className="mx-auto max-w-[440px] overflow-hidden rounded-[28px] border border-[#344153] bg-[#070B10] shadow-[0_25px_100px_rgba(0,0,0,0.65)]">
+        <aside className="relative flex min-h-[300px] flex-col justify-between overflow-hidden bg-[radial-gradient(ellipse_at_60%_83%,#F9A43B_0%,#C4673A_12%,#533C59_34%,#17233A_63%,#070B10_100%)] p-7">
+          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[35%] bg-[linear-gradient(0deg,#030A10_5%,#10182D_65%,transparent_100%)]" /><div aria-hidden="true" className="absolute inset-x-0 bottom-[17%] h-px bg-[#F8B25E]/50 shadow-[0_0_22px_5px_rgba(255,166,73,0.24)]" />
           <div className="relative">
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#D7FF35]">ZAPRUDA COMMUNITY</p>
-            <h1 className="mt-8 text-4xl font-bold leading-tight">Свои люди.<br />Свои водоёмы.<br />Свои истории.</h1>
+            <Wordmark />
+            <h1 className="mt-14 max-w-sm text-3xl font-black leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.65)]">Вход в сообщество рыболовов</h1>
             <p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">Записывай выезды, делись уловом и обсуждай рыбалку с теми, кто в теме.</p>
           </div>
           <p className="relative text-xs text-muted-foreground">Рыболовное сообщество без лишнего шума 🎣</p>
         </aside>
-        <section className="p-6 sm:p-9">
+        <section className="bg-[#070B10] p-6 sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Рыболовное сообщество</p>
-          <h2 className="mt-2 text-2xl font-bold text-white">{mode === "in" ? "С возвращением" : mode === "up" ? "Создать аккаунт" : mode === "forgot" ? "Восстановить пароль" : "Новый пароль"}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{mode === "in" ? "Войди по email и паролю или выбери подключённый сервис." : mode === "up" ? "Заполни данные и подтверди адрес электронной почты." : mode === "forgot" ? "Отправим ссылку для сброса пароля на почту." : "Придумай новый пароль для своего аккаунта."}</p>
+          <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">{mode === "in" ? "С возвращением" : mode === "up" ? "Создать аккаунт" : mode === "forgot" ? "Восстановить пароль" : "Новый пароль"}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{mode === "in" ? "Войди в тестовое сообщество по email и паролю." : mode === "up" ? "Заполни данные и подтверди адрес электронной почты." : mode === "forgot" ? "Отправим ссылку для сброса пароля на почту." : "Придумай новый пароль для своего аккаунта."}</p>
 
           <div className="my-6 grid grid-cols-2 rounded-xl bg-[#20271D] p-1 text-sm">
             <a href="/auth?mode=in" aria-current={mode === "in" ? "page" : undefined} className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "in" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>Вход</a>
             <a href="/auth?mode=up" aria-current={mode === "up" ? "page" : undefined} className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "up" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>Регистрация</a>
           </div>
-          <p className="mb-4 text-xs text-zinc-400">Для входа используй <strong className="text-[#D7FF35]">email</strong>, на который регистрировал аккаунт, а не никнейм.</p>
+          <p role="note" className="mb-4 rounded-xl border border-[#A99AD9]/25 bg-[#A99AD9]/[0.06] p-3 text-xs leading-5 text-[#C7BDE4]">Alpha использует отдельную тестовую базу: прежние аккаунты сюда не перенесены. Для проверки нажми «Регистрация» и создай тестовый аккаунт. Настоящие данные о рыболовных точках не вводи.</p>\n          <p className="mb-4 text-xs text-zinc-400">Для входа используй <strong className="text-[#D7FF35]">email</strong>, на который регистрировал аккаунт, а не никнейм.</p>
 
           <form className="space-y-4" onSubmit={submit}>
             {mode === "up" && (

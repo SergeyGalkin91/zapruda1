@@ -31,22 +31,22 @@
 
 :root {
   --radius: 0.75rem;
-  --background: oklch(0.13 0 0);
+  --background: #090B0C;
   --foreground: oklch(0.97 0 0);
-  --card: oklch(0.17 0 0);
+  --card: #141A1E;
   --card-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.897 0.196 126.665);
-  --primary-foreground: oklch(0.13 0 0);
-  --secondary: oklch(0.22 0 0);
+  --primary: #D7FF35;
+  --primary-foreground: #090B0C;
+  --secondary: #22212B;
   --secondary-foreground: oklch(0.95 0 0);
-  --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.66 0 0);
+  --muted: #1B2024;
+  --muted-foreground: #B8AACB;
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.13 0 0);
   --destructive: oklch(0.65 0.2 25);
-  --border: oklch(0.27 0 0);
-  --input: oklch(0.27 0 0);
-  --ring: oklch(0.897 0.196 126.665);
+  --border: #343640;
+  --input: #343640;
+  --ring: #D7FF35;
 }
 
 @layer base {
@@ -93,7 +93,6 @@
   border: 1px solid var(--color-border);
   background: var(--color-card);
 }
-
 
 /* Local appearance preferences. These apply only to appearance, never data or permissions. */
 :root[data-zapruda-background="forest"] {
@@ -167,10 +166,14 @@
 /* ZAPRUDA Underground design system — shared presentation only. */
 :root {
   --z-surface: #0B0D0E;
-  --z-card: #141D20;
+  --z-card: #12161A;
+  --z-card-elevated: #171C22;
+  --z-radius-card: 1rem;
+  --z-radius-hero: 1.5rem;
+  --z-gap-section: 1.5rem;
   --z-lime: #D7FF35;
-  --z-violet: #A78BFA;
-  --z-stroke: rgba(255,255,255,.11);
+  --z-violet: #B4A1D7;
+  --z-stroke: rgba(255,255,255,.10);
 }
 .z-underground {
   color: #F5F7F5;
@@ -235,10 +238,39 @@
 
 /* Explicit message direction overrides background preferences without altering chat data. */
 .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-incoming-bubble {
-  background-color: #211B2D;
-  border-color: rgba(167,139,250,.32);
+  background-color: #292140;
+  border-color: #493765;
+  color: #F5F2FF;
 }
 .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-own-bubble {
-  background-color: #283419;
-  border-color: rgba(215,255,53,.38);
+  background-color: #D7FF35;
+  border-color: #D7FF35;
+  color: #11170A;
+}
+.zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-own-bubble a {
+  color: inherit;
+}
+
+/* v0.7.0 shared mobile geometry — approved brand colors unchanged. */
+.z-card {
+  border: 1px solid var(--z-stroke);
+  background: var(--z-card);
+  border-radius: var(--z-radius-card);
+}
+.z-card-hero {
+  border: 1px solid var(--z-stroke);
+  background: var(--z-card-elevated);
+  border-radius: var(--z-radius-hero);
+}
+.z-room-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 88px;
+  width: 100%;
+  text-align: left;
+}
+@media (max-width: 639px) {
+  .z-room-row { min-height: 80px; gap: 0.75rem; }
 }
