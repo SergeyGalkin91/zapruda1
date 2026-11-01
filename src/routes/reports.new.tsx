@@ -276,7 +276,8 @@ function NewReport() {
             location_name: location.trim() || null,
             weather_summary: weather.trim() || null,
             air_temperature_c: temperature.trim() ? Number(temperature) : null,
-            pressure_hpa: pressure.trim() ? Number(pressure) * 1.33322 : null,
+            // Claude review: store pressure in hPa, rounded to one decimal (form uses mmHg).
+            pressure_hpa: pressure.trim() ? Math.round(Number(pressure) * 1.33322 * 10) / 10 : null,
             wind_direction: windDirection.trim() || null,
             wind_speed_ms: windSpeed.trim() ? Number(windSpeed) : null,
             is_public: isPublic,
