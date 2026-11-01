@@ -396,12 +396,12 @@ function Profile() {
     setSaving(true);
     setError("");
     setNotice("");
+    try {
     const { error: profileError } = await supabase.from("profiles")
       .update({ username: requestedUsername || null, display_name: displayName.trim() || null, bio: bio.trim() || null, chat_city: shareChatCity ? preferences.home_city.trim() : null })
       .eq("id", userId);
     if (profileError) {
       setError("Не удалось сохранить имя и описание: " + profileError.message);
-      setSaving(false);
       return;
     }
 
@@ -416,7 +416,6 @@ function Profile() {
       fishing_notes: preferences.fishing_notes.trim(),
       updated_at: new Date().toISOString(),
     }, { onConflict: "user_id" });
-    setSaving(false);
     if (prefsError) {
       setError("Имя сохранено, но настройки рыбалки не обновлены: " + prefsError.message);
       return;
@@ -424,6 +423,11 @@ function Profile() {
     setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
     setEditing(false);
     await loadProfile();
+    } catch (cause) {
+      setError("Ошибка сети при сохранении профиля. Проверь подключение и повтори попытку. " + (cause instanceof Error ? cause.message : ""));
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
