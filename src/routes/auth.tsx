@@ -152,7 +152,8 @@ function Auth() {
             <a href="/auth?mode=in" aria-current={mode === "in" ? "page" : undefined} className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "in" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>Вход</a>
             <a href="/auth?mode=up" aria-current={mode === "up" ? "page" : undefined} className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "up" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>Регистрация</a>
           </div>
-          <p role="note" className="mb-4 rounded-xl border border-[#A99AD9]/25 bg-[#A99AD9]/[0.06] p-3 text-xs leading-5 text-[#C7BDE4]">Alpha использует отдельную тестовую базу: прежние аккаунты сюда не перенесены. Для проверки нажми «Регистрация» и создай тестовый аккаунт. Настоящие данные о рыболовных точках не вводи.</p>\n          <p className="mb-4 text-xs text-zinc-400">Для входа используй <strong className="text-[#D7FF35]">email</strong>, на который регистрировал аккаунт, а не никнейм.</p>
+          <p role="note" className="mb-4 rounded-xl border border-[#A99AD9]/25 bg-[#A99AD9]/[0.06] p-3 text-xs leading-5 text-[#C7BDE4]">Alpha использует отдельную тестовую базу: прежние аккаунты сюда не перенесены. Для проверки нажми «Регистрация» и создай тестовый аккаунт. Настоящие данные о рыболовных точках не вводи.</p>
+          <p className="mb-4 text-xs text-zinc-400">Для входа используй <strong className="text-[#D7FF35]">email</strong>, на который регистрировал аккаунт, а не никнейм.</p>
 
           <form className="space-y-4" onSubmit={submit}>
             {mode === "up" && (
