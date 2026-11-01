@@ -7,6 +7,7 @@ import {
   Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { AvatarCropEditor, DefaultFishingAvatar } from "@/components/AvatarUpgrade";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
@@ -175,6 +176,7 @@ function Profile() {
   const [editing, setEditing] = useState(false);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarToCrop, setAvatarToCrop] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [signingOut, setSigningOut] = useState(false);
@@ -236,12 +238,29 @@ function Profile() {
       const { error: saveError } = await supabase.from("profiles").update({ avatar_url: data.publicUrl }).eq("id", userId);
       if (saveError) throw saveError;
       setAvatarUrl(data.publicUrl);
+      setAvatarToCrop(null);
       setNotice("Аватар обновлён.");
     } catch (err) {
       setError("Не удалось загрузить аватар: " + (err instanceof Error ? err.message : "попробуй ещё раз"));
     } finally {
       setUploadingAvatar(false);
     }
+  }
+
+  function chooseAvatar(file?: File) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Для аватара выбери JPG, PNG или WebP."); return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Размер аватара не должен превышать 5 МБ."); return;
+    }
+    setError(""); setAvatarToCrop(file);
+  }
+
+  async function saveCroppedAvatar(file: File) {
+    await uploadAvatar(file);
+    // Close only on successful persistence: uploadAvatar reports failures via error state.
   }
 
   async function handleSignOut() {
@@ -483,16 +502,17 @@ function Profile() {
 
   return (
     <Shell>
+      {avatarToCrop && <AvatarCropEditor file={avatarToCrop} saving={uploadingAvatar} onClose={() => setAvatarToCrop(null)} onSave={saveCroppedAvatar} />}
       <section className="relative mb-6 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#1E251A] via-[#101310] to-[#070908] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:p-8">
         <div className="pointer-events-none absolute -right-16 -top-20 size-60 rounded-full bg-[#D7FF35]/10 blur-3xl" />
         <p className="relative text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">ZAPRUDA / Профиль рыболова</p>
         <div className="relative mt-4 flex flex-wrap items-center gap-4">
           {avatarUrl
             ? <img src={avatarUrl} alt="" className="size-24 rounded-full border-[3px] border-[#D7FF35]/70 object-cover shadow-[0_0_28px_rgba(215,255,53,0.13)]" />
-            : <div className="flex size-20 items-center justify-center rounded-full border border-[#D7FF35]/35 bg-[#D7FF35]/10"><UserRound className="size-9 text-[#D7FF35]" /></div>}
+            : <DefaultFishingAvatar userId={userId ?? "guest"} className="size-24 shrink-0 rounded-full shadow-[0_0_28px_rgba(215,255,53,0.13)]" />}
           {userId && <label className="cursor-pointer rounded-xl border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]">
             {uploadingAvatar ? "Загружаем аватар…" : avatarUrl ? "Изменить аватар" : "Добавить аватар"}
-            <input type="file" className="sr-only" accept="image/png,image/jpeg,image/webp" disabled={uploadingAvatar} aria-label="Загрузить аватар (JPG, PNG, WebP, до 5 МБ)" onChange={(event) => { void uploadAvatar(event.target.files?.[0]); event.currentTarget.value = ""; }} />
+            <input type="file" className="sr-only" accept="image/png,image/jpeg,image/webp" disabled={uploadingAvatar} aria-label="Загрузить аватар (JPG, PNG, WebP, до 5 МБ)" onChange={(event) => { chooseAvatar(event.target.files?.[0]); event.currentTarget.value = ""; }} />
           </label>}
           <div className="min-w-0 flex-1">
             <h1 className="max-w-full text-[clamp(1.05rem,4.3vw,3.3rem)] font-black uppercase leading-[1.12] tracking-[-0.035em] text-white [overflow-wrap:normal] break-normal">{displayName || username || "Мой рыболовный профиль"}</h1>
