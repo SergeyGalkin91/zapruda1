@@ -1,0 +1,20 @@
+# Local STAGING preview only. Never use production Supabase values.
+# Run from repository root after creating a private .env.staging.local file.
+services:
+  zapruda-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GIT_SHA: ${ZAPRUDA_GIT_SHA:-local-staging}
+        VITE_SUPABASE_URL: ${STAGING_SUPABASE_URL:?Set STAGING_SUPABASE_URL in private environment}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${STAGING_SUPABASE_PUBLISHABLE_KEY:?Set STAGING_SUPABASE_PUBLISHABLE_KEY in private environment}
+    image: zapruda-community:0.7.0-staging
+    ports:
+      - "127.0.0.1:3080:3000"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
