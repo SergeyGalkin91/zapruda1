@@ -480,7 +480,7 @@ function Profile() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {!editing && <button type="button" onClick={() => { setError(""); setNotice(""); setEditing(true); }}
-                  className="btn-primary inline-flex min-h-10 items-center gap-2">
+                  className="btn-primary inline-flex min-h-11 items-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">
                   <Pencil className="size-4" /> Редактировать
                 </button>}
                 <Link to="/assistant" className="inline-flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 px-3 py-2 text-xs font-bold text-[#D7FF35] transition hover:bg-[#D7FF35]/10">
@@ -490,7 +490,7 @@ function Profile() {
             </div>
 
             {editing ? (
-              <form onSubmit={saveProfile} className="space-y-5">
+              <form onSubmit={saveProfile} aria-busy={saving} className="space-y-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Label name="Никнейм"><input className="field" maxLength={30} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="например, zaprudafish" /></Label>
                 <Label name="Отображаемое имя"><input className="field" maxLength={100} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Как тебя называть?" /></Label>
@@ -574,11 +574,11 @@ function Profile() {
                   <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#D7FF35]" />
                   После сохранения откроется готовая анкета. Снасти и личные предпочтения останутся приватными.
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-3">
-                  <button className="btn-ghost inline-flex min-h-12 items-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving}>
+                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                  <button className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving}>
                     <X className="size-4" /> Отмена
                   </button>
-                  <button className="btn-primary inline-flex min-h-12 flex-1 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold sm:flex-none" type="submit" disabled={saving} aria-label="Сохранить редактирование профиля">
+                  <button className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold" type="submit" disabled={saving} aria-label="Сохранить редактирование профиля">
                     <Save className="size-5" /> {saving ? "Сохраняем изменения…" : "Сохранить редактирование профиля"}
                   </button>
                 </div>
