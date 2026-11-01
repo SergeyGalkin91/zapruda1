@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 
 type Point={latitude:number;longitude:number};
 type DisplayMark=Point&{id:string;title:string;kind:string};
-type YandexPlacemark={};
-type YandexMap={destroy:()=>void;geoObjects:{add:(p:YandexPlacemark)=>void;removeAll:()=>void};events:{add:(name:string,fn:(event:any)=>void)=>void};setCenter:(coords:number[],zoom:number)=>void};
+type YandexPlacemark={events:{add:(name:string,fn:()=>void)=>void}};
+type YandexMapEvent={get:(name:string)=>unknown};
+type YandexMap={destroy:()=>void;geoObjects:{add:(p:YandexPlacemark)=>void;removeAll:()=>void};events:{add:(name:string,fn:(event:YandexMapEvent)=>void)=>void};setCenter:(coords:number[],zoom:number)=>void};
 type YandexApi={ready:(fn:()=>void)=>void;Map:new(node:HTMLElement,opts:{center:number[];zoom:number;controls?:string[]})=>YandexMap;Placemark:new(coords:number[],props?:Record<string,unknown>,opts?:Record<string,unknown>)=>YandexPlacemark};
 declare global {interface Window {ymaps?:YandexApi}}
 const getKey=()=>{
@@ -34,8 +35,8 @@ type Props={
  selected:Point|null;
  onPick:(p:Point)=>void;
  onSelectMark:(id:string)=>void;
- homeCity?:string;
- homeRegion?:string;
+ homeCity?:string|undefined;
+ homeRegion?:string|undefined;
 };
 const defaultCoords:Point={latitude:56.3269,longitude:44.0059};
 const markStyles:Record<string,{name:string;preset:string;dot:string}>={
@@ -72,9 +73,10 @@ export function InteractiveFishingMap({marks,selected,onPick,onSelectMark}:Props
     const m=new ymaps.Map(holder.current,{center:[center.latitude,center.longitude],zoom:13,controls:["zoomControl","typeSelector"]});
     instance.current=m;
     m.events.add("click",ev=>{
-      const coords=ev.get("coords") as number[];
-      if(!coords||!Number.isFinite(coords[0])||!Number.isFinite(coords[1]))return;
-      pickRef.current({latitude:Number(coords[0].toFixed(6)),longitude:Number(coords[1].toFixed(6))});
+      const coords=ev.get("coords") as number[]|undefined;
+      const lat=coords?.[0],lng=coords?.[1];
+      if(lat===undefined||lng===undefined||!Number.isFinite(lat)||!Number.isFinite(lng))return;
+      pickRef.current({latitude:Number(lat.toFixed(6)),longitude:Number(lng.toFixed(6))});
     });
     setReady(true);
   }).catch(e=>{if(active)setError(e instanceof Error?e.message:"Не удалось открыть Яндекс Карты.");});
@@ -88,8 +90,8 @@ export function InteractiveFishingMap({marks,selected,onPick,onSelectMark}:Props
     const placemark=new ymaps.Placemark([mark.latitude,mark.longitude],{
       balloonContentHeader:mark.title,
       hintContent:mark.title,
-    },{preset:markStyles[mark.kind]?.preset||markStyles["other"].preset});
-    (placemark as any).events.add("click",()=>markRef.current(mark.id));
+    },{preset:markStyles[mark.kind]?.preset??markStyles["other"]?.preset??"islands#grayCircleDotIcon"});
+    placemark.events.add("click",()=>markRef.current(mark.id));
     m.geoObjects.add(placemark);
   }
   if(selected){

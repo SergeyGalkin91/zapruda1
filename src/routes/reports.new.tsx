@@ -147,9 +147,9 @@ function NewReport() {
   useEffect(() => {
     let live = true;
     void Promise.all([
-      (supabase as any).from("atlas_waterbodies").select("id,name,region,country_code").order("name").limit(500),
-      (supabase as any).from("atlas_fish_species").select("id,name").limit(200),
-      (supabase as any).from("atlas_waterbody_species").select("waterbody_id,species_id").limit(2500)
+      supabase.from("atlas_waterbodies").select("id,name,region,country_code").order("name").limit(500),
+      supabase.from("atlas_fish_species").select("id,name").limit(200),
+      supabase.from("atlas_waterbody_species").select("waterbody_id,species_id").limit(2500)
     ]).then(([w, f, m]) => {
       if (!live) return;
       if (!w.error) setCatalogWaters(w.data ?? []);
@@ -187,7 +187,9 @@ function NewReport() {
     setAiMessage("");
     try {
       // Compress locally; do not transmit an oversized original image.
-      const bitmap = await createImageBitmap(photos[0]);
+      const firstPhoto = photos[0];
+      if (!firstPhoto) { setAiMessage("Выбери фотографию для распознавания."); return; }
+      const bitmap = await createImageBitmap(firstPhoto);
       const scale = Math.min(1, 960 / Math.max(bitmap.width, bitmap.height));
       const canvas = document.createElement("canvas");
       canvas.width = Math.max(1, Math.round(bitmap.width * scale));
@@ -314,6 +316,7 @@ function NewReport() {
 
       for (let i = uploadedCount; i < photos.length; i++) {
         const photo = photos[i];
+        if (!photo) continue; // Индекс всегда в границах массива; защита для noUncheckedIndexedAccess.
         const extension = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
         const path = `${user.id}/${reportId}/${crypto.randomUUID()}.${extension}`;
         setProgress(`Загружаем фото ${i + 1} из ${photos.length}…`);
@@ -348,7 +351,7 @@ function NewReport() {
             for (const caught of savedFish.data) {
               const species = catalogFishes.find(x => x.name.toLowerCase() === caught.species.trim().toLowerCase());
               if (!species || !catalogMappings.some(x => x.waterbody_id === selectedWaterbody && x.species_id === species.id)) continue;
-              await (supabase as any).from("atlas_catch_claims").insert({
+              await supabase.from("atlas_catch_claims").insert({
                 user_id: user.id, waterbody_id: selectedWaterbody, species_id: species.id,
                 catch_id: caught.id, evidence_photo_id: photoId,
               });

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Application = { status:"pending"|"approved"|"rejected"; reviewer_note:string; submitted_at:string; evidence_path:string };
 type Verification = { verified_at:string|null; revoked_at:string|null };
-const db=supabase as any;
+const db = supabase;
 
 export function GuideVerification({userId,guideSaved,onVerificationChange}:{userId:string;guideSaved:boolean;onVerificationChange:(verified:boolean)=>void}) {
   const [application,setApplication]=useState<Application|null>(null);

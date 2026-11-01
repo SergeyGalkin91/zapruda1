@@ -12,7 +12,7 @@ export const Route=createFileRoute("/assistant")({
   component:Assistant,
 });
 type Log={id:string;advice_day:string;prompt_summary:string;answer:string;status:"pending"|"ready"|"failed";created_at:string;attempts:number};
-const db=supabase as any;
+const db = supabase;
 
 function Assistant(){
  const [uid,setUid]=useState("");
@@ -58,7 +58,7 @@ function Assistant(){
    setBusy(false);
    if(requestError||data?.error){
      let message=data?.error||requestError?.message||"Не удалось получить совет.";
-     const context=(requestError as any)?.context;
+     const context=requestError?.context;
      if(context&&typeof context.json==="function"){
        try{const payload=await context.json();if(typeof payload?.error==="string")message=payload.error;}catch{}
      }

@@ -20,8 +20,11 @@ type ChatMessage = {
 type ChatReaction = { id: string; message_id: string; user_id: string; emoji: string };
 const REACTION_EMOJI = ["❤️", "👍", "🔥", "😂"] as const;
 const GLOBAL_ID = "00000000-0000-4000-8000-000000000001";
+const GENERAL_TOPIC: { key: ChatTopic; label: string; icon: string; description: string } = {
+  key: "general", label: "Общий", icon: "💬", description: "Знакомства, разговоры и рыбацкие истории",
+};
 const TOPICS: ReadonlyArray<{ key: ChatTopic; label: string; icon: string; description: string }> = [
-  { key: "general", label: "Общий", icon: "💬", description: "Знакомства, разговоры и рыбацкие истории" },
+  GENERAL_TOPIC,
   { key: "reports", label: "Трофеи и отчёты", icon: "🐟", description: "Кто, что и где поймал — без обязательной публикации точных координат" },
   { key: "waters", label: "Споты и вода", icon: "🌊", description: "Реки, озёра, условия и обсуждение подходов" },
   { key: "partners", label: "Напарники", icon: "🤝", description: "С кем поехать на рыбалку и как договориться" },
@@ -38,7 +41,7 @@ const ROOM_PHOTOS: Record<ChatTopic, string> = {
 };
 const quick = ["🎣", "🐟", "🔥", "👍", "😂", "💪", "❤️", "👏", "🤝", "🏆"];
 const VALID_TOPICS = TOPICS.map(t => t.key);
-const api = supabase as any;
+const api = supabase;
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [
@@ -123,7 +126,7 @@ function GeographicChat() {
     });
   const regions = places.filter(p => p.parent_id === country?.id && p.level === "region");
   const cities = places.filter(p => p.parent_id === region?.id && p.level === "city");
-  const currentTopic = TOPICS.find(t => t.key === topic) || TOPICS[0];
+  const currentTopic = TOPICS.find(t => t.key === topic) || GENERAL_TOPIC;
 
   function go(id: string, newTopic: ChatTopic = topic) {
     if (pendingPhotoMessageId) {
@@ -197,15 +200,22 @@ function GeographicChat() {
 
   async function createPlace(e: FormEvent<HTMLFormElement>, level: "region" | "city") {
     e.preventDefault();
-    if (!uid || !country || creating || (level === "city" && !region)) return;
+    if (!uid || !country?.country_code || creating || (level === "city" && !region)) return;
     const name = (level === "region" ? regionName : cityName).trim();
     if (name.length < 2 || name.length > 70) return;
     setCreating(true); setError("");
-    const { data, error: createError } = await api.rpc("ensure_chat_place", {
+    // RPC-параметры опциональны: при exactOptionalPropertyTypes их нельзя
+    // передавать как явный undefined/null, поэтому собираем объект по уровню.
+    const args: { p_country_code: string; p_region?: string; p_city?: string } = {
       p_country_code: country.country_code,
-      p_region: level === "region" ? name : region?.name,
-      p_city: level === "city" ? name : null,
-    });
+    };
+    if (level === "region") {
+      args.p_region = name;
+    } else if (region?.name) {
+      args.p_region = region.name;
+      if (level === "city") args.p_city = name;
+    }
+    const { data, error: createError } = await api.rpc("ensure_chat_place", args);
     if (createError) {
       setError("Не удалось добавить раздел: " + createError.message);
       setCreating(false); return;

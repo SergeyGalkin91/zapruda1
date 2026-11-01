@@ -9,7 +9,7 @@ type Booking={
  guide_net_rub:number|null;status:"requested"|"quoted"|"awaiting_payment"|"paid"|"canceled"|"refunded";
  payment_method:"bank_card"|"sbp"|null;created_at:string;
 };
-const db=supabase as any;
+const db = supabase;
 const money=(v:number|null)=>v===null?"—":v.toLocaleString("ru-RU")+" ₽";
 const modes:{value:Mode;label:string}[]=[
  {value:"shore",label:"С берега"},{value:"boat",label:"С лодки"},

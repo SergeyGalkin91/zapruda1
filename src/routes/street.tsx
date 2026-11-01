@@ -4,7 +4,9 @@ import { ArrowRight, Clock3, Fish, MapPin, Plus, RotateCcw, ShieldCheck, Square 
 import { Shell } from "@/components/Shell";
 
 type StreetCatch = { species: string; note: string; at: string };
-type StreetSession = { startedAt: string; area: string; notes: string; catches: StreetCatch[]; finishedAt?: string };
+// finishedAt допускает явный undefined: сессия восстанавливается из localStorage,
+// где поле может отсутствовать (exactOptionalPropertyTypes этого не разрешает).
+type StreetSession = { startedAt: string; area: string; notes: string; catches: StreetCatch[]; finishedAt?: string | undefined };
 const STORAGE_KEY = "zapruda:street-session:v1";
 
 export const Route = createFileRoute("/street")({

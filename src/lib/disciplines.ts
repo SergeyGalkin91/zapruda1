@@ -70,8 +70,13 @@ export function methodExperienceBreakdown(stats: FishingSpecialization) {
 }
 
 export function methodLevel(xp: number) {
-  const index = Math.max(0, METHOD_RANKS.findLastIndex(rank => xp >= rank.minXp));
-  const current = METHOD_RANKS[index];
+  // Цикл вместо findLastIndex: цель проекта не включает ES2023-lib.
+  let index = 0;
+  for (let i = METHOD_RANKS.length - 1; i >= 0; i--) {
+    const entry = METHOD_RANKS[i];
+    if (entry && xp >= entry.minXp) { index = i; break; }
+  }
+  const current = METHOD_RANKS[index] ?? METHOD_RANKS[0];
   const next = METHOD_RANKS[index + 1] ?? null;
   const percent = next
     ? Math.max(0, Math.min(100, 100 * (xp - current.minXp) / (next.minXp - current.minXp)))

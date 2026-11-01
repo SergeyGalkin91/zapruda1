@@ -180,7 +180,7 @@ function Profile() {
     setPreferences((current) => ({ ...current, [field]: value }));
 
   const loadFeaturedGear = useCallback(async (id: string) => {
-    const { data: kit, error: kitError } = await (supabase as any)
+    const { data: kit, error: kitError } = await supabase
       .from("angler_gear_sets")
       .select("title,fishing_method,rod_id,reel_id,line_id")
       .eq("user_id", id).eq("is_primary", true).maybeSingle();
@@ -340,7 +340,7 @@ function Profile() {
       const selected = current.fishing_methods.includes(method);
       if (selected && current.fishing_methods.length === 1) return current;
       const methods = selected ? current.fishing_methods.filter(code => code !== method) : [...current.fishing_methods, method];
-      const primary = methods.includes(current.main_technique) ? current.main_technique : methods[0];
+      const primary = methods.includes(current.main_technique) ? current.main_technique : methods[0] ?? "";
       return { ...current, main_technique: primary, fishing_methods: methods };
     });
   }

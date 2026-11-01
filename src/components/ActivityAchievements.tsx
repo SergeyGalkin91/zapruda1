@@ -20,14 +20,29 @@ export function ActivityAchievements() {
 
   const refresh = useCallback(async () => {
     setBusy(true);
-    const { data, error: e } = await (supabase as any).from("my_activity_badges")
+    const { data, error: e } = await supabase.from("my_activity_badges")
       .select("credited_minutes,active_days,earned_first_hour,earned_week,earned_ten_hours,beta_eligible")
       .maybeSingle();
     if (e) setError("Не удалось обновить активность: " + e.message);
-    else { setError(""); setStats(data || zero); }
-    const { data: application, error: applicationError } = await (supabase as any)
+    else {
+      setError("");
+      setStats({
+        credited_minutes: data?.credited_minutes ?? zero.credited_minutes,
+        active_days: data?.active_days ?? zero.active_days,
+        earned_first_hour: data?.earned_first_hour ?? zero.earned_first_hour,
+        earned_week: data?.earned_week ?? zero.earned_week,
+        earned_ten_hours: data?.earned_ten_hours ?? zero.earned_ten_hours,
+        beta_eligible: data?.beta_eligible ?? zero.beta_eligible,
+      });
+    }
+    const { data: application, error: applicationError } = await supabase
       .from("beta_test_applications").select("status").maybeSingle();
-    if (!applicationError) setApplicationStatus(application?.status ?? null);
+    if (!applicationError) {
+      const status = application?.status;
+      setApplicationStatus(
+        status === "pending" || status === "approved" || status === "declined" ? status : null,
+      );
+    }
     setBusy(false);
   }, []);
 
@@ -41,7 +56,7 @@ export function ActivityAchievements() {
       setError("Для подачи заявки войди в аккаунт.");
       setApplying(false); return;
     }
-    const { error: insertError } = await (supabase as any).from("beta_test_applications")
+    const { error: insertError } = await supabase.from("beta_test_applications")
       .insert({ user_id: auth.user.id });
     setApplying(false);
     if (insertError) setError("Не получилось отправить заявку: " + insertError.message);

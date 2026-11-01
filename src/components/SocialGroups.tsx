@@ -8,7 +8,7 @@ type Member = { group_id:string;user_id:string;role:string;status:"pending"|"acc
 type Person = { id:string;username:string|null;display_name:string|null };
 type Request = {id:string;name:string;city:string;status:"awaiting_payment"|"paid"|"cancelled";fee_rub:number;created_at:string };
 type GroupMessage = {id:string;user_id:string;body:string;created_at:string};
-const db=supabase as any;
+const db = supabase;
 const display=(p?:Person)=>p?.display_name||p?.username||"Рыболов";
 
 export function SocialGroups(){

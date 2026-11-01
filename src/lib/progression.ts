@@ -51,9 +51,14 @@ export function totalExperience(progress: FishingProgress): number {
 }
 
 export function currentRank(xp: number) {
-  const currentIndex = FISHING_RANKS.findLastIndex((rank) => xp >= rank.minXp);
-  const rankIndex = Math.max(0, currentIndex);
-  const rank = FISHING_RANKS[rankIndex];
+  // Цикл вместо findLastIndex: цель проекта не включает ES2023-lib,
+  // а ручной проход по убыванию даёт тот же результат — последний подходящий ранг.
+  let rankIndex = 0;
+  for (let i = FISHING_RANKS.length - 1; i >= 0; i--) {
+    const entry = FISHING_RANKS[i];
+    if (entry && xp >= entry.minXp) { rankIndex = i; break; }
+  }
+  const rank = FISHING_RANKS[rankIndex] ?? FISHING_RANKS[0];
   const next = FISHING_RANKS[rankIndex + 1] ?? null;
   return {
     rank,
