@@ -171,6 +171,7 @@ function Profile() {
   const [specializations, setSpecializations] = useState<FishingSpecialization[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const saveInFlight = useRef(false);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -378,7 +379,7 @@ function Profile() {
 
   async function saveProfile(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!userId || saving) return;
+    if (!userId || saveInFlight.current) return;
     // An older profile fetch must not overwrite edits while saving.
     loadSequence.current += 1;
     const requestedUsername = username.trim();
@@ -394,6 +395,7 @@ function Profile() {
       setError("Чтобы показывать город в общем чате, сначала укажи город рыбалки.");
       return;
     }
+    saveInFlight.current = true;
     setSaving(true);
     setError("");
     setNotice("");
@@ -429,7 +431,10 @@ function Profile() {
         setNotice(PROFILE_SAVE_SUCCESS);
         setEditing(false);
       }
+    } catch {
+      setError("Не удалось завершить сохранение. Проверь соединение и повтори попытку.");
     } finally {
+      saveInFlight.current = false;
       setSaving(false);
     }
   }
