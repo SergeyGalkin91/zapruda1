@@ -1,88 +1,130 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { Wordmark } from "@/components/Wordmark";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { supabase } from "@/integrations/supabase/client";
 
-type Mode = "in" | "up" | "forgot" | "new-password";
-
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    mode: (search.mode === "up" || search.mode === "forgot" || search.mode === "new-password" ? search.mode : "in") as Mode,
+  head: () => ({
+    meta: [
+      { title: "Вход и регистрация — ZAPRUDA" },
+      { name: "description", content: "Войдите или создайте аккаунт рыболова в ZAPRUDA." },
+      { property: "og:title", content: "Вход и регистрация — ZAPRUDA" },
+      { property: "og:description", content: "Войдите или создайте аккаунт рыболова в ZAPRUDA." },
+    ],
   }),
-  component: AuthPage,
+  validateSearch: (search: Record<string, unknown>) => ({ mode: search["mode"] === "up" ? "up" as const : "in" as const }),
+  component: Auth,
 });
 
-function AuthPage() {
-  const { mode: initialMode } = Route.useSearch();
-  const [mode, setMode] = useState<Mode>(initialMode);
+function Auth() {
+  const navigate = useNavigate();
+  const search = Route.useSearch();
+  const [mode, setMode] = useState<"in" | "up" | "forgot" | "new-password">(search.mode);
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    setMode(initialMode);
-  }, [initialMode]);
-
-  useEffect(() => {
+    // Never forcibly redirect users from registration to profile.
+    // Existing sessions are checked after explicit login; password recovery is handled separately.
+    const params = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const recovering = params.get("recovery") === "1";
+    const oauthReturn = params.get("oauth") === "1";
+    if (recovering) setMode("new-password");
+    const oauthError = params.get("error_description") || hash.get("error_description") || params.get("error") || hash.get("error");
+    if (oauthError) {
+      setError("Не удалось войти через внешний сервис: " + oauthError.slice(0, 250));
+    }
     let active = true;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      // recovery session detection for new-password mode is handled by URL/hash in parent flows
-      if (data.session && initialMode === "new-password") setMode("new-password");
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") setMode("new-password");
+      if (oauthReturn && !recovering && event === "SIGNED_IN" && session && active) {
+        void navigate({ to: "/profile", replace: true });
+      }
     });
-    return () => { active = false; };
-  }, [initialMode]);
+    if (oauthReturn && !recovering && !oauthError) {
+      setNotice("Проверяем вход через выбранный сервис…");
+      void supabase.auth.getSession().then(({ data, error: sessionError }) => {
+        if (!active) return;
+        if (data.session) void navigate({ to: "/profile", replace: true });
+        else if (sessionError) setError("Не удалось завершить вход: " + sessionError.message);
+        else setNotice("Вход не завершён. Повтори попытку или воспользуйся email.");
+      }).catch(() => { if (active) setError("Не удалось проверить вход. Попробуй ещё раз."); });
+    }
+    return () => { active = false; subscription.unsubscribe(); };
+  }, []);
 
-  async function onSubmit(e: FormEvent) {
+  useEffect(() => {
+    if (mode === "in" || mode === "up") setMode(search.mode);
+  }, [search.mode]);
+
+
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
     setError("");
     setNotice("");
     try {
-      if (mode === "up") {
-        if (password.length < 6) throw new Error("Пароль должен быть не короче 6 символов.");
-        const { error: signUpError } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: { data: { display_name: displayName.trim() || undefined } },
-        });
-        if (signUpError) throw signUpError;
-        setNotice("Проверь почту и подтверди адрес, затем войди в аккаунт.");
-        setMode("in");
+      if (mode === "in") {
+        const { data, error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        if (!data.session && !authError) throw new Error("Сервер не вернул сессию. Попробуй войти ещё раз.");
+        if (authError) throw authError;
+        await navigate({ to: "/profile" });
       } else if (mode === "forgot") {
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-          redirectTo: typeof window !== "undefined" ? `${window.location.origin}/auth?mode=new-password` : undefined,
+          redirectTo: window.location.origin + "/auth?recovery=1",
         });
         if (resetError) throw resetError;
-        setNotice("Если аккаунт существует, письмо для сброса пароля уже отправлено.");
+        setNotice("Если такой email зарегистрирован, мы отправили письмо для восстановления пароля. Проверь также «Спам».");
       } else if (mode === "new-password") {
-        if (password.length < 6) throw new Error("Пароль должен быть не короче 6 символов.");
+        if (password.length < 6) throw new Error("Пароль должен содержать не менее 6 символов.");
         if (password !== confirmPassword) throw new Error("Пароли не совпадают.");
         const { error: updateError } = await supabase.auth.updateUser({ password });
         if (updateError) throw updateError;
-        setNotice("Пароль обновлён. Можно пользоваться аккаунтом.");
-        setMode("in");
-        setPassword("");
-        setConfirmPassword("");
+        setNotice("Пароль изменён. Теперь можно перейти в профиль.");
+        await navigate({ to: "/profile" });
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (signInError) {
-          setError("Не удалось войти. Alpha использует отдельную тестовую базу: аккаунты предыдущей версии сюда не перенесены. Создай тестовый аккаунт через «Регистрация» или проверь данные нового аккаунта.");
+        const cleanUsername = username.trim().replace(/^@/, "");
+        if (!/^[a-zA-Z0-9_.-]{3,24}$/.test(cleanUsername)) {
+          throw new Error("Никнейм: 3–24 символа, латинские буквы, цифры, точка, дефис или подчёркивание.");
+        }
+        const { data, error: authError } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: { data: { username: cleanUsername, display_name: cleanUsername } },
+        });
+        if (authError) throw authError;
+        // The database's on_auth_user_created trigger creates the profile.
+        // When email confirmation is enabled the signup response has no session,
+        // so writing to profiles here would fail the authenticated-only RLS policy.
+        if (data.session) {
+          await navigate({ to: "/profile" });
         } else {
-          window.location.href = "/";
+          setNotice("Проверь почту и подтверди email, затем войди в аккаунт. Если письмо не пришло, проверь папку «Спам».");
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Не удалось выполнить запрос.");
+      const message = err instanceof Error ? err.message : "Не удалось выполнить запрос.";
+      const normalized = message.toLowerCase();
+      if (normalized.includes("failed to fetch") || normalized.includes("network") || normalized.includes("connection") || normalized.includes("fetch failed")) {
+        setError("Не удалось соединиться с сервером авторизации Supabase. Проверь подключение к интернету или VPN и повтори попытку.");
+      } else if (normalized.includes("invalid login credentials")) {
+        setError("Не удалось войти. Alpha использует отдельную тестовую базу: аккаунты предыдущей версии сюда не перенесены. Создай тестовый аккаунт через «Регистрация» или проверь данные нового аккаунта.");
+      } else if (normalized.includes("email not confirmed")) {
+        setError("Почта ещё не подтверждена. Открой письмо подтверждения и повтори вход.");
+      } else {
+        setError(message);
+      }
     } finally {
       setBusy(false);
     }
@@ -110,21 +152,24 @@ function AuthPage() {
             <a href="/auth?mode=in" aria-current={mode === "in" ? "page" : undefined} className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "in" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>Вход</a>
             <a href="/auth?mode=up" aria-current={mode === "up" ? "page" : undefined} className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "up" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>Регистрация</a>
           </div>
+          <p role="note" className="mb-4 rounded-xl border border-[#A99AD9]/25 bg-[#A99AD9]/[0.06] p-3 text-xs leading-5 text-[#C7BDE4]">Alpha использует отдельную тестовую базу: прежние аккаунты сюда не перенесены. Для проверки нажми «Регистрация» и создай тестовый аккаунт. Настоящие данные о рыболовных точках не вводи.</p>\n          <p className="mb-4 text-xs text-zinc-400">Для входа используй <strong className="text-[#D7FF35]">email</strong>, на который регистрировал аккаунт, а не никнейм.</p>
 
-          <form className="mt-4 space-y-3.5" onSubmit={onSubmit}>
-            {mode === "up" && <label className="block space-y-1.5 text-sm font-medium">
-              Имя в сообществе
-              <input className="field" value={displayName} onChange={(e) => setDisplayName(e.target.value)} autoComplete="nickname" maxLength={40} placeholder="Как к тебе обращаться" />
-            </label>}
-            {(mode === "in" || mode === "up" || mode === "forgot") && <label className="block space-y-1.5 text-sm font-medium">
+          <form className="space-y-4" onSubmit={submit}>
+            {mode === "up" && (
+              <label className="block space-y-1.5 text-sm font-medium">
+                Никнейм
+                <input className="field" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="например, river_hunter" minLength={3} maxLength={24} autoComplete="username" required />
+              </label>
+            )}
+            {mode !== "new-password" && <label className="block space-y-1.5 text-sm font-medium">
               Email
-              <input className="field" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
+              <input className="field" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" required />
             </label>}
             {(mode === "in" || mode === "up" || mode === "new-password") && <label className="block space-y-1.5 text-sm font-medium">
               {mode === "new-password" ? "Новый пароль" : "Пароль"}
               <span className="relative block">
-                <input className="field pr-14" type={passwordVisible ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} autoComplete={mode === "in" ? "current-password" : "new-password"} required />
-                <button type="button" aria-label={passwordVisible ? "Скрыть пароль" : "Показать пароль"} aria-pressed={passwordVisible} onClick={() => setPasswordVisible((prev) => !prev)} className="absolute inset-y-0 right-1 flex w-11 items-center justify-center rounded-lg text-[#D7FF35] hover:bg-white/10">
+                <input className="field pr-14" type={passwordVisible ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Не менее 6 символов" minLength={6} autoComplete={mode === "in" ? "current-password" : "new-password"} required />
+                <button type="button" aria-label={passwordVisible ? "Скрыть пароль" : "Показать пароль"} title={passwordVisible ? "Скрыть пароль" : "Показать пароль"} aria-pressed={passwordVisible} onClick={() => setPasswordVisible((prev) => !prev)} className="absolute inset-y-0 right-1 flex w-11 items-center justify-center rounded-lg text-[#D7FF35] hover:bg-white/10">
                   {passwordVisible ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                 </button>
               </span>
