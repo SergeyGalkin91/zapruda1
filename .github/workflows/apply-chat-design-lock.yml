@@ -1,0 +1,80 @@
+name: Apply chat design-lock patch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: grok/approved-ui-v070-fix
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore chat.tsx from a3659704 and apply design-lock patch
+        run: |
+          set -euo pipefail
+          curl -fsSL -o src/routes/chat.tsx \
+            "https://raw.githubusercontent.com/SergeyGalkin91/zapruda1/a36597047f20a42346a6959e307a39b5dc637818/src/routes/chat.tsx"
+          python3 <<'PY'
+          from pathlib import Path
+          chat = Path("src/routes/chat.tsx").read_text()
+          reps = [
+          ('''    {!loading && !uid && <p className="mb-5 rounded-xl border border-white/15 p-4 text-sm text-zinc-300">
+      Для просмотра чатов и отправки сообщений <Link search={{ mode: "in" }} to="/auth" className="font-bold text-[#D7FF35] underline">войди в аккаунт</Link>.
+    </p>}''',
+          '''    {!loading && !uid && <p className="mb-5 rounded-xl border border-white/15 bg-[#0B1018] p-4 text-sm text-zinc-300">
+      Комнаты «Свои на связи» открыты для просмотра. Чтобы писать сообщения, <Link search={{ mode: "in" }} to="/auth" className="font-bold text-[#D7FF35] underline">войди в аккаунт</Link>.
+    </p>}'''),
+          ('className="overflow-hidden rounded-[24px] border border-[#263044] bg-[#060B10] px-3 sm:px-5"',
+           'className="overflow-hidden rounded-3xl border border-white/10 bg-[#070B10] px-2 sm:px-4"'),
+          ('className={"z-room-row border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +',
+           'className={"z-room-row border-b border-white/10 px-2 py-3 text-left transition last:border-b-0 hover:bg-white/[0.03] " +'),
+          ('className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34435E] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]"',
+           'className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#151925]"'),
+          ('''              <span className="min-w-0 max-w-16 text-right text-[10px] tabular-nums text-[#B4A1D7]">{roomLastMessages[t.key] && <time dateTime={roomLastMessages[t.key]!.created_at}>{new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</time>}</span>''',
+           '''              <span className="flex min-w-[3.25rem] shrink-0 flex-col items-end gap-1.5 self-start pt-1">
+                {roomLastMessages[t.key] ? (
+                  <>
+                    <span className="size-2 rounded-full bg-[#D7FF35]" aria-hidden="true" title="Есть сообщения" />
+                    <time dateTime={roomLastMessages[t.key]!.created_at} className="text-[10px] tabular-nums leading-none text-[#A99AD9]">
+                      {new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                    </time>
+                  </>
+                ) : null}
+              </span>'''),
+          ('className="mb-5 rounded-[26px] border border-[#273247] bg-[#070B10] px-4 pb-6 pt-6 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7"',
+           'className="mb-5 rounded-3xl border border-white/10 bg-[#070B10] px-4 pb-6 pt-6 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-6 sm:pt-6"'),
+          ('className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9] opacity-60" title="Появится после подключения учёта прочтений">Непрочитанные</button>',
+           'className="flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60" title="Появится после подключения учёта прочтений">Непрочитанные</button>'),
+          ('className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60" title="Появится после подключения истории участия">Мои чаты</button>',
+           'className="flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60" title="Появится после подключения истории участия">Мои чаты</button>'),
+          ('{!threadOpen && <aside className="space-y-4 rounded-[24px] border border-white/10 bg-[#0E120F] p-4 lg:sticky lg:top-24">',
+           '{!threadOpen && <aside className="hidden space-y-4 rounded-3xl border border-white/10 bg-[#0E120F] p-4 lg:sticky lg:top-24 lg:block">'),
+          ('Тематические комнаты · выбери обсуждение', 'Комнаты сообщества'),
+          ]
+          for old, new in reps:
+              if old not in chat:
+                  raise SystemExit('patch fragment missing: ' + old[:60])
+              chat = chat.replace(old, new)
+          Path("src/routes/chat.tsx").write_text(chat)
+          print('patched ok', len(chat))
+          PY
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "Grok"
+          git config user.email "grok@users.noreply.github.com"
+          git add src/routes/chat.tsx
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "fix(chat): align «Свои на связи» with design lock"
+          git push origin HEAD:grok/approved-ui-v070-fix
