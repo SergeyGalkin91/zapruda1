@@ -1,0 +1,163 @@
+name: Apply P2 main screens density
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/p2-main-screens-compact-20261101
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Patch partners hero, feed intro, report submit bar
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          # --- partners.tsx hero compact ---
+          partners = Path("src/routes/partners.tsx").read_text()
+          old_p = '''      <section className="z-underground relative overflow-hidden px-5 py-8 sm:px-8 sm:py-11">
+        <div className="pointer-events-none absolute -right-10 -top-24 size-72 rounded-full bg-lime-300/[0.09] blur-3xl" />
+        <div className="relative">
+          <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-lime-300">ZAPRUDA / FISHING MATCH</p>
+          <h1 className="mt-3 text-4xl font-black uppercase tracking-[-0.05em] text-white sm:text-6xl">Рыбалка лучше <span className={lime}>вместе.</span></h1>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-300 sm:text-base">
+            Найди напарника на выезд. Смотри, куда и когда собираются, сколько мест в машине
+            и сколько стоит участие. Откликайся — организатор решает, кого взять.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">'''
+          new_p = '''      <section className="z-underground relative overflow-hidden px-4 py-5 sm:px-6 sm:py-6">
+        <div className="pointer-events-none absolute -right-10 -top-24 size-56 rounded-full bg-lime-300/[0.09] blur-3xl" />
+        <div className="relative">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-lime-300">ZAPRUDA / FISHING MATCH</p>
+          <h1 className="mt-2 text-3xl font-black uppercase tracking-[-0.05em] text-white sm:text-4xl">Рыбалка лучше <span className={lime}>вместе.</span></h1>
+          <p className="mt-2 max-w-2xl text-sm leading-5 text-zinc-300">
+            Найди напарника на выезд. Смотри, куда и когда собираются, сколько мест в машине
+            и сколько стоит участие. Откликайся — организатор решает, кого взять.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">'''
+          if old_p not in partners:
+              raise SystemExit('partners hero missing')
+          partners = partners.replace(old_p, new_p)
+          Path("src/routes/partners.tsx").write_text(partners)
+
+          # --- index.tsx compact intro ---
+          index = Path("src/routes/index.tsx").read_text()
+          old_i = '''      <section className="relative mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0B0D0B] px-5 py-7 sm:px-8 sm:py-9">
+        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#D7FF35]/[0.09] blur-3xl" />
+        <div className="relative">
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D7FF35]">ZAPRUDA COMMUNITY / CONCEPT 01</p>
+          <h1 className="mt-4 max-w-[880px] text-[clamp(2.6rem,6vw,5.5rem)] font-black uppercase leading-[0.97] tracking-[-0.06em] text-[#F5F7F5]">
+            НЕ ПРОСТО ЛЕНТА.<span className="block text-[#D7FF35]">ТВОЯ ВОДА.</span>
+          </h1>
+          <p className="mt-5 max-w-2xl text-sm leading-6 text-zinc-300">Живые отчёты, трофеи друзей, местные сообщества и свои люди на воде. Рыбалка начинается здесь.</p>
+          <Link to="/street" className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-[#D7FF35]/40 bg-[#121A12] px-5 py-4 transition hover:border-[#D7FF35]">
+            <span><strong className="block text-lg font-black uppercase tracking-tight text-[#D7FF35]">ZAPRUDA STREET · Город — твоя акватория</strong><span className="mt-1 block text-xs text-zinc-300">Street Fishing: начать городскую сессию и записывать уловы</span></span>
+            <span className="shrink-0 rounded-xl bg-[#D7FF35] px-3 py-2 font-black text-black">STREET</span>
+          </Link>
+          <div className="mt-7 grid gap-3 md:grid-cols-3">'''
+          new_i = '''      <section className="relative mb-4 overflow-hidden rounded-[24px] border border-white/10 bg-[#0B0D0B] px-4 py-4 sm:px-6 sm:py-5">
+        <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[#D7FF35]/[0.09] blur-3xl" />
+        <div className="relative">
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D7FF35]">ZAPRUDA COMMUNITY</p>
+          <h1 className="mt-2 max-w-[880px] text-[clamp(1.75rem,5vw,3rem)] font-black uppercase leading-[1.02] tracking-[-0.05em] text-[#F5F7F5]">
+            НЕ ПРОСТО ЛЕНТА.<span className="text-[#D7FF35]"> ТВОЯ ВОДА.</span>
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-5 text-zinc-300">Живые отчёты, трофеи и свои люди на воде.</p>
+          <Link to="/street" className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#D7FF35]/40 bg-[#121A12] px-4 py-3 transition hover:border-[#D7FF35]">
+            <span><strong className="block text-base font-black uppercase tracking-tight text-[#D7FF35]">ZAPRUDA STREET</strong><span className="mt-0.5 block text-xs text-zinc-300">Городская сессия и уловы</span></span>
+            <span className="shrink-0 rounded-xl bg-[#D7FF35] px-3 py-2 text-xs font-black text-black">STREET</span>
+          </Link>
+          <div className="mt-3 grid grid-cols-3 gap-2">'''
+          if old_i not in index:
+              raise SystemExit('index hero missing')
+          index = index.replace(old_i, new_i)
+          # tighten three CTA cards padding
+          index = index.replace(
+              'className="group rounded-2xl border border-[#D7FF35]/35 bg-[#D7FF35]/10 p-5 transition hover:border-[#D7FF35] hover:bg-[#D7FF35]/15"',
+              'className="group rounded-2xl border border-[#D7FF35]/35 bg-[#D7FF35]/10 p-3 transition hover:border-[#D7FF35] hover:bg-[#D7FF35]/15"',
+          )
+          index = index.replace(
+              'className="group rounded-2xl border border-white/15 bg-[#141D20] p-5 transition hover:border-[#D7FF35]"',
+              'className="group rounded-2xl border border-white/15 bg-[#141D20] p-3 transition hover:border-[#D7FF35]"',
+          )
+          index = index.replace(
+              'className="group rounded-2xl border border-[#A78BFA]/35 bg-[#141D20] p-5 transition hover:border-[#A78BFA]"',
+              'className="group rounded-2xl border border-[#A78BFA]/35 bg-[#141D20] p-3 transition hover:border-[#A78BFA]"',
+          )
+          index = index.replace(
+              '<span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">Выйти на воду</span>',
+              '<span className="mt-2 block text-xs font-black uppercase tracking-tight text-[#F5F7F5] sm:text-sm">Выйти на воду</span>',
+          )
+          index = index.replace(
+              '<span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">Новый трофей</span>',
+              '<span className="mt-2 block text-xs font-black uppercase tracking-tight text-[#F5F7F5] sm:text-sm">Новый трофей</span>',
+          )
+          index = index.replace(
+              '<span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">Рядом с тобой</span>',
+              '<span className="mt-2 block text-xs font-black uppercase tracking-tight text-[#F5F7F5] sm:text-sm">Рядом с тобой</span>',
+          )
+          index = index.replace(
+              '<p className="mt-5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">DARK / ACID / STREET FISHING</p>',
+              '<p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">DARK / ACID / STREET FISHING</p>',
+          )
+          # clearer empty state copy (no fake posts)
+          index = index.replace(
+              '''        <div className="panel p-8 text-center">
+          <div className="text-3xl">🎣</div>
+          <h2 className="mt-3 font-semibold">Пока тихо, как на бесклёвье</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Будь первым — опубликуй отчёт о рыбалке.</p>
+          <Link to="/reports/new" className="btn-primary mt-4 inline-flex">Создать отчёт</Link>
+        </div>''',
+              '''        <div className="panel p-6 text-center">
+          <div className="text-3xl" aria-hidden="true">🎣</div>
+          <h2 className="mt-3 font-semibold">Пока нет публикаций</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Когда появятся открытые отчёты, они будут здесь. Можешь опубликовать первый.</p>
+          <Link to="/reports/new" className="btn-primary mt-4 inline-flex">Создать отчёт</Link>
+        </div>''',
+          )
+          Path("src/routes/index.tsx").write_text(index)
+
+          # --- reports.new.tsx sticky submit ---
+          rep = Path("src/routes/reports.new.tsx").read_text()
+          old_r = '''        {error && <p className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive" role="alert">{error}</p>}
+        <div className="flex items-center gap-3">
+          <button className="btn-primary" disabled={saving}>{saving ? "Сохраняем…" : savedReportId ? "Повторить загрузку / завершить" : "Опубликовать отчёт"}</button>
+          {progress && <span className="text-xs text-lime-300" role="status">{progress}</span>}
+        </div>
+      </form>'''
+          new_r = '''        {error && <p className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive" role="alert">{error}</p>}
+        <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-20 -mx-1 flex items-center gap-3 rounded-2xl border border-white/10 bg-[#070B10]/95 px-3 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-none">
+          <button className="btn-primary min-h-12 flex-1 sm:flex-none" disabled={saving}>{saving ? "Сохраняем…" : savedReportId ? "Повторить загрузку / завершить" : "Опубликовать отчёт"}</button>
+          {progress && <span className="text-xs text-lime-300" role="status">{progress}</span>}
+        </div>
+      </form>'''
+          if old_r not in rep:
+              raise SystemExit('reports submit bar missing')
+          rep = rep.replace(old_r, new_r)
+          # slightly tighter page title spacing on mobile
+          rep = rep.replace(
+              '<h1 className="mb-6 text-2xl font-bold">Новый отчёт</h1>',
+              '<h1 className="mb-4 text-2xl font-bold">Новый отчёт</h1>',
+          )
+          Path("src/routes/reports.new.tsx").write_text(rep)
+
+          print('P2 partners/index/reports patched')
+          PY
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "Grok"
+          git config user.email "grok@users.noreply.github.com"
+          git add src/routes/partners.tsx src/routes/index.tsx src/routes/reports.new.tsx
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "fix(ui): P2 compact trips hero, feed intro, sticky report submit"
+          git push origin HEAD:grok/p2-main-screens-compact-20261101
