@@ -221,6 +221,7 @@ function Feed() {
       setLoadingMore(true);
     }
 
+    try {
     const from = reset ? 0 : reports.length;
     const { data, error: queryError } = await supabase
       .from("fishing_reports")
@@ -263,9 +264,13 @@ function Feed() {
       }
       setError("");
     }
-    setLoading(false);
-    setLoadingMore(false);
-    requestRef.current = false;
+    } catch (cause) {
+      setError("Не удалось загрузить отчёты: " + (cause instanceof Error ? cause.message : "ошибка сети"));
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+      requestRef.current = false;
+    }
   }, [hasMore, loadingMore, reports.length]);
 
   useEffect(() => { void loadPage(true); }, []);
