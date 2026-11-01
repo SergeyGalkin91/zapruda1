@@ -349,7 +349,9 @@ function Profile() {
 
     if (progressResult.error) {
       setProgress(null);
-      setError((prev) => prev + " Не удалось рассчитать достижения: " + progressResult.error.message);
+      if (!/could not find the function|schema cache/i.test(progressResult.error.message)) {
+        setError((prev) => prev + " Не удалось рассчитать достижения: " + progressResult.error.message);
+      }
     } else {
       const raw = progressResult.data?.[0];
       setProgress(raw ? {
@@ -363,7 +365,9 @@ function Profile() {
       } : EMPTY_PROGRESS);
     }
     if (specializationsResult.error) {
-      setError((prev) => prev + " Не удалось загрузить дисциплины: " + specializationsResult.error.message);
+      if (!/could not find the function|schema cache/i.test(specializationsResult.error.message)) {
+        setError((prev) => prev + " Не удалось загрузить дисциплины: " + specializationsResult.error.message);
+      }
       setSpecializations([]);
     } else {
       setSpecializations((specializationsResult.data ?? []).map((row) => ({
