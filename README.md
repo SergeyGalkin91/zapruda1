@@ -1,47 +1,66 @@
-# ZAPRUDА: Спиннинг-сообщество
+# ZAPRUDA COMMUNITY
 
-Создай адаптивное веб-приложение ZAPRUDA — современное социальное приложение для спиннингистов.
+Сообщество рыболовов с акцентом на спиннинг и street fishing: отчёты о выездах, реакции, общение, профиль снастей и локальные сообщества. Интерфейс на русском, адаптирован для телефона.
 
-Язык интерфейса: русский.
-Стиль: современный, тёмный, минималистичный, профессиональный рыболовный сервис. Удобная работа на телефоне и компьютере.
+**Текущая версия приложения:** `0.7.0`. **Статус:** активная разработка; не опубликовано как утверждённый production-релиз.
 
-Основные разделы:
+## Технологии
 
-Главная лента рыболовных отчётов.
+React 19, TypeScript, TanStack Start, Vite, Tailwind CSS, Supabase (PostgreSQL, Auth, RLS, Realtime) и Docker (Bun build → Node/Nitro runtime).
 
-Регистрация и вход пользователей.
+В проекте используется **Bun** и файл `bun.lock`. Не смешивайте случайно установку через npm с изменением lockfile.
 
-Профиль рыболова.
+## Быстрый запуск для разработки
 
-Создание отчёта: водоём, дата, погода, давление, ветер, приманки, техника ловли, фотографии и улов.
+Нужны Bun и тестовый Supabase-проект. Скопируйте `.env.example` в локальный `.env` (не коммитить) и задайте публичные параметры:
 
-Карточки пойманной рыбы с видом, весом и длиной.
-
-Комментарии и реакции.
-
-Раздел с рыболовными местами и картой — добавим после запуска основной версии.
-
-Используй React, TypeScript и современный адаптивный интерфейс. Не создавай фальшивую демонстрационную ленту вместо реальных данных.
-
-Важно: у меня уже есть проект Supabase с таблицами profiles, fishing_reports, catches, comments, reactions, follows и report_private_locations. Не создавай дубликаты этих таблиц. Сначала создай интерфейс и предложи подключить мой существующий проект Supabase. После подключения используй реальные таблицы, настрой регистрацию, чтение и создание публикаций с учётом RLS. Не отключай защиту базы и не используй секретные серверные ключи в браузере.
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/3bae4721-73b5-4293-872e-d10bee6f839d).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+```dotenv
+VITE_SUPABASE_URL=https://<your-staging-project>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=<public-publishable-key>
 ```
+
+```bash
+bun install
+bun run dev
+```
+
+Проверка изменений:
+
+```bash
+bun run build
+bun run test
+```
+
+Не помещайте `service_role`, секретный ключ или пароль PostgreSQL в переменные `VITE_*`: они попадают в клиентский bundle.
+
+## Docker STAGING
+
+В репозитории есть `Dockerfile`, `compose.staging.yaml`, `scripts/start-staging-docker.ps1` и пошаговое описание в [документации Docker STAGING](docs/ZAPRUDA_V070_DOCKER_STAGING.md). Контейнер использует только публичные ключи **отдельного** тестового проекта; production Supabase использовать нельзя.
+
+Пользователь уже подтвердил локальную сборку и открытие версии v0.7.0 в Docker по адресу `http://127.0.0.1:3080`. Это не подтверждает корректность всех авторизованных функций — схема STAGING пока не восстановлена.
+
+## Реализовано в коде
+
+- Регистрация и вход через Supabase Auth.
+- Лента рыболовных отчётов; `ReactionBar` читает и сохраняет реакции в `reactions`, поддерживает обновление через Realtime.
+- Чаты и сообщества с использованием Supabase.
+- Профиль рыболова, настройки и комплекты снастей; данные профиля сохраняются запросами в `profiles` и `angler_preferences`.
+- Отдельные интерфейсы администрирования (доступ и действия требуют проверки с реальными ролями).
+
+**Важно:** наличие функции в коде не означает завершённый интеграционный тест в STAGING.
+
+## Открытые задачи перед релизом
+
+- Восстановить полную, проверенную схему отдельного Supabase STAGING без пользовательских данных.
+- Проверить RLS, авторизацию, профиль, чат и административные функции от имени разных тестовых пользователей.
+- Исключить чтение точных координат рыболовных отчётов гостями и посторонними пользователями. Работа идёт в отдельной ветке аудита.
+- Проверить последовательное сохранение `profiles` и `angler_preferences` на реальных тестовых запросах; сейчас оно **не атомарно**.
+- Завершить мобильный визуальный контроль и принять решение о выпуске.
+
+## Дизайн — закреплён
+
+Источник истины: [ZAPRUDA Design Lock](docs/ZAPRUDA_DESIGN_LOCK_v0.6.0-admin-rc.1.md) и [Project Handoff](docs/ZAPRUDA_PROJECT_HANDOFF.md). Главный референс владельца — изображение с **пятью мобильными экранами**: графитовый фон, лаймовый `#D7FF35`, приглушённые сиреневые детали, рыбалка на закате, фирменный логотип и нижняя навигация с яркой кнопкой «+». Обозначение `v0.6.0-admin-rc.1` — версия дизайн-фиксации, **не** версия приложения. Не заменяйте этот стиль без согласования.
+
+## Работа в GitHub
+
+Основная разработка: draft [PR #14](https://github.com/SergeyGalkin91/zapruda1/pull/14). Аудит безопасности: ветка `audit/claude-security-review-v070`. Не переносите непроверенные SQL-изменения в production и не объединяйте PR без согласования и CI.
