@@ -328,7 +328,7 @@ function GeographicChat() {
   }
 
   return <Shell>
-    {!threadOpen && <header className="mb-5 rounded-[26px] border border-[#273247] bg-[#070B10] px-4 pb-6 pt-6 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
+    {!threadOpen && <header className="mb-5 rounded-3xl border border-white/10 bg-[#070B10] px-4 pb-6 pt-6 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
       <div className="mb-6 flex items-center justify-between gap-3">
         <div className="min-w-0 origin-left"><Wordmark /></div>
         <div className="flex items-center gap-2">
@@ -339,24 +339,24 @@ function GeographicChat() {
       {roomSearchOpen && <div className="mb-4"><label htmlFor="zapruda-room-search" className="block text-xs text-zinc-300">Найти комнату</label>
         <div className="mt-1 flex items-center gap-2"><input id="zapruda-room-search" autoFocus className="field min-w-0 flex-1" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} onKeyDown={e => { if (e.key === "Escape") { setRoomSearch(""); setRoomSearchOpen(false); } }} maxLength={80} placeholder="Трофеи, вода, напарники…" />{roomSearch && <button type="button" onClick={() => setRoomSearch("")} className="min-h-11 shrink-0 rounded-xl border border-white/20 px-3 text-xs font-bold text-white hover:border-[#D7FF35] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">Очистить</button>}</div>
       </div>}
-      <h1 className="break-words text-[clamp(1.65rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
+      <h1 className="break-words text-[clamp(1.65rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">ZAPRUDA SPOT</h1>
       <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="Фильтр чатов">
         <span className="flex min-h-11 items-center justify-center rounded-2xl bg-[#D7FF35] px-2 text-sm font-black text-[#10140A]" aria-current="true">Все</span>
-        <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60" title="Появится после подключения истории участия">Мои чаты</button>
-        <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9] opacity-60" title="Появится после подключения учёта прочтений">Непрочитанные</button>
+        <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60" title="Появится после подключения истории участия">Мои чаты</button>
+        <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-3xl border border-white/10 bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9] opacity-60" title="Появится после подключения учёта прочтений">Непрочитанные</button>
       </div>
     </header>}
 
     {loading && <p className="mb-5 text-sm text-zinc-400">Загружаем разделы чатов…</p>}
     {error && <p role="alert" className="mb-4 rounded-xl border border-red-400/30 bg-red-950/20 p-4 text-sm text-red-200">{error}</p>}
     {!loading && !uid && <p className="mb-5 rounded-xl border border-white/15 p-4 text-sm text-zinc-300">
-      Для просмотра чатов и отправки сообщений <Link search={{ mode: "in" }} to="/auth" className="font-bold text-[#D7FF35] underline">войди в аккаунт</Link>.
+      Комнаты доступны для просмотра. Чтобы отправлять сообщения, <Link search={{ mode: "in" }} to="/auth" className="font-bold text-[#D7FF35] underline">войди в аккаунт</Link>.
     </p>}
 
     {<div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
       {!threadOpen && <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#A99AD9]">Тематические комнаты · выбери обсуждение</p>
-        <div className="overflow-hidden rounded-[24px] border border-[#263044] bg-[#060B10] px-3 sm:px-5">
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#A99AD9]">Комнаты сообщества</p>
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#060B10] px-3 sm:px-5">
           {roomSearch.trim() && !TOPICS.some(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))) && <div role="status" className="space-y-3 p-5 text-sm text-[#B4A1D7]"><p>По запросу «{roomSearch.trim()}» комнат не найдено.</p><button type="button" onClick={() => setRoomSearch("")} className="min-h-11 rounded-xl border border-[#D7FF35]/40 px-4 font-bold text-[#D7FF35]">Сбросить поиск</button></div>}
           {TOPICS.filter(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))).map((t) => (
             <button key={t.key} type="button" onClick={() => uid ? go(placeId, t.key) : void navigate({ to: "/auth", search: { mode: "in" } })}
@@ -371,12 +371,12 @@ function GeographicChat() {
                 <span className="block truncate text-base font-black text-white">{t.label}</span>
                 <span className="mt-1 block truncate text-xs leading-5 text-[#A99AD9]">{roomLastMessages[t.key]?.body || t.description}</span>
               </span>
-              <span className="min-w-0 max-w-16 text-right text-[10px] tabular-nums text-[#B4A1D7]">{roomLastMessages[t.key] && <time dateTime={roomLastMessages[t.key]!.created_at}>{new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</time>}</span>
+              <span className="flex min-w-0 max-w-16 items-center gap-1.5 text-right text-[10px] tabular-nums text-[#B4A1D7]">{roomLastMessages[t.key] && <span aria-label="Есть сообщения" className="size-1.5 shrink-0 rounded-full bg-[#D7FF35]" />}{roomLastMessages[t.key] && <time dateTime={roomLastMessages[t.key]!.created_at}>{new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</time>}</span>
             </button>
           ))}
         </div>
       </section>}
-      {!threadOpen && <aside className="space-y-4 rounded-[24px] border border-white/10 bg-[#0E120F] p-4 lg:sticky lg:top-24">
+      {!threadOpen && <aside className="hidden space-y-4 rounded-[24px] border border-white/10 bg-[#0E120F] p-4 lg:sticky lg:top-24 lg:block">
         <button type="button" onClick={() => go(GLOBAL_ID, "general")}
           aria-pressed={placeId === GLOBAL_ID}
           className={"flex w-full items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm font-bold transition " +
