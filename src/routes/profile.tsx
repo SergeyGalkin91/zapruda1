@@ -173,6 +173,8 @@ function Profile() {
   const [saving, setSaving] = useState(false);
   const saveInFlight = useRef(false);
   const [editing, setEditing] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [signingOut, setSigningOut] = useState(false);
@@ -288,6 +290,11 @@ function Profile() {
       setShareChatCity(Boolean(profileResult.data.chat_city));
     }
 
+    if (!prefsResult.error) {
+      const needsSetup = !prefsResult.data;
+      setNeedsOnboarding(needsSetup);
+      if (needsSetup) setEditing(true);
+    }
     if (prefsResult.error) {
       setError((prev) => prev + " Не удалось загрузить рыболовную анкету: " + prefsResult.error.message);
     } else if (prefsResult.data) {
@@ -360,6 +367,7 @@ function Profile() {
   }
 
   function cancelEditing() {
+    if (needsOnboarding) return;
     setEditing(false);
     setNotice("");
     setError("");
@@ -429,6 +437,7 @@ function Profile() {
         setError(profileSaveNetworkError(result.profileSaved, result.cause));
       } else {
         setNotice(PROFILE_SAVE_SUCCESS);
+        setNeedsOnboarding(false);
         setEditing(false);
       }
     } catch {
@@ -489,7 +498,7 @@ function Profile() {
               <div>
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">01 / Анкета</p>
                 <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.035em] sm:text-3xl">Твой рыболовный профиль</h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">Именно эти данные используются для персонального подбора мест: город, транспорт, способы ловли, приманки и снасти.</p>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">{needsOnboarding ? "Заполни рыболовную анкету и сохрани её. После этого откроется обычный профиль с кнопкой редактирования." : "Именно эти данные используются для персонального подбора мест: город, транспорт, способы ловли, приманки и снасти."}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {!editing && <button type="button" onClick={() => { setError(""); setNotice(""); setEditing(true); }}
@@ -589,7 +598,7 @@ function Profile() {
                 </div>
                 {error && <p className="rounded-xl border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200" aria-live="off">{error}</p>}
                 <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
-                  <button className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving}>
+                  <button className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving || needsOnboarding} hidden={needsOnboarding}>
                     <X className="size-4" /> Отмена
                   </button>
                   <button className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold" type="submit" disabled={saving} aria-label="Сохранить редактирование профиля">
