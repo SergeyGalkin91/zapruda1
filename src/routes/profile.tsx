@@ -587,6 +587,7 @@ function Profile() {
                   <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#D7FF35]" />
                   После сохранения откроется готовая анкета. Снасти и личные предпочтения останутся приватными.
                 </div>
+                {error && <p className="rounded-xl border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200" aria-live="off">{error}</p>}
                 <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                   <button className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving}>
                     <X className="size-4" /> Отмена
