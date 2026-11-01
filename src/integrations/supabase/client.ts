@@ -56,7 +56,7 @@ function createSupabaseClient() {
   // VITE_* values or Node environment variables in all deployment modes.
   // This is a publishable client key, NOT a Supabase secret/service-role key.
   // PR #28 only: prevent the deployed browser preview from ever using production Auth.
-  const preview28 = typeof window !== 'undefined' && ['deploy-preview-28--zapruda1.netlify.app', 'deploy-preview-32--zapruda1.netlify.app'].includes(window.location.hostname);
+  const preview28 = typeof window !== 'undefined' && ['deploy-preview-28--zapruda1.netlify.app', 'deploy-preview-32--zapruda1.netlify.app', 'deploy-preview-41--zapruda1.netlify.app'].includes(window.location.hostname);
   const SUPABASE_URL = preview28 ? 'https://yudtbifopfnjtjanaqrd.supabase.co' : (import.meta.env['VITE_SUPABASE_URL'] || serverEnv?.['SUPABASE_URL'] || 'https://sonvniuwtvzzyuglscah.supabase.co');
   const SUPABASE_PUBLISHABLE_KEY = preview28 ? 'sb_publishable_GHxXu3_sK5YtuXeftTfwSQ_hK0F5mx8' : (import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || serverEnv?.['SUPABASE_PUBLISHABLE_KEY'] || 'sb_publishable_86B9kOH2BUNOuHyYoHX4qw_FbuLHl5E');
 
