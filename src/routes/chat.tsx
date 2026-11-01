@@ -336,9 +336,9 @@ function GeographicChat() {
           <Link to="/reports/new" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/75 text-2xl font-light text-white hover:border-[#D7FF35] hover:text-[#D7FF35]" aria-label="Создать отчёт"><Plus className="size-6" /></Link>
         </div>
       </div>
-      {roomSearchOpen && <label className="mb-4 block text-xs text-zinc-300">Найти комнату
-        <input autoFocus className="field mt-1 w-full" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} onKeyDown={e => { if (e.key === "Escape") { setRoomSearch(""); setRoomSearchOpen(false); } }} maxLength={80} placeholder="Трофеи, вода, напарники…" />
-      </label>}
+      {roomSearchOpen && <div className="mb-4"><label htmlFor="zapruda-room-search" className="block text-xs text-zinc-300">Найти комнату</label>
+        <div className="mt-1 flex items-center gap-2"><input id="zapruda-room-search" autoFocus className="field min-w-0 flex-1" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} onKeyDown={e => { if (e.key === "Escape") { setRoomSearch(""); setRoomSearchOpen(false); } }} maxLength={80} placeholder="Трофеи, вода, напарники…" />{roomSearch && <button type="button" onClick={() => setRoomSearch("")} className="min-h-11 shrink-0 rounded-xl border border-white/20 px-3 text-xs font-bold text-white hover:border-[#D7FF35] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">Очистить</button>}</div>
+      </div>}
       <h1 className="break-words text-[clamp(1.65rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
       <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="Фильтр чатов">
         <span className="flex min-h-11 items-center justify-center rounded-2xl bg-[#D7FF35] px-2 text-sm font-black text-[#10140A]" aria-current="true">Все</span>
