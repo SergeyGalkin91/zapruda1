@@ -422,7 +422,7 @@ function Profile() {
     }
     setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
     setEditing(false);
-    await loadProfile();
+    // Reload is a separate step: its failure must not be reported as a failed save.
     } catch (cause) {
       setError("Ошибка сети при сохранении профиля. Проверь подключение и повтори попытку. " + (cause instanceof Error ? cause.message : ""));
     } finally {
