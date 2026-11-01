@@ -1,4 +1,4 @@
-import { PROFILE_SAVE_SUCCESS, profileSaveNetworkError } from "@/lib/profile-save-feedback";
+import { PROFILE_SAVE_SUCCESS, profileSaveNetworkError, performProfileSave } from "@/lib/profile-save-feedback";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
@@ -397,41 +397,38 @@ function Profile() {
     setSaving(true);
     setError("");
     setNotice("");
-    let profileSaved = false;
     try {
-      const { error: profileError } = await supabase.from("profiles")
-        .update({
-          username: requestedUsername || null,
-          display_name: displayName.trim() || null,
-          bio: bio.trim() || null,
-          chat_city: shareChatCity ? preferences.home_city.trim() : null,
-        })
-        .eq("id", userId);
-      if (profileError) {
-        setError("Не удалось сохранить имя и описание: " + profileError.message);
-        return;
+      const result = await performProfileSave(
+        () => supabase.from("profiles")
+          .update({
+            username: requestedUsername || null,
+            display_name: displayName.trim() || null,
+            bio: bio.trim() || null,
+            chat_city: shareChatCity ? preferences.home_city.trim() : null,
+          })
+          .eq("id", userId),
+        () => supabase.from("angler_preferences").upsert({
+          user_id: userId,
+          ...preferences,
+          home_city: preferences.home_city.trim(),
+          home_region: preferences.home_region.trim(),
+          favorite_lures: preferences.favorite_lures.trim(),
+          tackle_text: preferences.tackle_text.trim(),
+          preferred_water: preferences.preferred_water.trim(),
+          fishing_notes: preferences.fishing_notes.trim(),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" }),
+      );
+      if (result.status === "profile-error") {
+        setError("Не удалось сохранить имя и описание: " + result.message);
+      } else if (result.status === "preferences-error") {
+        setError("Имя сохранено, но настройки рыбалки не обновлены: " + result.message);
+      } else if (result.status === "network-error") {
+        setError(profileSaveNetworkError(result.profileSaved, result.cause));
+      } else {
+        setNotice(PROFILE_SAVE_SUCCESS);
+        setEditing(false);
       }
-      profileSaved = true;
-
-      const { error: prefsError } = await supabase.from("angler_preferences").upsert({
-        user_id: userId,
-        ...preferences,
-        home_city: preferences.home_city.trim(),
-        home_region: preferences.home_region.trim(),
-        favorite_lures: preferences.favorite_lures.trim(),
-        tackle_text: preferences.tackle_text.trim(),
-        preferred_water: preferences.preferred_water.trim(),
-        fishing_notes: preferences.fishing_notes.trim(),
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "user_id" });
-      if (prefsError) {
-        setError("Имя сохранено, но настройки рыбалки не обновлены: " + prefsError.message);
-        return;
-      }
-      setNotice(PROFILE_SAVE_SUCCESS);
-      setEditing(false);
-    } catch (cause) {
-      setError(profileSaveNetworkError(profileSaved, cause));
     } finally {
       setSaving(false);
     }
