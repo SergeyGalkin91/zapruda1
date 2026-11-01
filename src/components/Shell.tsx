@@ -93,7 +93,7 @@ export function Shell({ children }: { children: ReactNode }) {
   }, [isSignedIn]);
 
   return (
-    <div className="min-h-screen overflow-x-clip pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-0">
+    <div className="min-h-screen overflow-x-clip pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] xl:pb-0">
       <ActivityTracker />
       <header className="sticky top-0 z-50 border-b border-white/[0.09] bg-[#0D100C]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
@@ -187,8 +187,8 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
       </footer>
 
-      <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080A09]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden">
-        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
+      <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080A09]/95 pb-[max(0.35rem,env(safe-area-inset-bottom,0px))] shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden">
+        <div className="mx-auto grid max-w-xl grid-cols-5 gap-0.5 px-1.5 sm:gap-1 sm:px-2">
           {mobileNav.map(({ to, label, Icon }) => {
             const target = to;
             const shownLabel = label;
@@ -197,14 +197,14 @@ export function Shell({ children }: { children: ReactNode }) {
             <Link key={target}
               to={target}
               activeOptions={{ exact: true }}
-              className="flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
-              activeProps={{ className: "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
+              className="flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1.5 text-[9px] font-semibold leading-tight text-[#949D90] transition hover:text-[#D7FF35] sm:min-h-[64px] sm:gap-1 sm:px-1 sm:py-2 sm:text-[11px]"
+              activeProps={{ className: "flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl bg-[#D7FF35]/10 px-0.5 py-1.5 text-[9px] font-bold leading-tight text-[#D7FF35] sm:min-h-[64px] sm:gap-1 sm:px-1 sm:py-2 sm:text-[11px]" }}>
               {to === "/profile" && !isSignedIn ? (
                 <LogIn className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
               ) : (
-                <span className={to === "/reports/new" ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]" : "flex size-8 items-center justify-center"}><ShownIcon className={to === "/reports/new" ? "size-6" : "size-[21px]"} strokeWidth={to === "/reports/new" ? 2.5 : 1.9} aria-hidden="true" /></span>
+                <span className={to === "/reports/new" ? "flex size-10 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)] sm:size-11" : "flex size-8 items-center justify-center"}><ShownIcon className={to === "/reports/new" ? "size-5 sm:size-6" : "size-[21px]"} strokeWidth={to === "/reports/new" ? 2.5 : 1.9} aria-hidden="true" /></span>
               )}
-              <span className="truncate">{shownLabel}</span>
+              <span className="max-w-full truncate px-0.5 text-center">{shownLabel}</span>
             </Link>
           ); })}
         </div>
