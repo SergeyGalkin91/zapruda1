@@ -173,6 +173,8 @@ function Profile() {
   const [saving, setSaving] = useState(false);
   const saveInFlight = useRef(false);
   const [editing, setEditing] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [signingOut, setSigningOut] = useState(false);
@@ -212,6 +214,35 @@ function Profile() {
       line: kit.line_id ? gearById.get(kit.line_id) ?? null : null,
     });
   }, []);
+
+  async function uploadAvatar(file?: File) {
+    if (!file || !userId || uploadingAvatar) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Для аватара выбери JPG, PNG или WebP.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Размер аватара не должен превышать 5 МБ.");
+      return;
+    }
+    setUploadingAvatar(true);
+    setError("");
+    try {
+      const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+      const storagePath = userId + "/" + crypto.randomUUID() + "." + extension;
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(storagePath, file, { contentType: file.type, upsert: false });
+      if (uploadError) throw uploadError;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(storagePath);
+      const { error: saveError } = await supabase.from("profiles").update({ avatar_url: data.publicUrl }).eq("id", userId);
+      if (saveError) throw saveError;
+      setAvatarUrl(data.publicUrl);
+      setNotice("Аватар обновлён.");
+    } catch (err) {
+      setError("Не удалось загрузить аватар: " + (err instanceof Error ? err.message : "попробуй ещё раз"));
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -288,6 +319,11 @@ function Profile() {
       setShareChatCity(Boolean(profileResult.data.chat_city));
     }
 
+    if (!prefsResult.error) {
+      const needsSetup = !prefsResult.data;
+      setNeedsOnboarding(needsSetup);
+      if (needsSetup) setEditing(true);
+    }
     if (prefsResult.error) {
       setError((prev) => prev + " Не удалось загрузить рыболовную анкету: " + prefsResult.error.message);
     } else if (prefsResult.data) {
@@ -313,7 +349,9 @@ function Profile() {
 
     if (progressResult.error) {
       setProgress(null);
-      setError((prev) => prev + " Не удалось рассчитать достижения: " + progressResult.error.message);
+      if (!/could not find the function|schema cache/i.test(progressResult.error.message)) {
+        setError((prev) => prev + " Не удалось рассчитать достижения: " + progressResult.error.message);
+      }
     } else {
       const raw = progressResult.data?.[0];
       setProgress(raw ? {
@@ -327,7 +365,9 @@ function Profile() {
       } : EMPTY_PROGRESS);
     }
     if (specializationsResult.error) {
-      setError((prev) => prev + " Не удалось загрузить дисциплины: " + specializationsResult.error.message);
+      if (!/could not find the function|schema cache/i.test(specializationsResult.error.message)) {
+        setError((prev) => prev + " Не удалось загрузить дисциплины: " + specializationsResult.error.message);
+      }
       setSpecializations([]);
     } else {
       setSpecializations((specializationsResult.data ?? []).map((row) => ({
@@ -360,6 +400,7 @@ function Profile() {
   }
 
   function cancelEditing() {
+    if (needsOnboarding) return;
     setEditing(false);
     setNotice("");
     setError("");
@@ -429,6 +470,7 @@ function Profile() {
         setError(profileSaveNetworkError(result.profileSaved, result.cause));
       } else {
         setNotice(PROFILE_SAVE_SUCCESS);
+        setNeedsOnboarding(false);
         setEditing(false);
       }
     } catch {
@@ -448,6 +490,10 @@ function Profile() {
           {avatarUrl
             ? <img src={avatarUrl} alt="" className="size-24 rounded-full border-[3px] border-[#D7FF35]/70 object-cover shadow-[0_0_28px_rgba(215,255,53,0.13)]" />
             : <div className="flex size-20 items-center justify-center rounded-full border border-[#D7FF35]/35 bg-[#D7FF35]/10"><UserRound className="size-9 text-[#D7FF35]" /></div>}
+          {userId && <label className="cursor-pointer rounded-xl border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]">
+            {uploadingAvatar ? "Загружаем аватар…" : avatarUrl ? "Изменить аватар" : "Добавить аватар"}
+            <input type="file" className="sr-only" accept="image/png,image/jpeg,image/webp" disabled={uploadingAvatar} aria-label="Загрузить аватар (JPG, PNG, WebP, до 5 МБ)" onChange={(event) => { void uploadAvatar(event.target.files?.[0]); event.currentTarget.value = ""; }} />
+          </label>}
           <div className="min-w-0 flex-1">
             <h1 className="max-w-full text-[clamp(1.05rem,4.3vw,3.3rem)] font-black uppercase leading-[1.12] tracking-[-0.035em] text-white [overflow-wrap:normal] break-normal">{displayName || username || "Мой рыболовный профиль"}</h1>
             <p className="mt-1 text-sm text-[#A6B1A0]">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
@@ -489,7 +535,7 @@ function Profile() {
               <div>
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">01 / Анкета</p>
                 <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.035em] sm:text-3xl">Твой рыболовный профиль</h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">Именно эти данные используются для персонального подбора мест: город, транспорт, способы ловли, приманки и снасти.</p>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">{needsOnboarding ? "Заполни рыболовную анкету и сохрани её. После этого откроется обычный профиль с кнопкой редактирования." : "Именно эти данные используются для персонального подбора мест: город, транспорт, способы ловли, приманки и снасти."}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {!editing && <button type="button" onClick={() => { setError(""); setNotice(""); setEditing(true); }}
@@ -589,7 +635,7 @@ function Profile() {
                 </div>
                 {error && <p className="rounded-xl border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200" aria-live="off">{error}</p>}
                 <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
-                  <button className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving}>
+                  <button className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving || needsOnboarding} hidden={needsOnboarding}>
                     <X className="size-4" /> Отмена
                   </button>
                   <button className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold" type="submit" disabled={saving} aria-label="Сохранить редактирование профиля">
