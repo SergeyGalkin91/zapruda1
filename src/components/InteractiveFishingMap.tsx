@@ -79,7 +79,7 @@ export function InteractiveFishingMap({marks,selected,onPick,onSelectMark}:Props
     setReady(true);
   }).catch(e=>{if(active)setError(e instanceof Error?e.message:"Не удалось открыть Яндекс Карты.");});
   return()=>{active=false;instance.current?.destroy();instance.current=null;api.current=null;};
- },[key]);
+ },[key, center.latitude, center.longitude]);
  useEffect(()=>{
   const ymaps=api.current,m=instance.current;
   if(!ymaps||!m)return;
