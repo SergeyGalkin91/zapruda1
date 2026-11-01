@@ -44,7 +44,7 @@ export function AnglerTackleCabinet({
 
   function setCategory(next:TackleType) {
     setGearType(next);
-    setBrand(TACKLE_BRANDS[next][0]);
+    setBrand(TACKLE_BRANDS[next][0] ?? "");
     setCustomBrand("");
     setModel("");
     setVariant(next==="reel"?"2500":"");

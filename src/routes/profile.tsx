@@ -340,7 +340,7 @@ function Profile() {
       const selected = current.fishing_methods.includes(method);
       if (selected && current.fishing_methods.length === 1) return current;
       const methods = selected ? current.fishing_methods.filter(code => code !== method) : [...current.fishing_methods, method];
-      const primary = methods.includes(current.main_technique) ? current.main_technique : methods[0];
+      const primary = methods.includes(current.main_technique) ? current.main_technique : methods[0] ?? "";
       return { ...current, main_technique: primary, fishing_methods: methods };
     });
   }

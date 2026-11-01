@@ -187,7 +187,9 @@ function NewReport() {
     setAiMessage("");
     try {
       // Compress locally; do not transmit an oversized original image.
-      const bitmap = await createImageBitmap(photos[0]);
+      const firstPhoto = photos[0];
+      if (!firstPhoto) { setAiMessage("Выбери фотографию для распознавания."); return; }
+      const bitmap = await createImageBitmap(firstPhoto);
       const scale = Math.min(1, 960 / Math.max(bitmap.width, bitmap.height));
       const canvas = document.createElement("canvas");
       canvas.width = Math.max(1, Math.round(bitmap.width * scale));
@@ -314,6 +316,7 @@ function NewReport() {
 
       for (let i = uploadedCount; i < photos.length; i++) {
         const photo = photos[i];
+        if (!photo) continue; // Индекс всегда в границах массива; защита для noUncheckedIndexedAccess.
         const extension = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
         const path = `${user.id}/${reportId}/${crypto.randomUUID()}.${extension}`;
         setProgress(`Загружаем фото ${i + 1} из ${photos.length}…`);
