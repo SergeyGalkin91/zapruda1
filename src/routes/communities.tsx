@@ -23,8 +23,11 @@ function Communities() {
   const cis = countries.filter((c) => c.group === "cis");
   const Chip = ({ c }: { c: (typeof countries)[number] }) => (
     <button
-      onClick={() => setCountry(c.code)}
-      className={`panel flex items-center gap-2 px-4 py-3 text-left text-sm font-semibold ${country === c.code ? "border-primary" : ""}`}
+      type="button"
+      onClick={() => setCountry(current => current === c.code ? null : c.code)}
+      aria-pressed={country === c.code}
+      aria-controls="zapruda-selected-country"
+      className={`panel flex min-h-11 items-center gap-2 px-4 py-3 text-left text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35] ${country === c.code ? "border-primary" : ""}`}
     >
       <span className="text-lg">{c.flag}</span>{c.name}
     </button>
@@ -68,7 +71,7 @@ function Communities() {
 
       <h2 className="mt-8 mb-3 text-sm uppercase tracking-widest text-muted-foreground">Страны СНГ</h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{cis.map((c) => <Chip key={c.code} c={c} />)}</div>
-      {sel && <section className="mt-5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/5 p-4 text-sm">
+      {sel && <section id="zapruda-selected-country" aria-label="Выбранная страна" className="mt-5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/5 p-4 text-sm">
         <p className="font-semibold text-[#D7FF35]">{sel.flag} {sel.name}</p>
         <p className="mt-1 text-zinc-300">Общайся с рыболовами этой страны, выбери регион и город, затем тематическую ветку.</p>
         <div className="mt-3 flex flex-wrap gap-4">
