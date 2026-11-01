@@ -40,6 +40,7 @@ function Auth() {
     const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
     const recovering = params.get("recovery") === "1";
     const oauthReturn = params.get("oauth") === "1";
+    const confirmedReturn = params.get("confirmed") === "1";
     if (recovering) setMode("new-password");
     const oauthError = params.get("error_description") || hash.get("error_description") || params.get("error") || hash.get("error");
     if (oauthError) {
@@ -48,11 +49,11 @@ function Auth() {
     let active = true;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") setMode("new-password");
-      if (oauthReturn && !recovering && event === "SIGNED_IN" && session && active) {
+      if ((oauthReturn || confirmedReturn) && !recovering && event === "SIGNED_IN" && session && active) {
         void navigate({ to: "/profile", replace: true });
       }
     });
-    if (oauthReturn && !recovering && !oauthError) {
+    if ((oauthReturn || confirmedReturn) && !recovering && !oauthError) {
       setNotice("Проверяем вход через выбранный сервис…");
       void supabase.auth.getSession().then(({ data, error: sessionError }) => {
         if (!active) return;
@@ -101,7 +102,10 @@ function Auth() {
         const { data, error: authError } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { data: { username: cleanUsername, display_name: cleanUsername } },
+          options: {
+            data: { username: cleanUsername, display_name: cleanUsername },
+            emailRedirectTo: window.location.origin + "/auth?confirmed=1",
+          },
         });
         if (authError) throw authError;
         // The database's on_auth_user_created trigger creates the profile.
