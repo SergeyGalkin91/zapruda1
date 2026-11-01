@@ -1,3 +1,4 @@
+import { toggleReportReaction } from "@/lib/report-reaction-toggle";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -88,27 +89,11 @@ export function ReactionBar({
     setBusy(type);
     setError("");
     try {
-      const { data, error: findError } = await supabase
-        .from("reactions")
-        .select("id")
-        .eq("report_id", reportId)
-        .eq("user_id", userId)
-        .eq("reaction_type", type);
-
-      if (findError) throw findError;
-      const existing = data ?? [];
-      if (existing.length) {
-        const { error: deleteError } = await supabase
-          .from("reactions")
-          .delete()
-          .in("id", existing.map((row) => row.id));
-        if (deleteError) throw deleteError;
-      } else {
-        const { error: insertError } = await supabase
-          .from("reactions")
-          .insert({ report_id: reportId, user_id: userId, reaction_type: type });
-        if (insertError) throw insertError;
-      }
+      await toggleReportReaction(
+        () => supabase.from("reactions").select("id").eq("report_id", reportId).eq("user_id", userId).eq("reaction_type", type),
+        (ids) => supabase.from("reactions").delete().in("id", ids),
+        () => supabase.from("reactions").insert({ report_id: reportId, user_id: userId, reaction_type: type }),
+      );
       await loadReactions();
     } catch (e) {
       setError("Не удалось сохранить реакцию: " + (e instanceof Error ? e.message : "неизвестная ошибка"));
