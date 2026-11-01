@@ -54,7 +54,7 @@ export function AvatarCropEditor({ file, saving, onClose, onSave }: Props) {
     img.onload = () => setImage(img);
     img.src = src;
   }, [src]);
-  const size = 280;
+  const size = 260;
   const baseScale = image ? Math.max(size / image.naturalWidth, size / image.naturalHeight) : 1;
   const w = image ? image.naturalWidth * baseScale * zoom : size;
   const h = image ? image.naturalHeight * baseScale * zoom : size;
@@ -77,7 +77,7 @@ export function AvatarCropEditor({ file, saving, onClose, onSave }: Props) {
     <div className="w-full max-w-sm rounded-3xl border border-[#D7FF35]/40 bg-[#101510] p-5 shadow-2xl">
       <h2 className="mb-3 text-lg font-black uppercase text-white">Настроить аватар</h2>
       <p className="mb-4 text-xs text-zinc-400">Перетаскивай фото пальцем или мышкой. Масштабируй ползунком.</p>
-      <div className="relative mx-auto touch-none overflow-hidden rounded-full border-[3px] border-[#D7FF35]" style={{ width: size, height: size }}
+      <div className="relative mx-auto max-w-full touch-none overflow-hidden rounded-full border-[3px] border-[#D7FF35]" style={{ width: size, height: size }}
         onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); dragging.current = { x: e.clientX, y: e.clientY, originX: offset.x, originY: offset.y }; }}
         onPointerMove={e => { if (dragging.current) setOffset(clamp(dragging.current.originX + e.clientX - dragging.current.x, dragging.current.originY + e.clientY - dragging.current.y)); }}
         onPointerUp={() => { dragging.current = null; }}
