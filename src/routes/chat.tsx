@@ -328,7 +328,7 @@ function GeographicChat() {
   }
 
   return <Shell>
-    {!threadOpen && <header className="mb-6 rounded-3xl border border-[var(--z-stroke)] bg-[radial-gradient(ellipse_at_top,#141425_0%,#070B10_65%)] px-4 pb-5 pt-5 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
+    {!threadOpen && <header className="z-card-hero mb-6 bg-[radial-gradient(ellipse_at_top,#141425_0%,#070B10_65%)] px-4 pb-5 pt-5 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
       <div className="mb-6 flex items-center justify-between gap-3">
         <div className="min-w-0 origin-left"><Wordmark /></div>
         <div className="flex items-center gap-2">
@@ -340,7 +340,7 @@ function GeographicChat() {
         <input autoFocus className="field mt-1 w-full" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} maxLength={80} placeholder="Трофеи, вода, напарники…" />
       </label>}
       <h1 className="break-words text-[clamp(1.65rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
-      <div className="mt-6 grid grid-cols-[0.8fr_1.2fr_1.5fr] gap-2" role="group" aria-label="Фильтр чатов">
+      <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="Фильтр чатов">
         <span className="flex min-h-11 items-center justify-center rounded-2xl bg-[#D7FF35] px-2 text-sm font-black text-[#10140A]" aria-current="true">Все</span>
         <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60" title="Появится после подключения истории участия">Мои чаты</button>
         <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9] opacity-60" title="Появится после подключения учёта прочтений">Непрочитанные</button>
@@ -356,21 +356,21 @@ function GeographicChat() {
     {uid && <div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
       {!threadOpen && <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#A99AD9]">Тематические комнаты · выбери обсуждение</p>
-        <div className="overflow-hidden rounded-2xl border border-[var(--z-stroke)] bg-[var(--z-card)] px-3 sm:px-5">
+        <div className="z-card-hero overflow-hidden px-3 sm:px-5">
           {TOPICS.filter(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))).map((t) => (
             <button key={t.key} type="button" onClick={() => go(placeId, t.key)}
               aria-pressed={topic === t.key}
-              className={"grid w-full min-h-[88px] grid-cols-[48px_minmax(0,1fr)] items-center gap-3 border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
+              className={"z-room-row border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
                 (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")}>
-              <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#514565] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]" aria-hidden="true">
+              <span className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#514565] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]" aria-hidden="true">
                 <img src={ROOM_PHOTOS[t.key]} loading="lazy" alt="" className="absolute inset-0 size-full object-cover" onError={e=>{ e.currentTarget.style.display="none"; e.currentTarget.nextElementSibling?.classList.remove("hidden"); }} />
                 <span className="relative z-10 hidden text-2xl text-[#D7FF35]">{t.icon}</span>
               </span>
               <span className="min-w-0">
-                <span className="block text-base font-black text-white">{t.label}</span>
+                <span className="block truncate text-base font-black text-white">{t.label}</span>
                 <span className="mt-1 block truncate text-xs leading-5 text-[#A99AD9]">{roomLastMessages[t.key]?.body || t.description}</span>
-                {roomLastMessages[t.key] && <time dateTime={roomLastMessages[t.key]!.created_at} className="mt-1 block text-right text-[10px] tabular-nums text-[#B4A1D7]">{new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</time>}
               </span>
+              <span className="min-w-0 text-right text-[10px] tabular-nums text-[#B4A1D7]">{roomLastMessages[t.key] && <time dateTime={roomLastMessages[t.key]!.created_at}>{new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</time>}</span>
             </button>
           ))}
         </div>
@@ -499,7 +499,7 @@ function GeographicChat() {
                   {new Date(message.created_at).toLocaleString("ru-RU",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
                 </time>
               </div>
-              <div className={"zapruda-chat-bubble whitespace-pre-wrap break-words rounded-[20px] border px-4 py-3 text-sm leading-6 "+(message.user_id===uid?"zapruda-chat-own-bubble ":"zapruda-chat-incoming-bubble ")+(message.user_id===uid?"rounded-tr-sm border-[#D7FF35] bg-[#D7FF35] text-[#11170A] shadow-[0_8px_28px_rgba(215,255,53,0.12)]":"rounded-tl-sm border-[#3E345B] bg-[#292140] text-[#F5F2FF]")}>
+              <div className={"zapruda-chat-bubble whitespace-pre-wrap break-words rounded-2xl border px-4 py-3 text-sm leading-6 "+(message.user_id===uid?"zapruda-chat-own-bubble ":"zapruda-chat-incoming-bubble ")+(message.user_id===uid?"rounded-tr-sm border-[#D7FF35] bg-[#D7FF35] text-[#11170A] shadow-[0_8px_28px_rgba(215,255,53,0.12)]":"rounded-tl-sm border-[#3E345B] bg-[#292140] text-[#F5F2FF]")}>
                 {message.body}
                 {photoUrls[message.id] && <a href={photoUrls[message.id]} target="_blank" rel="noopener noreferrer" className="mt-3 block overflow-hidden rounded-xl border border-black/10">
                   <img src={photoUrls[message.id]} alt="Фото из рыболовного чата" loading="lazy" className="max-h-72 max-w-full rounded-xl object-contain" />
