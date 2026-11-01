@@ -3169,6 +3169,19 @@ export type Database = {
           report_count: number
         }[]
       }
+      my_profile_full: {
+        Args: never
+        Returns: {
+          avatar_symbol: string | null
+          avatar_url: string | null
+          bio: string | null
+          chat_city: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          username: string | null
+        }[]
+      }
       quote_guide_booking: {
         Args: { p_id: string; p_price: number; p_terms: string }
         Returns: undefined
