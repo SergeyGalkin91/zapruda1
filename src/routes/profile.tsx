@@ -1,3 +1,4 @@
+import { PROFILE_SAVE_SUCCESS, profileSaveNetworkError } from "@/lib/profile-save-feedback";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
@@ -427,13 +428,10 @@ function Profile() {
         setError("Имя сохранено, но настройки рыбалки не обновлены: " + prefsError.message);
         return;
       }
-      setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
+      setNotice(PROFILE_SAVE_SUCCESS);
       setEditing(false);
     } catch (cause) {
-      const detail = cause instanceof Error ? " " + cause.message : "";
-      setError(profileSaved
-        ? "Имя сохранено, но настройки рыбалки не удалось обновить из-за ошибки сети. Повтори сохранение." + detail
-        : "Не удалось сохранить профиль из-за ошибки сети. Проверь подключение и повтори попытку." + detail);
+      setError(profileSaveNetworkError(profileSaved, cause));
     } finally {
       setSaving(false);
     }
