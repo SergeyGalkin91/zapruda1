@@ -90,7 +90,8 @@ export function ReactionBar({
     setError("");
     try {
       await toggleReportReaction(
-        () => supabase.from("reactions").select("id").eq("report_id", reportId).eq("user_id", userId).eq("reaction_type", type),
+        type,
+        () => supabase.from("reactions").select("id,reaction_type").eq("report_id", reportId).eq("user_id", userId),
         (ids) => supabase.from("reactions").delete().in("id", ids),
         () => supabase.from("reactions").insert({ report_id: reportId, user_id: userId, reaction_type: type }),
       );
