@@ -247,6 +247,34 @@ function Profile() {
     }
   }
 
+  async function removeCustomAvatar() {
+    if (!userId || uploadingAvatar || !avatarUrl) return;
+    setUploadingAvatar(true);
+    setError("");
+    try {
+      // Clear only the logged-in user's profile reference; the assigned fallback is stable.
+      const previous = avatarUrl;
+      const { error: saveError } = await supabase.from("profiles").update({ avatar_url: null }).eq("id", userId);
+      if (saveError) throw saveError;
+      setAvatarUrl(null);
+      setNotice("Фотография удалена. Восстановлен твой системный аватар.");
+      // The existing Storage policy allows users to delete only their own uploads.
+      const marker = "/storage/v1/object/public/avatars/";
+      const location = previous.indexOf(marker);
+      if (location !== -1) {
+        const path = decodeURIComponent(previous.slice(location + marker.length).split("?")[0]);
+        if (path.startsWith(userId + "/")) {
+          const { error: storageError } = await supabase.storage.from("avatars").remove([path]);
+          if (storageError) console.warn("Avatar orphan cleanup:", storageError.message);
+        }
+      }
+    } catch (cause) {
+      setError("Не удалось удалить фотографию: " + (cause instanceof Error ? cause.message : "попробуй ещё раз"));
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
+
   function chooseAvatar(file?: File) {
     if (!file) return;
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
@@ -514,6 +542,7 @@ function Profile() {
             {uploadingAvatar ? "Загружаем аватар…" : avatarUrl ? "Изменить аватар" : "Добавить аватар"}
             <input type="file" className="sr-only" accept="image/png,image/jpeg,image/webp" disabled={uploadingAvatar} aria-label="Загрузить аватар (JPG, PNG, WebP, до 5 МБ)" onChange={(event) => { chooseAvatar(event.target.files?.[0]); event.currentTarget.value = ""; }} />
           </label>}
+          {userId && avatarUrl && <button type="button" disabled={uploadingAvatar} onClick={() => { void removeCustomAvatar(); }} className="rounded-xl border border-white/15 px-3 py-2 text-xs font-bold text-zinc-300 hover:border-[#D7FF35]/50 disabled:opacity-50">Удалить фото</button>}
           <div className="min-w-0 flex-1">
             <h1 className="max-w-full text-[clamp(1.05rem,4.3vw,3.3rem)] font-black uppercase leading-[1.12] tracking-[-0.035em] text-white [overflow-wrap:normal] break-normal">{displayName || username || "Мой рыболовный профиль"}</h1>
             <p className="mt-1 text-sm text-[#A6B1A0]">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
