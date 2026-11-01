@@ -343,7 +343,7 @@ function GeographicChat() {
       <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="Фильтр чатов">
         <span className="flex min-h-11 items-center justify-center rounded-2xl bg-[#D7FF35] px-2 text-sm font-black text-[#10140A]" aria-current="true">Все</span>
         <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60" title="Появится после подключения истории участия">Мои чаты</button>
-        <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9] opacity-60" title="Появится после подключения учёта прочтений">Непрочитанные</button>
+        <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-3xl border border-white/10 bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9] opacity-60" title="Появится после подключения учёта прочтений">Непрочитанные</button>
       </div>
     </header>}
 
