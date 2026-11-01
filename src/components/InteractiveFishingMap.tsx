@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 
 type Point={latitude:number;longitude:number};
 type DisplayMark=Point&{id:string;title:string;kind:string};
-type YandexPlacemark={};
-type YandexMap={destroy:()=>void;geoObjects:{add:(p:YandexPlacemark)=>void;removeAll:()=>void};events:{add:(name:string,fn:(event:any)=>void)=>void};setCenter:(coords:number[],zoom:number)=>void};
+type YandexPlacemark={events:{add:(name:string,fn:()=>void)=>void}};
+type YandexMapEvent={get:(name:string)=>unknown};
+type YandexMap={destroy:()=>void;geoObjects:{add:(p:YandexPlacemark)=>void;removeAll:()=>void};events:{add:(name:string,fn:(event:YandexMapEvent)=>void)=>void};setCenter:(coords:number[],zoom:number)=>void};
 type YandexApi={ready:(fn:()=>void)=>void;Map:new(node:HTMLElement,opts:{center:number[];zoom:number;controls?:string[]})=>YandexMap;Placemark:new(coords:number[],props?:Record<string,unknown>,opts?:Record<string,unknown>)=>YandexPlacemark};
 declare global {interface Window {ymaps?:YandexApi}}
 const getKey=()=>{
@@ -89,7 +90,7 @@ export function InteractiveFishingMap({marks,selected,onPick,onSelectMark}:Props
       balloonContentHeader:mark.title,
       hintContent:mark.title,
     },{preset:markStyles[mark.kind]?.preset||markStyles["other"].preset});
-    (placemark as any).events.add("click",()=>markRef.current(mark.id));
+    placemark.events.add("click",()=>markRef.current(mark.id));
     m.geoObjects.add(placemark);
   }
   if(selected){

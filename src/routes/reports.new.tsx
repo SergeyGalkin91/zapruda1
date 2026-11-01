@@ -147,9 +147,9 @@ function NewReport() {
   useEffect(() => {
     let live = true;
     void Promise.all([
-      (supabase as any).from("atlas_waterbodies").select("id,name,region,country_code").order("name").limit(500),
-      (supabase as any).from("atlas_fish_species").select("id,name").limit(200),
-      (supabase as any).from("atlas_waterbody_species").select("waterbody_id,species_id").limit(2500)
+      supabase.from("atlas_waterbodies").select("id,name,region,country_code").order("name").limit(500),
+      supabase.from("atlas_fish_species").select("id,name").limit(200),
+      supabase.from("atlas_waterbody_species").select("waterbody_id,species_id").limit(2500)
     ]).then(([w, f, m]) => {
       if (!live) return;
       if (!w.error) setCatalogWaters(w.data ?? []);
@@ -348,7 +348,7 @@ function NewReport() {
             for (const caught of savedFish.data) {
               const species = catalogFishes.find(x => x.name.toLowerCase() === caught.species.trim().toLowerCase());
               if (!species || !catalogMappings.some(x => x.waterbody_id === selectedWaterbody && x.species_id === species.id)) continue;
-              await (supabase as any).from("atlas_catch_claims").insert({
+              await supabase.from("atlas_catch_claims").insert({
                 user_id: user.id, waterbody_id: selectedWaterbody, species_id: species.id,
                 catch_id: caught.id, evidence_photo_id: photoId,
               });

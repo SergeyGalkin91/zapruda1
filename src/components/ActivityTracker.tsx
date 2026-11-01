@@ -23,7 +23,7 @@ export function ActivityTracker() {
       if (Date.now() - lastActionAt > 75_000 || Date.now() - lastSubmittedAt < FIVE_MINUTES) return;
       submitting = true;
       // The DB provides the 5-minute server-time window, user may only insert their own id.
-      const { error } = await (supabase as any).from("user_activity_windows").insert({ user_id: activeId });
+      const { error } = await supabase.from("user_activity_windows").insert({ user_id: activeId });
       if (!error || error.code === "23505") lastSubmittedAt = Date.now();
       submitting = false;
     };

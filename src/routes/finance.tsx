@@ -33,12 +33,12 @@ function Finance(){
      if(!active)return;
      if(roleError||!admin){setLoading(false);return;}
      setAuthorized(true);
-     const {data,error:summaryError}=await (supabase as any).rpc("admin_finance_summary");
+     const {data,error:summaryError}=await supabase.rpc("admin_finance_summary");
      if(!active)return;
      if(summaryError)setError("Не удалось загрузить финансовую сводку: "+summaryError.message);
      else {
        const info=Array.isArray(data)?data[0]:data;
-       if(info)setSummary(Object.fromEntries(Object.keys(empty).map(k=>[k,Number(info[k]||0)])) as Summary);
+       if(info)setSummary(Object.fromEntries(Object.keys(empty).map(k=>[k,Number((info as Record<string, unknown>)[k]||0)])) as Summary);
      }
      setLoading(false);
    })().catch(e=>{if(active){setLoading(false);setError(e instanceof Error?e.message:"Не удалось открыть финансы.");}});
