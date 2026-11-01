@@ -55,8 +55,10 @@ function createSupabaseClient() {
   // Public project configuration fallback for Lovable hosting, which does not inject
   // VITE_* values or Node environment variables in all deployment modes.
   // This is a publishable client key, NOT a Supabase secret/service-role key.
-  const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || serverEnv?.['SUPABASE_URL'] || 'https://sonvniuwtvzzyuglscah.supabase.co';
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || serverEnv?.['SUPABASE_PUBLISHABLE_KEY'] || 'sb_publishable_86B9kOH2BUNOuHyYoHX4qw_FbuLHl5E';
+  // PR #28 only: prevent the deployed browser preview from ever using production Auth.
+  const preview28 = typeof window !== 'undefined' && window.location.hostname === 'deploy-preview-28--zapruda1.netlify.app';
+  const SUPABASE_URL = preview28 ? 'https://yudtbifopfnjtjanaqrd.supabase.co' : (import.meta.env['VITE_SUPABASE_URL'] || serverEnv?.['SUPABASE_URL'] || 'https://sonvniuwtvzzyuglscah.supabase.co');
+  const SUPABASE_PUBLISHABLE_KEY = preview28 ? 'sb_publishable_GHxXu3_sK5YtuXeftTfwSQ_hK0F5mx8' : (import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || serverEnv?.['SUPABASE_PUBLISHABLE_KEY'] || 'sb_publishable_86B9kOH2BUNOuHyYoHX4qw_FbuLHl5E');
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
