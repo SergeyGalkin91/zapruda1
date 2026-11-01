@@ -92,7 +92,7 @@ export function getAchievements(p: FishingProgress): Achievement[] {
     { id: "first_partner", title: "Организатор", description: "Создай первый совместный выезд", category: "Свой среди своих", current: p.trips_organized, target: 1 },
     { id: "five_trips", title: "Капитан команды", description: "Организуй пять выездов", category: "Свой среди своих", current: p.trips_organized, target: 5 },
     { id: "ten_reactions", title: "Свой человек", description: "Получи десять реакций от других рыбаков", category: "Свой среди своих", current: p.reactions_received, target: 10 },
-    { id: "fifty_reactions", title: "Любимец сообщества", description: "Получи пятьдесят реакций", category: "Свой среди своими", current: p.reactions_received, target: 50 },
+    { id: "fifty_reactions", title: "Любимец сообщества", description: "Получи пятьдесят реакций", category: "Свой среди своих", current: p.reactions_received, target: 50 },
     { id: "first_photo", title: "Фоторыбак", description: "Прикрепи фото к отчёту", category: "Истории", current: p.photo_reports, target: 1 },
     { id: "five_photo_reports", title: "Летописец", description: "Создай пять фотоотчётов", category: "Истории", current: p.photo_reports, target: 5 },
   ];
