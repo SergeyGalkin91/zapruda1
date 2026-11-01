@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import type { FormEvent } from "react";
 import { Activity, ExternalLink, MapPin, Plus, Trash2 } from "lucide-react";
@@ -40,16 +40,16 @@ export function PrivateFishingMarks({ userId, homeCity, homeRegion }: { userId: 
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  async function refresh() {
+  const refresh = useCallback(async () => {
     const { data, error: queryError } = await supabase.from("private_fishing_marks")
       .select("id,kind,title,note,latitude,longitude,created_at")
       .eq("user_id", userId).order("created_at", { ascending: false }).limit(100);
     if (queryError) setError("Не удалось загрузить личные метки: " + queryError.message);
     else setMarks((data ?? []) as Mark[]);
     setLoading(false);
-  }
+  }, [userId]);
 
-  useEffect(() => { void refresh(); }, [userId]);
+  useEffect(() => { void refresh(); }, [refresh]);
 
   async function save(event: FormEvent) {
     event.preventDefault();

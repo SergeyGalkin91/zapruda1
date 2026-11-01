@@ -166,7 +166,7 @@ function GeographicChat() {
   }
 
   useEffect(() => {
-    if (!uid || !selectedPlace || !threadOpen) return;
+    if (!uid || !placeId || !threadOpen) return;
     let alive = true;
     setMessages([]);
     setReactions([]);
@@ -179,7 +179,7 @@ function GeographicChat() {
       const thisRequest = ++requestNumber;
       const { data, error: queryError } = await api.from("chat_messages")
         .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url,chat_city)")
-        .eq("place_id", selectedPlace.id).eq("topic", topic)
+        .eq("place_id", placeId).eq("topic", topic)
         .order("created_at", { ascending: false }).limit(100);
       if (!alive || thisRequest !== requestNumber) return;
       setChatLoading(false);
@@ -206,10 +206,10 @@ function GeographicChat() {
       }
     };
     void fetchMessages();
-    const channel = supabase.channel("zapruda-chat-" + selectedPlace.id + "-" + topic)
+    const channel = supabase.channel("zapruda-chat-" + placeId + "-" + topic)
       .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "chat_messages",
-        filter: "place_id=eq." + selectedPlace.id,
+        filter: "place_id=eq." + placeId,
       }, () => { void fetchMessages(); }).subscribe();
     const onFocus = () => { void fetchMessages(); };
     window.addEventListener("focus", onFocus);
@@ -218,7 +218,7 @@ function GeographicChat() {
       window.removeEventListener("focus", onFocus);
       void supabase.removeChannel(channel);
     };
-  }, [uid, selectedPlace?.id, topic, refreshIndex, threadOpen]);
+  }, [uid, placeId, topic, refreshIndex, threadOpen]);
 
   async function createPlace(e: FormEvent<HTMLFormElement>, level: "region" | "city") {
     e.preventDefault();

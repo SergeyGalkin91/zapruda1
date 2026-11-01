@@ -273,7 +273,11 @@ function Feed() {
     }
   }, [hasMore, loadingMore, reports.length]);
 
-  useEffect(() => { void loadPage(true); }, []);
+  const loadPageRef = useRef(loadPage);
+  loadPageRef.current = loadPage;
+
+  // One-shot initial fetch; infinite scroll / realtime use loadPage via deps below.
+  useEffect(() => { void loadPageRef.current(true); }, []);
 
   useEffect(() => {
     const node = sentinelRef.current;

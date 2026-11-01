@@ -62,10 +62,11 @@ function Auth() {
       }).catch(() => { if (active) setError("Не удалось проверить вход. Попробуй ещё раз."); });
     }
     return () => { active = false; subscription.unsubscribe(); };
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
-    if (mode === "in" || mode === "up") setMode(search.mode);
+    // Sync URL mode only while user is on in/up forms (not forgot/recovery).
+    setMode((current) => (current === "in" || current === "up" ? search.mode : current));
   }, [search.mode]);
 
 
