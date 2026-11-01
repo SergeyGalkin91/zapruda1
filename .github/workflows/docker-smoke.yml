@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'Dockerfile'
+      - 'compose.staging.yaml'
       - '.dockerignore'
       - 'bun.lock'
       - 'package.json'
@@ -21,6 +22,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Validate STAGING compose without credentials or deployment
+        env:
+          STAGING_SUPABASE_URL: https://example.supabase.co
+          STAGING_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-not-a-real-credential
+        run: |
+          docker compose -f compose.staging.yaml config --quiet
       - name: Build isolated test image (no registry push)
         run: |
           docker build \
