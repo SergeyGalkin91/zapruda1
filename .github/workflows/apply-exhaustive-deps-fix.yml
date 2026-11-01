@@ -1,0 +1,123 @@
+name: Apply exhaustive-deps fixes
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/fix-exhaustive-deps-20261101
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Patch React hook dependencies
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          # auth.tsx
+          p = Path('src/routes/auth.tsx')
+          t = p.read_text()
+          t = t.replace(
+          '''    return () => { active = false; subscription.unsubscribe(); };\n  }, []);\n\n  useEffect(() => {\n    if (mode === "in" || mode === "up") setMode(search.mode);\n  }, [search.mode]);\n''',
+          '''    return () => { active = false; subscription.unsubscribe(); };\n  }, [navigate]);\n\n  useEffect(() => {\n    // Sync URL mode only while user is on in/up forms (not forgot/recovery).\n    setMode((current) => (current === "in" || current === "up" ? search.mode : current));\n  }, [search.mode]);\n'''
+          )
+          p.write_text(t)
+
+          # index.tsx
+          p = Path('src/routes/index.tsx')
+          t = p.read_text()
+          old = '''  }, [hasMore, loadingMore, reports.length]);\n\n  useEffect(() => { void loadPage(true); }, []);\n'''
+          new = '''  }, [hasMore, loadingMore, reports.length]);\n\n  const loadPageRef = useRef(loadPage);\n  loadPageRef.current = loadPage;\n\n  // One-shot initial fetch; infinite scroll / realtime use loadPage via deps below.\n  useEffect(() => { void loadPageRef.current(true); }, []);\n'''
+          if old not in t:
+              raise SystemExit('index block missing')
+          p.write_text(t.replace(old, new))
+
+          # chat.tsx
+          p = Path('src/routes/chat.tsx')
+          t = p.read_text()
+          t = t.replace(
+          '''  useEffect(() => {\n    if (!uid || !selectedPlace || !threadOpen) return;\n    let alive = true;\n    setMessages([]);\n    setReactions([]);\n    setPhotoUrls({});\n    setChatError("");\n    setChatLoading(true);\n\n    let requestNumber = 0;\n    const fetchMessages = async () => {\n      const thisRequest = ++requestNumber;\n      const { data, error: queryError } = await api.from("chat_messages")\n        .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url,chat_city)")\n        .eq("place_id", selectedPlace.id).eq("topic", topic)\n''',
+          '''  useEffect(() => {\n    if (!uid || !placeId || !threadOpen) return;\n    let alive = true;\n    setMessages([]);\n    setReactions([]);\n    setPhotoUrls({});\n    setChatError("");\n    setChatLoading(true);\n\n    let requestNumber = 0;\n    const fetchMessages = async () => {\n      const thisRequest = ++requestNumber;\n      const { data, error: queryError } = await api.from("chat_messages")\n        .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url,chat_city)")\n        .eq("place_id", placeId).eq("topic", topic)\n'''
+          )
+          t = t.replace(
+          '''    void fetchMessages();\n    const channel = supabase.channel("zapruda-chat-" + selectedPlace.id + "-" + topic)\n      .on("postgres_changes", {\n        event: "INSERT", schema: "public", table: "chat_messages",\n        filter: "place_id=eq." + selectedPlace.id,\n      }, () => { void fetchMessages(); }).subscribe();\n''',
+          '''    void fetchMessages();\n    const channel = supabase.channel("zapruda-chat-" + placeId + "-" + topic)\n      .on("postgres_changes", {\n        event: "INSERT", schema: "public", table: "chat_messages",\n        filter: "place_id=eq." + placeId,\n      }, () => { void fetchMessages(); }).subscribe();\n'''
+          )
+          t = t.replace(
+            '}, [uid, selectedPlace?.id, topic, refreshIndex, threadOpen]);',
+            '}, [uid, placeId, topic, refreshIndex, threadOpen]);',
+          )
+          p.write_text(t)
+
+          # AnglerGearSets
+          p = Path('src/components/AnglerGearSets.tsx')
+          t = p.read_text()
+          t = t.replace(
+          '''  useEffect(() => {\n    if (!selectedRod || !rods.some(item => item.id === selectedRod)) setSelectedRod(rods[0]?.id ?? "");\n    if (!selectedReel || !reels.some(item => item.id === selectedReel)) setSelectedReel(reels[0]?.id ?? "");\n    if (selectedLine && !lines.some(item => item.id === selectedLine)) setSelectedLine("");\n  }, [items, selectedRod, selectedReel, selectedLine]);\n''',
+          '''  useEffect(() => {\n    if (!selectedRod || !rods.some(item => item.id === selectedRod)) setSelectedRod(rods[0]?.id ?? "");\n    if (!selectedReel || !reels.some(item => item.id === selectedReel)) setSelectedReel(reels[0]?.id ?? "");\n    if (selectedLine && !lines.some(item => item.id === selectedLine)) setSelectedLine("");\n  }, [items, rods, reels, lines, selectedRod, selectedReel, selectedLine]);\n'''
+          )
+          p.write_text(t)
+
+          # PrivateFishingMarks
+          p = Path('src/components/PrivateFishingMarks.tsx')
+          t = p.read_text()
+          if 'useCallback' not in t:
+              t = t.replace(
+                  'import { useEffect, useState } from "react";',
+                  'import { useCallback, useEffect, useState } from "react";',
+              )
+          t = t.replace(
+          '''  async function refresh() {\n    const { data, error: queryError } = await supabase.from("private_fishing_marks")\n      .select("id,kind,title,note,latitude,longitude,created_at")\n      .eq("user_id", userId).order("created_at", { ascending: false }).limit(100);\n    if (queryError) setError("Не удалось загрузить личные метки: " + queryError.message);\n    else setMarks((data ?? []) as Mark[]);\n    setLoading(false);\n  }\n\n  useEffect(() => { void refresh(); }, [userId]);\n''',
+          '''  const refresh = useCallback(async () => {\n    const { data, error: queryError } = await supabase.from("private_fishing_marks")\n      .select("id,kind,title,note,latitude,longitude,created_at")\n      .eq("user_id", userId).order("created_at", { ascending: false }).limit(100);\n    if (queryError) setError("Не удалось загрузить личные метки: " + queryError.message);\n    else setMarks((data ?? []) as Mark[]);\n    setLoading(false);\n  }, [userId]);\n\n  useEffect(() => { void refresh(); }, [refresh]);\n'''
+          )
+          p.write_text(t)
+
+          # GuideVerification
+          p = Path('src/components/GuideVerification.tsx')
+          t = p.read_text()
+          if 'useCallback' not in t:
+              t = t.replace(
+                  'import { useEffect, useState, type FormEvent } from "react";',
+                  'import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";',
+              )
+          elif 'useRef' not in t:
+              t = t.replace(
+                  'import { useCallback, useEffect, useState, type FormEvent } from "react";',
+                  'import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";',
+              )
+          t = t.replace(
+          '''  async function refresh(){\n    const [v,a]=await Promise.all([\n      db.from("guide_verifications").select("verified_at,revoked_at").eq("user_id",userId).maybeSingle(),\n      db.from("guide_verification_applications").select("status,reviewer_note,submitted_at,evidence_path").eq("user_id",userId).maybeSingle(),\n    ]);\n    if(v.error || a.error){setError("Не удалось проверить статус: "+(v.error?.message||a.error?.message));return;}\n    const active=Boolean((v.data as Verification|null)?.verified_at && !(v.data as Verification|null)?.revoked_at);\n    setVerified(active);\n    onVerificationChange(active);\n    setApplication(a.data as Application|null);\n  }\n  useEffect(()=>{void refresh();},[userId]);\n''',
+          '''  const onVerificationChangeRef = useRef(onVerificationChange);\n  onVerificationChangeRef.current = onVerificationChange;\n  const refresh = useCallback(async () => {\n    const [v,a]=await Promise.all([\n      db.from("guide_verifications").select("verified_at,revoked_at").eq("user_id",userId).maybeSingle(),\n      db.from("guide_verification_applications").select("status,reviewer_note,submitted_at,evidence_path").eq("user_id",userId).maybeSingle(),\n    ]);\n    if(v.error || a.error){setError("Не удалось проверить статус: "+(v.error?.message||a.error?.message));return;}\n    const active=Boolean((v.data as Verification|null)?.verified_at && !(v.data as Verification|null)?.revoked_at);\n    setVerified(active);\n    onVerificationChangeRef.current(active);\n    setApplication(a.data as Application|null);\n  }, [userId]);\n  useEffect(()=>{void refresh();},[refresh]);\n'''
+          )
+          p.write_text(t)
+
+          # InteractiveFishingMap
+          p = Path('src/components/InteractiveFishingMap.tsx')
+          t = p.read_text()
+          t = t.replace(
+          ''' return()=>{active=false;instance.current?.destroy();instance.current=null;api.current=null;};\n },[key]);\n''',
+          ''' return()=>{active=false;instance.current?.destroy();instance.current=null;api.current=null;};\n },[key, center.latitude, center.longitude]);\n'''
+          )
+          p.write_text(t)
+
+          print('exhaustive-deps patches applied')
+          PY
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "Grok"
+          git config user.email "grok@users.noreply.github.com"
+          git add src/routes/auth.tsx src/routes/index.tsx src/routes/chat.tsx \
+            src/components/AnglerGearSets.tsx src/components/PrivateFishingMarks.tsx \
+            src/components/GuideVerification.tsx src/components/InteractiveFishingMap.tsx
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "fix(hooks): satisfy react-hooks/exhaustive-deps without behavior regressions"
+          git push origin HEAD:grok/fix-exhaustive-deps-20261101
