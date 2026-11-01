@@ -332,12 +332,12 @@ function GeographicChat() {
       <div className="mb-6 flex items-center justify-between gap-3">
         <div className="min-w-0 origin-left"><Wordmark /></div>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => { setRoomSearchOpen(open => !open); setRoomSearch(""); }} aria-expanded={roomSearchOpen} aria-label="Поиск тематических чатов" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-white hover:text-[#D7FF35]"><Search className="size-6" /></button>
+          <button type="button" onClick={() => { setRoomSearchOpen(open => !open); setRoomSearch(""); }} aria-expanded={roomSearchOpen} aria-label={roomSearchOpen ? "Закрыть поиск комнат" : "Поиск тематических чатов"} className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-white hover:text-[#D7FF35]"><Search className="size-6" /></button>
           <Link to="/reports/new" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/75 text-2xl font-light text-white hover:border-[#D7FF35] hover:text-[#D7FF35]" aria-label="Создать отчёт"><Plus className="size-6" /></Link>
         </div>
       </div>
       {roomSearchOpen && <label className="mb-4 block text-xs text-zinc-300">Найти комнату
-        <input autoFocus className="field mt-1 w-full" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} maxLength={80} placeholder="Трофеи, вода, напарники…" />
+        <input autoFocus className="field mt-1 w-full" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} onKeyDown={e => { if (e.key === "Escape") { setRoomSearch(""); setRoomSearchOpen(false); } }} maxLength={80} placeholder="Трофеи, вода, напарники…" />
       </label>}
       <h1 className="break-words text-[clamp(1.65rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
       <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="Фильтр чатов">
