@@ -89,12 +89,22 @@ export function ReactionBar({
     setBusy(type);
     setError("");
     try {
-      await toggleReportReaction(
-        type,
-        () => supabase.from("reactions").select("id,reaction_type").eq("report_id", reportId).eq("user_id", userId),
-        (ids) => supabase.from("reactions").delete().in("id", ids),
-        () => supabase.from("reactions").insert({ report_id: reportId, user_id: userId, reaction_type: type }),
-      );
+      if (import.meta.env.VITE_ENABLE_ATOMIC_REACTIONS === "true") {
+        // Enable only for STAGING after its RPC has been deployed and verified.
+        const { error: rpcError } = await supabase.rpc(
+          "toggle_report_reaction_atomic" as never,
+          { p_report_id: reportId, p_reaction_type: type } as never,
+        );
+        if (rpcError) throw rpcError;
+      } else {
+        // Compatibility path until the RPC is approved and deployed to production.
+        await toggleReportReaction(
+          type,
+          () => supabase.from("reactions").select("id,reaction_type").eq("report_id", reportId).eq("user_id", userId),
+          (ids) => supabase.from("reactions").delete().in("id", ids),
+          () => supabase.from("reactions").insert({ report_id: reportId, user_id: userId, reaction_type: type }),
+        );
+      }
       await loadReactions();
     } catch (e) {
       setError("Не удалось сохранить реакцию: " + (e instanceof Error ? e.message : "неизвестная ошибка"));
