@@ -20,7 +20,7 @@ type Water = { id: string; slug: string; country_code: string; name: string; reg
 type Species = { id: string; name: string; description: string };
 type Mapping = { waterbody_id: string; species_id: string; evidence_status: "indicative" | "reviewed" };
 type Progress = { waterbody_id: string; known_species: number; caught_species: number; reviewed_species: number; atlas_completed: boolean };
-const api = supabase as any;
+const api = supabase;
 const kindName: Record<string, string> = { river: "Река", lake: "Озеро", reservoir: "Водохранилище", canal: "Канал", other: "Водоём" };
 
 function Atlas() {

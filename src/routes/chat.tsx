@@ -38,7 +38,7 @@ const ROOM_PHOTOS: Record<ChatTopic, string> = {
 };
 const quick = ["🎣", "🐟", "🔥", "👍", "😂", "💪", "❤️", "👏", "🤝", "🏆"];
 const VALID_TOPICS = TOPICS.map(t => t.key);
-const api = supabase as any;
+const api = supabase;
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [
@@ -197,15 +197,22 @@ function GeographicChat() {
 
   async function createPlace(e: FormEvent<HTMLFormElement>, level: "region" | "city") {
     e.preventDefault();
-    if (!uid || !country || creating || (level === "city" && !region)) return;
+    if (!uid || !country?.country_code || creating || (level === "city" && !region)) return;
     const name = (level === "region" ? regionName : cityName).trim();
     if (name.length < 2 || name.length > 70) return;
     setCreating(true); setError("");
-    const { data, error: createError } = await api.rpc("ensure_chat_place", {
+    // RPC-параметры опциональны: при exactOptionalPropertyTypes их нельзя
+    // передавать как явный undefined/null, поэтому собираем объект по уровню.
+    const args: { p_country_code: string; p_region?: string; p_city?: string } = {
       p_country_code: country.country_code,
-      p_region: level === "region" ? name : region?.name,
-      p_city: level === "city" ? name : null,
-    });
+    };
+    if (level === "region") {
+      args.p_region = name;
+    } else if (region?.name) {
+      args.p_region = region.name;
+      if (level === "city") args.p_city = name;
+    }
+    const { data, error: createError } = await api.rpc("ensure_chat_place", args);
     if (createError) {
       setError("Не удалось добавить раздел: " + createError.message);
       setCreating(false); return;

@@ -13,7 +13,7 @@ type GuideApp={
   boat_document_note:string;evidence_path:string;status:"pending"|"approved"|"rejected";submitted_at:string;
 };
 type ClubReq={id:string;applicant_id:string;name:string;city:string;fee_rub:number;status:"awaiting_payment"|"paid"|"cancelled";created_at:string};
-const db=supabase as any;
+const db = supabase;
 
 function Moderation(){
   const [admin,setAdmin]=useState(false);

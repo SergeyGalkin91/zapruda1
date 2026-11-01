@@ -58,7 +58,7 @@ function SpotAnalytics(){
         supabase.from("zapruda_admins").select("user_id").eq("user_id",id).maybeSingle(),
         supabase.from("private_fishing_marks").select("id,kind,title,note,latitude,longitude")
           .eq("user_id",id).order("created_at",{ascending:false}).limit(100),
-        (supabase as any).from("angler_gear_sets").select("id,title,fishing_method,rod_id,reel_id,line_id,is_primary")
+        supabase.from("angler_gear_sets").select("id,title,fishing_method,rod_id,reel_id,line_id,is_primary")
           .eq("user_id",id).order("created_at",{ascending:false}).limit(100),
         supabase.from("angler_gear").select("id,brand,model,variant").eq("user_id",id).limit(250),
       ]);

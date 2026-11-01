@@ -8,7 +8,7 @@ type Kit = {
   rod_id: string; reel_id: string; line_id: string | null; notes: string;
   is_primary: boolean;
 };
-const api = supabase as any;
+const api = supabase;
 
 export function AnglerGearSets({
   userId, items, fishingMethods, onChange,
@@ -82,8 +82,9 @@ export function AnglerGearSets({
       setBusy(false);
       return;
     }
-    if (!editingId && !kits.some(kit => kit.is_primary)) {
-      const { error: primaryError } = await api.rpc("set_my_primary_gear_set", { p_kit_id: result.data.id });
+    const createdId = !editingId ? result.data?.id : undefined;
+    if (!editingId && !kits.some(kit => kit.is_primary) && createdId) {
+      const { error: primaryError } = await api.rpc("set_my_primary_gear_set", { p_kit_id: createdId });
       if (primaryError) {
         setNotice("Комплект добавлен, но не получилось сделать его основным: " + primaryError.message);
       } else {

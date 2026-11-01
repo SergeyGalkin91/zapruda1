@@ -18,7 +18,7 @@ export function VerifiedGuideDirectory(){
       const {data:auth}=await supabase.auth.getUser();
       if(!auth.user){if(active)setLoading(false);return;}
       // Public profile listing is filtered by RLS: active guides with trusted verification only.
-      const {data,error:e}=await (supabase as any).from("guide_profiles")
+      const {data,error:e}=await supabase.from("guide_profiles")
         .select("user_id,title,home_city,specialties,boat_model,live_sonar_system,live_sonar_model,service_program,service_mode,meeting_area,meeting_lat,meeting_lon")
         .eq("is_active",true).limit(80);
       if(!active)return;

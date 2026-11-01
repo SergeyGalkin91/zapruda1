@@ -180,7 +180,7 @@ function Profile() {
     setPreferences((current) => ({ ...current, [field]: value }));
 
   const loadFeaturedGear = useCallback(async (id: string) => {
-    const { data: kit, error: kitError } = await (supabase as any)
+    const { data: kit, error: kitError } = await supabase
       .from("angler_gear_sets")
       .select("title,fishing_method,rod_id,reel_id,line_id")
       .eq("user_id", id).eq("is_primary", true).maybeSingle();

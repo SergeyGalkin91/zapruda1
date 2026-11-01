@@ -14,7 +14,7 @@ type Person = { id: string; username: string | null; display_name: string | null
 type Thread = { id: string; requester_id: string; recipient_id: string; status: "pending" | "accepted" | "declined"; created_at: string };
 type Mark = { id: string; title: string; latitude: number; longitude: number };
 type Dm = { id: string; thread_id: string; sender_id: string; kind: "text" | "location"; body: string; location_title: string | null; latitude: number | null; longitude: number | null; created_at: string };
-const db = supabase as any;
+const db = supabase;
 const display = (p?: Person) => p?.display_name || p?.username || "Рыболов";
 const datetime = (s: string) => new Date(s).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
