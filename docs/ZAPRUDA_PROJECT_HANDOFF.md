@@ -34,3 +34,15 @@
 
 ## Как продолжать в новом чате
 Напиши: «Продолжаем ZAPRUDA COMMUNITY, утверждённый дизайн v0.6.0-admin-rc.1. Прочитай docs/ZAPRUDA_DESIGN_LOCK_v0.6.0-admin-rc.1.md, AGENTS.md и docs/ZAPRUDA_PROJECT_HANDOFF.md. Сначала проверь PR #5/#6 и GitHub Actions; не меняй дизайн, Supabase и production без моего согласия». Обязательно сверяй актуальный HEAD GitHub, не полагайся только на эту карточку.
+
+## Продолжение v0.7.0 — фактическое состояние на 2026-11-01
+
+- Рабочая ветка: `design/approved-v060-mobile-implementation`; черновик PR #14: https://github.com/SergeyGalkin91/zapruda1/pull/14. Приложение: **v0.7.0**. Идентификатор `v0.6.0-admin-rc.1` обозначает только утверждённый **дизайн**, не текущую версию приложения.
+- По результатам GitHub Actions для коммита `645790f3` успешно завершились Docker image smoke test, ZAPRUDA checks и Frontend Build.
+- Docker-конфигурация в репозитории: `Dockerfile`, `compose.staging.yaml`, `.github/workflows/docker-smoke.yml`; запуск Windows: `scripts/start-staging-docker.ps1` (в обход PowerShell ExecutionPolicy только для отдельного процесса). Инструкция: `docs/ZAPRUDA_V070_DOCKER_STAGING.md`.
+- Пользователь **сам подтвердил успешную локальную сборку и запуск** `zapruda-community:0.7.0-staging` и что приложение **открылось в браузере** по адресу `http://127.0.0.1:3080` на его Windows/Docker Desktop. В логе после запуска был `health: starting`; итоговый `healthy` ещё не подтверждён.
+- Локальная копия: `C:\Users\Dell\Desktop\ZAPRUDA-v070\zapruda1-design-approved-v060-mobile-implementation` (архив ветки GitHub, поскольку `git` не был доступен в PowerShell). Там создан личный `.env.staging.local` с публичными параметрами STAGING; **не запрашивать ключи в чате, не коммитить этот файл**. Сам пользовательский Docker Desktop недоступен через инструменты ChatGPT; не утверждать, что он изменён удалённо.
+- STAGING Supabase: `yudtbifopfnjtjanaqrd`, до завершения сессии проверено 0 public tables и 0 migrations. Поэтому авторизация, профиль и чат с настоящей тестовой БД пока **не подтверждены**. Production Supabase `sonvniuwtvzzyuglscah` не меняли. Атомарный RPC сохранения профиля также не реализован; текущие два запроса могут частично сохраниться.
+- Следующий шаг по возвращении: из уже открытой папки PowerShell `docker compose -f compose.staging.yaml ps`, проверить `healthy`; затем безопасно восстановить схему **только STAGING**, тестировать авторизацию/профиль с тестовым аккаунтом. Не возвращаться к переустановке Docker, Supabase CLI или Git и не просить заново публичный ключ.
+- **НЕИЗМЕННЫЙ ДИЗАЙН:** `docs/ZAPRUDA_DESIGN_LOCK_v0.6.0-admin-rc.1.md`; тёмный графит `#070B10`, лаймовый акцент `#D7FF35`, приглушённый сиреневый, рыболовные street-fishing фото, утверждённый логотип, мобильная навигация. Старый белый/серый стиль не возвращать. Никаких изменений дизайна без явного согласования.
+- PR #14 оставить черновиком, `main` не менять и ничего не выкладывать в production без отдельного одобрения и STAGING-проверок.
