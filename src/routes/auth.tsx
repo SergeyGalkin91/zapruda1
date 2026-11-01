@@ -40,6 +40,7 @@ function Auth() {
     const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
     const recovering = params.get("recovery") === "1";
     const oauthReturn = params.get("oauth") === "1";
+    const confirmedReturn = params.get("confirmed") === "1";
     if (recovering) setMode("new-password");
     const oauthError = params.get("error_description") || hash.get("error_description") || params.get("error") || hash.get("error");
     if (oauthError) {
@@ -48,11 +49,11 @@ function Auth() {
     let active = true;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") setMode("new-password");
-      if (oauthReturn && !recovering && event === "SIGNED_IN" && session && active) {
+      if ((oauthReturn || confirmedReturn) && !recovering && event === "SIGNED_IN" && session && active) {
         void navigate({ to: "/profile", replace: true });
       }
     });
-    if (oauthReturn && !recovering && !oauthError) {
+    if ((oauthReturn || confirmedReturn) && !recovering && !oauthError) {
       setNotice("Проверяем вход через выбранный сервис…");
       void supabase.auth.getSession().then(({ data, error: sessionError }) => {
         if (!active) return;
@@ -101,7 +102,10 @@ function Auth() {
         const { data, error: authError } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { data: { username: cleanUsername, display_name: cleanUsername } },
+          options: {
+            data: { username: cleanUsername, display_name: cleanUsername },
+            emailRedirectTo: window.location.origin + "/auth?confirmed=1",
+          },
         });
         if (authError) throw authError;
         // The database's on_auth_user_created trigger creates the profile.
@@ -133,25 +137,27 @@ function Auth() {
   return (
     <Shell>
       <div className="mx-auto max-w-[440px] overflow-hidden rounded-[28px] border border-[#344153] bg-[#070B10] shadow-[0_25px_100px_rgba(0,0,0,0.65)]">
-        <aside className="relative flex min-h-[300px] flex-col justify-between overflow-hidden bg-[radial-gradient(ellipse_at_60%_83%,#F9A43B_0%,#C4673A_12%,#533C59_34%,#17233A_63%,#070B10_100%)] p-7">
-          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[35%] bg-[linear-gradient(0deg,#030A10_5%,#10182D_65%,transparent_100%)]" /><div aria-hidden="true" className="absolute inset-x-0 bottom-[17%] h-px bg-[#F8B25E]/50 shadow-[0_0_22px_5px_rgba(255,166,73,0.24)]" />
-          <div className="relative">
+        <aside className="relative flex flex-col overflow-hidden bg-[radial-gradient(ellipse_at_60%_83%,#F9A43B_0%,#C4673A_12%,#533C59_34%,#17233A_63%,#070B10_100%)] px-5 pb-5 pt-5">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] bg-[linear-gradient(0deg,#030A10_8%,#10182D_70%,transparent_100%)]" />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-[14%] h-px bg-[#F8B25E]/40 shadow-[0_0_18px_4px_rgba(255,166,73,0.18)]" />
+          <div className="relative z-10">
             <Wordmark />
-            <h1 className="mt-14 max-w-sm text-3xl font-black leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.65)]">Вход в сообщество рыболовов</h1>
-            <p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">Записывай выезды, делись уловом и обсуждай рыбалку с теми, кто в теме.</p>
+            <h1 className="mt-5 max-w-sm text-[1.65rem] font-black leading-[1.15] text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.65)] sm:text-3xl sm:leading-tight">Вход в сообщество рыболовов</h1>
+            <p className="mt-2.5 max-w-xs text-sm leading-5 text-muted-foreground">Записывай выезды, делись уловом и обсуждай рыбалку с теми, кто в теме.</p>
           </div>
-          <p className="relative text-xs text-muted-foreground">Рыболовное сообщество без лишнего шума 🎣</p>
+          <p className="relative z-10 mt-4 text-xs leading-5 text-muted-foreground">Рыболовное сообщество без лишнего шума 🎣</p>
         </aside>
-        <section className="bg-[#070B10] p-6 sm:p-8">
+        <section className="bg-[#070B10] p-5 sm:p-7">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Рыболовное сообщество</p>
           <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">{mode === "in" ? "С возвращением" : mode === "up" ? "Создать аккаунт" : mode === "forgot" ? "Восстановить пароль" : "Новый пароль"}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{mode === "in" ? "Войди в тестовое сообщество по email и паролю." : mode === "up" ? "Заполни данные и подтверди адрес электронной почты." : mode === "forgot" ? "Отправим ссылку для сброса пароля на почту." : "Придумай новый пароль для своего аккаунта."}</p>
 
-          <div className="my-6 grid grid-cols-2 rounded-xl bg-[#20271D] p-1 text-sm">
+          <div className="my-4 grid grid-cols-2 rounded-xl bg-[#20271D] p-1 text-sm">
             <a href="/auth?mode=in" aria-current={mode === "in" ? "page" : undefined} className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "in" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>Вход</a>
             <a href="/auth?mode=up" aria-current={mode === "up" ? "page" : undefined} className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "up" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}>Регистрация</a>
           </div>
-          <p role="note" className="mb-4 rounded-xl border border-[#A99AD9]/25 bg-[#A99AD9]/[0.06] p-3 text-xs leading-5 text-[#C7BDE4]">Alpha использует отдельную тестовую базу: прежние аккаунты сюда не перенесены. Для проверки нажми «Регистрация» и создай тестовый аккаунт. Настоящие данные о рыболовных точках не вводи.</p>\n          <p className="mb-4 text-xs text-zinc-400">Для входа используй <strong className="text-[#D7FF35]">email</strong>, на который регистрировал аккаунт, а не никнейм.</p>
+          <p role="note" className="mb-4 rounded-xl border border-[#A99AD9]/25 bg-[#A99AD9]/[0.06] p-3 text-xs leading-5 text-[#C7BDE4]">Alpha использует отдельную тестовую базу: прежние аккаунты сюда не перенесены. Для проверки нажми «Регистрация» и создай тестовый аккаунт. Настоящие данные о рыболовных точках не вводи.</p>
+          <p className="mb-4 text-xs text-zinc-400">Для входа используй <strong className="text-[#D7FF35]">email</strong>, на который регистрировал аккаунт, а не никнейм.</p>
 
           <form className="space-y-4" onSubmit={submit}>
             {mode === "up" && (
