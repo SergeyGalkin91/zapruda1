@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { FileCheck2, LockKeyhole, ShieldCheck, UploadCloud } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,7 +18,9 @@ export function GuideVerification({userId,guideSaved,onVerificationChange}:{user
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
 
-  async function refresh(){
+  const onVerificationChangeRef = useRef(onVerificationChange);
+  onVerificationChangeRef.current = onVerificationChange;
+  const refresh = useCallback(async () => {
     const [v,a]=await Promise.all([
       db.from("guide_verifications").select("verified_at,revoked_at").eq("user_id",userId).maybeSingle(),
       db.from("guide_verification_applications").select("status,reviewer_note,submitted_at,evidence_path").eq("user_id",userId).maybeSingle(),
@@ -26,10 +28,10 @@ export function GuideVerification({userId,guideSaved,onVerificationChange}:{user
     if(v.error || a.error){setError("Не удалось проверить статус: "+(v.error?.message||a.error?.message));return;}
     const active=Boolean((v.data as Verification|null)?.verified_at && !(v.data as Verification|null)?.revoked_at);
     setVerified(active);
-    onVerificationChange(active);
+    onVerificationChangeRef.current(active);
     setApplication(a.data as Application|null);
-  }
-  useEffect(()=>{void refresh();},[userId]);
+  }, [userId]);
+  useEffect(()=>{void refresh();},[refresh]);
 
   async function submit(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
