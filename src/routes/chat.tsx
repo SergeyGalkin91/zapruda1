@@ -447,7 +447,7 @@ function GeographicChat() {
       </aside>}
 
       {threadOpen && <div className="min-w-0 space-y-3 rounded-[22px] lg:col-span-2">
-        <button type="button" onClick={closeThread} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-[#10131A] px-4 text-sm font-bold text-white hover:border-[#D7FF35]/60" aria-label="Вернуться к списку чатов">← Все чаты</button>
+        <button type="button" onClick={closeThread} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-[#10131A] px-4 text-sm font-bold text-white hover:border-[#D7FF35]/60" aria-label="Вернуться к каталогу ZAPRUDA SPOT">← ZAPRUDA SPOT</button>
         <nav aria-label="Путь к чату" className="flex flex-wrap items-center gap-1 text-xs">
           {crumbs.map((p,i)=><span key={p.id} className="inline-flex items-center gap-1">
             {i>0&&<ChevronRight className="size-3.5 text-zinc-500" />}
@@ -457,21 +457,27 @@ function GeographicChat() {
             </button>
           </span>)}
         </nav>
-        <div className="flex min-h-[650px] flex-col overflow-hidden rounded-[24px] border border-[#34304D] bg-[#0B1019] shadow-[0_22px_60px_rgba(0,0,0,.32)]">
-          <div className="border-b border-[#34304D] bg-[linear-gradient(130deg,#171729,#0B1119)] p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h2 className="flex items-center gap-2 text-base font-black text-white">
-                  <MessageCircle className="size-5 text-[#D7FF35]"/>
-                  {selectedPlace?.name || "Вся ZAPRUDA"}
-                </h2>
-                <p className="mt-1 text-xs text-zinc-400">
-                  {selectedPlace?.level==="city"?"Городской чат":selectedPlace?.level==="region"?"Чат региона":selectedPlace?.level==="country"?"Чат страны":"Общий чат сообщества"}
-                  {" · отдельная переписка для каждого раздела"}
-                </p>
+        <div className="flex min-h-[min(70vh,720px)] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#070B10] shadow-[0_22px_60px_rgba(0,0,0,.32)]">
+          <div className="border-b border-white/10 bg-[linear-gradient(130deg,#171729,#0B1119)] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#151925]" aria-hidden="true">
+                  <img src={ROOM_PHOTOS[topic]} alt="" className="absolute inset-0 size-full object-cover" loading="lazy" onError={e=>{ e.currentTarget.style.display="none"; e.currentTarget.nextElementSibling?.classList.remove("hidden"); }} />
+                  <span className="relative z-10 hidden text-xl text-[#D7FF35]">{currentTopic.icon}</span>
+                </span>
+                <div className="min-w-0">
+                  <h2 className="truncate text-base font-black text-white sm:text-lg">
+                    {currentTopic.label}
+                  </h2>
+                  <p className="mt-0.5 truncate text-xs text-[#A99AD9]">
+                    {selectedPlace?.name || "Вся ZAPRUDA"}
+                    {selectedPlace?.level==="city"?" · город":selectedPlace?.level==="region"?" · регион":selectedPlace?.level==="country"?" · страна":" · сообщество"}
+                    {!chatLoading && messages.length>0 ? ` · ${messages.length} сообщ.` : ""}
+                  </p>
+                </div>
               </div>
               <button type="button" onClick={() => setRefreshIndex(i=>i+1)}
-                className="btn-ghost inline-flex min-h-9 items-center gap-2 px-3 text-xs"><RefreshCw className="size-4"/> Обновить</button>
+                className="btn-ghost inline-flex min-h-9 items-center gap-2 px-3 text-xs" aria-label="Обновить переписку"><RefreshCw className="size-4"/> Обновить</button>
             </div>
             <div aria-label="Тематические ветки" className="mt-4 flex flex-wrap gap-1.5">
               {TOPICS.map(t=><button type="button" key={t.key} onClick={() => go(placeId,t.key)} aria-pressed={topic===t.key}
@@ -482,7 +488,7 @@ function GeographicChat() {
             </div>
             <p className="mt-3 text-xs text-zinc-500">{currentTopic.description}</p>
           </div>
-          <div className="zapruda-chat-window min-h-[360px] flex-1 space-y-5 overflow-y-auto bg-[#0A0C16] p-3 sm:p-6" aria-live="polite">
+          <div className="zapruda-chat-window min-h-[280px] flex-1 space-y-4 overflow-y-auto overscroll-contain bg-[#0A0C16] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-5" aria-live="polite">
             {chatLoading&&<p className="text-sm text-zinc-400">Загружаем сообщения ветки…</p>}
             {chatError&&<p role="alert" className="rounded-xl border border-red-400/30 bg-red-950/15 p-3 text-sm text-red-200">{chatError}</p>}
             {!chatLoading&&!chatError&&!messages.length&&<p className="rounded-xl border border-dashed border-white/15 p-5 text-sm text-zinc-400">
@@ -525,8 +531,8 @@ function GeographicChat() {
               </button>}
             </article>)}
           </div>
-          {!loading && !uid && <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#A78BFA]/20 bg-[#211B2D] px-4 py-3 text-sm text-[#DDD6FE]"><span>Чтобы писать в чаты ZAPRUDA, войди в аккаунт.</span><Link to="/auth" search={{ mode: "in" }} className="inline-flex min-h-10 items-center rounded-full bg-[#D7FF35] px-4 text-xs font-black uppercase text-black">Войти</Link></div>}
-          <form className="space-y-3 border-t border-[#383048] bg-[#11131B] p-3 sm:p-4" onSubmit={send}>
+          {!loading && !uid && <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-[#171528] px-4 py-3 text-sm text-[#DDD6FE]"><span>Чтобы писать в чаты ZAPRUDA, войди в аккаунт.</span><Link to="/auth" search={{ mode: "in" }} className="inline-flex min-h-10 items-center rounded-full bg-[#D7FF35] px-4 text-xs font-black uppercase text-black">Войти</Link></div>}
+          <form className="space-y-3 border-t border-white/10 bg-[#0E1218] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4" onSubmit={send}>
             {replyTo && <div className="flex items-start justify-between gap-3 rounded-xl border-l-2 border-[#D7FF35] bg-white/5 px-3 py-2 text-xs text-zinc-300">
               <span className="min-w-0 truncate">Ответ: {replyTo.profiles?.display_name || replyTo.profiles?.username || "Рыболов"} — {replyTo.body.slice(0, 100)}</span>
               <button type="button" onClick={() => setReplyTo(null)} className="shrink-0 font-semibold text-[#D7FF35]">Отмена</button>
