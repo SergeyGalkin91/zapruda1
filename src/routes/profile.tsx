@@ -236,7 +236,12 @@ function Profile() {
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from("avatars").getPublicUrl(storagePath);
       const { error: saveError } = await supabase.from("profiles").update({ avatar_url: data.publicUrl }).eq("id", userId);
-      if (saveError) throw saveError;
+      if (saveError) {
+        // Prevent an orphaned public file when the profile update is rejected.
+        const { error: cleanupError } = await supabase.storage.from("avatars").remove([storagePath]);
+        if (cleanupError) console.warn("Avatar upload rollback:", cleanupError.message);
+        throw saveError;
+      }
       setAvatarUrl(data.publicUrl);
       setAvatarToCrop(null);
       setNotice("Аватар обновлён.");
