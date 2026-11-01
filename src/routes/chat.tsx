@@ -328,7 +328,7 @@ function GeographicChat() {
   }
 
   return <Shell>
-    {!threadOpen && <header className="z-card-hero mb-6 bg-[radial-gradient(ellipse_at_top,#141425_0%,#070B10_65%)] px-4 pb-5 pt-5 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
+    {!threadOpen && <header className="mb-5 rounded-[26px] border border-[#273247] bg-[#070B10] px-4 pb-6 pt-6 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
       <div className="mb-6 flex items-center justify-between gap-3">
         <div className="min-w-0 origin-left"><Wordmark /></div>
         <div className="flex items-center gap-2">
@@ -353,17 +353,17 @@ function GeographicChat() {
       Для просмотра чатов и отправки сообщений <Link search={{ mode: "in" }} to="/auth" className="font-bold text-[#D7FF35] underline">войди в аккаунт</Link>.
     </p>}
 
-    {uid && <div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
+    {<div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
       {!threadOpen && <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#A99AD9]">Тематические комнаты · выбери обсуждение</p>
-        <div className="z-card-hero overflow-hidden px-3 sm:px-5">
+        <div className="overflow-hidden rounded-[24px] border border-[#263044] bg-[#060B10] px-3 sm:px-5">
           {roomSearch.trim() && !TOPICS.some(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))) && <div role="status" className="space-y-3 p-5 text-sm text-[#B4A1D7]"><p>По запросу «{roomSearch.trim()}» комнат не найдено.</p><button type="button" onClick={() => setRoomSearch("")} className="min-h-11 rounded-xl border border-[#D7FF35]/40 px-4 font-bold text-[#D7FF35]">Сбросить поиск</button></div>}
           {TOPICS.filter(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))).map((t) => (
-            <button key={t.key} type="button" onClick={() => go(placeId, t.key)}
+            <button key={t.key} type="button" onClick={() => uid ? go(placeId, t.key) : void navigate({ to: "/auth", search: { mode: "in" } })}
               aria-pressed={topic === t.key}
               className={"z-room-row border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
                 (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")}>
-              <span className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#514565] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]" aria-hidden="true">
+              <span className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34435E] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]" aria-hidden="true">
                 <img src={ROOM_PHOTOS[t.key]} loading="lazy" alt="" className="absolute inset-0 size-full object-cover" onError={e=>{ e.currentTarget.style.display="none"; e.currentTarget.nextElementSibling?.classList.remove("hidden"); }} />
                 <span className="relative z-10 hidden text-2xl text-[#D7FF35]">{t.icon}</span>
               </span>
