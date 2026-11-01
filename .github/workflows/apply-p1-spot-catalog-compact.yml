@@ -1,0 +1,75 @@
+name: Apply P1 SPOT catalog compact
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/p1-spot-catalog-compact-20261101
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compact ZAPRUDA SPOT catalog header
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          chat = Path("src/routes/chat.tsx").read_text()
+          old = '''    {!threadOpen && <header className="mb-5 rounded-3xl border border-white/10 bg-[#070B10] px-4 pb-6 pt-6 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <div className="min-w-0 origin-left"><Wordmark /></div>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => { setRoomSearchOpen(open => !open); setRoomSearch(""); }} aria-expanded={roomSearchOpen} aria-label={roomSearchOpen ? "Закрыть поиск комнат" : "Поиск тематических чатов"} className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-white hover:text-[#D7FF35]"><Search className="size-6" /></button>
+          <Link to="/reports/new" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/75 text-2xl font-light text-white hover:border-[#D7FF35] hover:text-[#D7FF35]" aria-label="Создать отчёт"><Plus className="size-6" /></Link>
+        </div>
+      </div>
+      {roomSearchOpen && <div className="mb-4"><label htmlFor="zapruda-room-search" className="block text-xs text-zinc-300">Найти комнату</label>
+        <div className="mt-1 flex items-center gap-2"><input id="zapruda-room-search" autoFocus className="field min-w-0 flex-1" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} onKeyDown={e => { if (e.key === "Escape") { setRoomSearch(""); setRoomSearchOpen(false); } }} maxLength={80} placeholder="Трофеи, вода, напарники…" />{roomSearch && <button type="button" onClick={() => setRoomSearch("")} className="min-h-11 shrink-0 rounded-xl border border-white/20 px-3 text-xs font-bold text-white hover:border-[#D7FF35] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">Очистить</button>}</div>
+      </div>}
+      <h1 className="break-words text-[clamp(1.65rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">ZAPRUDA SPOT</h1>
+      <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="Фильтр чатов">'''
+          new = '''    {!threadOpen && <header className="mb-3 rounded-3xl border border-white/10 bg-[#070B10] px-3 pb-3 pt-3 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-5 sm:pb-4 sm:pt-4">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h1 className="min-w-0 break-words text-[clamp(1.35rem,5.5vw,2.25rem)] font-black uppercase leading-[1.05] tracking-[-0.04em] text-white">ZAPRUDA SPOT</h1>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button type="button" onClick={() => { setRoomSearchOpen(open => !open); setRoomSearch(""); }} aria-expanded={roomSearchOpen} aria-label={roomSearchOpen ? "Закрыть поиск комнат" : "Поиск тематических чатов"} className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-white hover:text-[#D7FF35]"><Search className="size-5" /></button>
+          <Link to="/reports/new" className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/75 text-xl font-light text-white hover:border-[#D7FF35] hover:text-[#D7FF35]" aria-label="Создать отчёт"><Plus className="size-5" /></Link>
+        </div>
+      </div>
+      {roomSearchOpen && <div className="mb-3"><label htmlFor="zapruda-room-search" className="block text-xs text-zinc-300">Найти комнату</label>
+        <div className="mt-1 flex items-center gap-2"><input id="zapruda-room-search" autoFocus className="field min-w-0 flex-1" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} onKeyDown={e => { if (e.key === "Escape") { setRoomSearch(""); setRoomSearchOpen(false); } }} maxLength={80} placeholder="Трофеи, вода, напарники…" />{roomSearch && <button type="button" onClick={() => setRoomSearch("")} className="min-h-11 shrink-0 rounded-xl border border-white/20 px-3 text-xs font-bold text-white hover:border-[#D7FF35] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">Очистить</button>}</div>
+      </div>}
+      <div className="mt-2 grid grid-cols-3 gap-1.5" role="group" aria-label="Фильтр чатов">'''
+          if old not in chat:
+              raise SystemExit('catalog header fragment missing — Stage C base required')
+          chat = chat.replace(old, new)
+          chat = chat.replace(
+              '<span className="mt-1 block truncate text-xs leading-5 text-[#A99AD9]">{roomLastMessages[t.key]?.body || t.description}</span>',
+              '<span className="mt-1 block line-clamp-2 text-xs leading-5 text-[#A99AD9]">{roomLastMessages[t.key]?.body || t.description}</span>',
+          )
+          chat = chat.replace(
+              'className={"z-room-row border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +',
+              'className={"z-room-row border-b border-white/10 px-1 py-2.5 text-left transition last:border-b-0 hover:bg-white/[0.03] sm:min-h-[5.5rem] " +',
+          )
+          if '<Wordmark' not in chat and 'Wordmark />' not in chat:
+              chat = chat.replace('import { Wordmark } from "@/components/Wordmark";\n', '')
+          Path("src/routes/chat.tsx").write_text(chat)
+          assert "ZAPRUDA SPOT" in chat and "line-clamp-2" in chat
+          print("P1 catalog compact applied", len(chat))
+          PY
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "Grok"
+          git config user.email "grok@users.noreply.github.com"
+          git add src/routes/chat.tsx
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "fix(chat): P1 compact ZAPRUDA SPOT catalog header and 2-line room blurbs"
+          git push origin HEAD:grok/p1-spot-catalog-compact-20261101
