@@ -357,6 +357,7 @@ function GeographicChat() {
       {!threadOpen && <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#A99AD9]">Тематические комнаты · выбери обсуждение</p>
         <div className="z-card-hero overflow-hidden px-3 sm:px-5">
+          {roomSearch.trim() && !TOPICS.some(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))) && <div role="status" className="space-y-3 p-5 text-sm text-[#B4A1D7]"><p>По запросу «{roomSearch.trim()}» комнат не найдено.</p><button type="button" onClick={() => setRoomSearch("")} className="min-h-11 rounded-xl border border-[#D7FF35]/40 px-4 font-bold text-[#D7FF35]">Сбросить поиск</button></div>}
           {TOPICS.filter(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))).map((t) => (
             <button key={t.key} type="button" onClick={() => go(placeId, t.key)}
               aria-pressed={topic === t.key}
@@ -370,7 +371,7 @@ function GeographicChat() {
                 <span className="block truncate text-base font-black text-white">{t.label}</span>
                 <span className="mt-1 block truncate text-xs leading-5 text-[#A99AD9]">{roomLastMessages[t.key]?.body || t.description}</span>
               </span>
-              <span className="min-w-0 text-right text-[10px] tabular-nums text-[#B4A1D7]">{roomLastMessages[t.key] && <time dateTime={roomLastMessages[t.key]!.created_at}>{new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</time>}</span>
+              <span className="min-w-0 max-w-16 text-right text-[10px] tabular-nums text-[#B4A1D7]">{roomLastMessages[t.key] && <time dateTime={roomLastMessages[t.key]!.created_at}>{new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</time>}</span>
             </button>
           ))}
         </div>
