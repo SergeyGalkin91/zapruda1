@@ -1,0 +1,65 @@
+name: Apply stage6 competitions UI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/stage6-team-competitions
+
+      - name: Decode competitions + patch communities
+        run: |
+          python3 <<'PY'
+          import zlib, base64, codecs
+          from pathlib import Path
+
+          a = Path(".github/payloads/stage6/competitions.a.z64").read_text().strip()
+          b = Path(".github/payloads/stage6/competitions.b.z64").read_text().strip()
+          data = zlib.decompress(base64.b64decode(a + b))
+          Path("src/routes/competitions.tsx").write_bytes(data)
+          print("competitions", len(data))
+
+          p = Path("src/routes/communities.tsx")
+          t = p.read_text()
+          if "/competitions" not in t:
+              if 'import { createFileRoute } from "@tanstack/react-router";' in t:
+                  t = t.replace(
+                      'import { createFileRoute } from "@tanstack/react-router";',
+                      'import { createFileRoute, Link } from "@tanstack/react-router";',
+                  )
+              elif 'import { createFileRoute, Link } from "@tanstack/react-router";' not in t:
+                  t = 'import { createFileRoute, Link } from "@tanstack/react-router";\n' + t
+              if "<SocialGroups" in t:
+                  block = (
+                      '<section className="mb-6 rounded-2xl border border-[#D7FF35]/25 bg-[#121A12] p-5">\n'
+                      '        <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#D7FF35]">\u0421\u043e\u0440\u0435\u0432\u043d\u043e\u0432\u0430\u043d\u0438\u044f</p>\n'
+                      '        <h2 className="mt-2 text-xl font-black text-white">\u041a\u043e\u043c\u0430\u043d\u0434\u043d\u044b\u0439 \u0437\u0430\u0447\u0451\u0442 \u043a\u043b\u0443\u0431\u043e\u0432</h2>\n'
+                      '        <p className="mt-2 text-sm text-zinc-400">\u0412\u043d\u0443\u0442\u0440\u0435\u043d\u043d\u0438\u0435 \u0442\u0443\u0440\u043d\u0438\u0440\u044b. \u041f\u0440\u0438\u0437\u044b \u043e\u0442 \u0441\u043f\u043e\u043d\u0441\u043e\u0440\u043e\u0432 - \u043f\u043e\u0437\u0436\u0435.</p>\n'
+                      '        <Link to="/competitions" className="btn-primary mt-4 inline-flex min-h-11 items-center px-4">\u041a \u0441\u043e\u0440\u0435\u0432\u043d\u043e\u0432\u0430\u043d\u0438\u044f\u043c</Link>\n'
+                      '      </section>\n'
+                      '      <SocialGroups'
+                  )
+                  t = t.replace("<SocialGroups", codecs.decode(block, "unicode_escape"))
+              p.write_text(t)
+          print("communities", "/competitions" in p.read_text())
+          PY
+
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun run build
+      - run: bun run test
+
+      - name: Commit
+        run: |
+          git config user.name Grok
+          git config user.email grok@users.noreply.github.com
+          git add src/routes/competitions.tsx src/routes/communities.tsx src/routeTree.gen.ts
+          git diff --cached --quiet || git commit -m "feat(stage6): competitions UI + communities entry + routes"
+          git push origin HEAD:grok/stage6-team-competitions

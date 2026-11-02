@@ -1,0 +1,176 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import {
+  Check, Flag, Plus, RefreshCw, Trophy, Users, X,
+} from "lucide-react";
+import { Shell } from "@/components/Shell";
+import { supabase } from "@/integrations/supabase/client";
+
+export const Route = createFileRoute("/competitions")({
+  head: () => ({
+    meta: [
+      { title: "Соревнования — ZAPRUDA" },
+      {
+        name: "description",
+        content: "Командные соревнования клубов ZAPRUDA: регистрация, результаты и таблица.",
+      },
+    ],
+  }),
+  component: CompetitionsPage,
+});
+
+type Competition = {
+  id: string;
+  organizer_id: string;
+  title: string;
+  description: string;
+  area_label: string;
+  starts_at: string;
+  ends_at: string;
+  status: "draft" | "open" | "live" | "finished" | "cancelled";
+  max_teams: number;
+  scoring_mode: "total_fish" | "total_weight_g" | "biggest_fish_g";
+};
+
+type Team = {
+  id: string;
+  competition_id: string;
+  club_id: string | null;
+  captain_id: string;
+  name: string;
+  status: "registered" | "withdrawn" | "disqualified";
+};
+
+type Result = {
+  id: string;
+  competition_id: string;
+  team_id: string;
+  submitted_by: string;
+  fish_count: number;
+  total_weight_g: number;
+  biggest_fish_g: number;
+  note: string;
+  status: "pending" | "accepted" | "rejected";
+};
+
+const db = supabase as any;
+
+const statusLabel: Record<Competition["status"], string> = {
+  draft: "черновик",
+  open: "набор",
+  live: "идёт",
+  finished: "завершено",
+  cancelled: "отменено",
+};
+
+const scoreLabel: Record<Competition["scoring_mode"], string> = {
+  total_fish: "По количеству рыб",
+  total_weight_g: "По общему весу",
+  biggest_fish_g: "По самой крупной рыбе",
+};
+
+function scoreValue(mode: Competition["scoring_mode"], r: Result) {
+  if (mode === "total_weight_g") return r.total_weight_g;
+  if (mode === "biggest_fish_g") return r.biggest_fish_g;
+  return r.fish_count;
+}
+
+function CompetitionsPage() {
+  const [uid, setUid] = useState("");
+  const [items, setItems] = useState<Competition[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [results, setResults] = useState<Result[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [activeId, setActiveId] = useState("");
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [area, setArea] = useState("");
+  const [startsAt, setStartsAt] = useState("");
+  const [endsAt, setEndsAt] = useState("");
+  const [maxTeams, setMaxTeams] = useState("8");
+  const [scoring, setScoring] = useState<Competition["scoring_mode"]>("total_fish");
+  const [teamName, setTeamName] = useState("");
+  const [fishCount, setFishCount] = useState("");
+  const [weightG, setWeightG] = useState("");
+  const [biggestG, setBiggestG] = useState("");
+  const [resultNote, setResultNote] = useState("");
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) {
+      setUid("");
+      setLoading(false);
+      return;
+    }
+    setUid(auth.user.id);
+
+    const [cRes, tRes, rRes] = await Promise.all([
+      db
+        .from("competitions")
+        .select(
+          "id,organizer_id,title,description,area_label,starts_at,ends_at,status,max_teams,scoring_mode",
+        )
+        .order("starts_at", { ascending: false })
+        .limit(40),
+      db
+        .from("competition_teams")
+        .select("id,competition_id,club_id,captain_id,name,status")
+        .limit(400),
+      db
+        .from("competition_results")
+        .select(
+          "id,competition_id,team_id,submitted_by,fish_count,total_weight_g,biggest_fish_g,note,status",
+        )
+        .limit(400),
+    ]);
+
+    if (cRes.error) {
+      setError(
+        /relation|does not exist|schema cache/i.test(cRes.error.message)
+          ? "Соревнования ещё не подключены в базе (нужна миграция STAGING). UI готов."
+          : "Не удалось загрузить соревнования: " + cRes.error.message,
+      );
+      setItems([]);
+      setTeams([]);
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+
+    setError("");
+    setItems((cRes.data ?? []) as Competition[]);
+    setTeams((tRes.data ?? []) as Team[]);
+    setResults((rRes.data ?? []) as Result[]);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const active = useMemo(
+    () => items.find((c) => c.id === activeId) || items[0] || null,
+    [items, activeId],
+  );
+
+  useEffect(() => {
+    if (active && !activeId) setActiveId(active.id);
+  }, [active, activeId]);
+
+  const activeTeams = useMemo(
+    () => teams.filter((t) => active && t.competition_id === active.id && t.status === "registered"),
+    [teams, active],
+  );
+
+  const leaderboard = useMemo(() => {
+    if (!active) return [];
+    const accepted = results.filter(
+      (r) => r.competition_id === active.id && r.status === "accepted",
+    );
+    return [...accepted]

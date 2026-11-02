@@ -1,0 +1,44 @@
+name: Apply stage6 team competitions
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/stage6-team-competitions
+
+      - name: Write stage6 files
+        run: |
+          python3 <<'PY'
+          import zlib, base64
+          from pathlib import Path
+
+          def write(path, payload):
+              Path(path).parent.mkdir(parents=True, exist_ok=True)
+              Path(path).write_bytes(zlib.decompress(base64.b64decode(payload)))
+              print(path, Path(path).stat().st_size)
+
+          write("src/routes/competitions.tsx", open(".github/payloads/stage6/competitions.z64").read().strip())
+          write("src/routes/communities.tsx", open(".github/payloads/stage6/communities.z64").read().strip())
+          write("supabase/migrations/20261102160000_team_competitions.sql", open(".github/payloads/stage6/migration.z64").read().strip())
+          PY
+
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun run build
+      - run: bun run test
+
+      - name: Commit
+        run: |
+          git config user.name Grok
+          git config user.email grok@users.noreply.github.com
+          git add src/routes/competitions.tsx src/routes/communities.tsx src/routeTree.gen.ts supabase/migrations/20261102160000_team_competitions.sql
+          git diff --cached --quiet || git commit -m "feat(stage6): team competitions UI + STAGING migration"
+          git push origin HEAD:grok/stage6-team-competitions
