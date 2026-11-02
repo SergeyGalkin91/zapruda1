@@ -3,6 +3,7 @@ import { useState } from "react";
 import { MessageCircle, Send, ShieldCheck } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { SocialGroups } from "@/components/SocialGroups";
+import { SocialMeetups } from "@/components/SocialMeetups";
 import { VerifiedGuideDirectory } from "@/components/VerifiedGuideDirectory";
 import { countries } from "@/lib/geo";
 
@@ -66,6 +67,7 @@ function Communities() {
         <span className="text-primary">→</span>
       </Link>
 
+      <SocialMeetups />
       <SocialGroups />
       <VerifiedGuideDirectory />
 

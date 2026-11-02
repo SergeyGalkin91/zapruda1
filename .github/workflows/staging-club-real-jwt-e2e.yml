@@ -1,0 +1,37 @@
+name: STAGING club real-JWT E2E (manual)
+on:
+  workflow_dispatch:
+jobs:
+  two-account-club:
+    if: github.ref_name != 'main'
+    runs-on: ubuntu-latest
+    environment: staging-e2e
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Validate required protected variables without printing them
+        env:
+          URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+          KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+          OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
+          OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
+          INVITEE_EMAIL: ${{ secrets.ZAPRUDA_E2E_INVITEE_EMAIL }}
+          INVITEE_PASSWORD: ${{ secrets.ZAPRUDA_E2E_INVITEE_PASSWORD }}
+          CLUB_ID: ${{ vars.ZAPRUDA_E2E_CLUB_ID }}
+        run: |
+          test "$URL" = "https://yudtbifopfnjtjanaqrd.supabase.co" || { echo "STAGING URL missing or invalid"; exit 1; }
+          for name in KEY OWNER_EMAIL OWNER_PASSWORD INVITEE_EMAIL INVITEE_PASSWORD CLUB_ID; do
+            test -n "${!name}" || { echo "Missing protected E2E config: $name"; exit 1; }
+          done
+      - name: Real independent JWT/Auth/REST club scenario
+        env:
+          ZAPRUDA_E2E_STAGING_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+          ZAPRUDA_E2E_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+          ZAPRUDA_E2E_OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
+          ZAPRUDA_E2E_OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
+          ZAPRUDA_E2E_INVITEE_EMAIL: ${{ secrets.ZAPRUDA_E2E_INVITEE_EMAIL }}
+          ZAPRUDA_E2E_INVITEE_PASSWORD: ${{ secrets.ZAPRUDA_E2E_INVITEE_PASSWORD }}
+          ZAPRUDA_E2E_CLUB_ID: ${{ vars.ZAPRUDA_E2E_CLUB_ID }}
+        run: node scripts/e2e-club-two-real-jwt.mjs

@@ -101,6 +101,7 @@ export function SocialGroups(){
 
   async function invite(){
     if(!uid||!groupId||!inviteId||busy)return;
+    if(occupied(groupId)>=15){setError("В клубе уже заняты все 15 мест, включая приглашения.");return;}
     if(groups.find(g=>g.id===groupId)?.owner_id!==uid){setError("Приглашать может только владелец клуба.");return;}
     setBusy(true);setError("");setNotice("");
     const {error:e}=await db.from("social_group_members").insert({
@@ -134,6 +135,8 @@ export function SocialGroups(){
     setDraft("");await loadMessages(activeGroup);
   }
 
+  const occupied=(id:string)=>members.filter(m=>m.group_id===id&&(m.status==="accepted"||m.status==="pending")).length;
+  const selectedFull=!!groupId&&occupied(groupId)>=15;
   const own=groups.filter(g=>g.owner_id===uid);
   const joined=groups.filter(g=>members.some(m=>m.group_id===g.id&&m.user_id===uid&&m.status==="accepted"));
   const pending=members.filter(m=>m.user_id===uid&&m.status==="pending");
@@ -151,7 +154,7 @@ export function SocialGroups(){
           <h3 className="mb-3 font-bold">Мои клубы ({joined.length})</h3>
           {joined.map(g=><button type="button" key={g.id} onClick={()=>setActiveGroup(g.id)}
             className={"mb-2 block w-full rounded-xl border p-3 text-left text-sm "+(activeGroup===g.id?"border-[#D7FF35]/60 bg-[#D7FF35]/10":"border-white/10 bg-black/10 hover:border-[#D7FF35]/40")}>
-            <strong className="block text-white">{g.name}</strong><span className="mt-1 block text-xs text-zinc-400">{g.city||"Любой город"} · {g.description||"Общение и выезды"}</span>
+            <strong className="block text-white">{g.name} <span className="ml-2 text-xs font-bold text-[#D7FF35]">{occupied(g.id)}/15 мест</span></strong><span className="mt-1 block text-xs text-zinc-400">{g.city||"Любой город"} · {g.description||"Общение и выезды"}</span>
             <span className="mt-2 flex items-center gap-2 text-xs text-[#D7FF35]"><MessageCircle className="size-3.5"/> Открыть чат {g.owner_id===uid?"· мой клуб":""}</span>
           </button>)}
           {!joined.length&&<p className="text-sm text-zinc-500">Пока клубов нет. Можно получить приглашение от друга или подать заявку на собственный.</p>}
@@ -188,13 +191,16 @@ export function SocialGroups(){
         <div className="space-y-3 rounded-xl border border-white/10 bg-black/10 p-4">
           <h3 className="flex items-center gap-2 font-bold"><UserPlus className="size-4 text-[#D7FF35]"/> Пригласить в свой клуб</h3>
           <select aria-label="Выбрать собственный клуб" className="field" value={groupId} onChange={e=>setGroupId(e.target.value)}>
-            <option value="">Выбери свой клуб</option>{own.map(g=><option key={g.id} value={g.id}>{g.name}</option>)}
+            <option value="">Выбери свой клуб</option>{own.map(g=><option key={g.id} value={g.id}>{g.name} · {occupied(g.id)}/15</option>)}
           </select>
           <select aria-label="Выбрать рыболова" className="field" value={inviteId} onChange={e=>setInviteId(e.target.value)}>
             <option value="">Кого пригласить?</option>
             {people.filter(p=>!members.some(m=>m.group_id===groupId&&m.user_id===p.id)).map(p=><option key={p.id} value={p.id}>{display(p)}</option>)}
           </select>
-          <button type="button" className="btn-primary inline-flex" disabled={!inviteId||!groupId||busy} onClick={()=>void invite()}><UserPlus className="size-4"/> Пригласить</button>
+          <button type="button" className="btn-primary inline-flex" disabled={!inviteId||!groupId||busy||selectedFull} onClick={()=>void invite()}><UserPlus className="size-4"/> Пригласить</button>
+          {groupId&&<p role="status" className={"text-xs "+(selectedFull?"text-amber-300":"text-zinc-400")}>
+            {selectedFull?"Все 15 мест заняты, включая ожидающие приглашения.":`Свободно мест: ${15-occupied(groupId)} из 15 (приглашения тоже занимают место).`}
+          </p>}
           <p className="text-xs text-zinc-400">Для индивидуального обсуждения выезда можно перейти в <Link to="/messages" search={{mark:""}} className="underline text-[#D7FF35]">личные сообщения</Link>.</p>
         </div>
       </div>
