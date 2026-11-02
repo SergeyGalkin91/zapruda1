@@ -1,0 +1,55 @@
+name: Apply stage7 Grok API function and assistant labels
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/stage7-grok-api-advice
+
+      - name: Write edge function and patch assistant labels
+        run: |
+          python3 <<'PY'
+          import zlib, base64
+          from pathlib import Path
+
+          a = Path(".github/payloads/stage7/zapruda-daily-advice.a.z64").read_text().strip()
+          b = Path(".github/payloads/stage7/zapruda-daily-advice.b.z64").read_text().strip()
+          data = zlib.decompress(base64.b64decode(a + b))
+          path = Path("supabase/functions/zapruda-daily-advice/index.ts")
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_bytes(data)
+          print("function", len(data))
+
+          p = Path("src/routes/assistant.tsx")
+          t = p.read_text()
+          t = t.replace("Один персональный совет в день", "Выйти на воду · совет Grok (BETA)", 1)
+          t = t.replace("ZAPRUDA / AI-РЫБОЛОВ", "ZAPRUDA / ВЫЙТИ НА ВОДУ", 1)
+          if "Grok (xAI)" not in t:
+              t = t.replace(
+                  "ИИ не проверяет актуальную погоду",
+                  "Совет формирует Grok (xAI) на сервере. Ключ API не попадает в браузер. ИИ не проверяет актуальную погоду",
+              )
+          p.write_text(t)
+          print("assistant patched")
+          PY
+
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun run build
+      - run: bun run test
+
+      - name: Commit
+        run: |
+          git config user.name Grok
+          git config user.email grok@users.noreply.github.com
+          git add supabase/functions/zapruda-daily-advice/index.ts src/routes/assistant.tsx
+          git diff --cached --quiet || git commit -m "feat(stage7): deployable Grok daily-advice function + UI labels"
+          git push origin HEAD:grok/stage7-grok-api-advice
