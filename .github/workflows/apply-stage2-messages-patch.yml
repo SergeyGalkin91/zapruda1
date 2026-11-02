@@ -1,0 +1,88 @@
+name: Apply stage2 messages patch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/stage2-partner-dm-reactions
+
+      - name: Patch messages.tsx
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path("src/routes/messages.tsx")
+          t = p.read_text()
+          if "DmMessageReactions" not in t:
+              t = t.replace(
+                  'import { Shell } from "@/components/Shell";\nimport { supabase } from "@/integrations/supabase/client";',
+                  'import { Shell } from "@/components/Shell";\nimport { DmMessageReactions } from "@/components/DmMessageReactions";\nimport { supabase } from "@/integrations/supabase/client";',
+              )
+          old = '            <time className="mt-2 block text-[10px] text-zinc-500">{datetime(m.created_at)}</time></div>)}'
+          new = '            <time className="mt-2 block text-[10px] text-zinc-500">{datetime(m.created_at)}</time>\n            <DmMessageReactions messageId={m.id} currentUserId={uid} />\n            </div>)}'
+          if old in t:
+              t = t.replace(old, new)
+          banner = '''    <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+      <div><p className="text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">ZAPRUDA / ОБЩЕНИЕ</p><h1 className="mt-1 text-3xl font-black text-white">Личные сообщения</h1><p className="mt-2 text-sm text-zinc-400">Переписка только после принятия запроса. Подписки не открывают личный чат автоматически.</p></div>
+      <button className="btn-ghost inline-flex" type="button" onClick={() => void refresh()}><RefreshCw className="size-4"/> Обновить</button>
+    </div>'''
+          banner2 = '''    <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+      <div><p className="text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">ZAPRUDA / ОБЩЕНИЕ</p><h1 className="mt-1 text-3xl font-black text-white">Личные сообщения</h1><p className="mt-2 text-sm text-zinc-400">Переписка только после принятия запроса. Подписки не открывают личный чат автоматически. Реакции — под сообщениями в принятом чате.</p></div>
+      <button className="btn-ghost inline-flex" type="button" onClick={() => void refresh()}><RefreshCw className="size-4"/> Обновить</button>
+    </div>
+    <section className="mb-5 rounded-2xl border border-[#D7FF35]/25 bg-[#121A12] p-4">
+      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#D7FF35]">Найти напарника</p>
+      <p className="mt-1 text-sm text-zinc-300">Найди человека в поиске ниже или через выезды, отправь запрос на переписку — чат откроется после принятия.</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Link to="/partners" className="btn-primary inline-flex min-h-10 items-center px-3 text-sm">Выезды и компания</Link>
+        <Link to="/communities" className="inline-flex min-h-10 items-center rounded-xl border border-white/15 px-3 text-sm font-semibold text-zinc-200 hover:border-[#D7FF35]/40">Комьюнити</Link>
+      </div>
+    </section>'''
+          if banner in t:
+              t = t.replace(banner, banner2)
+          p.write_text(t)
+          print("messages", "DmMessageReactions" in t, "Найти напарника" in t)
+          PY
+
+      - name: Patch communities partner CTA
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path("src/routes/communities.tsx")
+          t = p.read_text()
+          if "Найти напарника" not in t:
+              insert = '''
+      <section className="z-underground mt-6 p-5">
+        <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#D7FF35]">Найти напарника</p>
+        <h2 className="mt-2 text-xl font-black text-white">Рыбалка на двоих</h2>
+        <p className="mt-2 text-sm text-zinc-400">Отправь запрос на личную переписку. Сообщения и реакции доступны после принятия.</p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link to="/messages" className="btn-primary inline-flex min-h-11 items-center px-4">Личные сообщения</Link>
+          <Link to="/partners" className="inline-flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-sm font-semibold text-zinc-200">Выезды</Link>
+        </div>
+      </section>
+'''
+              t = t.replace("<SocialGroups />", insert + "\n      <SocialGroups />")
+              p.write_text(t)
+          print("communities ok")
+          PY
+
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun run build
+      - run: bun run test
+
+      - name: Commit
+        run: |
+          git config user.name Grok
+          git config user.email grok@users.noreply.github.com
+          git add src/routes/messages.tsx src/routes/communities.tsx
+          git diff --cached --quiet || git commit -m "feat(stage2): wire DM reactions and partner CTAs"
+          git push origin HEAD:grok/stage2-partner-dm-reactions
