@@ -1,5 +1,4 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.49.0";
 
 /**
  * FAIL-CLOSED payment webhook stub for guide bookings.
@@ -79,36 +78,11 @@ Deno.serve(async (req: Request) => {
     return respond(400, { error: "provider_payment_id required", paid: false });
   }
 
-  // Fail-closed: shared secret + client-supplied status is NOT provider settlement proof.
-  // Do not call mark_guide_booking_paid_from_provider until HMAC/amount verification exists.
-  const providerProofEnabled = (Deno.env.get("GUIDE_PAYMENT_PROVIDER_PROOF") ?? "") === "1";
-  if (!providerProofEnabled) {
-    return respond(501, {
-      error:
-        "Provider settlement verification not implemented. Refusing to mark paid (fail-closed).",
-      paid: false,
-      request_id: requestId,
-    });
-  }
-
-  // Future path (still requires real signature verification before enabling PROOF=1).
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  if (!supabaseUrl || !serviceKey) return respond(503, { error: "Backend not configured" });
-
-  const admin = createClient(supabaseUrl, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
+  // Until a provider-specific verified settlement implementation exists, no event
+  // may update payment state, regardless of configured environment variables.
+  return respond(501, {
+    error: "Provider settlement verification not implemented; payment remains locked.",
+    paid: false,
+    request_id: requestId,
   });
-
-  const { error } = await admin.rpc("mark_guide_booking_paid_from_provider", {
-    p_request_id: requestId,
-    p_provider_payment_id: providerPaymentId,
-    p_settlement_confirmed: true,
-  });
-
-  if (error) {
-    return respond(500, { error: error.message || "RPC failed", paid: false });
-  }
-
-  return respond(200, { ok: true, paid: true, request_id: requestId });
 });
