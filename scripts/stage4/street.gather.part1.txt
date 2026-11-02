@@ -1,0 +1,122 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import {
+  ArrowLeft, CalendarDays, Check, MapPinned, Plus, RefreshCw, Users, X,
+} from "lucide-react";
+import { Shell } from "@/components/Shell";
+import { supabase } from "@/integrations/supabase/client";
+
+export const Route = createFileRoute("/street/gather")({
+  head: () => ({
+    meta: [
+      { title: "Вечерний стрит — ZAPRUDA" },
+      {
+        name: "description",
+        content: "Собери небольшую компанию на городскую рыбалку: район, время, места.",
+      },
+    ],
+  }),
+  component: StreetGatherPage,
+});
+
+type Gathering = {
+  id: string;
+  organizer_id: string;
+  title: string;
+  area_label: string;
+  meet_lat: number | null;
+  meet_lng: number | null;
+  starts_at: string;
+  seats: number;
+  notes: string;
+  status: "open" | "full" | "cancelled" | "done";
+  created_at: string;
+};
+
+type Member = {
+  id: string;
+  gathering_id: string;
+  user_id: string;
+  status: "pending" | "accepted" | "declined" | "withdrawn";
+  note: string;
+};
+
+type Profile = { id: string; username: string | null; display_name: string | null };
+
+const db = supabase as any;
+const nameOf = (p?: Profile) => p?.display_name || p?.username || "Рыболов";
+
+function StreetGatherPage() {
+  const [uid, setUid] = useState("");
+  const [items, setItems] = useState<Gathering[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [showForm, setShowForm] = useState(false);
+
+  const [title, setTitle] = useState("");
+  const [area, setArea] = useState("");
+  const [startsAt, setStartsAt] = useState("");
+  const [seats, setSeats] = useState("3");
+  const [notes, setNotes] = useState("");
+  const [applyNote, setApplyNote] = useState<Record<string, string>>({});
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) {
+      setUid("");
+      setLoading(false);
+      return;
+    }
+    setUid(auth.user.id);
+
+    const [gRes, mRes] = await Promise.all([
+      db
+        .from("street_gatherings")
+        .select(
+          "id,organizer_id,title,area_label,meet_lat,meet_lng,starts_at,seats,notes,status,created_at",
+        )
+        .in("status", ["open", "full", "done"])
+        .order("starts_at", { ascending: true })
+        .limit(50),
+      db
+        .from("street_gathering_members")
+        .select("id,gathering_id,user_id,status,note")
+        .limit(500),
+    ]);
+
+    if (gRes.error) {
+      setError(
+        /relation|does not exist|schema cache/i.test(gRes.error.message)
+          ? "Сборы стрита ещё не подключены в базе (нужна миграция STAGING). UI уже готов."
+          : "Не удалось загрузить сборы: " + gRes.error.message,
+      );
+      setItems([]);
+      setMembers([]);
+      setLoading(false);
+      return;
+    }
+
+    setError("");
+    const list = (gRes.data ?? []) as Gathering[];
+    setItems(list);
+    setMembers((mRes.data ?? []) as Member[]);
+
+    const ids = new Set<string>();
+    for (const g of list) ids.add(g.organizer_id);
+    for (const m of (mRes.data ?? []) as Member[]) ids.add(m.user_id);
+    if (ids.size) {
+      const { data: people } = await supabase
+        .from("profiles")
+        .select("id,username,display_name")
+        .in("id", [...ids]);
+      const map = new Map<string, Profile>();
+      for (const p of (people ?? []) as Profile[]) map.set(p.id, p);
+      setProfiles(map);
+    }
+    setLoading(false);
+  }, []);

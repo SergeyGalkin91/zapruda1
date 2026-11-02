@@ -14,18 +14,42 @@ jobs:
         with:
           ref: grok/stage4-street-gather
 
-      - name: Write street gather sources
+      - name: Assemble street.gather.tsx and patch street.tsx
         run: |
+          if [ ! -f scripts/stage4/street.gather.part1.txt ] || [ ! -f scripts/stage4/street.gather.part2.txt ]; then
+            echo "parts missing"
+            exit 1
+          fi
+          cat scripts/stage4/street.gather.part1.txt scripts/stage4/street.gather.part2.txt > src/routes/street.gather.tsx
           python3 <<'PY'
           from pathlib import Path
-
-          gather = r'''PLACEHOLDER_GATHER'''
-          # Written by follow-up commit if placeholder remains
-          print('use artifact path')
+          p = Path("src/routes/street.tsx")
+          t = p.read_text()
+          if "/street/gather" not in t:
+              t = t.replace(
+                  "<Shell>",
+                  '''<Shell>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <Link to="/street/gather" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-3 text-sm font-bold text-[#D7FF35]">
+          Собрать вечерний стрит
+        </Link>
+      </div>
+''',
+                  1,
+              )
+              p.write_text(t)
+          print("street patched", "/street/gather" in p.read_text())
           PY
 
       - uses: oven-sh/setup-bun@v2
       - run: bun install
-      - name: Ensure route exists via build if file present
+      - run: bun run build
+      - run: bun run test
+
+      - name: Commit
         run: |
-          if [ -f src/routes/street.gather.tsx ]; then bun run build && bun run test; else echo "waiting for source files"; fi
+          git config user.name Grok
+          git config user.email grok@users.noreply.github.com
+          git add src/routes/street.gather.tsx src/routes/street.tsx src/routeTree.gen.ts
+          git diff --cached --quiet || git commit -m "feat(stage4): assemble /street/gather and regen routes"
+          git push origin HEAD:grok/stage4-street-gather
