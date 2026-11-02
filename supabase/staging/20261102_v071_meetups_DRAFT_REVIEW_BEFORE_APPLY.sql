@@ -78,6 +78,9 @@ begin
  end if;
  return new;
 end $$;
+revoke all on function public.meetup_member_guard() from public;
+revoke all on function public.meetup_owner_bootstrap() from public;
+
 drop trigger if exists meetup_member_guard_trg on public.meetup_members;
 create trigger meetup_member_guard_trg before insert or update on public.meetup_members
 for each row execute function public.meetup_member_guard();
