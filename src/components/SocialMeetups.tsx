@@ -109,20 +109,20 @@ export function SocialMeetups(){
   </form>}
   {(!country.trim()||!region.trim()||!city.trim())&&<p className="text-sm text-zinc-400">Укажите страну, регион и город, чтобы увидеть местные объявления.</p>}
   <div className="grid gap-3 md:grid-cols-2">{shown.map(p=>{
-    const count=occupancy[p.id]??0;
+    const count=occupancy[p.id];
     const mine=membership(p.id),owner=p.owner_id===userId;
     return <article key={p.id} className="rounded-xl border border-white/15 bg-black/20 p-4">
-      <div className="flex justify-between gap-2"><h3 className="font-bold text-white">{p.title}</h3><span className="text-[#D7FF35]">{count}/3</span></div>
+      <div className="flex justify-between gap-2"><h3 className="font-bold text-white">{p.title}</h3><span className="text-[#D7FF35]">{count===undefined?"—":count}/3</span></div>
       <p className="mt-2 flex items-center gap-1 text-xs text-zinc-400"><MapPin size={13}/>{p.country_code} · {p.region_code} · {p.city_code}</p>
       <p className="mt-2 text-sm text-zinc-300">{p.description}</p>
       <div className="mt-3 flex flex-wrap gap-2">
-       {!owner&&!mine&&userId&&p.status==="open"&&count<3&&<button disabled={busy} onClick={()=>void join(p.id)} className="btn-primary">Откликнуться</button>}
+       {!owner&&!mine&&userId&&p.status==="open"&&count!==undefined&&count<3&&<button disabled={busy} onClick={()=>void join(p.id)} className="btn-primary">Откликнуться</button>}
        {mine?.status==="pending"&&<span className="text-xs text-zinc-400">Отклик ожидает решения</span>}
        {accepted(p.id)&&<button onClick={()=>void openChat(p.id)} className="btn-ghost inline-flex items-center gap-2"><MessageCircle size={15}/> Частный чат</button>}
       </div>
       {owner&&members.filter(m=>m.post_id===p.id&&m.status==="pending").map(m=><div key={m.user_id} className="mt-2 flex flex-wrap items-center gap-2 border-t border-white/10 pt-2 text-xs">
        <span>Заявка: {m.user_id.slice(0,8)}…</span>
-       <button disabled={busy||count>=3} onClick={()=>void decide(p.id,m.user_id,"accepted")} className="text-[#D7FF35]">Принять</button>
+       <button disabled={busy||count===undefined||count>=3} onClick={()=>void decide(p.id,m.user_id,"accepted")} className="text-[#D7FF35]">Принять</button>
        <button disabled={busy} onClick={()=>void decide(p.id,m.user_id,"declined")} className="text-red-300">Отклонить</button>
       </div>)}
     </article>
