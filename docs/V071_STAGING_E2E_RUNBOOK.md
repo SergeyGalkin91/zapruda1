@@ -8,14 +8,13 @@ In GitHub repo Settings → Environments → `staging-e2e` → **Environment sec
 
 - `ZAPRUDA_E2E_PUBLISHABLE_KEY` — STAGING public publishable key (`sb_publishable_...`).
 - `ZAPRUDA_E2E_OWNER_EMAIL`, `ZAPRUDA_E2E_OWNER_PASSWORD`
-- `ZAPRUDA_E2E_INVITEE_EMAIL`, `ZAPRUDA_E2E_INVITEE_PASSWORD`
 - `ZAPRUDA_E2E_SEATED_EMAIL`, `ZAPRUDA_E2E_SEATED_PASSWORD`
 - `ZAPRUDA_E2E_RACER_A_EMAIL`, `ZAPRUDA_E2E_RACER_A_PASSWORD`
 - `ZAPRUDA_E2E_RACER_B_EMAIL`, `ZAPRUDA_E2E_RACER_B_PASSWORD`
 
 **Environment variable** (not secret): `ZAPRUDA_E2E_STAGING_URL` = `https://yudtbifopfnjtjanaqrd.supabase.co`.
 
-**Important:** the meetup two-JWT test needs INVITEE; meetup and competition race tests need OWNER, SEATED, RACER_A, RACER_B. That is **five** independently verified test users if all suites are run. If you only have four users, run the competition race first; do not reuse credentials across different roles in the same concurrent test.
+**Important:** all suites now use **four** distinct STAGING users: OWNER, SEATED, RACER_A and RACER_B. The meetup two-JWT workflow maps its INVITEE role to RACER_A credentials; the concurrent race remains four separate JWTs. Never reuse one user across roles within the race itself.
 
 GitHub Actions → select each manual workflow → Run workflow → choose branch. Competition and Edge workflows are restricted to `fix/issue61-v071-p0-stages-5-8`; meetup workflow is restricted to `release/v0.7.1-integration-20261102`. Protected `staging-e2e` environment may require explicit approval.
 
