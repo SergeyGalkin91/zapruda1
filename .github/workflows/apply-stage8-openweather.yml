@@ -14,7 +14,7 @@ jobs:
         with:
           ref: grok/stage8-openweather-api
 
-      - name: Decode payloads
+      - name: Decode edge functions and UI component
         run: |
           python3 <<'PY'
           import zlib, base64
@@ -29,19 +29,13 @@ jobs:
               path.write_bytes(data)
               print(dest, len(data))
 
-          def write_quarters(name, dest):
-              parts = [Path(f".github/payloads/stage8/{name}.q{i}.z64").read_text().strip() for i in range(4)]
-              data = zlib.decompress(base64.b64decode("".join(parts)))
-              path = Path(dest)
-              path.parent.mkdir(parents=True, exist_ok=True)
-              path.write_bytes(data)
-              print(dest, len(data))
-
           write_ab("openweather-current", "supabase/functions/openweather-current/index.ts")
           write_ab("daily-fishing-brief", "supabase/functions/daily-fishing-brief/index.ts")
           write_ab("daily-fishing-brief-ui", "src/components/DailyFishingBrief.tsx")
-          write_quarters("reports-new", "src/routes/reports.new.tsx")
           PY
+
+      - name: Patch reports/new for OpenWeather autofill
+        run: python3 scripts/stage8_patch_reports_new.py
 
       - uses: oven-sh/setup-bun@v2
       - run: bun install
@@ -57,6 +51,7 @@ jobs:
             supabase/functions/daily-fishing-brief/index.ts \
             src/routes/reports.new.tsx \
             src/components/DailyFishingBrief.tsx \
-            docs/STAGE8_OPENWEATHER.md
+            docs/STAGE8_OPENWEATHER.md \
+            scripts/stage8_patch_reports_new.py
           git diff --cached --quiet || git commit -m "feat(stage8): OpenWeather edge function, brief source, report autofill"
           git push origin HEAD:grok/stage8-openweather-api
