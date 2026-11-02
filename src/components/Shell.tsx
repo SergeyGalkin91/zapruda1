@@ -28,10 +28,8 @@ const mobileNav = [
 const otherNav = [
   { to: "/", label: "Лента уловов", Icon: House },
   { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
-  { to: "/partners", label: "Выезды и стрит", Icon: Users },
   { to: "/street", label: "Street Fishing", Icon: Fish },
   { to: "/chat", label: "ZAPRUDA SPOT · чаты", Icon: MessageCircle },
-  { to: "/guides", label: "Кабинет гида", Icon: Ship },
   { to: "/atlas", label: "Атлас", Icon: Compass },
   { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
@@ -41,6 +39,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [authError, setAuthError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isVerifiedGuide, setIsVerifiedGuide] = useState(false);
 
   useEffect(() => { applyAppearance(loadAppearance()); }, []);
 
@@ -90,6 +89,19 @@ export function Shell({ children }: { children: ReactNode }) {
         .select("user_id").eq("user_id", data.user.id).maybeSingle();
       if (active) setIsAdmin(Boolean(role));
     }).catch(() => { if (active) setIsAdmin(false); });
+    return () => { active = false; };
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    let active = true;
+    if (!isSignedIn) { setIsVerifiedGuide(false); return; }
+    void supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: verified, error } = await supabase.from("guide_verifications")
+        .select("verified_at,revoked_at")
+        .eq("user_id", data.user.id).maybeSingle();
+      if (active) setIsVerifiedGuide(!error && Boolean(verified?.verified_at && !verified.revoked_at));
+    }).catch(() => { if (active) setIsVerifiedGuide(false); });
     return () => { active = false; };
   }, [isSignedIn]);
 
@@ -146,6 +158,12 @@ export function Shell({ children }: { children: ReactNode }) {
                 <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
               </Link>
             ))}
+            {isSignedIn && isVerifiedGuide && (
+              <Link to="/guides" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
+                <Ship className="size-4 text-[#D7FF35]" aria-hidden="true" />Кабинет гида
+                <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
+              </Link>
+            )}
             {!isSignedIn && (
               <Link search={{ mode: "in" }} to="/auth" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
                 <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
