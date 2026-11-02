@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, useRef, type FormEvent } from "react";
 import { MapPin, Plus, Users, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,8 +23,11 @@ export function SocialMeetups(){
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
+ const latestRequest=useRef(0);
  const refresh=useCallback(async()=>{
+   const request=++latestRequest.current;
    const {data:auth}=await supabase.auth.getUser();
+   if(request!==latestRequest.current)return;
    const uid=auth.user?.id??"";setUserId(uid);
    if(!uid){setPosts([]);setMembers([]);return;}
    if(!country.trim()||!region.trim()||!city.trim()){setPosts([]);setMembers([]);setOccupancy({});return;}
@@ -32,10 +35,14 @@ export function SocialMeetups(){
      db.from("meetup_posts").select("id,owner_id,country_code,region_code,city_code,title,description,status").eq("country_code",country.trim().toUpperCase()).eq("region_code",region.trim()).eq("city_code",city.trim()).order("created_at",{ascending:false}).limit(100),
      db.from("meetup_members").select("post_id,user_id,role,status")
    ]);
+   if(request!==latestRequest.current)return;
    if(p.error||m.error){setError("СХОДКИ пока недоступны: "+(p.error?.message||m.error?.message));return;}
    setPosts(p.data??[]);setMembers(m.data??[]);
    const counts=await Promise.all((p.data??[]).map(async (post:Post)=>({id:post.id, result:await db.rpc("meetup_occupancy",{p_post:post.id})})));
-   setOccupancy(Object.fromEntries(counts.map(x=>[x.id,x.result.error?0:Number(x.result.data??0)])));
+   if(request!==latestRequest.current)return;
+   const failed=counts.find(x=>x.result.error);
+   if(failed){setError("Не удалось определить свободные места. Повторите загрузку.");setOccupancy({});return;}
+   setOccupancy(Object.fromEntries(counts.map(x=>[x.id,Number(x.result.data??0)])));
  },[country,region,city]);
  useEffect(()=>{void refresh()},[refresh]);
  const membership=(id:string)=>members.find(m=>m.post_id===id&&m.user_id===userId);
@@ -68,6 +75,7 @@ export function SocialMeetups(){
    if(!accepted(id)){setError("Чат доступен только принятым участникам");return;}
    const {data,error:err}=await db.from("meetup_messages").select("id,sender_id,body,created_at").eq("post_id",id).order("created_at",{ascending:true}).limit(100);
    if(err){setError(err.message);return;}
+   if(!accepted(id))return;
    setMessages(data??[]);setActive(id);
  }
  async function send(e:FormEvent){
