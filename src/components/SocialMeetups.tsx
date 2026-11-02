@@ -10,6 +10,7 @@ const db = supabase as any;
 export function SocialMeetups(){
  const [userId,setUserId]=useState("");
  const [posts,setPosts]=useState<Post[]>([]);
+ const [occupancy,setOccupancy]=useState<Record<string,number>>({});
  const [members,setMembers]=useState<Member[]>([]);
  const [country,setCountry]=useState("");
  const [region,setRegion]=useState("");
@@ -26,13 +27,16 @@ export function SocialMeetups(){
    const {data:auth}=await supabase.auth.getUser();
    const uid=auth.user?.id??"";setUserId(uid);
    if(!uid){setPosts([]);setMembers([]);return;}
+   if(!country.trim()||!region.trim()||!city.trim()){setPosts([]);setMembers([]);setOccupancy({});return;}
    const [p,m]=await Promise.all([
-     db.from("meetup_posts").select("id,owner_id,country_code,region_code,city_code,title,description,status").order("created_at",{ascending:false}).limit(100),
+     db.from("meetup_posts").select("id,owner_id,country_code,region_code,city_code,title,description,status").eq("country_code",country.trim().toUpperCase()).eq("region_code",region.trim()).eq("city_code",city.trim()).order("created_at",{ascending:false}).limit(100),
      db.from("meetup_members").select("post_id,user_id,role,status")
    ]);
    if(p.error||m.error){setError("СХОДКИ пока недоступны: "+(p.error?.message||m.error?.message));return;}
    setPosts(p.data??[]);setMembers(m.data??[]);
- },[]);
+   const counts=await Promise.all((p.data??[]).map(async (post:Post)=>({id:post.id, result:await db.rpc("meetup_occupancy",{p_post:post.id})})));
+   setOccupancy(Object.fromEntries(counts.map(x=>[x.id,x.result.error?0:Number(x.result.data??0)])));
+ },[country,region,city]);
  useEffect(()=>{void refresh()},[refresh]);
  const membership=(id:string)=>members.find(m=>m.post_id===id&&m.user_id===userId);
  const accepted=(id:string)=>membership(id)?.status==="accepted";
@@ -95,8 +99,9 @@ export function SocialMeetups(){
     <textarea maxLength={1500} placeholder="Что планируете ловить?" value={description} onChange={e=>setDescription(e.target.value)} className="w-full rounded-lg border border-white/20 bg-black/40 p-3"/>
     <button disabled={busy||!country||!region||!city} className="btn-primary inline-flex items-center justify-center gap-2"><Plus size={16}/> Опубликовать</button>
   </form>}
+  {(!country.trim()||!region.trim()||!city.trim())&&<p className="text-sm text-zinc-400">Укажите страну, регион и город, чтобы увидеть местные объявления.</p>}
   <div className="grid gap-3 md:grid-cols-2">{shown.map(p=>{
-    const count=members.filter(m=>m.post_id===p.id&&m.status==="accepted").length;
+    const count=occupancy[p.id]??0;
     const mine=membership(p.id),owner=p.owner_id===userId;
     return <article key={p.id} className="rounded-xl border border-white/15 bg-black/20 p-4">
       <div className="flex justify-between gap-2"><h3 className="font-bold text-white">{p.title}</h3><span className="text-[#D7FF35]">{count}/3</span></div>
