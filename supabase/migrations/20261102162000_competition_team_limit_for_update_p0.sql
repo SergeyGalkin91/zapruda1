@@ -1,5 +1,6 @@
--- Issue #61-A additive P0: serialize team limit + match results team/competition.
--- Safe to re-run. Requires competition_* tables (create via stage6 or full competitions migration).
+-- Issue #61-A additive P0 (idempotent re-apply).
+-- Requires 20261102160000_team_competitions.sql first.
+-- Reinforces FOR UPDATE limit + immutable field guards if baseline already present.
 
 create or replace function public.enforce_competition_team_limit()
 returns trigger
@@ -41,8 +42,51 @@ drop trigger if exists trg_competition_team_limit on public.competition_teams;
 create trigger trg_competition_team_limit
   before insert or update of status
   on public.competition_teams
-  for each row
-  execute function public.enforce_competition_team_limit();
+  for each row execute function public.enforce_competition_team_limit();
+
+create or replace function public.guard_competition_team_immutable()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  if new.competition_id is distinct from old.competition_id then
+    raise exception 'COMPETITION_ID_IMMUTABLE' using errcode = '42501';
+  end if;
+  if new.captain_id is distinct from old.captain_id then
+    raise exception 'CAPTAIN_ID_IMMUTABLE' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_guard_competition_team_immutable on public.competition_teams;
+create trigger trg_guard_competition_team_immutable
+  before update on public.competition_teams
+  for each row execute function public.guard_competition_team_immutable();
+
+create or replace function public.guard_competition_result_immutable()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  if new.competition_id is distinct from old.competition_id then
+    raise exception 'RESULT_COMPETITION_ID_IMMUTABLE' using errcode = '42501';
+  end if;
+  if new.team_id is distinct from old.team_id then
+    raise exception 'RESULT_TEAM_ID_IMMUTABLE' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_guard_competition_result_immutable on public.competition_results;
+create trigger trg_guard_competition_result_immutable
+  before update on public.competition_results
+  for each row execute function public.guard_competition_result_immutable();
 
 create or replace function public.enforce_competition_result_team_match()
 returns trigger
@@ -65,25 +109,29 @@ drop trigger if exists trg_competition_result_team_match on public.competition_r
 create trigger trg_competition_result_team_match
   before insert or update of competition_id, team_id
   on public.competition_results
-  for each row
-  execute function public.enforce_competition_result_team_match();
+  for each row execute function public.enforce_competition_result_team_match();
 
+-- Drop any prior self-select WITH CHECK policies and install non-recursive ones.
 drop policy if exists "Captain or organizer update team" on public.competition_teams;
 create policy "Captain or organizer update team"
   on public.competition_teams for update to authenticated
   using (
-    captain_id = auth.uid()
-    or exists (select 1 from public.competitions c where c.id = competition_id and c.organizer_id = auth.uid())
+    captain_id = (select auth.uid())
+    or exists (
+      select 1 from public.competitions c
+      where c.id = competition_id and c.organizer_id = (select auth.uid())
+    )
   )
   with check (
-    captain_id = (select t.captain_id from public.competition_teams t where t.id = id)
-    and competition_id = (select t.competition_id from public.competition_teams t where t.id = id)
-    and (
-      (captain_id = auth.uid() and status in ('registered', 'withdrawn'))
-      or (
-        exists (select 1 from public.competitions c where c.id = competition_id and c.organizer_id = auth.uid())
+    (
+      captain_id = (select auth.uid())
+      and status in ('registered', 'withdrawn')
+    )
+    or exists (
+      select 1 from public.competitions c
+      where c.id = competition_id
+        and c.organizer_id = (select auth.uid())
         and status in ('registered', 'withdrawn', 'disqualified')
-      )
     )
   );
 
@@ -91,11 +139,15 @@ drop policy if exists "Organizer moderates results" on public.competition_result
 create policy "Organizer moderates results"
   on public.competition_results for update to authenticated
   using (
-    exists (select 1 from public.competitions c where c.id = competition_id and c.organizer_id = auth.uid())
+    exists (
+      select 1 from public.competitions c
+      where c.id = competition_id and c.organizer_id = (select auth.uid())
+    )
   )
   with check (
-    competition_id = (select r.competition_id from public.competition_results r where r.id = id)
-    and team_id = (select r.team_id from public.competition_results r where r.id = id)
-    and exists (select 1 from public.competitions c where c.id = competition_id and c.organizer_id = auth.uid())
-    and status in ('submitted', 'accepted', 'rejected')
+    exists (
+      select 1 from public.competitions c
+      where c.id = competition_id and c.organizer_id = (select auth.uid())
+    )
+    and status in ('pending', 'submitted', 'accepted', 'rejected')
   );
