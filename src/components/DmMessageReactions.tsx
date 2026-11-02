@@ -12,7 +12,7 @@ const OPTIONS = [
   { emoji: "🤝", type: "support", label: "Поддержка" },
 ] as const;
 
-type Row = { id: string; user_id: string; reaction_type: string };
+type Row = { id: string; user_id: string; emoji: string };
 
 /**
  * Reactions under a private message.
@@ -36,7 +36,7 @@ export function DmMessageReactions({
     if (!messageId || !available) return;
     const { data, error } = await db
       .from("social_message_reactions")
-      .select("id,user_id,reaction_type")
+      .select("id,user_id,emoji")
       .eq("message_id", messageId);
     if (error) {
       if (/relation|does not exist|schema cache|permission/i.test(error.message)) {
@@ -47,11 +47,11 @@ export function DmMessageReactions({
     const rows = (data ?? []) as Row[];
     const next: Record<string, number> = {};
     for (const opt of OPTIONS) {
-      next[opt.type] = rows.filter((r) => r.reaction_type === opt.type).length;
+      next[opt.type] = rows.filter((r) => r.emoji === opt.emoji).length;
     }
     setCounts(next);
     setMine(
-      rows.filter((r) => r.user_id === currentUserId).map((r) => r.reaction_type),
+      rows.filter((r) => r.user_id === currentUserId).map((r) => OPTIONS.find(o => o.emoji === r.emoji)?.type).filter((v): v is string => Boolean(v)),
     );
   }, [messageId, currentUserId, available]);
 
@@ -89,12 +89,12 @@ export function DmMessageReactions({
           .delete()
           .eq("message_id", messageId)
           .eq("user_id", currentUserId)
-          .eq("reaction_type", type);
+          .eq("emoji", OPTIONS.find(o => o.type === type)?.emoji ?? type);
       } else {
         await db.from("social_message_reactions").insert({
           message_id: messageId,
           user_id: currentUserId,
-          reaction_type: type,
+          emoji: OPTIONS.find(o => o.type === type)?.emoji ?? type,
         });
       }
       await load();
