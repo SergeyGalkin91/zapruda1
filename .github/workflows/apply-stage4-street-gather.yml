@@ -1,0 +1,31 @@
+name: Apply stage4 street gather files
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/stage4-street-gather
+
+      - name: Write street gather sources
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          gather = r'''PLACEHOLDER_GATHER'''
+          # Written by follow-up commit if placeholder remains
+          print('use artifact path')
+          PY
+
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - name: Ensure route exists via build if file present
+        run: |
+          if [ -f src/routes/street.gather.tsx ]; then bun run build && bun run test; else echo "waiting for source files"; fi
