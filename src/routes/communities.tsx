@@ -66,8 +66,18 @@ function Communities() {
         <span className="text-primary">→</span>
       </Link>
 
-      <SocialGroups />
-      <VerifiedGuideDirectory />
+      <nav aria-label="Направления комьюнити" className="mt-6 grid gap-3 sm:grid-cols-3">
+        <a href="#partner" className="rounded-2xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 p-4 font-bold text-[#D7FF35] transition hover:opacity-85 focus-visible:outline-2 focus-visible:outline-[#D7FF35]">Найти напарника</a>
+        <a href="#clubs" className="rounded-2xl border border-white/15 bg-[#131712] p-4 font-bold text-white transition hover:opacity-85 focus-visible:outline-2 focus-visible:outline-[#D7FF35]">Клубы</a>
+        <a href="#guides" className="rounded-2xl border border-[#A99AD9]/30 bg-[#A99AD9]/10 p-4 font-bold text-white transition hover:opacity-85 focus-visible:outline-2 focus-visible:outline-[#D7FF35]">Найти гида</a>
+      </nav>
+      <section id="partner" className="mt-6 rounded-2xl border border-white/10 bg-[#111711] p-5">
+        <h2 className="text-xl font-black text-white">Найти напарника</h2>
+        <p className="mt-2 text-sm text-zinc-400">Найди другого рыболова, предложи общение и открой личный чат после принятия запроса.</p>
+        <Link to="/messages" className="btn-primary mt-3 inline-flex min-h-11 items-center px-4">Найти рыболова</Link>
+      </section>
+      <section id="clubs" className="scroll-mt-24"><SocialGroups /></section>
+      <section id="guides" className="scroll-mt-24"><VerifiedGuideDirectory /></section>
 
       <h2 className="mt-8 mb-3 text-sm uppercase tracking-widest text-muted-foreground">Страны СНГ</h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{cis.map((c) => <Chip key={c.code} c={c} />)}</div>
