@@ -20,8 +20,9 @@ jobs:
           import zlib, base64
           from pathlib import Path
 
-          payload = Path(".github/payloads/stage7/zapruda-daily-advice.index.z64").read_text().strip()
-          data = zlib.decompress(base64.b64decode(payload))
+          a = Path(".github/payloads/stage7/zapruda-daily-advice.a.z64").read_text().strip()
+          b = Path(".github/payloads/stage7/zapruda-daily-advice.b.z64").read_text().strip()
+          data = zlib.decompress(base64.b64decode(a + b))
           path = Path("supabase/functions/zapruda-daily-advice/index.ts")
           path.parent.mkdir(parents=True, exist_ok=True)
           path.write_bytes(data)
