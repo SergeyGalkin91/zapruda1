@@ -43,7 +43,7 @@ describe("v0.7.1 migration dependency and safety contract", () => {
 
   it("never contains a webhook path that can write paid", () => {
     const webhook = readFileSync(join(process.cwd(), "supabase/functions/guide-payment-webhook/index.ts"), "utf8");
-    expect(webhook).not.toMatch(/mark_guide_booking_paid_from_provider/);
+    expect(webhook).not.toMatch(/\.rpc\(/);
     expect(webhook).not.toMatch(/GUIDE_PAYMENT_PROVIDER_PROOF/);
     expect(webhook).toMatch(/return respond\(501,/);
   });
