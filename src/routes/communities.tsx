@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { MessageCircle, Send, ShieldCheck } from "lucide-react";
+import { MessageCircle, Send, ShieldCheck, Users } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { SocialGroups } from "@/components/SocialGroups";
 import { VerifiedGuideDirectory } from "@/components/VerifiedGuideDirectory";
@@ -71,6 +71,10 @@ function Communities() {
         <a href="#clubs" className="rounded-2xl border border-white/15 bg-[#131712] p-4 font-bold text-white transition hover:opacity-85 focus-visible:outline-2 focus-visible:outline-[#D7FF35]">Клубы</a>
         <a href="#guides" className="rounded-2xl border border-[#A99AD9]/30 bg-[#A99AD9]/10 p-4 font-bold text-white transition hover:opacity-85 focus-visible:outline-2 focus-visible:outline-[#D7FF35]">Найти гида</a>
       </nav>
+      <Link to="/partners" className="mt-5 flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-[#D7FF35]/25 bg-[#D7FF35]/[0.06] p-4 text-white transition hover:border-[#D7FF35]/70 hover:bg-[#D7FF35]/10 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-[#D7FF35]">
+        <span className="flex items-center gap-3"><Users className="size-5 shrink-0 text-[#D7FF35]" aria-hidden="true" /><span><strong className="block">Выезды и Street Fishing</strong><span className="block text-sm font-normal text-zinc-400">Собрать компанию, найти выезд и откликнуться</span></span></span>
+        <span aria-hidden="true" className="text-[#D7FF35]">→</span>
+      </Link>
       <section id="partner" className="mt-6 rounded-2xl border border-white/10 bg-[#111711] p-5">
         <h2 className="text-xl font-black text-white">Найти напарника</h2>
         <p className="mt-2 text-sm text-zinc-400">Найди другого рыболова, предложи общение и открой личный чат после принятия запроса.</p>
