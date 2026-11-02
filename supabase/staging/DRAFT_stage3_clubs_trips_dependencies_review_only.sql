@@ -4,7 +4,7 @@
 -- Execute only in STAGING after code/RLS review.
 create table if not exists public.partner_trips (
  id uuid primary key default gen_random_uuid(),
- organizer_id uuid not null references auth.users(id),
+ organizer_id uuid not null references public.profiles(id),
  city text not null, destination text not null, departure_at timestamptz not null,
  fishing_method text not null default 'Спиннинг', target_fish text not null default '',
  transport text not null default 'Обсудим', seats smallint not null default 1 check(seats between 1 and 20),
@@ -24,7 +24,7 @@ create table if not exists public.partner_trips (
 );
 create table if not exists public.partner_trip_requests (
  id uuid primary key default gen_random_uuid(), trip_id uuid not null references public.partner_trips(id) on delete cascade,
- applicant_id uuid not null references auth.users(id), note text not null default '',
+ applicant_id uuid not null references public.profiles(id), note text not null default '',
  status text not null default 'pending' check(status in ('pending','accepted','declined','withdrawn')),
  created_at timestamptz not null default now(),unique(trip_id,applicant_id)
 );
