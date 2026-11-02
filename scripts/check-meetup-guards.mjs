@@ -15,4 +15,6 @@ must(hardening,"new.owner_id is distinct from old.owner_id",'Post owner mutation
 must(hardening,'MEETUP_DETAILS_OWNER_MISMATCH','Private GPS ownership guard missing');
 for(const column of ['country_code','region_code','city_code']) must(ui,'.eq("'+column+'"','Server-side city filter missing '+column);
 must(ui,'meetup_occupancy','Occupancy must be read via server');
+must(ui,'count===undefined?"—":count','Unknown occupancy must never be displayed as zero');
+must(ui,'count!==undefined&&count<3','Join must be disabled until occupancy is known');
 console.log('PASS: static meetup safeguards present. Actual JWT, concurrent race and mobile E2E NOT tested by this check.');
