@@ -65,4 +65,4 @@ Docker STAGING: [инструкция](docs/ZAPRUDA_V070_DOCKER_STAGING.md).
 - Перед слиянием: типы, сборка, тесты, RLS/GRANT, реальные сценарии авторизации двумя пользователями и проверка мобильного интерфейса.
 - База STAGING и миграции должны проверяться отдельно; не копируйте пользовательские данные production и не восстанавливайте старые сущности только потому, что они были в ранней версии.
 
-См. [аудит устаревших PR](docs/ZAPRUDA_LEGACY_CLEANUP_AUDIT_20261102.md) (документ пока в отдельном Draft PR), [продуктовую архитектуру СПОТ / Комьюнити / Гиды](docs/ZAPRUDA_PRODUCT_ARCHITECTURE_SPOT_COMMUNITY_GUIDES.md) (также в отдельном PR).
+Материалы на рассмотрении: [аудит устаревших PR — Draft PR #50](https://github.com/SergeyGalkin91/zapruda1/pull/50) и [архитектура СПОТ / Комьюнити / Гиды — Draft PR #46](https://github.com/SergeyGalkin91/zapruda1/pull/46).
