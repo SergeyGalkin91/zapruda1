@@ -20,6 +20,9 @@ export function SocialMeetups(){
  const [active,setActive]=useState("");
  const [messages,setMessages]=useState<Message[]>([]);
  const [draft,setDraft]=useState("");
+ const [privatePlace,setPrivatePlace]=useState("");
+ const [meetingAt,setMeetingAt]=useState("");
+ const [detailsReady,setDetailsReady]=useState(false);
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
@@ -71,8 +74,20 @@ export function SocialMeetups(){
    const {error:err}=await db.from("meetup_members").update({status}).eq("post_id",id).eq("user_id",user);
    setBusy(false);if(err)setError(err.message);else await refresh();
  }
+ async function saveDetails(e:FormEvent){
+   e.preventDefault();if(!active||!accepted(active)||posts.find(p=>p.id===active)?.owner_id!==userId||busy)return;
+   setBusy(true);setError("");
+   const {error:err}=await db.from("meetup_private_details").upsert({post_id:active,owner_id:userId,private_place:privatePlace.trim()||null,meeting_at:meetingAt?new Date(meetingAt).toISOString():null},{onConflict:"post_id"});
+   setBusy(false);if(err){setError("Не удалось сохранить приватные детали: "+err.message);return;}
+   setNotice("Приватные детали сохранены");await openChat(active);
+ }
  async function openChat(id:string){
    if(!accepted(id)){setError("Чат доступен только принятым участникам");return;}
+   setDetailsReady(false);
+   const {data:details,error:detailsError}=await db.from("meetup_private_details").select("private_place,meeting_at").eq("post_id",id).maybeSingle();
+   if(detailsError){setError("Ошибка доступа к месту встречи: "+detailsError.message);return;}
+   setPrivatePlace(details?.private_place??"");setMeetingAt(details?.meeting_at?new Date(details.meeting_at).toISOString().slice(0,16):"");
+   setDetailsReady(true);
    const {data,error:err}=await db.from("meetup_messages").select("id,sender_id,body,created_at").eq("post_id",id).order("created_at",{ascending:true}).limit(100);
    if(err){setError(err.message);return;}
    if(!accepted(id))return;
@@ -129,8 +144,10 @@ export function SocialMeetups(){
    })}</div>
   {active&&accepted(active)&&<form onSubmit={send} className="space-y-3 rounded-xl border border-[#D7FF35]/30 p-4">
    <h3 className="font-bold">Приватный чат сходки</h3>
+   {detailsReady&&<div className="space-y-2 rounded-lg border border-white/10 p-3 text-sm"><p className="text-[#D7FF35]">Место и время доступны только принятым участникам</p><p>{privatePlace||"Место уточняется"}</p><p>{meetingAt?new Date(meetingAt).toLocaleString("ru-RU"):"Время уточняется"}</p></div>}
    <div className="max-h-64 space-y-2 overflow-y-auto">{messages.map(m=><p key={m.id} className="text-sm text-zinc-200">{m.sender_id===userId?"Вы":"Участник"}: {m.body}</p>)}</div>
    <div className="flex gap-2"><input required maxLength={1500} value={draft} onChange={e=>setDraft(e.target.value)} className="min-w-0 flex-1 rounded-lg border border-white/20 bg-black/40 p-3" placeholder="Сообщение"/><button disabled={busy} className="btn-primary">Отправить</button></div>
   </form>}
+  {active&&accepted(active)&&posts.find(p=>p.id===active)?.owner_id===userId&&<form onSubmit={saveDetails} className="space-y-2 rounded-xl border border-white/10 p-4"><h3 className="font-bold">Приватные детали для участников</h3><input maxLength={500} value={privatePlace} onChange={e=>setPrivatePlace(e.target.value)} placeholder="Точное место встречи" className="w-full rounded-lg border border-white/20 bg-black/40 p-3"/><input type="datetime-local" value={meetingAt} onChange={e=>setMeetingAt(e.target.value)} className="w-full rounded-lg border border-white/20 bg-black/40 p-3"/><button disabled={busy} className="btn-primary">Сохранить место и время</button></form>}
  </section>
 }
