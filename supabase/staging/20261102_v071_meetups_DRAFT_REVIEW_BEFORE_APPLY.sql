@@ -122,3 +122,11 @@ create policy meetup_messages_insert on public.meetup_messages for insert to aut
 grant select,insert,update on public.meetup_posts,public.meetup_members,public.meetup_private_details to authenticated;
 grant select,insert on public.meetup_messages to authenticated;
 revoke all on public.meetup_posts,public.meetup_members,public.meetup_private_details,public.meetup_messages from anon;
+
+-- Public-safe occupancy: count only; no participant identities or precise locations.
+create or replace function public.meetup_occupancy(p_post uuid)
+returns integer language sql stable security definer set search_path='' as $$
+ select count(*)::integer from public.meetup_members m where m.post_id=p_post and m.status='accepted'
+$$;
+revoke all on function public.meetup_occupancy(uuid) from public;
+grant execute on function public.meetup_occupancy(uuid) to authenticated;
