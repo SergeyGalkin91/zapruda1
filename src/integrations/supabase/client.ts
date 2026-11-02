@@ -55,8 +55,18 @@ function createSupabaseClient() {
   // Public project configuration fallback for Lovable hosting, which does not inject
   // VITE_* values or Node environment variables in all deployment modes.
   // This is a publishable client key, NOT a Supabase secret/service-role key.
-  const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || serverEnv?.['SUPABASE_URL'] || 'https://sonvniuwtvzzyuglscah.supabase.co';
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || serverEnv?.['SUPABASE_PUBLISHABLE_KEY'] || 'sb_publishable_86B9kOH2BUNOuHyYoHX4qw_FbuLHl5E';
+  let SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || serverEnv?.['SUPABASE_URL'] || 'https://sonvniuwtvzzyuglscah.supabase.co';
+  let SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || serverEnv?.['SUPABASE_PUBLISHABLE_KEY'] || 'sb_publishable_86B9kOH2BUNOuHyYoHX4qw_FbuLHl5E';
+
+  // Netlify deploy previews must never inherit or fall back to PROD credentials.
+  // Force the isolated STAGING project on both browser and Netlify preview SSR.
+  const isNetlifyPreview = (typeof window !== 'undefined' &&
+    /^deploy-preview-\\d+--zapruda1\\.netlify\\.app$/.test(window.location.hostname)) ||
+    serverEnv?.['CONTEXT'] === 'deploy-preview';
+  if (isNetlifyPreview) {
+    SUPABASE_URL = 'https://yudtbifopfnjtjanaqrd.supabase.co';
+    SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_GHxXu3_sK5YtuXeftTfwSQ_hK0F5mx8';
+  }
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
