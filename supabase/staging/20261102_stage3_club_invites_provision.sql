@@ -6,7 +6,7 @@ set search_path=pg_catalog,public
 as $$
 declare req public.club_creation_requests%rowtype; new_group uuid;
 begin
- if current_user <> 'service_role' then
+ if current_setting('request.jwt.claim.role',true) is distinct from 'service_role' then
    raise exception 'Service role only' using errcode='42501';
  end if;
  select * into req from public.club_creation_requests where id=p_request_id for update;
