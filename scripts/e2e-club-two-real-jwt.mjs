@@ -58,5 +58,5 @@ assert.equal(session.session,null,'Outsider must be unauthenticated');
 const {data:outsiderRead,error:outsiderError}=await outsider.from('social_group_messages').select('id').eq('id',msg.id);
 if(outsiderError && !['42501'].includes(outsiderError.code))throw outsiderError;
 assert.equal(outsiderRead?.length??0,0,'Unauthenticated client cannot read club message');
-console.log('PASS: two real STAGING JWT sessions, invite/accept, private club chat; fixture state intentionally retained for inspection');
+console.log('PASS: two real STAGING JWT sessions, invite/accept, private club chat. WARNING: disposable fixture membership/message remain for explicit cleanup.');
 await owner.auth.signOut();await invitee.auth.signOut();
