@@ -55,6 +55,7 @@ try {
  assert.ok(typeof first.json.answer==='string'&&first.json.answer.length>=40,'No real advice');
  const second=await invoke('zapruda-daily-advice',jwt,input);
  assert.equal(second.status,200,'Second daily request must return cached answer');
+ assert.equal(second.json.advice_day,first.json.advice_day,'Quota day changed during E2E; rerun away from midnight Moscow');
  assert.equal(second.json.already_used,true,'Daily quota not cached');
  assert.equal(second.json.answer,first.json.answer,'Daily answer changed');
  console.log('PASS live xAI advice + cached daily quota');
