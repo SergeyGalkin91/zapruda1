@@ -35,7 +35,7 @@ jobs:
             test -n "${!name}" || { echo "Missing protected config: $name"; exit 1; }
           done
       - name: Two independent JWTs and private data authorization
-        env: &meetup_env
+        env:
           ZAPRUDA_E2E_STAGING_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
           ZAPRUDA_E2E_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
           ZAPRUDA_E2E_OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
@@ -45,7 +45,10 @@ jobs:
         run: node scripts/e2e-meetups-two-real-jwt.mjs
       - name: Concurrent third-seat admission (four independent JWTs)
         env:
-          <<: *meetup_env
+          ZAPRUDA_E2E_STAGING_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+          ZAPRUDA_E2E_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+          ZAPRUDA_E2E_OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
+          ZAPRUDA_E2E_OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
           ZAPRUDA_E2E_SEATED_EMAIL: ${{ secrets.ZAPRUDA_E2E_SEATED_EMAIL }}
           ZAPRUDA_E2E_SEATED_PASSWORD: ${{ secrets.ZAPRUDA_E2E_SEATED_PASSWORD }}
           ZAPRUDA_E2E_RACER_A_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
