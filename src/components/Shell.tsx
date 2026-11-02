@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship,
+  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, MapPinned, Menu, Ship,
   MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined, ShieldCheck,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
@@ -10,28 +10,29 @@ import { ActivityTracker } from "@/components/ActivityTracker";
 import { applyAppearance, loadAppearance } from "@/lib/appearance";
 
 const desktopNav = [
-  { to: "/", label: "Лента", Icon: House },
-  { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
-  { to: "/partners", label: "Выезды", Icon: Users },
+  { to: "/spot", label: "СПОТ", Icon: MapPinned },
   { to: "/communities", label: "Комьюнити", Icon: Compass },
-  { to: "/chat", label: "Чат", Icon: MessageCircle },
-  { to: "/messages", label: "Личные", Icon: MessageCircle },
-  { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
+  { to: "/assistant", label: "Выйти на воду", Icon: BrainCircuit },
+  { to: "/messages", label: "Сообщения", Icon: MessageCircle },
+  { to: "/profile", label: "Профиль", Icon: UserRound },
 ] as const;
 
 const mobileNav = [
-  { to: "/", label: "Лента", Icon: House },
+  { to: "/spot", label: "СПОТ", Icon: MapPinned },
   { to: "/communities", label: "Комьюнити", Icon: Compass },
-  { to: "/reports/new", label: "Создать", Icon: Plus },
-  { to: "/partners", label: "Выезды", Icon: Users },
-  { to: "/chat", label: "Чат", Icon: MessageCircle },
+  { to: "/assistant", label: "На воду", Icon: BrainCircuit },
+  { to: "/messages", label: "Сообщения", Icon: MessageCircle },
+  { to: "/profile", label: "Профиль", Icon: UserRound },
 ] as const;
 
 const otherNav = [
-  { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
+  { to: "/", label: "Лента уловов", Icon: House },
+  { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
+  { to: "/partners", label: "Выезды и стрит", Icon: Users },
+  { to: "/street", label: "Street Fishing", Icon: Fish },
+  { to: "/chat", label: "ZAPRUDA SPOT · чаты", Icon: MessageCircle },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
-  { to: "/communities", label: "Комьюнити и клубы", Icon: Compass },
-  { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
+  { to: "/atlas", label: "Атлас", Icon: Compass },
   { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
 ] as const;
@@ -202,7 +203,7 @@ export function Shell({ children }: { children: ReactNode }) {
               {to === "/profile" && !isSignedIn ? (
                 <LogIn className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
               ) : (
-                <span className={to === "/reports/new" ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]" : "flex size-8 items-center justify-center"}><ShownIcon className={to === "/reports/new" ? "size-6" : "size-[21px]"} strokeWidth={to === "/reports/new" ? 2.5 : 1.9} aria-hidden="true" /></span>
+                <span className={to === "/spot" ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]" : "flex size-8 items-center justify-center"}><ShownIcon className={to === "/spot" ? "size-6" : "size-[21px]"} strokeWidth={to === "/spot" ? 2.5 : 1.9} aria-hidden="true" /></span>
               )}
               <span className="truncate">{shownLabel}</span>
             </Link>
