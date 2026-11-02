@@ -49,9 +49,13 @@ const {error:pendingSendError}=await guest.from('meetup_messages').insert({
  post_id:id,sender_id:b,body:'FORBIDDEN pending message'
 });
 assert.ok(pendingSendError,'Pending member can send private messages');
-const {error:outsiderApproveError}=await guest.from('meetup_members').update({status:'accepted'})
- .eq('post_id',id).eq('user_id',b);
-assert.ok(outsiderApproveError,'Pending user can self-approve');
+const {data:selfApproval, error:outsiderApproveError}=await guest.from('meetup_members').update({status:'accepted'})
+ .eq('post_id',id).eq('user_id',b).select('status');
+assert.ok(outsiderApproveError || selfApproval.length===0,'Pending user can self-approve');
+const {data:stillPending,error:stateError}=await guest.from('meetup_members')
+ .select('status').eq('post_id',id).eq('user_id',b).single();
+if(stateError)throw stateError;
+assert.equal(stillPending.status,'pending','Self-approval changed membership');
 const {error:outsiderModifyError}=await guest.from('meetup_private_details').upsert({
  post_id:id,owner_id:a,private_place:'FORBIDDEN overwrite'
 },{onConflict:'post_id'});
