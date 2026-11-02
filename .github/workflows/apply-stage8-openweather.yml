@@ -1,0 +1,57 @@
+name: Apply stage8 OpenWeather integration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/stage8-openweather-api
+
+      - name: Decode edge functions and UI component
+        run: |
+          python3 <<'PY'
+          import zlib, base64
+          from pathlib import Path
+
+          def write_ab(name, dest):
+              a = Path(f".github/payloads/stage8/{name}.a.z64").read_text().strip()
+              b = Path(f".github/payloads/stage8/{name}.b.z64").read_text().strip()
+              data = zlib.decompress(base64.b64decode(a + b))
+              path = Path(dest)
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(data)
+              print(dest, len(data))
+
+          write_ab("openweather-current", "supabase/functions/openweather-current/index.ts")
+          write_ab("daily-fishing-brief", "supabase/functions/daily-fishing-brief/index.ts")
+          write_ab("daily-fishing-brief-ui", "src/components/DailyFishingBrief.tsx")
+          PY
+
+      - name: Patch reports/new for OpenWeather autofill
+        run: python3 scripts/stage8_patch_reports_new.py
+
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun run build
+      - run: bun run test
+
+      - name: Commit
+        run: |
+          git config user.name Grok
+          git config user.email grok@users.noreply.github.com
+          git add \
+            supabase/functions/openweather-current/index.ts \
+            supabase/functions/daily-fishing-brief/index.ts \
+            src/routes/reports.new.tsx \
+            src/components/DailyFishingBrief.tsx \
+            docs/STAGE8_OPENWEATHER.md \
+            scripts/stage8_patch_reports_new.py
+          git diff --cached --quiet || git commit -m "feat(stage8): OpenWeather edge function, brief source, report autofill"
+          git push origin HEAD:grok/stage8-openweather-api
