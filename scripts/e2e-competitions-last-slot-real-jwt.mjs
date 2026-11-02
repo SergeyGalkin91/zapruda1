@@ -33,6 +33,19 @@ const registered=(user,name)=>user.client.from('competition_teams').insert({
  competition_id:comp.id,captain_id:user.id,name,status:'registered'
 }).select('id,status').single();
 const first=await registered(seated,label+'_seated');if(first.error)throw first.error;
+// A captain must not register a team on behalf of a different account.
+const {error:spoofError}=await a.client.from('competition_teams').insert({
+ competition_id:comp.id,captain_id:b.id,name:label+'_spoofed',status:'registered'
+});
+assert.ok(spoofError,'Captain identity spoofed through team INSERT');
+// Captain and competition ID are immutable even when a row is otherwise updateable.
+const {data:tampered,error:tamperError}=await seated.client.from('competition_teams')
+ .update({captain_id:a.id}).eq('id',first.data.id).select('captain_id');
+assert.ok(tamperError || (tampered??[]).length===0,'Captain ID unexpectedly changed');
+const {data:unchanged,error:verifyError}=await seated.client.from('competition_teams')
+ .select('captain_id').eq('id',first.data.id).single();
+if(verifyError)throw verifyError;
+assert.equal(unchanged.captain_id,seated.id,'Captain identity changed');
 const results=await Promise.all([registered(a,label+'_a'),registered(b,label+'_b')]);
 const success=results.filter(x=>!x.error),failed=results.filter(x=>x.error);
 assert.equal(success.length,1,'Exactly one last-seat registration required');
