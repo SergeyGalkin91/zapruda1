@@ -39,11 +39,11 @@ create index if not exists meetup_members_user_idx on public.meetup_members(user
 create index if not exists meetup_messages_post_idx on public.meetup_messages(post_id,created_at);
 
 -- Security-definer checks only for membership existence, never return private data.
-create or replace function public.meetup_is_accepted(p_post uuid,p_user uuid)
+create or replace function public.meetup_is_accepted(p_post uuid)
 returns boolean language sql stable security definer set search_path='' as $$
- select exists(select 1 from public.meetup_members m where m.post_id=p_post and m.user_id=p_user and m.status='accepted')
+ select exists(select 1 from public.meetup_members m where m.post_id=p_post and m.user_id=auth.uid() and m.status='accepted')
 $$;
-revoke all on function public.meetup_is_accepted(uuid,uuid) from public;
+revoke all on function public.meetup_is_accepted(uuid) from public;
 grant execute on function public.meetup_is_accepted(uuid,uuid) to authenticated;
 
 create or replace function public.meetup_member_guard()
@@ -108,15 +108,15 @@ create policy meetup_members_update on public.meetup_members for update to authe
  using(user_id=auth.uid() or exists(select 1 from public.meetup_posts p where p.id=post_id and p.owner_id=auth.uid()))
  with check(user_id=auth.uid() or exists(select 1 from public.meetup_posts p where p.id=post_id and p.owner_id=auth.uid()));
 create policy meetup_details_read on public.meetup_private_details for select to authenticated
- using(public.meetup_is_accepted(post_id,auth.uid()));
+ using(public.meetup_is_accepted(post_id));
 create policy meetup_details_insert on public.meetup_private_details for insert to authenticated
  with check(owner_id=auth.uid() and exists(select 1 from public.meetup_posts p where p.id=post_id and p.owner_id=auth.uid()));
 create policy meetup_details_update on public.meetup_private_details for update to authenticated
  using(owner_id=auth.uid()) with check(owner_id=auth.uid());
 create policy meetup_messages_read on public.meetup_messages for select to authenticated
- using(public.meetup_is_accepted(post_id,auth.uid()));
+ using(public.meetup_is_accepted(post_id));
 create policy meetup_messages_insert on public.meetup_messages for insert to authenticated
- with check(sender_id=auth.uid() and public.meetup_is_accepted(post_id,auth.uid()));
+ with check(sender_id=auth.uid() and public.meetup_is_accepted(post_id));
 grant select,insert,update on public.meetup_posts,public.meetup_members,public.meetup_private_details to authenticated;
 grant select,insert on public.meetup_messages to authenticated;
 revoke all on public.meetup_posts,public.meetup_members,public.meetup_private_details,public.meetup_messages from anon;
