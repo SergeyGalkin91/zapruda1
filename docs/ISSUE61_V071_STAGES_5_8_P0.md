@@ -2,16 +2,18 @@
 
 Base: `release/v0.7.1-integration-20261102` (PR #60). Draft PR #63. **Do not merge to main / PROD.**
 
-## Migration chain (STAGING order)
+## Migration chain (fresh database + STAGING)
+
+**Clean deploy order:** competition baseline `20261102160000`, competition P0 `20261102162000`, AI journal `20261102170000`, atomic claim `20261102171000`, revoke trigger grants `20261102173000`, AI lease guard `20261102174000`, guide profiles/quotes baseline `20261106000000`, **guide payment lock `20261106001000`**. Quote-lock timestamp is deliberately after guide baseline; never restore earlier timestamp. STAGING had the same schema applied manually in prerequisite order before the filename correction. No PROD operations performed.
 
 | File | Purpose | Prerequisites | STAGING status (2026-11-02) | Rollback |
 |------|---------|---------------|-----------------------------|----------|
-| `20261106000000_guide_profiles_commissions.sql` | guide_profiles, guide_booking_quotes | partner_trips, partner_trip_requests, profiles | **Unknown / may be absent** | drop quotes/profiles tables |
-| `20261102160000_team_competitions.sql` | competitions / teams / results + baseline RLS + immutable triggers + FOR UPDATE | auth.users | **Absent** (must apply before P0 reinforce) | drop competition_* |
-| `20261102162000_competition_team_limit_for_update_p0.sql` | reinforce FOR UPDATE + immutable guards | competitions baseline | **Not applied** | drop triggers |
-| `20261102161000_guide_payment_contact_lock_p0.sql` | quote payment field locks + service RPC | guide_booking_quotes | **Not applied** (was blocked: old SQL referenced missing inquiries) | drop trigger/RPC |
+| `20261106000000_guide_profiles_commissions.sql` | guide_profiles, guide_booking_quotes | partner_trips, partner_trip_requests, profiles | **Applied to STAGING** | drop quotes/profiles tables |
+| `20261102160000_team_competitions.sql` | competitions / teams / results + baseline RLS + immutable triggers + FOR UPDATE | auth.users | **Applied to STAGING** | drop competition_* |
+| `20261102162000_competition_team_limit_for_update_p0.sql` | reinforce FOR UPDATE + immutable guards | competitions baseline | **Applied to STAGING** | drop triggers |
+| `20261106001000_guide_payment_contact_lock_p0.sql` | quote payment field locks + service RPC | guide_booking_quotes | **Applied to STAGING** | drop trigger/RPC |
 | `20261102170000_ai_daily_advices_grok.sql` | ai_daily_advices table | auth.users | **Applied** (RLS ON, select-only client) | drop table |
-| `20261102171000_ai_daily_advice_atomic_claim.sql` | claim/complete RPCs + lease columns | ai_daily_advices | **Not applied** | drop functions/columns |
+| `20261102171000_ai_daily_advice_atomic_claim.sql` | claim/complete RPCs + lease columns | ai_daily_advices | **Applied to STAGING** | drop functions/columns |
 
 ## Security fixes in this iteration
 
@@ -24,7 +26,7 @@ Base: `release/v0.7.1-integration-20261102` (PR #60). Draft PR #63. **Do not mer
 - Aligned with real schema `guide_booking_quotes` (no invented `guide_booking_inquiries`).
 - Client cannot set paid / contacts_unlocked_at / provider_payment_id / paid_at.
 - RPC requires `p_settlement_confirmed = true` and service_role.
-- Webhook **fail-closed**: empty status rejected; `waiting_for_capture` not paid; without `GUIDE_PAYMENT_PROVIDER_PROOF=1` returns **501** and never writes paid. Shared secret ≠ provider proof.
+- Webhook **fail-closed**: empty status rejected; `waiting_for_capture` not paid; always returns **501** for valid settled events; no code path can mark paid. Shared secret ≠ provider proof.
 
 ### C Grok
 - Atomic `claim_ai_daily_advice_slot` + `complete_ai_daily_advice_slot` (FOR UPDATE + lease).
@@ -61,3 +63,10 @@ Apply on STAGING only after prerequisite tables exist:
 6. deploy edge functions
 
 Do not set `GUIDE_PAYMENT_PROVIDER_PROOF=1` until YooKassa (or chosen provider) HMAC + amount checks are real.
+
+## Outstanding release gates
+
+- Real concurrent JWT last-seat and guide contact access tests are still NOT run; CI/static SQL checks are not equivalent.
+- Live xAI and OpenWeather HTTP E2E require STAGING JWTs and configured API secrets.
+- Real payment settlement verification (provider proof + booking, amount, currency and idempotency) is NOT implemented; webhook stays fail-closed.
+- Latest STAGING-only AI lease guard migration `20261102174000_ai_daily_advice_lease_expiry_guard.sql` rejects null/replayed/stale completions; applied to STAGING.
