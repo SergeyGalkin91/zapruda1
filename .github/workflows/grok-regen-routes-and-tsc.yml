@@ -1,0 +1,167 @@
+name: Grok regen routes and tsc guards
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/design-qa-tsc-lint-20261102
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install
+
+      - name: Apply surgical code guards
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          # street finishedAt
+          p = Path('src/routes/street.tsx')
+          t = p.read_text()
+          t = t.replace('finishedAt?: string };', 'finishedAt?: string | undefined };')
+          p.write_text(t)
+
+          # tackle brand
+          p = Path('src/components/AnglerTackleCabinet.tsx')
+          t = p.read_text()
+          t = t.replace('setBrand(TACKLE_BRANDS[next][0]);', 'setBrand(TACKLE_BRANDS[next][0] ?? "");')
+          p.write_text(t)
+
+          # reaction env
+          p = Path('src/components/ReactionBar.tsx')
+          t = p.read_text()
+          t = t.replace("import.meta.env.VITE_ENABLE_ATOMIC_REACTIONS", "import.meta.env['VITE_ENABLE_ATOMIC_REACTIONS']")
+          p.write_text(t)
+
+          # admin Entry type
+          p = Path('src/routes/admin.operations.tsx')
+          t = p.read_text()
+          t = t.replace(
+              'reference?: string };',
+              'reference?: string | undefined };',
+          )
+          # only Entry line if still old form
+          t = t.replace(
+              'when: string; reference?: string };',
+              'when: string; reference?: string | undefined };',
+          )
+          p.write_text(t)
+
+          # map coords + homeCity
+          p = Path('src/components/InteractiveFishingMap.tsx')
+          t = p.read_text()
+          t = t.replace('homeCity?:string;', 'homeCity?:string|undefined;')
+          t = t.replace('homeRegion?:string;', 'homeRegion?:string|undefined;')
+          t = t.replace(
+          '''      const coords=ev.get("coords") as number[];
+      if(!coords||!Number.isFinite(coords[0])||!Number.isFinite(coords[1]))return;
+      pickRef.current({latitude:Number(coords[0].toFixed(6)),longitude:Number(coords[1].toFixed(6))});
+''',
+          '''      const coords=ev.get("coords") as number[]|undefined;
+      const lat=coords?.[0], lng=coords?.[1];
+      if(lat===undefined||lng===undefined||!Number.isFinite(lat)||!Number.isFinite(lng))return;
+      pickRef.current({latitude:Number(lat.toFixed(6)),longitude:Number(lng.toFixed(6))});
+''')
+          t = t.replace(
+              '},{preset:markStyles[mark.kind]?.preset||markStyles["other"].preset});',
+              '},{preset:markStyles[mark.kind]?.preset??markStyles["other"]?.preset??"islands#grayCircleDotIcon"});',
+          )
+          p.write_text(t)
+
+          # auth density
+          p = Path('src/routes/auth.tsx')
+          t = p.read_text()
+          t = t.replace('min-h-[300px]', 'min-h-0').replace('mt-14 max-w-sm', 'mt-5 max-w-sm')
+          p.write_text(t)
+
+          # chat naming + topic
+          p = Path('src/routes/chat.tsx')
+          t = p.read_text()
+          t = t.replace('СВОИ НА СВЯЗИ', 'ZAPRUDA SPOT').replace('Свои на связи', 'ZAPRUDA SPOT')
+          t = t.replace(
+              'const currentTopic = TOPICS.find((t) => t.key === topic) || TOPICS[0];',
+              'const currentTopic = TOPICS.find((t) => t.key === topic) ?? TOPICS[0]!;',
+          )
+          p.write_text(t)
+
+          # reports photo guards
+          p = Path('src/routes/reports.new.tsx')
+          t = p.read_text()
+          if 'const firstPhoto = photos[0]' not in t:
+              t = t.replace(
+                  'const bitmap = await createImageBitmap(photos[0]);',
+                  'const firstPhoto = photos[0];\n      if (!firstPhoto) return;\n      const bitmap = await createImageBitmap(firstPhoto);',
+              )
+          if 'if (!photo) continue' not in t:
+              t = t.replace(
+                  'for (let i = uploadedCount; i < photos.length; i++) {\n        const photo = photos[i];\n',
+                  'for (let i = uploadedCount; i < photos.length; i++) {\n        const photo = photos[i];\n        if (!photo) continue;\n',
+              )
+          p.write_text(t)
+
+          # profile async save
+          p = Path('src/routes/profile.tsx')
+          t = p.read_text()
+          t = t.replace(
+              ': methods[0];\n      return { ...current, main_technique: primary, fishing_methods: methods };',
+              ': (methods[0] ?? "");\n      return { ...current, main_technique: primary, fishing_methods: methods };',
+          )
+          t = t.replace(
+          '''      const result = await performProfileSave(
+        () => supabase.from("profiles")
+          .update({
+            username: requestedUsername || null,
+            display_name: displayName.trim() || null,
+            bio: bio.trim() || null,
+            chat_city: shareChatCity ? preferences.home_city.trim() : null,
+          })
+          .eq("id", userId),
+        () => supabase.from("angler_preferences").upsert({
+''',
+          '''      const result = await performProfileSave(
+        async () => await supabase.from("profiles")
+          .update({
+            username: requestedUsername || null,
+            display_name: displayName.trim() || null,
+            bio: bio.trim() || null,
+            chat_city: shareChatCity ? preferences.home_city.trim() : null,
+          })
+          .eq("id", userId),
+        async () => await supabase.from("angler_preferences").upsert({
+''',
+          )
+          p.write_text(t)
+          print('patches applied')
+          PY
+
+      - name: Build (regenerates routeTree.gen.ts)
+        run: bun run build
+
+      - name: Typecheck
+        run: bunx tsc --noEmit
+
+      - name: Tests
+        run: bun run test
+
+      - name: Commit and push
+        run: |
+          git config user.name "Grok"
+          git config user.email "grok@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "fix(qa): routeTree admin paths, tsc guards, chat ZAPRUDA SPOT, auth density"
+            git push origin HEAD:grok/design-qa-tsc-lint-20261102
+          fi
