@@ -540,8 +540,8 @@ function Profile() {
           </label>}
           {userId && avatarUrl && <button type="button" disabled={uploadingAvatar} onClick={() => { void removeCustomAvatar(); }} className="rounded-xl border border-white/15 px-3 py-2 text-xs font-bold text-zinc-300 hover:border-[#D7FF35]/50 disabled:opacity-50">Удалить фото</button>}
           <div className="min-w-0 flex-1">
-            <h1 className="max-w-full text-[clamp(1.05rem,4.3vw,3.3rem)] font-black uppercase leading-[1.12] tracking-[-0.035em] text-white [overflow-wrap:normal] break-normal">{displayName || username || "Мой рыболовный профиль"}</h1>
-            <p className="mt-1 text-sm text-[#A6B1A0]">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
+            <h1 className="max-w-full text-[clamp(1.15rem,2.45vw,2rem)] font-black uppercase leading-tight tracking-[-0.025em] break-words text-white [overflow-wrap:normal] break-normal">{displayName || username || "Мой рыболовный профиль"}</h1>
+            <p className="mt-1 break-words text-xs leading-5 text-[#A6B1A0] sm:text-sm">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
             <p className="mt-2 text-xs text-zinc-400">{bio || "Расскажи, где и на что любишь ловить."}</p>
           </div>
           <div className="flex max-w-full flex-col items-start gap-3 sm:items-end">
@@ -583,6 +583,7 @@ function Profile() {
                 <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">{needsOnboarding ? "Заполни рыболовную анкету и сохрани её. После этого откроется обычный профиль с кнопкой редактирования." : "Именно эти данные используются для персонального подбора мест: город, транспорт, способы ловли, приманки и снасти."}</p>
               </div>
               <div className="flex flex-wrap gap-2">
+                {editing && <button type="submit" form="zapruda-profile-edit-form" disabled={saving} className="btn-primary inline-flex min-h-11 items-center gap-2 disabled:opacity-60"><Save className="size-4" /> {saving ? "Сохраняем…" : "Сохранить"}</button>}
                 {!editing && <button type="button" onClick={() => { setError(""); setNotice(""); setEditing(true); }}
                   className="btn-primary inline-flex min-h-11 items-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">
                   <Pencil className="size-4" /> Редактировать
@@ -594,7 +595,7 @@ function Profile() {
             </div>
 
             {editing ? (
-              <form onSubmit={saveProfile} aria-busy={saving} className="space-y-5">
+              <form id="zapruda-profile-edit-form" onSubmit={saveProfile} aria-busy={saving} className="space-y-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Label name="Никнейм"><input className="field" maxLength={30} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="например, zaprudafish" /></Label>
                 <Label name="Отображаемое имя"><input className="field" maxLength={100} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Как тебя называть?" /></Label>
@@ -684,7 +685,7 @@ function Profile() {
                     <X className="size-4" /> Отмена
                   </button>
                   <button className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold" type="submit" disabled={saving} aria-label="Сохранить редактирование профиля">
-                    <Save className="size-5" /> {saving ? "Сохраняем изменения…" : "Сохранить редактирование профиля"}
+                    <Save className="size-5" /> {saving ? "Сохраняем изменения…" : "Сохранить изменения"}
                   </button>
                 </div>
               </div>
