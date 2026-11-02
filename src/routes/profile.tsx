@@ -1,5 +1,6 @@
+import { PROFILE_SAVE_SUCCESS, profileSaveNetworkError, performProfileSave } from "@/lib/profile-save-feedback";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BrainCircuit, Check, Compass, Fish, MapPin, Save, Settings2, ShieldCheck,
@@ -170,6 +171,7 @@ function Profile() {
   const [specializations, setSpecializations] = useState<FishingSpecialization[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const saveInFlight = useRef(false);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -226,14 +228,24 @@ function Profile() {
     }
   }
 
+  const loadSequence = useRef(0);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; loadSequence.current += 1; };
+  }, []);
+
   const loadProfile = useCallback(async () => {
+    const sequence = ++loadSequence.current;
+    const isCurrent = () => mountedRef.current && sequence === loadSequence.current;
     setLoading(true);
     setError("");
     const { data: auth, error: authError } = await supabase.auth.getUser();
+    if (!isCurrent()) return;
     if (authError || !auth.user) {
       setLoading(false);
       setUserId(null);
-      setError(authError?.message || "Чтобы заполнить профиль, войди в аккаунт.");
+      setError("Чтобы заполнить профиль, войди в аккаунт ZAPRUDA.");
       return;
     }
     setUserId(auth.user.id);
@@ -247,6 +259,7 @@ function Profile() {
       supabase.rpc("my_fishing_specializations_v2"),
     ]);
 
+    if (!isCurrent()) return;
     if (profileResult.error) {
       setError("Не удалось загрузить профиль: " + profileResult.error.message);
     } else if (profileResult.data) {
@@ -264,6 +277,7 @@ function Profile() {
       if (canFillAvatar && providerAvatar) additions.avatar_url = providerAvatar;
       if (Object.keys(additions).length) {
         const { error: syncError } = await supabase.from("profiles").update(additions).eq("id", auth.user.id);
+        if (!isCurrent()) return;
         if (syncError) console.warn("OAuth profile import skipped:", syncError.message);
         else profileResult.data = { ...profileResult.data, ...additions };
       }
@@ -365,7 +379,9 @@ function Profile() {
 
   async function saveProfile(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!userId || saving) return;
+    if (!userId || saveInFlight.current) return;
+    // An older profile fetch must not overwrite edits while saving.
+    loadSequence.current += 1;
     const requestedUsername = username.trim();
     if (requestedUsername && !/^[a-zA-Z0-9_.-]{3,30}$/.test(requestedUsername)) {
       setError("Никнейм: от 3 до 30 символов, латинские буквы, цифры, точка, дефис или подчёркивание.");
@@ -379,36 +395,48 @@ function Profile() {
       setError("Чтобы показывать город в общем чате, сначала укажи город рыбалки.");
       return;
     }
+    saveInFlight.current = true;
     setSaving(true);
     setError("");
     setNotice("");
-    const { error: profileError } = await supabase.from("profiles")
-      .update({ username: requestedUsername || null, display_name: displayName.trim() || null, bio: bio.trim() || null, chat_city: shareChatCity ? preferences.home_city.trim() : null })
-      .eq("id", userId);
-    if (profileError) {
-      setError("Не удалось сохранить имя и описание: " + profileError.message);
+    try {
+      const result = await performProfileSave(
+        () => supabase.from("profiles")
+          .update({
+            username: requestedUsername || null,
+            display_name: displayName.trim() || null,
+            bio: bio.trim() || null,
+            chat_city: shareChatCity ? preferences.home_city.trim() : null,
+          })
+          .eq("id", userId),
+        () => supabase.from("angler_preferences").upsert({
+          user_id: userId,
+          ...preferences,
+          home_city: preferences.home_city.trim(),
+          home_region: preferences.home_region.trim(),
+          favorite_lures: preferences.favorite_lures.trim(),
+          tackle_text: preferences.tackle_text.trim(),
+          preferred_water: preferences.preferred_water.trim(),
+          fishing_notes: preferences.fishing_notes.trim(),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" }),
+      );
+      if (result.status === "profile-error") {
+        setError("Не удалось сохранить имя и описание: " + result.message);
+      } else if (result.status === "preferences-error") {
+        setError("Имя сохранено, но настройки рыбалки не обновлены: " + result.message);
+      } else if (result.status === "network-error") {
+        setError(profileSaveNetworkError(result.profileSaved, result.cause));
+      } else {
+        setNotice(PROFILE_SAVE_SUCCESS);
+        setEditing(false);
+      }
+    } catch {
+      setError("Не удалось завершить сохранение. Проверь соединение и повтори попытку.");
+    } finally {
+      saveInFlight.current = false;
       setSaving(false);
-      return;
     }
-
-    const { error: prefsError } = await supabase.from("angler_preferences").upsert({
-      user_id: userId,
-      ...preferences,
-      home_city: preferences.home_city.trim(),
-      home_region: preferences.home_region.trim(),
-      favorite_lures: preferences.favorite_lures.trim(),
-      tackle_text: preferences.tackle_text.trim(),
-      preferred_water: preferences.preferred_water.trim(),
-      fishing_notes: preferences.fishing_notes.trim(),
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
-    setSaving(false);
-    if (prefsError) {
-      setError("Имя сохранено, но настройки рыбалки не обновлены: " + prefsError.message);
-      return;
-    }
-    setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
-    setEditing(false);
   }
 
   return (
@@ -421,7 +449,7 @@ function Profile() {
             ? <img src={avatarUrl} alt="" className="size-24 rounded-full border-[3px] border-[#D7FF35]/70 object-cover shadow-[0_0_28px_rgba(215,255,53,0.13)]" />
             : <div className="flex size-20 items-center justify-center rounded-full border border-[#D7FF35]/35 bg-[#D7FF35]/10"><UserRound className="size-9 text-[#D7FF35]" /></div>}
           <div className="min-w-0 flex-1">
-            <h1 className="text-[clamp(1.9rem,5vw,3.3rem)] font-black uppercase leading-[0.98] tracking-[-0.055em] text-white">{displayName || username || "Мой рыболовный профиль"}</h1>
+            <h1 className="max-w-full text-[clamp(1.05rem,4.3vw,3.3rem)] font-black uppercase leading-[1.12] tracking-[-0.035em] text-white [overflow-wrap:normal] break-normal">{displayName || username || "Мой рыболовный профиль"}</h1>
             <p className="mt-1 text-sm text-[#A6B1A0]">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
             <p className="mt-2 text-xs text-zinc-400">{bio || "Расскажи, где и на что любишь ловить."}</p>
           </div>
@@ -465,7 +493,7 @@ function Profile() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {!editing && <button type="button" onClick={() => { setError(""); setNotice(""); setEditing(true); }}
-                  className="btn-primary inline-flex min-h-10 items-center gap-2">
+                  className="btn-primary inline-flex min-h-11 items-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">
                   <Pencil className="size-4" /> Редактировать
                 </button>}
                 <Link to="/assistant" className="inline-flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 px-3 py-2 text-xs font-bold text-[#D7FF35] transition hover:bg-[#D7FF35]/10">
@@ -475,7 +503,7 @@ function Profile() {
             </div>
 
             {editing ? (
-              <form onSubmit={saveProfile} className="space-y-5">
+              <form onSubmit={saveProfile} aria-busy={saving} className="space-y-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Label name="Никнейм"><input className="field" maxLength={30} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="например, zaprudafish" /></Label>
                 <Label name="Отображаемое имя"><input className="field" maxLength={100} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Как тебя называть?" /></Label>
@@ -559,11 +587,12 @@ function Profile() {
                   <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#D7FF35]" />
                   После сохранения откроется готовая анкета. Снасти и личные предпочтения останутся приватными.
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-3">
-                  <button className="btn-ghost inline-flex min-h-12 items-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving}>
+                {error && <p className="rounded-xl border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200" aria-live="off">{error}</p>}
+                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                  <button className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving}>
                     <X className="size-4" /> Отмена
                   </button>
-                  <button className="btn-primary inline-flex min-h-12 flex-1 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold sm:flex-none" type="submit" disabled={saving} aria-label="Сохранить редактирование профиля">
+                  <button className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold" type="submit" disabled={saving} aria-label="Сохранить редактирование профиля">
                     <Save className="size-5" /> {saving ? "Сохраняем изменения…" : "Сохранить редактирование профиля"}
                   </button>
                 </div>

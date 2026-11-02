@@ -36,3 +36,6 @@ env.local
 *.njsproj
 *.sln
 *.sw?
+
+# Local-only schema exports; may contain sensitive function definitions
+/private-schema-export/
