@@ -1,0 +1,4 @@
+STAGING-only E2E request: 2026-11-03
+Suites: competitions, meetups, Grok, OpenWeather
+Target: yudtbifopfnjtjanaqrd
+Credentials must exist in the staging-e2e Environment; never add values here.

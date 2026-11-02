@@ -1,8 +1,14 @@
-name: v0.7.1 Competitions real-JWT STAGING race (manual)
+name: v0.7.1 Competitions real-JWT STAGING race (protected)
 on:
   workflow_dispatch:
+  push:
+    branches: [fix/issue61-v071-p0-stages-5-8]
+    paths: [.github/staging-e2e-request.txt]
 permissions:
   contents: read
+concurrency:
+  group: staging-e2e-competition-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   competition-last-seat:
     if: github.ref_name == 'fix/issue61-v071-p0-stages-5-8'

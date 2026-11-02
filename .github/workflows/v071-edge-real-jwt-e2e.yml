@@ -1,8 +1,14 @@
-name: v0.7.1 Live Edge JWT STAGING E2E (manual)
+name: v0.7.1 Live Edge JWT STAGING E2E (protected)
 on:
   workflow_dispatch:
+  push:
+    branches: [fix/issue61-v071-p0-stages-5-8]
+    paths: [.github/staging-e2e-request.txt]
 permissions:
   contents: read
+concurrency:
+  group: staging-e2e-edge-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   edge-real-jwt:
     if: github.ref_name == 'fix/issue61-v071-p0-stages-5-8'

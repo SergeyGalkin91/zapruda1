@@ -17,7 +17,9 @@
 ## Ручной запуск
 На вкладке Actions выберите workflow `v0.7.1 Competitions real-JWT STAGING race (manual)` или `v0.7.1 Live Edge JWT STAGING E2E (manual)`, затем **Run workflow**, branch `fix/issue61-v071-p0-stages-5-8`.
 
-Для meetups используется workflow `v0.7.1 Meetup real-JWT STAGING E2E (manual)` только из integration branch `release/v0.7.1-integration-20261102`; кроме четырёх перечисленных аккаунтов нужен `ZAPRUDA_E2E_INVITEE_EMAIL/PASSWORD`. Если только четыре аккаунта, отдельного пятого можно не создавать, но роли нужно аккуратно перераспределить в тесте и проверить права — не подставлять ID из production.
+Для СХОДОК отдельный пятый аккаунт не нужен: роль INVITEE уже получает credentials RACER_A. Все suites используют ровно четыре различных подтверждённых аккаунта OWNER / SEATED / RACER_A / RACER_B.
+
+**Актуализация 2026-11-03 (Москва):** кнопка Run workflow в текущем Actions UI недоступна. Для запуска без изменения main добавлен opt-in push по файлу `.github/staging-e2e-request.txt` только в `fix/issue61-v071-p0-stages-5-8`; все три suites теперь могут проверять один SHA этой ветки. Полный порядок — [V071_STAGING_E2E_RUNBOOK.md](V071_STAGING_E2E_RUNBOOK.md). Текущие факты, ограничения доступа и счётчик готовности — [V071_STAGING_E2E_STATUS_20261103.md](V071_STAGING_E2E_STATUS_20261103.md). Старые шаги Run workflow выше применимы только если GitHub действительно показывает эту кнопку.
 
 ## Критерии приёмки
 - Все relevant workflows завершились **success** на точном SHA и ссылки на runs сохранены в PR #63.
