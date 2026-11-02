@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, Menu, Ship,
+  ArrowUpRight, BrainCircuit, Compass, Fish, House, LogIn, MapPinned, Menu, Ship,
   MessageCircle, Plus, ShoppingBag, UserRound, Users, X, Settings2, ChartNoAxesCombined, ShieldCheck,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
@@ -10,28 +10,27 @@ import { ActivityTracker } from "@/components/ActivityTracker";
 import { applyAppearance, loadAppearance } from "@/lib/appearance";
 
 const desktopNav = [
-  { to: "/", label: "Лента", Icon: House },
-  { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
-  { to: "/partners", label: "Выезды", Icon: Users },
+  { to: "/spot", label: "СПОТ", Icon: MapPinned },
   { to: "/communities", label: "Комьюнити", Icon: Compass },
-  { to: "/chat", label: "Чат", Icon: MessageCircle },
-  { to: "/messages", label: "Личные", Icon: MessageCircle },
-  { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
+  { to: "/assistant", label: "Выйти на воду", Icon: BrainCircuit },
+  { to: "/messages", label: "Сообщения", Icon: MessageCircle },
+  { to: "/profile", label: "Профиль", Icon: UserRound },
 ] as const;
 
 const mobileNav = [
-  { to: "/", label: "Лента", Icon: House },
+  { to: "/spot", label: "СПОТ", Icon: MapPinned },
   { to: "/communities", label: "Комьюнити", Icon: Compass },
-  { to: "/reports/new", label: "Создать", Icon: Plus },
-  { to: "/partners", label: "Выезды", Icon: Users },
-  { to: "/chat", label: "Чат", Icon: MessageCircle },
+  { to: "/assistant", label: "На воду", Icon: BrainCircuit },
+  { to: "/messages", label: "Сообщения", Icon: MessageCircle },
+  { to: "/profile", label: "Профиль", Icon: UserRound },
 ] as const;
 
 const otherNav = [
-  { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
-  { to: "/guides", label: "Кабинет гида", Icon: Ship },
-  { to: "/communities", label: "Комьюнити и клубы", Icon: Compass },
-  { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
+  { to: "/", label: "Лента уловов", Icon: House },
+  { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
+  { to: "/street", label: "Street Fishing", Icon: Fish },
+  { to: "/chat", label: "ZAPRUDA SPOT · чаты", Icon: MessageCircle },
+  { to: "/atlas", label: "Атлас", Icon: Compass },
   { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
 ] as const;
@@ -40,6 +39,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [authError, setAuthError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isVerifiedGuide, setIsVerifiedGuide] = useState(false);
 
   useEffect(() => { applyAppearance(loadAppearance()); }, []);
 
@@ -89,6 +89,19 @@ export function Shell({ children }: { children: ReactNode }) {
         .select("user_id").eq("user_id", data.user.id).maybeSingle();
       if (active) setIsAdmin(Boolean(role));
     }).catch(() => { if (active) setIsAdmin(false); });
+    return () => { active = false; };
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    let active = true;
+    if (!isSignedIn) { setIsVerifiedGuide(false); return; }
+    void supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: verified, error } = await supabase.from("guide_verifications")
+        .select("verified_at,revoked_at")
+        .eq("user_id", data.user.id).maybeSingle();
+      if (active) setIsVerifiedGuide(!error && Boolean(verified?.verified_at && !verified.revoked_at));
+    }).catch(() => { if (active) setIsVerifiedGuide(false); });
     return () => { active = false; };
   }, [isSignedIn]);
 
@@ -145,6 +158,12 @@ export function Shell({ children }: { children: ReactNode }) {
                 <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
               </Link>
             ))}
+            {isSignedIn && isVerifiedGuide && (
+              <Link to="/guides" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
+                <Ship className="size-4 text-[#D7FF35]" aria-hidden="true" />Кабинет гида
+                <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
+              </Link>
+            )}
             {!isSignedIn && (
               <Link search={{ mode: "in" }} to="/auth" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
                 <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
@@ -202,7 +221,7 @@ export function Shell({ children }: { children: ReactNode }) {
               {to === "/profile" && !isSignedIn ? (
                 <LogIn className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
               ) : (
-                <span className={to === "/reports/new" ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]" : "flex size-8 items-center justify-center"}><ShownIcon className={to === "/reports/new" ? "size-6" : "size-[21px]"} strokeWidth={to === "/reports/new" ? 2.5 : 1.9} aria-hidden="true" /></span>
+                <span className={to === "/spot" ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]" : "flex size-8 items-center justify-center"}><ShownIcon className={to === "/spot" ? "size-6" : "size-[21px]"} strokeWidth={to === "/spot" ? 2.5 : 1.9} aria-hidden="true" /></span>
               )}
               <span className="truncate">{shownLabel}</span>
             </Link>
