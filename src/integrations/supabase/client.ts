@@ -61,7 +61,7 @@ function createSupabaseClient() {
   // Netlify deploy previews must never inherit or fall back to PROD credentials.
   // Force the isolated STAGING project on both browser and Netlify preview SSR.
   const isNetlifyPreview = (typeof window !== 'undefined' &&
-    /^deploy-preview-\\d+--zapruda1\\.netlify\\.app$/.test(window.location.hostname)) ||
+    /^deploy-preview-[0-9]+--zapruda1[.]netlify[.]app$/.test(window.location.hostname)) ||
     serverEnv?.['CONTEXT'] === 'deploy-preview';
   if (isNetlifyPreview) {
     SUPABASE_URL = 'https://yudtbifopfnjtjanaqrd.supabase.co';
