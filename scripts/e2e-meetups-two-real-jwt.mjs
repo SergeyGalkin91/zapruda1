@@ -41,6 +41,25 @@ const {error:selfAcceptError}=await guest.from('meetup_members').insert({post_id
 assert.ok(selfAcceptError,'Guest bypassed approval');
 const {error:joinError}=await guest.from('meetup_members').insert({post_id:id,user_id:b,role:'participant',status:'pending'});
 if(joinError)throw joinError;
+// Verify pending users cannot read or write the accepted-only chat.
+const {data:pendingMessages,error:pendingMessagesError}=await guest.from('meetup_messages').select('id').eq('post_id',id);
+if(pendingMessagesError)throw pendingMessagesError;
+assert.equal(pendingMessages.length,0,'Pending member can read messages');
+const {error:pendingSendError}=await guest.from('meetup_messages').insert({
+ post_id:id,sender_id:b,body:'FORBIDDEN pending message'
+});
+assert.ok(pendingSendError,'Pending member can send private messages');
+const {data:selfApproval, error:outsiderApproveError}=await guest.from('meetup_members').update({status:'accepted'})
+ .eq('post_id',id).eq('user_id',b).select('status');
+assert.ok(outsiderApproveError || selfApproval.length===0,'Pending user can self-approve');
+const {data:stillPending,error:stateError}=await guest.from('meetup_members')
+ .select('status').eq('post_id',id).eq('user_id',b).single();
+if(stateError)throw stateError;
+assert.equal(stillPending.status,'pending','Self-approval changed membership');
+const {error:outsiderModifyError}=await guest.from('meetup_private_details').upsert({
+ post_id:id,owner_id:a,private_place:'FORBIDDEN overwrite'
+},{onConflict:'post_id'});
+assert.ok(outsiderModifyError,'Pending member can overwrite private location');
 const {data:pendingDetails,error:pendingError}=await guest.from('meetup_private_details').select('post_id').eq('post_id',id);
 if(pendingError)throw pendingError;assert.equal(pendingDetails.length,0,'Pending guest can read GPS');
 const {error:approveError}=await owner.from('meetup_members').update({status:'accepted'}).eq('post_id',id).eq('user_id',b);
@@ -51,5 +70,5 @@ const {error:messageError}=await guest.from('meetup_messages').insert({post_id:i
 if(messageError)throw messageError;
 const {data:messages,error:messagesError}=await owner.from('meetup_messages').select('body').eq('post_id',id);
 if(messagesError)throw messagesError;assert.equal(messages.length,1);
-console.log('PASS: two real JWT, owner bootstrap, private GPS, pending denial, approval, private chat. Fixture must be cleaned.');
+console.log('PASS: two real JWT, private GPS and chat denied before approval, self-approval and location overwrite denied, accepted chat works. Fixture must be cleaned.');
 await Promise.all([owner.auth.signOut(),guest.auth.signOut()]);
