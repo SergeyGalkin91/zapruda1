@@ -1,5 +1,5 @@
 // STAGING-only true JWT competition last-slot concurrency test.
-// 4 disposable verified users: ORGANIZER, SEATED, RACER_A, RACER_B.
+// 4 disposable verified users: OWNER, SEATED, RACER_A, RACER_B.
 // Leaves fixture for cleanup. Do not use production credentials.
 import assert from 'node:assert/strict';
 import { createClient } from '@supabase/supabase-js';
@@ -8,7 +8,7 @@ const url = required('ZAPRUDA_E2E_STAGING_URL');
 assert.equal(new URL(url).origin, 'https://yudtbifopfnjtjanaqrd.supabase.co');
 const key = required('ZAPRUDA_E2E_PUBLISHABLE_KEY');
 assert.ok(key.startsWith('sb_publishable_'));
-const roles = ['ORGANIZER','SEATED','RACER_A','RACER_B'];
+const roles = ['OWNER','SEATED','RACER_A','RACER_B'];
 const clients = await Promise.all(roles.map(async role => {
  const client=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
  const {data,error}=await client.auth.signInWithPassword({
