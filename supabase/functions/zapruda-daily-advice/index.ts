@@ -197,14 +197,23 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  await admin.rpc("complete_ai_daily_advice_slot", {
-    p_id: rowId,
-    p_lease_token: leaseToken,
-    p_success: true,
-    p_answer: answer,
-    p_model: model,
-    p_error_message: "",
-  });
+  const { data: completion, error: completionError } = await admin.rpc(
+    "complete_ai_daily_advice_slot",
+    {
+      p_id: rowId,
+      p_lease_token: leaseToken,
+      p_success: true,
+      p_answer: answer,
+      p_model: model,
+      p_error_message: "",
+    },
+  );
+  if (completionError || !completion?.ok) {
+    return respond(409, {
+      error: "Не удалось подтвердить сохранение совета. Повтори запрос позже.",
+      advice_day: adviceDay,
+    });
+  }
 
   return respond(200, {
     answer,
