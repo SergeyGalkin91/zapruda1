@@ -5,7 +5,7 @@ const schema=fs.readFileSync('supabase/staging/20261102_v071_meetups_DRAFT_REVIE
 const hardening=fs.readFileSync('supabase/staging/20261102_v071_meetup_integrity_hardening.sql','utf8');
 const ui=fs.readFileSync('src/components/SocialMeetups.tsx','utf8');
 const must=(text,part,msg)=>assert.ok(text.includes(part),msg);
-must(schema,'FOR UPDATE','Meetup capacity trigger must lock post');
+must(schema.toLowerCase(),'for update','Meetup capacity trigger must lock post');
 must(schema,"v_count>=3",'Three-person maximum missing');
 must(schema,"new.status='accepted' and old.status='pending'",'Owner approval transition missing');
 must(schema,"auth.uid()<>v_owner",'Owner approval authorization missing');
