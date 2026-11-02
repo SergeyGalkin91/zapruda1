@@ -1,0 +1,288 @@
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const acceptedCount = useCallback(
+    (gatheringId: string) =>
+      members.filter((m) => m.gathering_id === gatheringId && m.status === "accepted").length,
+    [members],
+  );
+
+  const myMembership = useCallback(
+    (gatheringId: string) =>
+      members.find((m) => m.gathering_id === gatheringId && m.user_id === uid),
+    [members, uid],
+  );
+
+  async function createGathering(e: FormEvent) {
+    e.preventDefault();
+    if (!uid || busy) return;
+    const when = new Date(startsAt);
+    if (!Number.isFinite(when.getTime()) || when.getTime() < Date.now() - 60_000) {
+      setError("Укажи будущие дату и время.");
+      return;
+    }
+    const seatN = Number(seats);
+    if (!Number.isFinite(seatN) || seatN < 2 || seatN > 6) {
+      setError("Мест в компании: от 2 до 6.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    setNotice("");
+    const { error: insertError } = await db.from("street_gatherings").insert({
+      organizer_id: uid,
+      title: title.trim().slice(0, 80),
+      area_label: area.trim().slice(0, 120),
+      starts_at: when.toISOString(),
+      seats: seatN,
+      notes: notes.trim().slice(0, 500),
+      status: "open",
+    });
+    setBusy(false);
+    if (insertError) {
+      setError("Не удалось создать сбор: " + insertError.message);
+      return;
+    }
+    setShowForm(false);
+    setTitle("");
+    setArea("");
+    setStartsAt("");
+    setNotes("");
+    setNotice("Сбор опубликован. Точное место встречи согласуйте с принятыми участниками в личке.");
+    await refresh();
+  }
+
+  async function apply(gatheringId: string) {
+    if (!uid || busy) return;
+    setBusy(true);
+    setError("");
+    const { error: insertError } = await db.from("street_gathering_members").insert({
+      gathering_id: gatheringId,
+      user_id: uid,
+      status: "pending",
+      note: (applyNote[gatheringId] ?? "").trim().slice(0, 300),
+    });
+    setBusy(false);
+    if (insertError) {
+      setError("Отклик не отправлен: " + insertError.message);
+      return;
+    }
+    setNotice("Отклик отправлен. Организатор решит, принять ли тебя.");
+    await refresh();
+  }
+
+  async function decide(member: Member, status: "accepted" | "declined") {
+    if (!uid || busy) return;
+    setBusy(true);
+    setError("");
+    const { error: updateError } = await db
+      .from("street_gathering_members")
+      .update({ status })
+      .eq("id", member.id);
+    setBusy(false);
+    if (updateError) {
+      const msg = updateError.message || "";
+      setError(
+        /GATHERING_FULL|мест больше нет/i.test(msg)
+          ? "Мест больше нет."
+          : "Не удалось обновить отклик: " + msg,
+      );
+      return;
+    }
+    setNotice(status === "accepted" ? "Участник принят. Уточните место во внутреннем чате." : "Отклик отклонён.");
+    await refresh();
+  }
+
+  async function setStatus(id: string, status: Gathering["status"]) {
+    if (!uid || busy) return;
+    setBusy(true);
+    setError("");
+    const { error: updateError } = await db
+      .from("street_gatherings")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .eq("organizer_id", uid);
+    setBusy(false);
+    if (updateError) {
+      setError("Статус не обновлён: " + updateError.message);
+      return;
+    }
+    setNotice(
+      status === "done"
+        ? "Сбор завершён. Можно оформить улов в отчёте."
+        : status === "cancelled"
+          ? "Сбор отменён."
+          : "Статус обновлён.",
+    );
+    await refresh();
+  }
+
+  const upcoming = useMemo(
+    () => items.filter((g) => g.status === "open" || g.status === "full"),
+    [items],
+  );
+
+  return (
+    <Shell>
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <Link
+            to="/street"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-400 hover:text-[#D7FF35]"
+          >
+            <ArrowLeft className="size-3.5" /> Street-сессия
+          </Link>
+          <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-[#D7FF35]">
+            ZAPRUDA · ВЕЧЕРНИЙ СТРИТ
+          </p>
+          <h1 className="mt-1 text-3xl font-black text-white">Собрать компанию</h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
+            Район и время — публично. Точные координаты не публикуются: место встречи —
+            только организатору и принятым участникам (в личных сообщениях).
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="btn-ghost inline-flex" onClick={() => void refresh()}>
+            <RefreshCw className="size-4" /> Обновить
+          </button>
+          {uid && (
+            <button
+              type="button"
+              className="btn-primary inline-flex"
+              onClick={() => setShowForm((v) => !v)}
+            >
+              <Plus className="size-4" /> Новый сбор
+            </button>
+          )}
+        </div>
+      </div>
+
+      {!uid && (
+        <p className="mb-4 text-sm text-zinc-400">
+          Чтобы собирать компанию,{" "}
+          <Link to="/auth" search={{ mode: "in" }} className="font-semibold text-[#D7FF35] underline">
+            войди в аккаунт
+          </Link>
+          .
+        </p>
+      )}
+
+      {error && (
+        <p role="alert" className="mb-4 rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-sm text-red-200">
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p role="status" className="mb-4 rounded-xl border border-[#D7FF35]/30 p-3 text-sm text-[#D7FF35]">
+          {notice}
+        </p>
+      )}
+
+      {showForm && uid && (
+        <form
+          onSubmit={createGathering}
+          className="mb-6 space-y-3 rounded-2xl border border-[#D7FF35]/30 bg-[#121A12] p-5"
+        >
+          <h2 className="font-black text-white">Новый вечерний стрит</h2>
+          <input className="field" required minLength={3} maxLength={80} placeholder="Название (например: Ока · закат)" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <input className="field" required minLength={2} maxLength={120} placeholder="Район / водоём (без точного адреса)" value={area} onChange={(e) => setArea(e.target.value)} />
+          <label className="block text-sm text-zinc-300">
+            Когда
+            <input className="field mt-1" type="datetime-local" required value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+          </label>
+          <label className="block text-sm text-zinc-300">
+            Человек в компании (2–6)
+            <input className="field mt-1 max-w-[8rem]" type="number" min={2} max={6} value={seats} onChange={(e) => setSeats(e.target.value)} />
+          </label>
+          <textarea className="field min-h-20" maxLength={500} placeholder="Комментарий: стиль ловли, что взять… без GPS" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <p className="text-xs text-zinc-500">Публикуется только район. Точку встречи передай принятым в личных сообщениях.</p>
+          <button type="submit" className="btn-primary inline-flex" disabled={busy}>Опубликовать сбор</button>
+        </form>
+      )}
+
+      {loading ? (
+        <p className="text-sm text-zinc-400">Загрузка…</p>
+      ) : (
+        <div className="space-y-4">
+          {!upcoming.length && (
+            <p className="rounded-2xl border border-white/10 p-5 text-sm text-zinc-400">
+              Пока нет открытых сборов. Создай первый или загляни позже.
+            </p>
+          )}
+          {upcoming.map((g) => {
+            const accepted = acceptedCount(g.id);
+            const free = Math.max(0, g.seats - 1 - accepted);
+            const mine = myMembership(g.id);
+            const isOrg = g.organizer_id === uid;
+            const pendingForOrg = members.filter((m) => m.gathering_id === g.id && m.status === "pending");
+            return (
+              <article key={g.id} className="rounded-2xl border border-white/10 bg-[#101410] p-4 sm:p-5">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <h3 className="text-lg font-black text-white">{g.title}</h3>
+                    <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-400">
+                      <span className="inline-flex items-center gap-1"><MapPinned className="size-3.5 text-[#D7FF35]" />{g.area_label}</span>
+                      <span className="inline-flex items-center gap-1"><CalendarDays className="size-3.5 text-[#D7FF35]" />{new Date(g.starts_at).toLocaleString("ru-RU")}</span>
+                      <span className="inline-flex items-center gap-1"><Users className="size-3.5 text-[#D7FF35]" />{accepted + 1}/{g.seats}{free === 0 ? " · мест нет" : ` · свободно ${free}`}</span>
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-500">Организатор: {nameOf(profiles.get(g.organizer_id))}</p>
+                  </div>
+                  <span className="rounded-lg border border-[#D7FF35]/30 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-[#D7FF35]">{g.status === "open" ? "открыт" : g.status}</span>
+                </div>
+                {g.notes && <p className="mt-3 text-sm text-zinc-300">{g.notes}</p>}
+
+                {isOrg && (
+                  <div className="mt-4 space-y-2 border-t border-white/10 pt-3">
+                    <p className="text-xs font-bold text-zinc-400">Отклики</p>
+                    {!pendingForOrg.length && <p className="text-xs text-zinc-500">Пока нет заявок.</p>}
+                    {pendingForOrg.map((m) => (
+                      <div key={m.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 p-3 text-sm">
+                        <span>{nameOf(profiles.get(m.user_id))}{m.note ? ` — ${m.note}` : ""}</span>
+                        <span className="flex gap-2">
+                          <button type="button" className="btn-primary inline-flex" disabled={busy || free <= 0} onClick={() => void decide(m, "accepted")}><Check className="size-4" /> Принять</button>
+                          <button type="button" className="btn-ghost inline-flex" disabled={busy} onClick={() => void decide(m, "declined")}><X className="size-4" /> Отклонить</button>
+                        </span>
+                      </div>
+                    ))}
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <button type="button" className="btn-ghost text-xs" disabled={busy} onClick={() => void setStatus(g.id, "done")}>Завершить сбор</button>
+                      <button type="button" className="btn-ghost text-xs" disabled={busy} onClick={() => void setStatus(g.id, "cancelled")}>Отменить</button>
+                      <Link to="/reports/new" className="text-xs font-semibold text-[#D7FF35] underline">Оформить улов →</Link>
+                      <Link to="/messages" className="text-xs font-semibold text-zinc-400 underline">Написать участникам в ЛС</Link>
+                    </div>
+                  </div>
+                )}
+
+                {!isOrg && uid && g.status === "open" && free > 0 && !mine && (
+                  <div className="mt-4 space-y-2 border-t border-white/10 pt-3">
+                    <input className="field" maxLength={300} placeholder="Короткий комментарий к отклику (необязательно)" value={applyNote[g.id] ?? ""} onChange={(e) => setApplyNote((prev) => ({ ...prev, [g.id]: e.target.value }))} />
+                    <button type="button" className="btn-primary inline-flex" disabled={busy} onClick={() => void apply(g.id)}>Откликнуться</button>
+                  </div>
+                )}
+
+                {!isOrg && mine && (
+                  <p className="mt-3 text-sm text-[#D7FF35]">
+                    Твой статус:{" "}
+                    {mine.status === "pending"
+                      ? "ожидает решения"
+                      : mine.status === "accepted"
+                        ? "ты в компании — уточни место у организатора в личке"
+                        : mine.status}
+                  </p>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="mt-8 flex flex-wrap gap-3 text-sm">
+        <Link to="/street" className="font-semibold text-zinc-300 underline">Личная street-сессия</Link>
+        <Link to="/partners" className="font-semibold text-zinc-300 underline">Выезды</Link>
+        <Link to="/communities" className="font-semibold text-[#D7FF35] underline">Комьюнити</Link>
+      </div>
+    </Shell>
+  );
+}
