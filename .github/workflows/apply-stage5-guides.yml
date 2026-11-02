@@ -1,0 +1,85 @@
+name: Apply stage5 guides commission UX
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/stage5-guides-commission
+
+      - name: Patch GuideBookings and directory
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          p = Path("src/components/GuideBookings.tsx")
+          t = p.read_text()
+          if "COMMISSION_RATE" not in t:
+              t = t.replace(
+                  "const db=supabase as any;",
+                  "const db=supabase as any;\nconst COMMISSION_RATE = 0.1;\nconst calcCommission = (price: number) => Math.round(price * COMMISSION_RATE);\nconst calcNet = (price: number) => price - calcCommission(price);\nconst looksLikeExternalContact = (text: string) => /(?:\\+?\\d[\\d\\s()-]{8,}\\d)|(?:t\\.me\\/)|(?:telegram)|(?:whatsapp)|(?:wa\\.me\\/)|(?:@\\w{4,})/i.test(text);",
+              )
+          if "looksLikeExternalContact(details)" not in t:
+              t = t.replace(
+                  "const {error:insertError}=await db.from(\"guide_booking_inquiries\").insert({\n   customer_id:uid,guide_id:guideId,service_mode:mode,planned_at:new Date(when).toISOString(),\n   meeting_text:location.trim(),customer_note:details.trim(),\n  });",
+                  "if (looksLikeExternalContact(details) || looksLikeExternalContact(location)) {\n    setError(\"До оплаты не указывай телефон, Telegram и внешние ссылки. Обсуждение — внутри ZAPRUDA; контакты — после оплаты.\");\n    return;\n  }\n  const {error:insertError}=await db.from(\"guide_booking_inquiries\").insert({\n   customer_id:uid,guide_id:guideId,service_mode:mode,planned_at:new Date(when).toISOString(),\n   meeting_text:location.trim(),customer_note:details.trim(),\n  });",
+              )
+          if "Предпросмотр комиссии" not in t and "Тебе (оценка)" not in t:
+              t = t.replace(
+                  '''         <button className="btn-primary inline-flex" disabled={busy===item.id} type="button" onClick={()=>void quote(item)}>\n           <Check className="size-4"/> Отправить стоимость и условия\n         </button>''',
+                  '''         {(() => {\n           const p = Number(quotes[item.id]?.price ?? item.amount_rub ?? 0);\n           if (!Number.isFinite(p) || p < 100) return null;\n           return (\n             <div className="grid grid-cols-3 gap-2 text-xs">\n               <div className="rounded-lg border border-white/10 p-2"><p className="text-zinc-500">Клиент платит</p><p className="font-bold text-white">{money(p)}</p></div>\n               <div className="rounded-lg border border-white/10 p-2"><p className="text-zinc-500">ZAPRUDA 10%</p><p className="font-bold text-[#D7FF35]">{money(calcCommission(p))}</p></div>\n               <div className="rounded-lg border border-white/10 p-2"><p className="text-zinc-500">Тебе (оценка)</p><p className="font-bold text-white">{money(calcNet(p))}</p></div>\n             </div>\n           );\n         })()}\n         <p className="text-[11px] text-zinc-500">Комиссия 10% только с оплаченной сделки. Анкета гида бесплатна. Контакты клиенту — после оплаты.</p>\n         <button className="btn-primary inline-flex" disabled={busy===item.id} type="button" onClick={()=>void quote(item)}>\n           <Check className="size-4"/> Отправить стоимость и условия\n         </button>''',
+              )
+          if "из них комиссия ZAPRUDA" not in t and "комиссия платформы 10%" not in t:
+              t = t.replace(
+                  '''       {!isGuide(item)&&item.status==="quoted"&&<div className="rounded-xl border border-[#D7FF35]/20 p-3">\n         <p className="text-xs font-bold">Согласовать условия и выбрать способ оплаты</p>''',
+                  '''       {!isGuide(item)&&item.status==="quoted"&&<div className="rounded-xl border border-[#D7FF35]/20 p-3">\n         <p className="text-xs font-bold">Согласовать условия и выбрать способ оплаты</p>\n         <p className="mt-1 text-xs text-zinc-400">Итого {money(item.amount_rub)} · комиссия платформы 10% ({money(item.commission_rub)}) уже заложена в расчёт для гида.</p>''',
+              )
+          if 'item.status==="paid"' not in t or "Оплата подтверждена" not in t:
+              t = t.replace(
+                  '''       {item.status==="awaiting_payment"&&<p className="flex items-center gap-2 text-xs text-amber-200">\n         <ShieldCheck className="size-4"/> Способ: {item.payment_method==="sbp"?"СБП":"карта"} · платёж не инициирован, бронирование не подтверждено\n       </p>}''',
+                  '''       {item.status==="awaiting_payment"&&<p className="flex items-center gap-2 text-xs text-amber-200">\n         <ShieldCheck className="size-4"/> Способ: {item.payment_method==="sbp"?"СБП":"карта"} · платёж не инициирован. Внешние контакты пока не открываются.\n       </p>}\n       {item.status==="paid"&&<p className="flex items-center gap-2 text-xs text-[#D7FF35]">\n         <ShieldCheck className="size-4"/> Оплата подтверждена. Можно обменяться контактами в личных сообщениях.\n       </p>}''',
+              )
+          t = t.replace(
+              'setNotice("Заявка отправлена. Гид согласует стоимость и условия. После согласования можно будет выбрать способ оплаты. Деньги пока не списываются.");',
+              'setNotice("Заявка отправлена. Гид согласует цену (комиссия ZAPRUDA 10% с оплаты). До оплаты — только чат внутри приложения.");',
+          )
+          p.write_text(t)
+
+          d = Path("src/components/VerifiedGuideDirectory.tsx")
+          dt = d.read_text()
+          if "Как работает бронь" not in dt:
+              dt = dt.replace(
+                  '<div className="mt-4 grid gap-3 sm:grid-cols-2">',
+                  '''<div className="mt-4 rounded-2xl border border-[#D7FF35]/25 bg-[#121A12] p-4 text-sm text-zinc-300">\n      <p className="font-bold text-[#D7FF35]">Как работает бронь</p>\n      <p className="mt-1 text-xs leading-5">Заявка → цена от гида → согласие → оплата в ZAPRUDA. Комиссия платформы <strong>10%</strong> только с оплаченной рыбалки. Анкета гида бесплатна. До оплаты не переходите в другие мессенджеры.</p>\n    </div>\n    <div className="mt-4 grid gap-3 sm:grid-cols-2">''',
+              )
+              d.write_text(dt)
+
+          g = Path("src/routes/guides.tsx")
+          gt = g.read_text()
+          gt = gt.replace(
+              'setNotice("Платный выезд опубликован. Цена и комиссия 10% сохранены и больше не изменяются.");',
+              'setNotice("Платный выезд опубликован. Комиссия ZAPRUDA 10% зафиксирована. Анкета гида по-прежнему бесплатна.");',
+          )
+          g.write_text(gt)
+          print("stage5 patches done")
+          PY
+
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun run build
+      - run: bun run test
+
+      - name: Commit
+        run: |
+          git config user.name Grok
+          git config user.email grok@users.noreply.github.com
+          git add src/components/GuideBookings.tsx src/components/VerifiedGuideDirectory.tsx src/routes/guides.tsx
+          git diff --cached --quiet || git commit -m "feat(stage5): 10% commission UX and contact policy"
+          git push origin HEAD:grok/stage5-guides-commission
