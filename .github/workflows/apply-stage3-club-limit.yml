@@ -1,0 +1,77 @@
+name: Apply stage3 club limit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/stage3-club-limit-15
+
+      - name: Patch SocialGroups client limit
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("src/components/SocialGroups.tsx")
+          t = p.read_text()
+          if "CLUB_MEMBER_LIMIT" not in t:
+              t = t.replace(
+                  "const db=supabase as any;",
+                  "const db=supabase as any;\nconst CLUB_MEMBER_LIMIT = 15;\nconst CLUB_FEE_RUB = 500;",
+              )
+          if "function occupiedSlots" not in t:
+              t = t.replace(
+                  "  async function invite(){",
+                  "  function occupiedSlots(gid: string) {\n    return members.filter(m => m.group_id === gid && (m.status === \"accepted\" || m.status === \"pending\")).length;\n  }\n\n  async function invite(){",
+              )
+          if "occupiedSlots(groupId) >= CLUB_MEMBER_LIMIT" not in t:
+              t = t.replace(
+                  "if(groups.find(g=>g.id===groupId)?.owner_id!==uid){setError(\"Приглашать может только владелец клуба.\");return;}\n    setBusy(true);",
+                  "if(groups.find(g=>g.id===groupId)?.owner_id!==uid){setError(\"Приглашать может только владелец клуба.\");return;}\n    if(occupiedSlots(groupId) >= CLUB_MEMBER_LIMIT){setError(\"В клубе уже \" + CLUB_MEMBER_LIMIT + \" участников (лимит).\");return;}\n    setBusy(true);",
+              )
+          t = t.replace(
+              'setNotice("Заявка сохранена. Оплата 500 ₽ ещё не принимается: нужен подключённый платёжный сервис. Клуб появится только после подтверждения платежа.");',
+              'setNotice("Заявка сохранена (создание клуба — " + CLUB_FEE_RUB + " ₽). Клуб появится только после подтверждения оплаты администратором. Онлайн-эквайринг подключается отдельно.");',
+          )
+          t = t.replace(
+              '<span className="rounded-lg bg-[#D7FF35] px-3 py-1.5 text-sm font-black text-black">500 ₽ · один раз</span>',
+              '<span className="rounded-lg bg-[#D7FF35] px-3 py-1.5 text-sm font-black text-black">{CLUB_FEE_RUB} ₽ · один раз · до {CLUB_MEMBER_LIMIT} чел.</span>',
+          )
+          if "occupiedSlots(g.id)" not in t:
+              t = t.replace(
+                  '{g.city||"Любой город"} · {g.description||"Общение и выезды"}',
+                  '{g.city||"Любой город"} · {occupiedSlots(g.id)}/{CLUB_MEMBER_LIMIT} · {g.description||"Общение и выезды"}',
+              )
+          if "Мест занято:" not in t:
+              t = t.replace(
+                  '<button type="button" className="btn-primary inline-flex" disabled={!inviteId||!groupId||busy} onClick={()=>void invite()}><UserPlus className="size-4"/> Пригласить</button>',
+                  '{groupId ? <p className="text-xs text-zinc-400">Мест занято: {occupiedSlots(groupId)}/{CLUB_MEMBER_LIMIT}{occupiedSlots(groupId) >= CLUB_MEMBER_LIMIT ? " · набор закрыт" : ""}</p> : null}\n          <button type="button" className="btn-primary inline-flex" disabled={!inviteId||!groupId||busy||(!!groupId && occupiedSlots(groupId) >= CLUB_MEMBER_LIMIT)} onClick={()=>void invite()}><UserPlus className="size-4"/> Пригласить</button>',
+              )
+          # invite error mapping
+          t = t.replace(
+              'if(e)setError("Не удалось отправить приглашение: "+e.message);',
+              'if(e){const msg=e.message||"";setError(/CLUB_MEMBER_LIMIT|максимум 15/i.test(msg)?("Лимит клуба: не больше "+CLUB_MEMBER_LIMIT+" участников."):("Не удалось отправить приглашение: "+msg));}',
+          )
+          p.write_text(t)
+          print("patched", "CLUB_MEMBER_LIMIT" in t, "occupiedSlots" in t)
+          PY
+
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun run build
+      - run: bun run test
+
+      - name: Commit
+        run: |
+          git config user.name Grok
+          git config user.email grok@users.noreply.github.com
+          git add src/components/SocialGroups.tsx supabase/migrations/20261102130000_club_member_limit_15.sql
+          git diff --cached --quiet || git commit -m "feat(stage3): club member limit 15 client+server"
+          git push origin HEAD:grok/stage3-club-limit-15
