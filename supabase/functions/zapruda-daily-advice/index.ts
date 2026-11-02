@@ -177,8 +177,8 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!upstream.ok) {
-      const text = await upstream.text().catch(() => "");
-      throw new Error(`xAI HTTP ${upstream.status}: ${text.slice(0, 200)}`);
+      await upstream.body?.cancel().catch(() => {});
+      throw new Error(`xAI HTTP ${upstream.status}`);
     }
     const payload = (await upstream.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
@@ -186,7 +186,11 @@ Deno.serve(async (req: Request) => {
     answer = sanitize(payload.choices?.[0]?.message?.content, 8000);
     if (answer.length < 40) throw new Error("Пустой или слишком короткий ответ модели");
   } catch (err) {
-    const errorMessage = sanitize(err instanceof Error ? err.message : "upstream_error", 500);
+    // Only fixed diagnostics may reach the user-readable journal. Provider bodies
+    // and arbitrary exception messages can contain credentials or request details.
+    const errorMessage = err instanceof Error && /^xAI HTTP \d{3}$/.test(err.message)
+      ? err.message
+      : err instanceof Error && err.name === "TimeoutError" ? "XAI_TIMEOUT" : "XAI_UPSTREAM_ERROR";
     await admin.rpc("complete_ai_daily_advice_slot", {
       p_id: rowId,
       p_lease_token: leaseToken,

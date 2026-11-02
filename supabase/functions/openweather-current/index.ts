@@ -46,6 +46,13 @@ function hpaToMmHg(hpa: number): number {
   return Math.round(hpa * 0.750061683);
 }
 
+function coordinate(value: unknown): number | null {
+  if (typeof value !== "number" && typeof value !== "string") return null;
+  if (typeof value === "string" && !value.trim()) return null;
+  const result = Number(value);
+  return Number.isFinite(result) ? result : null;
+}
+
 const DEG_TO_CARD = [
   "С", "ССВ", "СВ", "ВСВ", "В", "ВЮВ", "ЮВ", "ЮЮВ",
   "Ю", "ЮЮЗ", "ЮЗ", "ЗЮЗ", "З", "ЗСЗ", "СЗ", "ССЗ",
@@ -98,7 +105,9 @@ Deno.serve(async (req: Request) => {
     return respond(400, { error: "Некорректный JSON" });
   }
 
-  const city = String(body.city ?? body.q ?? "").trim().slice(0, 120);
+  const cityInput = body.city ?? body.q ?? "";
+  if (typeof cityInput !== "string") return respond(400, { error: "Некорректный город" });
+  const city = cityInput.trim().slice(0, 120);
   const hasLat = body.lat != null || body.latitude != null;
   const hasLon = body.lon != null || body.longitude != null;
   if (hasLat !== hasLon) {
@@ -107,8 +116,8 @@ Deno.serve(async (req: Request) => {
 
   const latRaw = body.lat ?? body.latitude;
   const lonRaw = body.lon ?? body.longitude;
-  const lat = latRaw == null || latRaw === "" ? null : Number(latRaw);
-  const lon = lonRaw == null || lonRaw === "" ? null : Number(lonRaw);
+  const lat = coordinate(latRaw);
+  const lon = coordinate(lonRaw);
 
   const useCoords =
     lat != null &&

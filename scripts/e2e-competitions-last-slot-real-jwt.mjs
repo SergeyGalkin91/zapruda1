@@ -62,5 +62,49 @@ if(readError)throw readError;
 const accepted=teams.filter(x=>x.status==='registered');
 assert.equal(accepted.length,2,'Competition capacity exceeded');
 assert.ok(accepted.some(x=>x.captain_id===seated.id));
-console.log('PASS: 4 real JWT, simultaneous last-seat inserts, exactly two registered.');
+// State and moderation regressions: every write remains scoped to this QA fixture.
+for (const status of ['accepted','rejected']) {
+ const {error}=await seated.client.from('competition_results').insert({
+  competition_id:comp.id,team_id:first.data.id,submitted_by:seated.id,status
+ });
+ assert.ok(error,'Captain self-moderated a result INSERT as '+status);
+}
+const {data:submitted,error:submitError}=await seated.client.from('competition_results').insert({
+ competition_id:comp.id,team_id:first.data.id,submitted_by:seated.id,status:'submitted'
+}).select('id').single();
+if(submitError)throw submitError;
+const {data:moderated,error:moderateError}=await organizer.client.from('competition_results')
+ .update({status:'accepted'}).eq('id',submitted.id).select('status').single();
+if(moderateError)throw moderateError;
+assert.equal(moderated.status,'accepted','Organizer moderation failed');
+const {error:resultIdentityError}=await organizer.client.from('competition_results')
+ .update({submitted_by:a.id}).eq('id',submitted.id);
+assert.ok(resultIdentityError,'Result submitter identity changed');
+const {error:shrinkError}=await organizer.client.from('competitions')
+ .update({max_teams:1}).eq('id',comp.id);
+assert.ok(shrinkError,'Capacity shrank below registered team count');
+const {data:disqualified,error:disqualifyError}=await organizer.client.from('competition_teams')
+ .update({status:'disqualified'}).eq('id',first.data.id).select('status').single();
+if(disqualifyError)throw disqualifyError;
+assert.equal(disqualified.status,'disqualified','Organizer disqualification failed');
+const {error:undoError}=await seated.client.from('competition_teams')
+ .update({status:'registered'}).eq('id',first.data.id);
+assert.ok(undoError,'Captain undid organizer disqualification');
+const {data:reinstated,error:reinstateError}=await organizer.client.from('competition_teams')
+ .update({status:'registered'}).eq('id',first.data.id).select('status').single();
+if(reinstateError)throw reinstateError;
+assert.equal(reinstated.status,'registered','Organizer reinstatement failed');
+const {data:withdrawn,error:withdrawError}=await seated.client.from('competition_teams')
+ .update({status:'withdrawn'}).eq('id',first.data.id).select('status').single();
+if(withdrawError)throw withdrawError;
+assert.equal(withdrawn.status,'withdrawn');
+const {data:finished,error:finishError}=await organizer.client.from('competitions')
+ .update({status:'finished'}).eq('id',comp.id).select('status').single();
+if(finishError)throw finishError;
+assert.equal(finished.status,'finished');
+const {error:rejoinError}=await seated.client.from('competition_teams')
+ .update({status:'registered'}).eq('id',first.data.id);
+assert.ok(rejoinError,'Captain rejoined a finished competition');
+assert.match(rejoinError.message,/REGISTRATION_CLOSED/);
+console.log('PASS: 4 real JWT, simultaneous last-seat inserts, moderation and state guards.');
 for(const u of clients)await u.client.auth.signOut();

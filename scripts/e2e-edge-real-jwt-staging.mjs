@@ -41,6 +41,10 @@ try {
  }
  const invalid=await invoke('openweather-current',jwt,{lat:56.33});
  assert.equal(invalid.status,400,'Partial coordinates must return 400');
+ for (const coordinates of [{lat:true,lon:false},{lat:[],lon:[]}]) {
+  const invalidType=await invoke('openweather-current',jwt,coordinates);
+  assert.equal(invalidType.status,400,'Non-numeric coordinate types must return 400');
+ }
  const weather=await invoke('openweather-current',jwt,{city:'Нижний Новгород'});
  assert.equal(weather.status,200,'Live weather must return 200');
  assert.equal(weather.json.source,'OpenWeather');
