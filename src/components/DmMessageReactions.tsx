@@ -16,7 +16,7 @@ type Row = { id: string; user_id: string; emoji: string };
 
 /**
  * Reactions under a private message.
- * Requires table public.social_message_reactions (migration 20261102120000).
+ * Requires public.social_message_reactions with emoji column (STAGING migration stage12_private_dm_consented).
  * If the table is missing on the project, the bar stays hidden after one failed load.
  */
 export function DmMessageReactions({
