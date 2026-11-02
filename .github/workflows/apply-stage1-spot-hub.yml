@@ -1,0 +1,328 @@
+name: Apply stage1 SPOT hub
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grok/stage1-spot-hub-ia
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install deps
+        run: bun install
+
+      - name: Patch Shell navigation
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path("src/components/Shell.tsx")
+          t = p.read_text()
+
+          t = t.replace(
+          '''const desktopNav = [
+            { to: "/", label: "Лента", Icon: House },
+            { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
+            { to: "/partners", label: "Выезды", Icon: Users },
+            { to: "/communities", label: "Комьюнити", Icon: Compass },
+            { to: "/chat", label: "Чат", Icon: MessageCircle },
+            { to: "/messages", label: "Личные", Icon: MessageCircle },
+            { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
+          ] as const;''',
+          '''const desktopNav = [
+            { to: "/spot", label: "СПОТ", Icon: MapPinned },
+            { to: "/communities", label: "Комьюнити", Icon: Compass },
+            { to: "/assistant", label: "Выйти на воду", Icon: BrainCircuit },
+            { to: "/messages", label: "Сообщения", Icon: MessageCircle },
+            { to: "/profile", label: "Профиль", Icon: UserRound },
+          ] as const;'''
+          )
+
+          t = t.replace(
+          '''const mobileNav = [
+            { to: "/", label: "Лента", Icon: House },
+            { to: "/communities", label: "Комьюнити", Icon: Compass },
+            { to: "/reports/new", label: "Создать", Icon: Plus },
+            { to: "/partners", label: "Выезды", Icon: Users },
+            { to: "/chat", label: "Чат", Icon: MessageCircle },
+          ] as const;''',
+          '''const mobileNav = [
+            { to: "/spot", label: "СПОТ", Icon: MapPinned },
+            { to: "/communities", label: "Комьюнити", Icon: Compass },
+            { to: "/assistant", label: "На воду", Icon: BrainCircuit },
+            { to: "/messages", label: "Сообщения", Icon: MessageCircle },
+            { to: "/profile", label: "Профиль", Icon: UserRound },
+          ] as const;'''
+          )
+
+          t = t.replace(
+          '''const otherNav = [
+            { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
+            { to: "/guides", label: "Кабинет гида", Icon: Ship },
+            { to: "/communities", label: "Комьюнити и клубы", Icon: Compass },
+            { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
+            { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
+            { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
+          ] as const;''',
+          '''const otherNav = [
+            { to: "/", label: "Лента уловов", Icon: House },
+            { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
+            { to: "/chat", label: "ZAPRUDA SPOT · чаты", Icon: MessageCircle },
+            { to: "/partners", label: "Выезды и стрит", Icon: Users },
+            { to: "/street", label: "Street-сессия", Icon: Fish },
+            { to: "/guides", label: "Кабинет гида", Icon: Ship },
+            { to: "/atlas", label: "Атлас водоёмов", Icon: Compass },
+            { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
+            { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
+          ] as const;'''
+          )
+
+          if "MapPinned" not in t.split("lucide-react")[0]:
+              t = t.replace("House, LogIn, Menu, Ship,", "House, LogIn, MapPinned, Menu, Ship,")
+
+          t = t.replace(
+          '''                <a href="/profile" className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3">
+                  <UserRound className="size-4" aria-hidden="true" />
+                  Профиль
+                </a>''',
+          '''                <Link to="/profile" className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3">
+                  <UserRound className="size-4" aria-hidden="true" />
+                  Профиль
+                </Link>'''
+          )
+
+          old_map = '''          {mobileNav.map(({ to, label, Icon }) => {
+            const target = to;
+            const shownLabel = label;
+            const ShownIcon = Icon;
+            return (
+            <Link key={target}
+              to={target}
+              activeOptions={{ exact: true }}
+              className="flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
+              activeProps={{ className: "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
+              {to === "/profile" && !isSignedIn ? (
+                <LogIn className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
+              ) : (
+                <span className={to === "/reports/new" ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]" : "flex size-8 items-center justify-center"}><ShownIcon className={to === "/reports/new" ? "size-6" : "size-[21px]"} strokeWidth={to === "/reports/new" ? 2.5 : 1.9} aria-hidden="true" /></span>
+              )}
+              <span className="truncate">{shownLabel}</span>
+            </Link>
+          ); })}'''
+
+          new_map = '''          {mobileNav.map(({ to, label, Icon }) => {
+            const target = to === "/profile" && !isSignedIn ? "/auth" : to;
+            const shownLabel = to === "/profile" && !isSignedIn ? "Войти" : label;
+            const ShownIcon = to === "/profile" && !isSignedIn ? LogIn : Icon;
+            return (
+            <Link key={to}
+              to={target}
+              {...(target === "/auth" ? { search: { mode: "in" as const } } : {})}
+              activeOptions={{ exact: true }}
+              className="flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
+              activeProps={{ className: "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
+              <span className="flex size-8 items-center justify-center">
+                <ShownIcon className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
+              </span>
+              <span className="truncate">{shownLabel}</span>
+            </Link>
+          ); })}'''
+
+          if old_map in t:
+              t = t.replace(old_map, new_map)
+
+          t = t.replace(
+              "pb-[env(safe-area-inset-bottom)]",
+              "pb-[max(0.35rem,env(safe-area-inset-bottom,0px))]",
+          )
+
+          p.write_text(t)
+          print("Shell patched", "MapPinned" in t, "/spot" in t)
+          PY
+
+      - name: Write communities tabs
+        run: |
+          cat > src/routes/communities.tsx << 'COMM'
+          import { createFileRoute, Link } from "@tanstack/react-router";
+          import { useState } from "react";
+          import { MessageCircle, Send, ShieldCheck, Users, Building2, Ship } from "lucide-react";
+          import { Shell } from "@/components/Shell";
+          import { SocialGroups } from "@/components/SocialGroups";
+          import { VerifiedGuideDirectory } from "@/components/VerifiedGuideDirectory";
+          import { countries } from "@/lib/geo";
+
+          const TABS = [
+            { id: "partner", label: "Напарник", Icon: Users },
+            { id: "clubs", label: "Клубы", Icon: Building2 },
+            { id: "guides", label: "Гиды", Icon: Ship },
+          ] as const;
+
+          type TabId = (typeof TABS)[number]["id"];
+
+          export const Route = createFileRoute("/communities")({
+            head: () => ({
+              meta: [
+                { title: "Комьюнити — ZAPRUDA" },
+                { name: "description", content: "Напарник, клубы и гиды ZAPRUDA COMMUNITY." },
+                { property: "og:title", content: "Комьюнити — ZAPRUDA" },
+              ],
+            }),
+            validateSearch: (search: Record<string, unknown>) => {
+              const raw = typeof search.tab === "string" ? search.tab : "partner";
+              const tab: TabId =
+                raw === "clubs" || raw === "guides" || raw === "partner" ? raw : "partner";
+              return { tab };
+            },
+            component: Communities,
+          });
+
+          function Communities() {
+            const { tab } = Route.useSearch();
+            const [country, setCountry] = useState<string | null>(null);
+            const cis = countries.filter((c) => c.group === "cis");
+            const Chip = ({ c }: { c: (typeof countries)[number] }) => (
+              <button
+                type="button"
+                onClick={() => setCountry((current) => (current === c.code ? null : c.code))}
+                aria-pressed={country === c.code}
+                aria-controls="zapruda-selected-country"
+                className={`panel flex min-h-11 items-center gap-2 px-4 py-3 text-left text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35] ${country === c.code ? "border-primary" : ""}`}
+              >
+                <span className="text-lg">{c.flag}</span>
+                {c.name}
+              </button>
+            );
+            const sel = countries.find((c) => c.code === country);
+
+            return (
+              <Shell>
+                <h1 className="z-underground-title break-words text-[clamp(1.8rem,8vw,3.75rem)] text-white [overflow-wrap:anywhere]">
+                  КОМЬЮНИТИ
+                </h1>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
+                  Три направления: напарник на двоих, свой клуб и проверенные гиды.
+                </p>
+
+                <div role="tablist" aria-label="Разделы комьюнити" className="mt-5 grid grid-cols-3 gap-2">
+                  {TABS.map(({ id, label, Icon }) => {
+                    const active = tab === id;
+                    return (
+                      <Link
+                        key={id}
+                        to="/communities"
+                        search={{ tab: id }}
+                        role="tab"
+                        aria-selected={active}
+                        className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-center text-[11px] font-bold transition sm:text-xs ${
+                          active
+                            ? "border-[#D7FF35]/50 bg-[#D7FF35]/15 text-[#D7FF35]"
+                            : "border-white/10 bg-[#121612] text-zinc-400 hover:border-white/20 hover:text-white"
+                        }`}
+                      >
+                        <Icon className="size-4" aria-hidden="true" />
+                        {label}
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {tab === "partner" && (
+                  <section className="mt-6 space-y-4" aria-label="Напарник">
+                    <div className="rounded-2xl border border-[#D7FF35]/25 bg-[#121A12] p-5">
+                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#D7FF35]">Найти напарника</p>
+                      <h2 className="mt-2 text-xl font-black text-white">Рыбалка на двоих</h2>
+                      <p className="mt-2 text-sm leading-6 text-zinc-400">
+                        Договорись о выезде и открой личный чат. Без публичной ленты и без оплаты клуба.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <Link to="/partners" className="btn-primary inline-flex min-h-11 items-center px-4">Открыть выезды</Link>
+                        <Link to="/messages" className="inline-flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-sm font-semibold text-zinc-200 hover:border-[#D7FF35]/40">Личные сообщения</Link>
+                      </div>
+                    </div>
+                    <Link search={{ place: "", topic: "partners", country: "" }} to="/chat" className="z-underground flex min-w-0 items-center justify-between gap-3 p-5 transition hover:border-[#A78BFA]/50">
+                      <div className="min-w-0">
+                        <p className="font-display font-bold">Ветка «Напарники» в чатах</p>
+                        <p className="text-sm text-muted-foreground">Общий разговор о поисках компании по географии</p>
+                      </div>
+                      <span className="text-primary">→</span>
+                    </Link>
+                  </section>
+                )}
+
+                {tab === "clubs" && (
+                  <section className="mt-6 space-y-4" aria-label="Клубы">
+                    <div className="rounded-2xl border border-[#A99AD9]/30 bg-[#171527] p-5">
+                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#A99AD9]">Клуб или команда</p>
+                      <h2 className="mt-2 text-xl font-black text-white">До 15 участников</h2>
+                      <p className="mt-2 text-sm leading-6 text-zinc-400">Создание клуба — 500 ₽ через ZAPRUDA. Ниже — текущие группы и заявки.</p>
+                    </div>
+                    <SocialGroups />
+                  </section>
+                )}
+
+                {tab === "guides" && (
+                  <section className="mt-6 space-y-4" aria-label="Гиды">
+                    <div className="rounded-2xl border border-[#D7FF35]/25 bg-[#121A12] p-5">
+                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#D7FF35]">Найти гида</p>
+                      <h2 className="mt-2 text-xl font-black text-white">Проверенные рыболовные гиды</h2>
+                      <p className="mt-2 text-sm leading-6 text-zinc-400">Каталог и бронирование. Комиссия платформы — с оплаченного заказа. Анкета гида бесплатна.</p>
+                      <Link to="/guides" className="btn-primary mt-4 inline-flex min-h-11 items-center px-4">Кабинет гида</Link>
+                    </div>
+                    <VerifiedGuideDirectory />
+                  </section>
+                )}
+
+                <section className="z-underground mt-8 overflow-hidden bg-gradient-to-br from-[#1F1B29] via-[#101314] to-[#0B0D0E] p-5 sm:p-7">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 text-[#D7FF35]">
+                      <Send className="size-7" aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D7FF35]">Официальное Telegram-сообщество</p>
+                      <h2 className="mt-1 text-xl font-black text-white">ZAPRUDA COMMUNITY</h2>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a href="https://t.me/ZAPRUDACOMMUNITY" target="_blank" rel="noopener noreferrer" className="btn-primary inline-flex items-center gap-2">
+                      <MessageCircle className="size-4" /> Открыть Telegram
+                    </a>
+                    <Link to="/feedback" className="btn-ghost inline-flex"><ShieldCheck className="size-4" /> Предложить улучшение</Link>
+                  </div>
+                </section>
+
+                <h2 className="mb-3 mt-8 text-sm uppercase tracking-widest text-muted-foreground">Страны СНГ · чаты</h2>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{cis.map((c) => <Chip key={c.code} c={c} />)}</div>
+                {sel && (
+                  <section id="zapruda-selected-country" aria-label="Выбранная страна" className="mt-5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/5 p-4 text-sm">
+                    <p className="font-semibold text-[#D7FF35]">{sel.flag} {sel.name}</p>
+                    <div className="mt-3 flex flex-wrap gap-4">
+                      <Link to="/chat" search={{ country: sel.code, place: "", topic: "general" }} className="inline-flex font-bold text-[#D7FF35] underline">Открыть чаты страны →</Link>
+                      <Link to="/atlas" search={{ country: sel.code }} className="inline-flex font-semibold text-zinc-300 underline">Атлас водоёмов →</Link>
+                    </div>
+                  </section>
+                )}
+              </Shell>
+            );
+          }
+          COMM
+          # Fix accidental leading spaces from heredoc indent
+          python3 -c "from pathlib import Path; p=Path('src/routes/communities.tsx'); t=p.read_text(); p.write_text('\n'.join(line[2:] if line.startswith('  ') else line for line in t.splitlines())+('\n' if t.endswith('\n') else ''))"
+
+      - name: Build, test, push
+        run: |
+          bun run build
+          bun run test
+          git config user.name "Grok"
+          git config user.email "grok@users.noreply.github.com"
+          git add src/components/Shell.tsx src/routes/communities.tsx src/routeTree.gen.ts src/routes/spot.tsx
+          git commit -m "feat(stage1): Shell nav SPOT hub + communities tabs + routeTree" || echo "nothing"
+          git push origin HEAD:grok/stage1-spot-hub-ia
