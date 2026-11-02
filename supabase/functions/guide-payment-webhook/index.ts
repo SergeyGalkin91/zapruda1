@@ -2,14 +2,15 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.0";
 
 /**
- * Payment provider webhook stub for guide bookings.
- * - Verifies shared secret / signature BEFORE any DB write.
- * - Calls mark_guide_booking_paid_from_provider via service_role only.
- * - Never trusts client-supplied "paid" flags.
+ * FAIL-CLOSED payment webhook stub for guide bookings.
+ *
+ * Shared header secret is NOT proof of YooKassa (or any provider) settlement.
+ * Until provider HMAC + amount/currency/booking match is implemented,
+ * this function NEVER marks paid (returns 501).
  *
  * Secrets:
- *   GUIDE_PAYMENT_WEBHOOK_SECRET — required shared secret (header X-Zapruda-Webhook-Secret)
- *   Optional future: provider-specific HMAC (YOOKASSA_SECRET etc.) — not faked as success.
+ *   GUIDE_PAYMENT_WEBHOOK_SECRET — gate only (not settlement proof)
+ * Future: YOOKASSA_SECRET / provider signature verification
  */
 
 const cors = {
@@ -30,6 +31,9 @@ function timingSafeEqual(a: string, b: string): boolean {
   return out === 0;
 }
 
+/** Only explicit settled statuses. waiting_for_capture is NOT paid. */
+const SETTLED_STATUSES = new Set(["paid", "succeeded", "success", "payment.succeeded"]);
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "POST") return respond(405, { error: "Method not allowed" });
@@ -44,10 +48,6 @@ Deno.serve(async (req: Request) => {
     return respond(401, { error: "Invalid webhook signature" });
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  if (!supabaseUrl || !serviceKey) return respond(503, { error: "Backend not configured" });
-
   let body: Record<string, unknown> = {};
   try {
     body = (await req.json()) as Record<string, unknown>;
@@ -55,37 +55,60 @@ Deno.serve(async (req: Request) => {
     return respond(400, { error: "Invalid JSON" });
   }
 
-  const inquiryId = String(body.inquiry_id ?? body.inquiryId ?? "").trim();
+  const requestId = String(body.request_id ?? body.inquiry_id ?? body.inquiryId ?? "").trim();
   const providerPaymentId = String(
     body.provider_payment_id ?? body.payment_id ?? body.id ?? "",
   ).trim();
-  const eventStatus = String(body.status ?? body.event ?? "").toLowerCase();
+  const eventStatus = String(body.status ?? body.event ?? "").toLowerCase().trim();
 
-  if (!/^[0-9a-f-]{36}$/i.test(inquiryId)) {
-    return respond(400, { error: "inquiry_id required (uuid)" });
+  if (!eventStatus) {
+    return respond(400, { error: "status required", paid: false });
+  }
+  if (!SETTLED_STATUSES.has(eventStatus)) {
+    return respond(200, {
+      ignored: true,
+      reason: "non_settled_event",
+      status: eventStatus,
+      paid: false,
+    });
+  }
+  if (!/^[0-9a-f-]{36}$/i.test(requestId)) {
+    return respond(400, { error: "request_id required (uuid)", paid: false });
   }
   if (providerPaymentId.length < 4) {
-    return respond(400, { error: "provider_payment_id required" });
+    return respond(400, { error: "provider_payment_id required", paid: false });
   }
 
-  // Only confirmed paid events; never mark paid on pending/canceled without explicit mapping
-  const paidEvents = new Set(["paid", "succeeded", "success", "payment.succeeded", "waiting_for_capture"]);
-  if (eventStatus && !paidEvents.has(eventStatus)) {
-    return respond(200, { ignored: true, reason: "non_paid_event", status: eventStatus });
+  // Fail-closed: shared secret + client-supplied status is NOT provider settlement proof.
+  // Do not call mark_guide_booking_paid_from_provider until HMAC/amount verification exists.
+  const providerProofEnabled = (Deno.env.get("GUIDE_PAYMENT_PROVIDER_PROOF") ?? "") === "1";
+  if (!providerProofEnabled) {
+    return respond(501, {
+      error:
+        "Provider settlement verification not implemented. Refusing to mark paid (fail-closed).",
+      paid: false,
+      request_id: requestId,
+    });
   }
+
+  // Future path (still requires real signature verification before enabling PROOF=1).
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!supabaseUrl || !serviceKey) return respond(503, { error: "Backend not configured" });
 
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
   const { error } = await admin.rpc("mark_guide_booking_paid_from_provider", {
-    p_inquiry_id: inquiryId,
+    p_request_id: requestId,
     p_provider_payment_id: providerPaymentId,
+    p_settlement_confirmed: true,
   });
 
   if (error) {
-    return respond(500, { error: error.message || "RPC failed" });
+    return respond(500, { error: error.message || "RPC failed", paid: false });
   }
 
-  return respond(200, { ok: true, inquiry_id: inquiryId });
+  return respond(200, { ok: true, paid: true, request_id: requestId });
 });

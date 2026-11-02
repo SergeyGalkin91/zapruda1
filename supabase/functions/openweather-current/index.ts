@@ -2,9 +2,9 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.0";
 
 /**
- * Current weather for report autofill / briefs.
+ * Current weather for report autofill.
  * Secret: OPENWEATHER_API_KEY (or OPENWEATHERMAP_API_KEY).
- * Does not persist GPS; response only returns fields needed for forms.
+ * Does not return or persist raw GPS in report_fields.
  */
 
 const cors = {
@@ -17,6 +17,20 @@ const cors = {
 
 const respond = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: cors });
+
+// Simple per-isolate rate limit (best-effort; not a substitute for gateway limits).
+const hits = new Map<string, { n: number; reset: number }>();
+function rateLimit(userId: string, max = 20, windowMs = 60_000): boolean {
+  const now = Date.now();
+  const cur = hits.get(userId);
+  if (!cur || cur.reset < now) {
+    hits.set(userId, { n: 1, reset: now + windowMs });
+    return true;
+  }
+  if (cur.n >= max) return false;
+  cur.n += 1;
+  return true;
+}
 
 function anonKey(): string {
   const legacy = Deno.env.get("SUPABASE_ANON_KEY");
@@ -68,14 +82,24 @@ Deno.serve(async (req: Request) => {
     return respond(401, { error: "Войди в ZAPRUDA" });
   }
 
+  if (!rateLimit(authData.user.id)) {
+    return respond(429, { error: "Слишком много запросов погоды. Подожди минуту." });
+  }
+
   let body: Record<string, unknown> = {};
   try {
     body = (await req.json()) as Record<string, unknown>;
   } catch {
-    return respond(400, { error: "Некорректное тело запроса" });
+    return respond(400, { error: "Некорректный JSON" });
   }
 
   const city = String(body.city ?? body.q ?? "").trim().slice(0, 120);
+  const hasLat = body.lat != null || body.latitude != null;
+  const hasLon = body.lon != null || body.longitude != null;
+  if (hasLat !== hasLon) {
+    return respond(400, { error: "Укажи оба координаты lat и lon, либо только город" });
+  }
+
   const latRaw = body.lat ?? body.latitude;
   const lonRaw = body.lon ?? body.longitude;
   const lat = latRaw == null || latRaw === "" ? null : Number(latRaw);
@@ -91,6 +115,9 @@ Deno.serve(async (req: Request) => {
     lon >= -180 &&
     lon <= 180;
 
+  if (hasLat && hasLon && !useCoords) {
+    return respond(400, { error: "Некорректные координаты" });
+  }
   if (!useCoords && city.length < 2) {
     return respond(400, { error: "Укажи город или валидные координаты" });
   }
@@ -119,18 +146,25 @@ Deno.serve(async (req: Request) => {
   if (upstream.status === 404) {
     return respond(404, { error: "Место не найдено" });
   }
+  if (upstream.status === 429) {
+    return respond(429, { error: "Лимит OpenWeather. Попробуй позже." });
+  }
   if (!upstream.ok) {
     return respond(502, { error: `Погода: HTTP ${upstream.status}` });
   }
 
-  const data = (await upstream.json()) as {
+  let data: {
     name?: string;
     weather?: Array<{ description?: string }>;
     main?: { temp?: number; pressure?: number; humidity?: number };
     wind?: { speed?: number; deg?: number };
     sys?: { country?: string };
-    coord?: { lat?: number; lon?: number };
   };
+  try {
+    data = (await upstream.json()) as typeof data;
+  } catch {
+    return respond(502, { error: "Некорректный ответ погодного сервиса" });
+  }
 
   const temp = data.main?.temp;
   const pressureHpa = data.main?.pressure;
@@ -138,15 +172,17 @@ Deno.serve(async (req: Request) => {
   const windDeg = data.wind?.deg;
   const description = (data.weather?.[0]?.description || "").trim();
 
-  // report_fields: no raw GPS required for form autofill privacy policy
   const report_fields = {
     weather_summary: description,
-    air_temperature_c: temp != null ? Math.round(temp * 10) / 10 : null,
-    pressure_mmhg: pressureHpa != null ? hpaToMmHg(pressureHpa) : null,
+    air_temperature_c: temp != null && Number.isFinite(temp) ? Math.round(temp * 10) / 10 : null,
+    pressure_mmhg:
+      pressureHpa != null && Number.isFinite(pressureHpa) ? hpaToMmHg(pressureHpa) : null,
     wind_direction: windCardinal(windDeg ?? null),
-    wind_speed_ms: windMs != null ? Math.round(windMs * 10) / 10 : null,
+    wind_speed_ms:
+      windMs != null && Number.isFinite(windMs) ? Math.round(windMs * 10) / 10 : null,
   };
 
+  // Intentionally omit lat/lon from response body for privacy.
   return respond(200, {
     city: data.name || city,
     country: data.sys?.country || "",

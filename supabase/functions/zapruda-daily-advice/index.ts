@@ -2,9 +2,9 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.0";
 
 /**
- * ZAPRUDA daily fishing advice via xAI Grok.
- * Secrets (Edge only): XAI_API_KEY, optional XAI_MODEL, XAI_API_BASE.
- * Client has SELECT-only on ai_daily_advices; writes use service_role.
+ * Daily fishing advice via xAI Grok.
+ * Secrets: XAI_API_KEY, optional XAI_MODEL, XAI_API_BASE.
+ * Quota claim is atomic via claim_ai_daily_advice_slot / complete_ai_daily_advice_slot.
  */
 
 const cors = {
@@ -85,69 +85,58 @@ Deno.serve(async (req: Request) => {
   if (location.length < 2) return respond(400, { error: "Укажи водоём или место" });
 
   const adviceDay = moscowAdviceDay();
+  const promptSummary = `${location} · ${target} · ${timeOfDay}`;
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data: existing } = await admin
-    .from("ai_daily_advices")
-    .select("id, status, attempts, answer, prompt_summary")
-    .eq("user_id", userId)
-    .eq("advice_day", adviceDay)
-    .maybeSingle();
+  const { data: claim, error: claimError } = await admin.rpc("claim_ai_daily_advice_slot", {
+    p_user_id: userId,
+    p_advice_day: adviceDay,
+    p_prompt_summary: promptSummary,
+    p_max_failed: 3,
+  });
 
-  if (existing?.status === "ready" && existing.answer) {
-    return respond(200, {
-      answer: existing.answer,
-      already_used: true,
-      advice_day: adviceDay,
-    });
-  }
-  if (existing?.status === "failed" && (existing.attempts ?? 0) >= 3) {
-    return respond(429, {
-      error: "Слишком много неудачных попыток сегодня. Попробуй завтра.",
-      advice_day: adviceDay,
-    });
+  if (claimError) {
+    return respond(500, { error: "Не удалось зарезервировать дневной слот" });
   }
 
-  const promptSummary = `${location} · ${target} · ${timeOfDay}`;
-  let rowId = existing?.id as string | undefined;
-  const nextAttempts = (existing?.attempts ?? 0) + 1;
+  const claimObj = (claim ?? {}) as {
+    ok?: boolean;
+    reason?: string;
+    answer?: string;
+    id?: string;
+    lease_token?: string;
+  };
 
-  if (!rowId) {
-    const { data: inserted, error: insertError } = await admin
-      .from("ai_daily_advices")
-      .insert({
-        user_id: userId,
+  if (!claimObj.ok) {
+    if (claimObj.reason === "already_used" && claimObj.answer) {
+      return respond(200, {
+        answer: claimObj.answer,
+        already_used: true,
         advice_day: adviceDay,
-        prompt_summary: promptSummary,
-        status: "pending",
-        attempts: 0,
-        model: "",
-        answer: "",
-        error_message: "",
-      })
-      .select("id")
-      .single();
-    if (insertError) {
-      // concurrent unique race — re-read
-      const { data: raced } = await admin
-        .from("ai_daily_advices")
-        .select("id, status, attempts, answer")
-        .eq("user_id", userId)
-        .eq("advice_day", adviceDay)
-        .maybeSingle();
-      if (raced?.status === "ready" && raced.answer) {
-        return respond(200, { answer: raced.answer, already_used: true, advice_day: adviceDay });
-      }
-      if (!raced?.id) return respond(500, { error: "Не удалось создать запись журнала" });
-      rowId = raced.id;
-    } else {
-      rowId = inserted?.id;
+      });
     }
+    if (claimObj.reason === "too_many_failures") {
+      return respond(429, {
+        error: "Слишком много неудачных попыток сегодня. Попробуй завтра.",
+        advice_day: adviceDay,
+      });
+    }
+    if (claimObj.reason === "lease_held") {
+      return respond(409, {
+        error: "Запрос уже обрабатывается. Подожди несколько секунд.",
+        advice_day: adviceDay,
+      });
+    }
+    return respond(500, { error: "Слот недоступен", reason: claimObj.reason });
   }
 
-  if (!rowId) return respond(500, { error: "Не удалось создать запись журнала" });
+  const rowId = claimObj.id;
+  const leaseToken = claimObj.lease_token;
+  if (!rowId || !leaseToken) {
+    return respond(500, { error: "Некорректный lease" });
+  }
 
   const systemPrompt =
     "Ты опытный русскоязычный рыболов-наставник ZAPRUDA COMMUNITY. " +
@@ -164,8 +153,6 @@ Deno.serve(async (req: Request) => {
     .join("\n");
 
   let answer = "";
-  let errorMessage = "";
-
   try {
     const upstream = await fetch(`${apiBase}/chat/completions`, {
       method: "POST",
@@ -195,36 +182,29 @@ Deno.serve(async (req: Request) => {
     answer = sanitize(payload.choices?.[0]?.message?.content, 8000);
     if (answer.length < 40) throw new Error("Пустой или слишком короткий ответ модели");
   } catch (err) {
-    errorMessage = sanitize(err instanceof Error ? err.message : "upstream_error", 500);
-    await admin
-      .from("ai_daily_advices")
-      .update({
-        status: "failed",
-        attempts: nextAttempts,
-        error_message: errorMessage,
-        model,
-        prompt_summary: promptSummary,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", rowId);
+    const errorMessage = sanitize(err instanceof Error ? err.message : "upstream_error", 500);
+    await admin.rpc("complete_ai_daily_advice_slot", {
+      p_id: rowId,
+      p_lease_token: leaseToken,
+      p_success: false,
+      p_answer: "",
+      p_model: model,
+      p_error_message: errorMessage,
+    });
     return respond(502, {
-      error: "ИИ не ответил. Попытка не засчитывается как успешный совет. Попробуй позже.",
+      error: "ИИ не ответил. Успешный совет не засчитан. Попробуй позже.",
       advice_day: adviceDay,
     });
   }
 
-  await admin
-    .from("ai_daily_advices")
-    .update({
-      status: "ready",
-      attempts: nextAttempts,
-      answer,
-      model,
-      prompt_summary: promptSummary,
-      error_message: "",
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", rowId);
+  await admin.rpc("complete_ai_daily_advice_slot", {
+    p_id: rowId,
+    p_lease_token: leaseToken,
+    p_success: true,
+    p_answer: answer,
+    p_model: model,
+    p_error_message: "",
+  });
 
   return respond(200, {
     answer,
