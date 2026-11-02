@@ -20,7 +20,7 @@ jobs:
           import zlib, base64
           from pathlib import Path
 
-          def write(name, dest):
+          def write_ab(name, dest):
               a = Path(f".github/payloads/stage8/{name}.a.z64").read_text().strip()
               b = Path(f".github/payloads/stage8/{name}.b.z64").read_text().strip()
               data = zlib.decompress(base64.b64decode(a + b))
@@ -29,10 +29,18 @@ jobs:
               path.write_bytes(data)
               print(dest, len(data))
 
-          write("openweather-current", "supabase/functions/openweather-current/index.ts")
-          write("daily-fishing-brief", "supabase/functions/daily-fishing-brief/index.ts")
-          write("reports-new", "src/routes/reports.new.tsx")
-          write("daily-fishing-brief-ui", "src/components/DailyFishingBrief.tsx")
+          def write_quarters(name, dest):
+              parts = [Path(f".github/payloads/stage8/{name}.q{i}.z64").read_text().strip() for i in range(4)]
+              data = zlib.decompress(base64.b64decode("".join(parts)))
+              path = Path(dest)
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(data)
+              print(dest, len(data))
+
+          write_ab("openweather-current", "supabase/functions/openweather-current/index.ts")
+          write_ab("daily-fishing-brief", "supabase/functions/daily-fishing-brief/index.ts")
+          write_ab("daily-fishing-brief-ui", "src/components/DailyFishingBrief.tsx")
+          write_quarters("reports-new", "src/routes/reports.new.tsx")
           PY
 
       - uses: oven-sh/setup-bun@v2
