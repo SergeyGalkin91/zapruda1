@@ -36,9 +36,15 @@ assert.equal(club.owner_id,ownerId,'Fixture club must belong to owner account');
 const {data:membership,error:membershipError}=await owner.from('social_group_members').select('status').eq('group_id',group).eq('user_id',inviteeId).maybeSingle();
 if(membershipError)throw membershipError;
 assert.equal(membership,null,'Fixture must not already include invitee');
+assert.ok(club.owner_id===ownerId);
+const probeBody='QA E2E privacy probe '+new Date().toISOString();
+const {data:probe,error:probeError}=await owner.from('social_group_messages')
+ .insert({group_id:group,user_id:ownerId,body:probeBody}).select('id').single();
+if(probeError)throw probeError;
+assert.ok(probe.id,'An actual private message must exist before checking RLS');
 const {data:preJoinChat,error:preJoinError}=await invitee.from('social_group_messages').select('id').eq('group_id',group).limit(1);
 assert.equal(preJoinError,null,'Pending-invitee read should be filtered by RLS, not error');
-assert.equal(preJoinChat.length,0,'Non-member must not read private club chat');
+assert.equal(preJoinChat.length,0,'Non-member must not read an existing private club message');
 const {error:forgedInviteError}=await invitee.from('social_group_members').insert({
  group_id:group,user_id:inviteeId,role:'owner',status:'accepted',invited_by:null,
 });
@@ -54,11 +60,14 @@ if(pendingError)throw pendingError;
 assert.equal(pending.status,'pending');
 const {data:beforeAcceptChat,error:beforeAcceptError}=await invitee.from('social_group_messages').select('id').eq('group_id',group).limit(1);
 assert.equal(beforeAcceptError,null);
-assert.equal(beforeAcceptChat.length,0,'Pending member must not read private messages');
+assert.equal(beforeAcceptChat.length,0,'Pending member must not read an existing private message');
 
 const {data:accepted,error:acceptError}=await invitee.from('social_group_members').update({status:'accepted'}).eq('group_id',group).eq('user_id',inviteeId).select('status').single();
 if(acceptError)throw acceptError;
 assert.equal(accepted.status,'accepted');
+const {data:postAcceptChat,error:postAcceptError}=await invitee.from('social_group_messages').select('id').eq('id',probe.id);
+if(postAcceptError)throw postAcceptError;
+assert.equal(postAcceptChat.length,1,'Accepted member must now read owner private message');
 const body='E2E club message '+new Date().toISOString();
 const {data:msg,error:sendError}=await invitee.from('social_group_messages').insert({group_id:group,user_id:inviteeId,body}).select('id').single();
 if(sendError)throw sendError;
