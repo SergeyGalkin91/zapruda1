@@ -34,6 +34,11 @@ try {
   console.log('PASS',name,'no JWT rejected 401');
  }
  const jwt=data.session.access_token;
+ for (const name of ['openweather-current','zapruda-daily-advice']) {
+  const invalidBody=await invoke(name,jwt,null);
+  assert.equal(invalidBody.status,400,name+' must reject a JSON null body without crashing');
+  console.log('PASS',name,'JSON null body rejected 400');
+ }
  const invalid=await invoke('openweather-current',jwt,{lat:56.33});
  assert.equal(invalid.status,400,'Partial coordinates must return 400');
  const weather=await invoke('openweather-current',jwt,{city:'Нижний Новгород'});

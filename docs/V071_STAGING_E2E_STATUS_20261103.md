@@ -17,7 +17,7 @@ Scope: PR #63, branch `fix/issue61-v071-p0-stages-5-8`, STAGING `yudtbifopfnjtja
 | Gate | Result |
 | --- | --- |
 | `bun install --frozen-lockfile` | PASS after lockfile correction (Bun 1.4.4) |
-| `bun run test` | PASS: 35 tests, 7 files |
+| `bun run test` | PASS: 52 tests, 8 files (including 17 offline handler regression tests) |
 | `bun run build` | PASS: client, SSR and Nitro output generated locally; no deployment |
 | Migration filename audit | PASS for new collisions; 3 pre-existing collision groups still require separate reconciliation |
 | Meetup static safeguards | PASS; this is explicitly not real JWT or concurrency E2E |
@@ -45,8 +45,20 @@ All three failed job logs were read. They confirm configuration failures, not fa
 2. GitHub Environment has **zero secrets**. Required secret names are in [the runbook](V071_STAGING_E2E_RUNBOOK.md). Password values cannot be recovered from Supabase Auth. Supply them directly in GitHub's secret form; never in chat, commits, comments or logs. Publishable key plus four email/password pairs = **9 secrets**. Service-role and provider keys do not belong in these jobs.
 3. **RESOLVED after explicit owner approval on 2026-11-03:** the browser saved `SergeyGalkin91` as the required reviewer and disabled administrator bypass. GitHub displayed `Environment "staging-e2e" updated.` Readback shows Required reviewers ON, reviewer `SergeyGalkin91` selected, administrator bypass OFF, and the two branch restrictions intact. The earlier automatic approval rejection was resolved by the owner's explicit permission; no bypass was used.
 4. The browser has no Run workflow button for the existing meetup workflow and reports the competition workflow as not found, despite the files existing on the feature branch. The opt-in branch push trigger addresses that launch limitation. It cannot supply missing credentials or replace environment protections.
-5. AI and weather functions are ACTIVE v2 with `verify_jwt=true` on STAGING. That is deployment metadata, not evidence of configured provider secrets, a valid user request, real weather or a successful xAI answer.
+5. AI and weather functions are now ACTIVE v3 with `verify_jwt=true` on STAGING; deployed source readback matches the validated files. That is deployment metadata, not evidence of configured provider secrets, a valid user request, real weather or a successful xAI answer.
 
+## Independent handler fixes completed after protection setup
+
+- Reproduced two unhandled exceptions in the previous sources: authenticated-handler unit calls with JSON `null` crashed while reading `city` and `location`.
+- Both handlers now reject null, arrays, scalar and invalid JSON request bodies with HTTP 400 before quota RPCs or provider requests.
+- OpenWeather now returns HTTP 502 for a null/array upstream envelope, missing numeric temperature/pressure, or a non-string weather description instead of crashing or returning an empty successful forecast.
+- Added 17 tests executing the actual transpiled handler sources with mocked Deno host, Auth response and provider. **52 unit tests across 8 files PASS**, build PASS, E2E script syntax and test formatting PASS. These are offline tests; they do not authenticate real users or call a provider.
+- Added an authenticated JSON-null regression check for both functions to the prepared real-JWT Edge E2E script. That script remains BLOCKED on missing protected credentials.
+- Deployed only `zapruda-daily-advice` and `openweather-current` to STAGING. Both are ACTIVE **version 3**, `verify_jwt=true`; source readback exactly matches the fixed files. No Auth users, passwords, email confirmation, sessions, grants, schemas or production resources were modified.
+- Executed two real unauthenticated HTTP POST checks against the STAGING function URLs: **both returned 401**. This verifies gateway rejection only, not the authenticated JSON-validation path, xAI generation or live weather.
+- Rollback if needed: redeploy these two function sources from feature commit `968be245f2e4399971dcc5b62986c41d15990f11`, retaining `verify_jwt=true`. Do not change Auth or production.
+
+**Remaining authentication requirement:** four test accounts provisioned and email-confirmed through the supported Auth flow, followed by an approved secure sign-in/credential handoff from their intended owners. The current tools do not provide that step autonomously. Do not use password recovery, direct Auth-table writes, administrator-minted user sessions, magic-link helpers or confirmation bypass as a substitute.
 ## Readiness measurement
 
 This checkpoint uses **8 equally weighted verification gates**: frozen installation, unit tests, build, complete protected environment with four confirmed users, competitions JWT E2E, meetup JWT E2E, live Grok E2E, and live OpenWeather E2E.

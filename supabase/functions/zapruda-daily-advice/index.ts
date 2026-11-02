@@ -73,7 +73,11 @@ Deno.serve(async (req: Request) => {
 
   let body: Record<string, unknown> = {};
   try {
-    body = (await req.json()) as Record<string, unknown>;
+    const parsed: unknown = await req.json();
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return respond(400, { error: "Некорректное тело запроса" });
+    }
+    body = parsed as Record<string, unknown>;
   } catch {
     return respond(400, { error: "Некорректное тело запроса" });
   }

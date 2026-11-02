@@ -89,7 +89,11 @@ Deno.serve(async (req: Request) => {
 
   let body: Record<string, unknown> = {};
   try {
-    body = (await req.json()) as Record<string, unknown>;
+    const parsed: unknown = await req.json();
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return respond(400, { error: "Некорректный JSON" });
+    }
+    body = parsed as Record<string, unknown>;
   } catch {
     return respond(400, { error: "Некорректный JSON" });
   }
@@ -162,8 +166,20 @@ Deno.serve(async (req: Request) => {
     sys?: { country?: string };
   };
   try {
-    data = (await upstream.json()) as typeof data;
+    const parsed: unknown = await upstream.json();
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return respond(502, { error: "Некорректный ответ погодного сервиса" });
+    }
+    data = parsed as typeof data;
   } catch {
+    return respond(502, { error: "Некорректный ответ погодного сервиса" });
+  }
+
+  if (!Number.isFinite(data.main?.temp) || !Number.isFinite(data.main?.pressure)) {
+    return respond(502, { error: "Некорректный ответ погодного сервиса" });
+  }
+  const rawDescription = data.weather?.[0]?.description;
+  if (rawDescription != null && typeof rawDescription !== "string") {
     return respond(502, { error: "Некорректный ответ погодного сервиса" });
   }
 
@@ -171,7 +187,7 @@ Deno.serve(async (req: Request) => {
   const pressureHpa = data.main?.pressure;
   const windMs = data.wind?.speed;
   const windDeg = data.wind?.deg;
-  const description = (data.weather?.[0]?.description || "").trim();
+  const description = (rawDescription ?? "").trim();
 
   const report_fields = {
     weather_summary: description,
