@@ -14,49 +14,22 @@ jobs:
         with:
           ref: grok/stage6-team-competitions
 
-      - name: Assemble competitions.tsx and communities link
+      - name: Decode UI payloads
         run: |
-          test -f scripts/stage6/comp.part1.txt
-          test -f scripts/stage6/comp.part2.txt
-          test -f scripts/stage6/comp.part3.txt
-          test -f scripts/stage6/comp.part4.txt
-          cat scripts/stage6/comp.part1.txt scripts/stage6/comp.part2.txt scripts/stage6/comp.part3.txt scripts/stage6/comp.part4.txt > src/routes/competitions.tsx
           python3 <<'PY'
+          import zlib, base64
           from pathlib import Path
-          p = Path("src/routes/communities.tsx")
-          t = p.read_text()
-          if "/competitions" not in t:
-              if 'import { createFileRoute } from "@tanstack/react-router";' in t:
-                  t = t.replace(
-                      'import { createFileRoute } from "@tanstack/react-router";',
-                      'import { createFileRoute, Link } from "@tanstack/react-router";',
-                  )
-              elif 'import { createFileRoute, Link } from "@tanstack/react-router";' not in t:
-                  t = 'import { createFileRoute, Link } from "@tanstack/react-router";\n' + t
-              if "<SocialGroups" in t:
-                  block = (
-                      '<section className="mb-6 rounded-2xl border border-[#D7FF35]/25 bg-[#121A12] p-5">\n'
-                      '        <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#D7FF35]">\u0421\u043e\u0440\u0435\u0432\u043d\u043e\u0432\u0430\u043d\u0438\u044f</p>\n'
-                      '        <h2 className="mt-2 text-xl font-black text-white">\u041a\u043e\u043c\u0430\u043d\u0434\u043d\u044b\u0439 \u0437\u0430\u0447\u0451\u0442 \u043a\u043b\u0443\u0431\u043e\u0432</h2>\n'
-                      '        <p className="mt-2 text-sm text-zinc-400">\u0412\u043d\u0443\u0442\u0440\u0435\u043d\u043d\u0438\u0435 \u0442\u0443\u0440\u043d\u0438\u0440\u044b \u0441\u043e\u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0430. \u041f\u0440\u0438\u0437\u044b \u043e\u0442 \u0441\u043f\u043e\u043d\u0441\u043e\u0440\u043e\u0432 - \u043f\u043e\u0437\u0436\u0435.</p>\n'
-                      '        <Link to="/competitions" className="btn-primary mt-4 inline-flex min-h-11 items-center px-4">\u041a \u0441\u043e\u0440\u0435\u0432\u043d\u043e\u0432\u0430\u043d\u0438\u044f\u043c</Link>\n'
-                      '      </section>\n'
-                      '      <SocialGroups'
-                  )
-                  t = t.replace("<SocialGroups", block.encode().decode('unicode_escape') if '\\u' in block else block)
-                  # decode unicode escapes properly
-                  import codecs
-                  block2 = codecs.decode(block, 'unicode_escape')
-                  t = p.read_text()
-                  if "/competitions" not in t:
-                      if 'import { createFileRoute } from "@tanstack/react-router";' in t:
-                          t = t.replace(
-                              'import { createFileRoute } from "@tanstack/react-router";',
-                              'import { createFileRoute, Link } from "@tanstack/react-router";',
-                          )
-                      t = t.replace("<SocialGroups", block2)
-              p.write_text(t)
-          print("communities", "/competitions" in p.read_text())
+
+          def write(path, payload_path):
+              payload = Path(payload_path).read_text().strip()
+              data = zlib.decompress(base64.b64decode(payload))
+              Path(path).parent.mkdir(parents=True, exist_ok=True)
+              Path(path).write_bytes(data)
+              print(path, len(data))
+
+          write("src/routes/competitions.tsx", ".github/payloads/stage6/competitions.min.z64")
+          write("src/routes/communities.tsx", ".github/payloads/stage6/communities.min.z64")
+          write("src/routeTree.gen.ts", ".github/payloads/stage6/routeTree.min.z64")
           PY
 
       - uses: oven-sh/setup-bun@v2
@@ -69,5 +42,5 @@ jobs:
           git config user.name Grok
           git config user.email grok@users.noreply.github.com
           git add src/routes/competitions.tsx src/routes/communities.tsx src/routeTree.gen.ts
-          git diff --cached --quiet || git commit -m "feat(stage6): /competitions UI and communities entry"
+          git diff --cached --quiet || git commit -m "feat(stage6): competitions UI + communities entry + routes"
           git push origin HEAD:grok/stage6-team-competitions
