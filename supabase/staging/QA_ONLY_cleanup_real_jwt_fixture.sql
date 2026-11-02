@@ -3,8 +3,8 @@
 -- DO NOT run with a production group or without reviewing the read-only preview.
 -- Keep the QA owner/account; this script removes only the known QA club and its messages.
 -- This destroys the disposable group, so run only AFTER confirming its unique QA name.
-BEGIN;
-DO $$
+-- Invoke inside BEGIN / SET LOCAL zapruda.qa_club_id / COMMIT in one session.
+DO $
 DECLARE fixture_id uuid := nullif(current_setting('zapruda.qa_club_id', true),'')::uuid;
         fixture_name text; fixture_owner uuid;
 BEGIN
@@ -19,6 +19,5 @@ BEGIN
  DELETE FROM public.social_group_members WHERE group_id=fixture_id;
  DELETE FROM public.social_groups WHERE id=fixture_id;
  RAISE NOTICE 'QA group cleaned: %',fixture_id;
-END $$;
-COMMIT;
+END $;
 -- Run a separate SELECT afterward to verify group_id no longer exists.
