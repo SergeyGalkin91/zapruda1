@@ -55,8 +55,7 @@ Deno.serve(async (req: Request) => {
   const apiBase = (Deno.env.get("XAI_API_BASE") || "https://api.x.ai/v1").replace(/\/$/, "");
 
   if (!supabaseUrl || !key) return respond(503, { error: "Backend not configured" });
-  if (!serviceKey) return respond(503, { error: "Service role not configured" });
-  if (!xaiKey) return respond(503, { error: "ИИ-сервис временно недоступен (ключ не настроен)" });
+
 
   const jwt = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
   if (!jwt) return respond(401, { error: "Войди в ZAPRUDA" });
@@ -69,6 +68,8 @@ Deno.serve(async (req: Request) => {
   if (authError || !authData.user || authData.user.is_anonymous) {
     return respond(401, { error: "Войди в ZAPRUDA" });
   }
+  if (!serviceKey) return respond(503, { error: "Service role not configured" });
+  if (!xaiKey) return respond(503, { error: "ИИ-сервис временно недоступен (ключ не настроен)" });
   const userId = authData.user.id;
 
   let body: Record<string, unknown> = {};
