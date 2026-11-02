@@ -36,6 +36,14 @@ assert.equal(club.owner_id,ownerId,'Fixture club must belong to owner account');
 const {data:membership,error:membershipError}=await owner.from('social_group_members').select('status').eq('group_id',group).eq('user_id',inviteeId).maybeSingle();
 if(membershipError)throw membershipError;
 assert.equal(membership,null,'Fixture must not already include invitee');
+const {data:preJoinChat,error:preJoinError}=await invitee.from('social_group_messages').select('id').eq('group_id',group).limit(1);
+assert.equal(preJoinError,null,'Pending-invitee read should be filtered by RLS, not error');
+assert.equal(preJoinChat.length,0,'Non-member must not read private club chat');
+const {error:forgedInviteError}=await invitee.from('social_group_members').insert({
+ group_id:group,user_id:inviteeId,role:'owner',status:'accepted',invited_by:null,
+});
+assert.ok(forgedInviteError,'Invitee must not self-enroll as owner');
+
 
 const {error:inviteError}=await owner.from('social_group_members').insert({
  group_id:group,user_id:inviteeId,role:'member',status:'pending',invited_by:ownerId,
@@ -44,6 +52,10 @@ if(inviteError)throw inviteError;
 const {data:pending,error:pendingError}=await invitee.from('social_group_members').select('status').eq('group_id',group).eq('user_id',inviteeId).single();
 if(pendingError)throw pendingError;
 assert.equal(pending.status,'pending');
+const {data:beforeAcceptChat,error:beforeAcceptError}=await invitee.from('social_group_messages').select('id').eq('group_id',group).limit(1);
+assert.equal(beforeAcceptError,null);
+assert.equal(beforeAcceptChat.length,0,'Pending member must not read private messages');
+
 const {data:accepted,error:acceptError}=await invitee.from('social_group_members').update({status:'accepted'}).eq('group_id',group).eq('user_id',inviteeId).select('status').single();
 if(acceptError)throw acceptError;
 assert.equal(accepted.status,'accepted');
