@@ -21,8 +21,8 @@ jobs:
           KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
           OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
           OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
-          INVITEE_EMAIL: ${{ secrets.ZAPRUDA_E2E_INVITEE_EMAIL }}
-          INVITEE_PASSWORD: ${{ secrets.ZAPRUDA_E2E_INVITEE_PASSWORD }}
+          INVITEE_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
+          INVITEE_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_A_PASSWORD }}
           SEATED_EMAIL: ${{ secrets.ZAPRUDA_E2E_SEATED_EMAIL }}
           SEATED_PASSWORD: ${{ secrets.ZAPRUDA_E2E_SEATED_PASSWORD }}
           RACER_A_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
@@ -40,8 +40,8 @@ jobs:
           ZAPRUDA_E2E_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
           ZAPRUDA_E2E_OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
           ZAPRUDA_E2E_OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
-          ZAPRUDA_E2E_INVITEE_EMAIL: ${{ secrets.ZAPRUDA_E2E_INVITEE_EMAIL }}
-          ZAPRUDA_E2E_INVITEE_PASSWORD: ${{ secrets.ZAPRUDA_E2E_INVITEE_PASSWORD }}
+          ZAPRUDA_E2E_INVITEE_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
+          ZAPRUDA_E2E_INVITEE_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_A_PASSWORD }}
         run: node scripts/e2e-meetups-two-real-jwt.mjs
       - name: Concurrent third-seat admission (four independent JWTs)
         env:
