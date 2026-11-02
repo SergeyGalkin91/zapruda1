@@ -44,7 +44,7 @@ returns boolean language sql stable security definer set search_path='' as $$
  select exists(select 1 from public.meetup_members m where m.post_id=p_post and m.user_id=auth.uid() and m.status='accepted')
 $$;
 revoke all on function public.meetup_is_accepted(uuid) from public;
-grant execute on function public.meetup_is_accepted(uuid,uuid) to authenticated;
+grant execute on function public.meetup_is_accepted(uuid) to authenticated;
 
 create or replace function public.meetup_member_guard()
 returns trigger language plpgsql security definer set search_path='' as $$
