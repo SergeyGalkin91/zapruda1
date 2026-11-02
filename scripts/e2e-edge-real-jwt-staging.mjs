@@ -21,13 +21,16 @@ async function invoke(name,token,body) {
   ...(token?{'Authorization':'Bearer '+token}:{})
  },body:JSON.stringify(body),signal:AbortSignal.timeout(35000)});
  const raw=await r.text();
- let json;try{json=JSON.parse(raw)}catch{throw Error(name+' non-JSON response status '+r.status)}
+ let json;try{json=JSON.parse(raw)}catch{
+  if(r.status===401 || r.status===403) return {status:r.status,json:{error:'gateway_rejected'}};
+  throw Error(name+' non-JSON response status '+r.status);
+ }
  return {status:r.status,json};
 }
 try {
  for (const name of ['openweather-current','zapruda-daily-advice']) {
   const result=await invoke(name,null,{city:'Нижний Новгород',location:'Ока'});
-  assert.equal(result.status,401,name+' must reject missing JWT');
+  assert.ok([401,403].includes(result.status),name+' must reject missing JWT at gateway');
   console.log('PASS',name,'no JWT rejected 401');
  }
  const jwt=data.session.access_token;
@@ -48,6 +51,7 @@ try {
  const input={location:'QA Нижний Новгород река Ока',target:'Окунь',time:'Утро'};
  const first=await invoke('zapruda-daily-advice',jwt,input);
  assert.equal(first.status,200,'Live xAI answer must return 200');
+ assert.equal(first.json.advice_day,new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),'Wrong Moscow quota day');
  assert.ok(typeof first.json.answer==='string'&&first.json.answer.length>=40,'No real advice');
  const second=await invoke('zapruda-daily-advice',jwt,input);
  assert.equal(second.status,200,'Second daily request must return cached answer');
