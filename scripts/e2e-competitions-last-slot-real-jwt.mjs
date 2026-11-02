@@ -17,6 +17,7 @@ const clients = await Promise.all(roles.map(async role => {
  });
  if(error)throw error;
  assert.ok(data.session?.access_token,role+' missing JWT');
+ assert.ok(data.user?.email_confirmed_at,role+' email is not verified');
  return {role,client,id:data.user.id};
 }));
 assert.equal(new Set(clients.map(x=>x.id)).size,4,'Distinct users required');
@@ -38,6 +39,10 @@ const {error:spoofError}=await a.client.from('competition_teams').insert({
  competition_id:comp.id,captain_id:b.id,name:label+'_spoofed',status:'registered'
 });
 assert.ok(spoofError,'Captain identity spoofed through team INSERT');
+const {data:spurious,error:spuriousError}=await organizer.client.from('competition_teams')
+ .select('id').eq('competition_id',comp.id).eq('name',label+'_spoofed');
+if(spuriousError)throw spuriousError;
+assert.equal(spurious.length,0,'Spoofed captain row persisted');
 // Captain and competition ID are immutable even when a row is otherwise updateable.
 const {data:tampered,error:tamperError}=await seated.client.from('competition_teams')
  .update({captain_id:a.id}).eq('id',first.data.id).select('captain_id');
