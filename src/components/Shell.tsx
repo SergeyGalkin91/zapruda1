@@ -14,7 +14,7 @@ const desktopNav = [
   { to: "/reports/new", label: "Новый отчёт", Icon: Plus },
   { to: "/partners", label: "Выезды", Icon: Users },
   { to: "/communities", label: "Комьюнити", Icon: Compass },
-  { to: "/chat", label: "Чат", Icon: MessageCircle },
+  { to: "/chat", label: "ZAPRUDA SPOT", Icon: MessageCircle },
   { to: "/messages", label: "Личные", Icon: MessageCircle },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
 ] as const;
@@ -24,15 +24,19 @@ const mobileNav = [
   { to: "/communities", label: "Комьюнити", Icon: Compass },
   { to: "/reports/new", label: "Создать", Icon: Plus },
   { to: "/partners", label: "Выезды", Icon: Users },
-  { to: "/chat", label: "Чат", Icon: MessageCircle },
+  { to: "/chat", label: "ZAPRUDA SPOT", Icon: MessageCircle },
 ] as const;
 
+/** Secondary destinations — one clear path each, no duplicates of primary nav. */
 const otherNav = [
   { to: "/messages", label: "Личные сообщения", Icon: MessageCircle },
+  { to: "/street", label: "Street Fishing", Icon: Fish },
   { to: "/guides", label: "Кабинет гида", Icon: Ship },
-  { to: "/communities", label: "Комьюнити и клубы", Icon: Compass },
+  { to: "/atlas", label: "Атлас водоёмов", Icon: Compass },
+  { to: "/specializations", label: "Специализации и XP", Icon: ChartNoAxesCombined },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
   { to: "/analytics", label: "Аналитика · Beta (VIP)", Icon: ChartNoAxesCombined },
+  { to: "/feedback", label: "Обратная связь", Icon: MessageCircle },
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
 ] as const;
 
@@ -43,8 +47,6 @@ export function Shell({ children }: { children: ReactNode }) {
 
   useEffect(() => { applyAppearance(loadAppearance()); }, []);
 
-  // Always render a usable login link while the browser session initializes.
-  // The listener handles login/logout; getSession covers clients that delay INITIAL_SESSION.
   useEffect(() => {
     let active = true;
     let sawAuthEvent = false;
@@ -63,7 +65,6 @@ export function Shell({ children }: { children: ReactNode }) {
         setIsSignedIn(Boolean(data.session?.user));
       }).catch((error: unknown) => {
         if (!active) return;
-        // A visitor without a session is an expected state, not a UI failure.
         if (error instanceof Error && /auth session missing/i.test(error.message)) {
           setIsSignedIn(false);
           setAuthError("");
@@ -111,18 +112,15 @@ export function Shell({ children }: { children: ReactNode }) {
               >
                 <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />
                 {label}
-
               </Link>
             ))}
           </nav>
           <div className="flex shrink-0 items-center gap-2">
             {isSignedIn ? (
-              <>
-                <a href="/profile" className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3">
-                  <UserRound className="size-4" aria-hidden="true" />
-                  Профиль
-                </a>
-              </>
+              <Link to="/profile" className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3">
+                <UserRound className="size-4" aria-hidden="true" />
+                Профиль
+              </Link>
             ) : (
               <Link search={{ mode: "in" }} to="/auth" className="inline-flex rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white">
                 Войти
@@ -133,46 +131,43 @@ export function Shell({ children }: { children: ReactNode }) {
                 <Menu className="size-5 group-open:hidden" aria-hidden="true" />
                 <X className="hidden size-5 group-open:block" aria-hidden="true" />
               </summary>
-          <nav
-            id="zapruda-extra-nav"
-            aria-label="Остальные разделы"
-            className="absolute right-0 top-[calc(100%+8px)] z-50 w-[min(320px,calc(100vw-2rem))] space-y-1 rounded-2xl border border-white/15 bg-[#171C14] p-2 shadow-2xl shadow-black/70"
-          >
-            <div className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.19em] text-[#D7FF35]">ZAPRUDA / Разделы</div>
-            {otherNav.map(({ to, label, Icon }) => (
-              <Link key={to} to={to} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
-                <Icon className="size-4 text-[#D7FF35]" aria-hidden="true" />{label}
-                <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
-              </Link>
-            ))}
-            {!isSignedIn && (
-              <Link search={{ mode: "in" }} to="/auth" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
-                <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
-              </Link>
-            )}
-            {isAdmin && (
-              <Link to="/admin"
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.07]">
-                <ShieldCheck className="size-4 text-[#D7FF35]" aria-hidden="true" />
-                Кабинет администрации
-                <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
-              </Link>
-            )}
-            {isAdmin && (
-              <Link to="/moderation"
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.07]">
-                <ShieldCheck className="size-4 text-[#D7FF35]" aria-hidden="true" />
-                Модерация заявок
-                <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
-              </Link>
-            )}
-            <div className="my-2 border-t border-white/10" />
-            <Link to="/settings"
-              className="flex items-center gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 px-3 py-3 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/10">
-              <Settings2 className="size-4" aria-hidden="true" /> Настройки
-              <ArrowUpRight className="ml-auto size-3.5" aria-hidden="true" />
-            </Link>
-          </nav>
+              <nav
+                id="zapruda-extra-nav"
+                aria-label="Остальные разделы"
+                className="absolute right-0 top-[calc(100%+8px)] z-50 w-[min(320px,calc(100vw-2rem))] space-y-1 rounded-2xl border border-white/15 bg-[#171C14] p-2 shadow-2xl shadow-black/70"
+              >
+                <div className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.19em] text-[#D7FF35]">ZAPRUDA / Разделы</div>
+                {otherNav.map(({ to, label, Icon }) => (
+                  <Link key={to + label} to={to} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
+                    <Icon className="size-4 text-[#D7FF35]" aria-hidden="true" />{label}
+                    <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
+                  </Link>
+                ))}
+                {!isSignedIn && (
+                  <Link search={{ mode: "in" }} to="/auth" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]">
+                    <LogIn className="size-4 text-[#D7FF35]" aria-hidden="true" />Вход в аккаунт
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link to="/admin" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.07]">
+                    <ShieldCheck className="size-4 text-[#D7FF35]" aria-hidden="true" />
+                    Кабинет администрации
+                    <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link to="/moderation" className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/[0.07]">
+                    <ShieldCheck className="size-4 text-[#D7FF35]" aria-hidden="true" />
+                    Модерация заявок
+                    <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
+                  </Link>
+                )}
+                <div className="my-2 border-t border-white/10" />
+                <Link to="/settings" className="flex items-center gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 px-3 py-3 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/10">
+                  <Settings2 className="size-4" aria-hidden="true" /> Настройки
+                  <ArrowUpRight className="ml-auto size-3.5" aria-hidden="true" />
+                </Link>
+              </nav>
             </details>
           </div>
         </div>
@@ -187,28 +182,46 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
       </footer>
 
-      <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080A09]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden">
+      <nav aria-label="Мобильная навигация" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080A09]/95 pb-[max(0.35rem,env(safe-area-inset-bottom,0px))] shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden">
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
-          {mobileNav.map(({ to, label, Icon }) => {
-            const target = to;
-            const shownLabel = label;
-            const ShownIcon = Icon;
-            return (
-            <Link key={target}
-              to={target}
+          {mobileNav.map(({ to, label, Icon }) => (
+            <Link
+              key={to}
+              to={to}
               activeOptions={{ exact: true }}
               className="flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
-              activeProps={{ className: "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]" }}>
-              {to === "/profile" && !isSignedIn ? (
-                <LogIn className="size-[21px]" strokeWidth={1.9} aria-hidden="true" />
-              ) : (
-                <span className={to === "/reports/new" ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]" : "flex size-8 items-center justify-center"}><ShownIcon className={to === "/reports/new" ? "size-6" : "size-[21px]"} strokeWidth={to === "/reports/new" ? 2.5 : 1.9} aria-hidden="true" /></span>
-              )}
-              <span className="truncate">{shownLabel}</span>
+              activeProps={{
+                className:
+                  "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]",
+              }}
+            >
+              <span
+                className={
+                  to === "/reports/new"
+                    ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]"
+                    : "flex size-8 items-center justify-center"
+                }
+              >
+                <Icon
+                  className={to === "/reports/new" ? "size-6" : "size-[21px]"}
+                  strokeWidth={to === "/reports/new" ? 2.5 : 1.9}
+                  aria-hidden="true"
+                />
+              </span>
+              <span className="truncate">{label}</span>
             </Link>
-          ); })}
+          ))}
         </div>
-        {isAdmin && <div className="mx-auto max-w-xl px-3 pb-2"><Link to="/admin" className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#A99AD9]/40 bg-[#171527] text-xs font-black text-[#D7FF35]"><ShieldCheck className="size-4" /> Админ-панель</Link></div>}
+        {isAdmin && (
+          <div className="mx-auto max-w-xl px-3 pb-2">
+            <Link
+              to="/admin"
+              className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#A99AD9]/40 bg-[#171527] text-xs font-black text-[#D7FF35]"
+            >
+              <ShieldCheck className="size-4" /> Админ-панель
+            </Link>
+          </div>
+        )}
       </nav>
     </div>
   );
