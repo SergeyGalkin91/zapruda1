@@ -38,10 +38,14 @@ const otherNav = [
 
 export function Shell({ children }: { children: ReactNode }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isNetlifyStagingPreview, setIsNetlifyStagingPreview] = useState(false);
   const [authError, setAuthError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => { applyAppearance(loadAppearance()); }, []);
+  useEffect(() => {
+    setIsNetlifyStagingPreview(/^deploy-preview-[0-9]+--zapruda1[.]netlify[.]app$/.test(window.location.hostname));
+  }, []);
 
   // Always render a usable login link while the browser session initializes.
   // The listener handles login/logout; getSession covers clients that delay INITIAL_SESSION.
@@ -100,6 +104,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0">
             <Wordmark />
           </Link>
+          {isNetlifyStagingPreview && <span className="rounded-lg border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-2 py-1 text-[10px] font-black tracking-wide text-[#D7FF35]" title="Тестовая среда Supabase STAGING">STAGING</span>}
           <nav aria-label="Основная навигация" className="hidden items-center gap-1 xl:flex">
             {desktopNav.map(({ to, label, Icon }) => (
               <Link
