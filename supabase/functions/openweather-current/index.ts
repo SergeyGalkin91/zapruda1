@@ -69,7 +69,7 @@ Deno.serve(async (req: Request) => {
     "";
 
   if (!supabaseUrl || !key) return respond(503, { error: "Backend not configured" });
-  if (!owKey) return respond(503, { error: "Погодный сервис не настроен" });
+
 
   const jwt = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
   if (!jwt) return respond(401, { error: "Войди в ZAPRUDA" });
@@ -81,6 +81,7 @@ Deno.serve(async (req: Request) => {
   if (authError || !authData.user || authData.user.is_anonymous) {
     return respond(401, { error: "Войди в ZAPRUDA" });
   }
+  if (!owKey) return respond(503, { error: "Погодный сервис не настроен" });
 
   if (!rateLimit(authData.user.id)) {
     return respond(429, { error: "Слишком много запросов погоды. Подожди минуту." });
