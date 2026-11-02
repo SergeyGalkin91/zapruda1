@@ -25,6 +25,20 @@ Scope: PR #63, branch `fix/issue61-v071-p0-stages-5-8`, STAGING `yudtbifopfnjtja
 
 Before these changes, exact feature SHA `76be539c2749b03296d012a54f452ae2e2663efd` had quality and Docker smoke checks SUCCESS. Those results do not prove this new commit. Check the new commit's own Actions results before promotion; E2E runs stopped on missing protected configuration must be recorded as BLOCKED, not PASS.
 
+## Actual GitHub Actions execution
+
+Tested source SHA: **`4b5d03fd02873e69c7b65cd91f0f4a8649166c64`**. The branch-only request successfully started all three E2E jobs. The following are completed runs, not planned tests:
+
+| Run | Outcome | Evidence |
+| --- | --- | --- |
+| [Quality](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41539328958) | SUCCESS | Frozen install, unit tests and build on the tested source |
+| [Docker smoke](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41539328934) | SUCCESS | Isolated image build and HTTP smoke |
+| [Competition JWT E2E](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41539320765) | GitHub FAILURE; functional E2E BLOCKED | Frozen install passed; script stopped at `Missing ZAPRUDA_E2E_PUBLISHABLE_KEY` before signing in or creating a fixture |
+| [Meetup JWT E2E](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41539320818) | GitHub FAILURE; functional E2E BLOCKED | Frozen install passed; preflight stopped at `Missing protected config: KEY`; both JWT/capacity steps SKIPPED |
+| [Grok/OpenWeather JWT E2E](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41539320952) | GitHub FAILURE; functional E2E BLOCKED | Frozen install passed; script stopped at `Missing protected setting ZAPRUDA_E2E_PUBLISHABLE_KEY` before signing in or invoking either provider |
+
+All three failed job logs were read. They confirm configuration failures, not failures in the tested competition, meetup, AI or weather business logic. No JWT, provider request or test fixture was produced by these runs. No cleanup is required for these attempts. A documentation-only follow-up commit records this evidence; its own CI status must still be checked independently.
+
 ## Verified blockers
 
 1. Read-only query against STAGING `auth.users` returned **3 total users / 2 email-confirmed**. Four distinct confirmed accounts are required; no passwords or JWTs were read or changed.
