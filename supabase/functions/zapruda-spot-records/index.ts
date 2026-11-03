@@ -130,7 +130,7 @@ Deno.serve(async (req: Request) => {
       const { data, error } = await userClient.rpc("zc_spot_submit", args);
       if (error) {
         await admin.storage.from(BUCKET).remove([storageKey]);
-        return respond({ error: "Record submission rejected", detail: error.message }, 400, origin);
+        return respond({ error: "Record submission rejected" }, 400, origin);
       }
       return respond({ status: "pending", catch_id: data }, 201, origin);
     }
@@ -147,6 +147,31 @@ Deno.serve(async (req: Request) => {
       return error
         ? respond({ error: "Moderator access required" }, 403, origin)
         : respond({ queue: data }, 200, origin);
+    }
+    if (action === "reviewed") {
+      const { data, error } = await userClient.rpc("zc_spot_reviewed_catches");
+      return error
+        ? respond({ error: "Moderator access required" }, 403, origin)
+        : respond({ queue: data }, 200, origin);
+    }
+    if (action === "revoke") {
+      const catchId = body["catch_id"];
+      const reason = body["reason"];
+      if (
+        typeof catchId !== "string" ||
+        !/^[0-9a-f-]{36}$/i.test(catchId) ||
+        typeof reason !== "string" ||
+        reason.trim().length < 10 ||
+        reason.trim().length > 500
+      )
+        return respond({ error: "Invalid revocation request" }, 400, origin);
+      const { data, error } = await userClient.rpc("zc_spot_revoke", {
+        p_catch_id: catchId,
+        p_reason: reason.trim(),
+      });
+      return error
+        ? respond({ error: "Revocation denied" }, 403, origin)
+        : respond({ review: data }, 200, origin);
     }
     if (action === "review") {
       const id = body["catch_id"];
@@ -166,7 +191,7 @@ Deno.serve(async (req: Request) => {
         p_micro_welfare_valid: body["micro_welfare_valid"] === true,
       });
       return error
-        ? respond({ error: "Review failed", detail: error.message }, 403, origin)
+        ? respond({ error: "Review failed" }, 403, origin)
         : respond({ review: data }, 200, origin);
     }
     if (action === "evidence") {

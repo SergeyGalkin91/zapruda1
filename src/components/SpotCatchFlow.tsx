@@ -1,4 +1,5 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import type { User } from "@supabase/supabase-js";
 import { Crown, Fish, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,9 +24,21 @@ type QueueRow = CatchRow & {
 };
 type Notice = { id: number; message: string; created_at: string };
 
-async function spotAction<T>(action: string, extra: Record<string, unknown> = {}): Promise<T> {
+async function spotToken(actor: string): Promise<string> {
+  const { data, error } = await supabase.auth.getSession();
+  if (error || data.session?.user.id !== actor || !data.session.access_token)
+    throw new Error("Сессия изменилась. Повтори действие из своего аккаунта.");
+  return data.session.access_token;
+}
+async function spotAction<T>(
+  actor: string,
+  action: string,
+  extra: Record<string, unknown> = {},
+): Promise<T> {
+  const token = await spotToken(actor);
   const { data, error } = await supabase.functions.invoke("zapruda-spot-records", {
     body: { action, ...extra },
+    headers: { Authorization: `Bearer ${token}` },
   });
   if (error || data?.error) {
     throw new Error(typeof data?.error === "string" ? data.error : "Операция недоступна.");
@@ -54,18 +67,67 @@ export function SpotCatchFlow() {
   const [catches, setCatches] = useState<CatchRow[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [queue, setQueue] = useState<QueueRow[] | null>(null);
+  const [reviewed, setReviewed] = useState<QueueRow[] | null>(null);
+  const [revokeReasons, setRevokeReasons] = useState<Record<string, string>>({});
+  const [revokeChecked, setRevokeChecked] = useState<Record<string, boolean>>({});
   const [evidence, setEvidence] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const allowed = isSpotStaging();
+  const identity = useRef<string | null>(null);
+  const generation = useRef(0);
+  const mounted = useRef(true);
 
   useEffect(() => {
     if (!allowed) return;
     let active = true;
-    void (async () => {
-      const { data: auth } = await supabase.auth.getUser();
+    mounted.current = true;
+    let authVersion = 0;
+    const applyUser = (user: User | null) => {
       if (!active) return;
-      setUid(auth.user?.id ?? "");
+      const next = user && !user.is_anonymous && user.email_confirmed_at ? user.id : "";
+      if (identity.current !== next) {
+        generation.current++;
+        setCatches([]);
+        setNotices([]);
+        setQueue(null);
+        setReviewed(null);
+        setEvidence({});
+        setReviewChecked({});
+        setMicroWelfareChecked({});
+        setRevokeChecked({});
+        setRevokeReasons({});
+        setPhoto(null);
+        setWeight("");
+        setLength("");
+        setCapturedAt("");
+        setSpotId("");
+        setMessage("");
+        setBusy(false);
+      }
+      identity.current = next;
+      setUid(next);
+    };
+    const version = authVersion;
+    void Promise.resolve()
+      .then(() => supabase.auth.getUser())
+      .then(({ data }) => {
+        if (version === authVersion) applyUser(data.user);
+      })
+      .catch(() => {
+        if (version === authVersion) applyUser(null);
+      });
+    let unsubscribe = () => {};
+    try {
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        authVersion++;
+        applyUser(session?.user ?? null);
+      });
+      unsubscribe = () => data.subscription.unsubscribe();
+    } catch {
+      applyUser(null);
+    }
+    void (async () => {
       const { data } = await supabase
         .from("zc_public_spots")
         .select("id,name,city,disciplines")
@@ -74,26 +136,44 @@ export function SpotCatchFlow() {
         .limit(100);
       if (!active) return;
       setSpots((data ?? []) as Spot[]);
-    })();
+    })().catch(() => {
+      if (active) setSpots([]);
+    });
     return () => {
       active = false;
+      mounted.current = false;
+      unsubscribe();
     };
   }, [allowed]);
 
   const eligible = spots.filter((spot) => spot.disciplines.includes(league));
 
   async function refreshOwn() {
-    const [my, inbox] = await Promise.all([
-      spotAction<{ catches: CatchRow[] }>("mine"),
-      spotAction<{ notifications: Notice[] }>("inbox"),
-    ]);
-    setCatches(my.catches ?? []);
-    setNotices(inbox.notifications ?? []);
+    const actor = identity.current,
+      version = generation.current;
+    if (!actor) return;
+    try {
+      const [my, inbox] = await Promise.all([
+        spotAction<{ catches: CatchRow[] }>(actor, "mine"),
+        spotAction<{ notifications: Notice[] }>(actor, "inbox"),
+      ]);
+      if (!mounted.current || identity.current !== actor || generation.current !== version) return;
+      setCatches(my.catches ?? []);
+      setNotices(inbox.notifications ?? []);
+    } catch {
+      if (mounted.current && identity.current === actor && generation.current === version)
+        setMessage("Не удалось обновить уловы и уведомления. Попробуй ещё раз.");
+    }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!photo || !spotId || busy) return;
+    const actor = identity.current,
+      version = generation.current;
+    if (!actor) return;
+    const current = () =>
+      mounted.current && identity.current === actor && generation.current === version;
     setBusy(true);
     setMessage("");
     try {
@@ -108,21 +188,30 @@ export function SpotCatchFlow() {
       const parsedDate = new Date(capturedAt);
       if (!Number.isFinite(parsedDate.getTime())) throw new Error("Укажи дату поимки.");
       body.set("captured_at", parsedDate.toISOString());
+      const token = await spotToken(actor);
+      if (!current()) return;
       const { data, error } = await supabase.functions.invoke("zapruda-spot-records", {
         body,
+        headers: { Authorization: `Bearer ${token}` },
       });
+      if (!current()) return;
       if (error || data?.error) throw new Error("Заявка не принята сервером.");
       setMessage("Улов отправлен на проверку. Корона присваивается только после модерации.");
       setPhoto(null);
       await refreshOwn();
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Не удалось отправить улов.");
+      if (current()) setMessage(err instanceof Error ? err.message : "Не удалось отправить улов.");
     } finally {
-      setBusy(false);
+      if (current()) setBusy(false);
     }
   }
 
   async function act(action: string, extra: Record<string, unknown> = {}) {
+    const actor = identity.current,
+      version = generation.current;
+    if (!actor || busy) return;
+    const current = () =>
+      mounted.current && identity.current === actor && generation.current === version;
     setBusy(true);
     setMessage("");
     try {
@@ -130,22 +219,36 @@ export function SpotCatchFlow() {
         queue?: QueueRow[];
         url?: string;
         review?: { titles_changed: number };
-      }>(action, extra);
+      }>(actor, action, extra);
+      if (!current()) return;
       if (action === "queue") setQueue(result.queue ?? []);
+      if (action === "reviewed") setReviewed(result.queue ?? []);
       if (action === "evidence" && result.url && typeof extra["catch_id"] === "string") {
         setEvidence((old) => ({ ...old, [String(extra["catch_id"])]: result.url! }));
       }
-      if (action === "review") {
-        setMessage("Решение сохранено. Обновлено титулов: " + (result.review?.titles_changed ?? 0));
-        const updated = await spotAction<{ queue: QueueRow[] }>("queue");
+      if (action === "review" || action === "revoke") {
+        setMessage(
+          (action === "revoke"
+            ? "Подтверждение отозвано. Обновлено титулов: "
+            : "Решение сохранено. Обновлено титулов: ") + (result.review?.titles_changed ?? 0),
+        );
+        const updated = await spotAction<{ queue: QueueRow[] }>(actor, "queue");
+        if (!current()) return;
         setQueue(updated.queue ?? []);
+        if (reviewed !== null) {
+          const accepted = await spotAction<{ queue: QueueRow[] }>(actor, "reviewed");
+          if (!current()) return;
+          setReviewed(accepted.queue ?? []);
+        }
       }
       if (action === "subscribe") setMessage("Подписка на спот и выбранную дисциплину оформлена.");
-      if (action === "mine" || action === "inbox" || action === "review") await refreshOwn();
+      if (action === "mine" || action === "inbox" || action === "review" || action === "revoke")
+        await refreshOwn();
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Не удалось выполнить действие.");
+      if (current())
+        setMessage(err instanceof Error ? err.message : "Не удалось выполнить действие.");
     } finally {
-      setBusy(false);
+      if (current()) setBusy(false);
     }
   }
 
@@ -400,6 +503,83 @@ export function SpotCatchFlow() {
                   Подтверждение допускается только после проверки фото, веса, способа ловли,
                   законности и места поимки.
                 </p>
+              </article>
+            ))}
+            {queue !== null && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void act("reviewed")}
+                className="mt-4 text-sm font-semibold text-[#D7FF35] underline"
+              >
+                Подтверждённые уловы и пересмотр
+              </button>
+            )}
+            {reviewed?.map((item) => (
+              <article
+                key={item.catch_id}
+                className="mt-3 space-y-3 rounded-xl border border-white/10 p-3"
+              >
+                <p className="text-sm text-white">
+                  {item.species} · {item.weight_g} г · {item.length_mm} мм · {item.league}
+                </p>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void act("evidence", { catch_id: item.catch_id })}
+                  className="text-xs font-bold text-[#D7FF35] underline"
+                >
+                  Открыть фото на 60 секунд
+                </button>
+                {evidence[item.catch_id] && (
+                  <img
+                    src={evidence[item.catch_id]}
+                    alt="Закрытое фотодоказательство для пересмотра"
+                    className="max-h-72 rounded-xl object-contain"
+                  />
+                )}
+                <label className="block text-xs text-zinc-300">
+                  Причина отзыва подтверждения
+                  <textarea
+                    className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
+                    minLength={10}
+                    maxLength={500}
+                    value={revokeReasons[item.catch_id] ?? ""}
+                    onChange={(event) =>
+                      setRevokeReasons((old) => ({ ...old, [item.catch_id]: event.target.value }))
+                    }
+                  />
+                </label>
+                <label className="flex items-start gap-2 text-xs text-zinc-300">
+                  <input
+                    type="checkbox"
+                    checked={revokeChecked[item.catch_id] ?? false}
+                    onChange={(event) =>
+                      setRevokeChecked((old) => ({ ...old, [item.catch_id]: event.target.checked }))
+                    }
+                  />
+                  Я проверил основания пересмотра. Подтверждение будет отозвано, титулы пересчитаны,
+                  участники уведомлены.
+                </label>
+                <button
+                  type="button"
+                  disabled={
+                    busy ||
+                    item.owner_id === uid ||
+                    !evidence[item.catch_id] ||
+                    !revokeChecked[item.catch_id] ||
+                    (revokeReasons[item.catch_id]?.trim().length ?? 0) < 10
+                  }
+                  onClick={() =>
+                    void act("revoke", {
+                      catch_id: item.catch_id,
+                      reason: revokeReasons[item.catch_id]?.trim(),
+                    })
+                  }
+                  className="rounded-lg border border-red-400/40 px-3 py-2 text-xs text-red-300 disabled:opacity-40"
+                >
+                  Отозвать подтверждение и пересчитать KING
+                </button>
               </article>
             ))}
           </div>
