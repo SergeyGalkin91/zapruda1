@@ -3118,6 +3118,10 @@ export type Database = {
       };
     };
     Functions: {
+      zc_spot_public_leaderboard: {
+        Args: { p_spot_id: string; p_league: string };
+        Returns: Json;
+      };
       accept_guide_quote: {
         Args: { p_id: string; p_method: string };
         Returns: undefined;
