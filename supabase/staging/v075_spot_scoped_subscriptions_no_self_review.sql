@@ -97,5 +97,4 @@ begin
    end loop;
  end if;
  return jsonb_build_object('decision',p_decision,'titles_changed',n);
-end $function$
-
+end $function$;
