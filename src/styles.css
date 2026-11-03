@@ -841,3 +841,38 @@
 :root[data-zapruda-background="electric-blue"] nav[aria-label="Мобильная навигация"] {
   background-color: rgba(11,32,88,.97);
 }
+
+/* Eggplant replaces legacy lavender/purple graphics only in Electric Blue.
+   Keep light text on deep eggplant for readable labels. */
+:root[data-zapruda-background="electric-blue"] :is(
+  [class*="bg-[#A78BFA]"],
+  [class*="bg-[#A99AD9]"],
+  [class*="bg-[#B4A1D7]"],
+  [class*="bg-[#292140]"]
+) {
+  background-color: #614051;
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class*="text-[#A78BFA]"],
+  [class*="text-[#A99AD9]"],
+  [class*="text-[#C4B5FD]"],
+  [class*="text-[#DDD6FE]"],
+  [class*="text-[#B4A1D7]"]
+) {
+  color: #F9ECF7;
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class*="border-[#A78BFA]"],
+  [class*="border-[#A99AD9]"],
+  [class*="border-[#B4A1D7]"]
+) {
+  border-color: #956C88;
+}
+/* Header and navigation must also follow the selected Electric Blue palette. */
+:root[data-zapruda-background="electric-blue"] header.sticky,
+:root[data-zapruda-background="electric-blue"] nav[aria-label="Мобильная навигация"] {
+  background-color: rgb(18 37 94 / 96%);
+}
+:root[data-zapruda-background="electric-blue"] nav[aria-label="Остальные разделы"] {
+  background-color: #243B83;
+}
