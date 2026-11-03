@@ -54,6 +54,8 @@ beforeAll(async () => {
     "create policy legacy_metadata_delete on public.report_photos for delete to authenticated using(true)",
   );
   await applySqlFile(db, geoMigration);
+  await applySqlFile(db, "staging/v075_report_photo_access_gate.sql");
+  await applySqlFile(db, "staging/v075_report_coordinate_acl.sql");
 }, 30000);
 beforeEach(async () => {
   await db.exec("begin");
@@ -82,19 +84,21 @@ afterAll(async () => {
 
 describe("Report privacy: real PostgreSQL policies, disconnected synthetic identities", () => {
   it.each(["anon", "authenticated"])(
-    "%s sees only sanitized public rows and objects",
+    "%s sees sanitized metadata but cannot mint Storage tokens",
     async (role) => {
       await actAsFixture(db, users.outsider, role);
       expect((await db.query("select id from public.report_photos")).rows).toEqual([
         { id: cleanPhoto },
       ]);
-      expect((await db.query("select name from storage.objects")).rows).toEqual([{ name: path() }]);
+      expect((await db.query("select name from storage.objects")).rows).toEqual([]);
     },
   );
-  it("owner retains access to their original and private derivatives", async () => {
+  it("owner retains original access; derivative reads require the visibility gateway", async () => {
     await actAsFixture(db, users.owner);
     expect((await db.query("select id from public.report_photos")).rows).toHaveLength(3);
-    expect((await db.query("select name from storage.objects")).rows).toHaveLength(3);
+    expect((await db.query("select name from storage.objects")).rows).toEqual([
+      { name: path(rawPhoto) },
+    ]);
   });
   it("stranger cannot read exact private GPS", async () => {
     await actAsFixture(db, users.outsider);
@@ -192,11 +196,14 @@ describe("Report privacy: real PostgreSQL policies, disconnected synthetic ident
       { bucket_id: "report-photos" },
     ]);
   });
-  it("public SELECT * physically contains no exact coordinates", async () => {
+  it("public readers can read public columns and have no exact-field privilege", async () => {
     await actAsFixture(db, "", "anon");
-    expect((await db.query("select latitude,longitude from public.fishing_reports")).rows).toEqual([
-      { latitude: null, longitude: null },
+    expect((await db.query("select id from public.fishing_reports")).rows).toEqual([
+      { id: report },
     ]);
+    await expect(
+      db.query("select latitude,longitude from public.fishing_reports"),
+    ).rejects.toMatchObject({ code: "42501" });
   });
   it.each([
     [1, 2],

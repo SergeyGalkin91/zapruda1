@@ -32,6 +32,7 @@ import { ActivityAchievements } from "@/components/ActivityAchievements";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import type { FishingSpecialization } from "@/lib/disciplines";
 import { supabase } from "@/integrations/supabase/client";
+import { loadPublicReportPhotos } from "@/lib/public-report-photos";
 import type { FishingProgress } from "@/lib/progression";
 import { EMPTY_PROGRESS } from "@/lib/progression";
 
@@ -151,35 +152,18 @@ function TrophyGallery({ userId }: { userId: string }) {
         if (active) setPhotos([]);
         return;
       }
-      const photoRows = await supabase
-        .from("report_photos")
-        .select("report_id,storage_path,sort_order")
-        .in(
-          "report_id",
-          list.map((x) => x.id),
-        )
-        .order("sort_order", { ascending: true })
-        .limit(36);
-      if (photoRows.error) throw photoRows.error;
-      const rows = photoRows.data ?? [];
-      if (!rows.length) {
-        if (active) setPhotos([]);
-        return;
-      }
-      const signed = await supabase.storage.from("report-photos").createSignedUrls(
-        rows.map((x) => x.storage_path),
-        3600,
-      );
-      if (signed.error) throw signed.error;
-      const titles = new Map(list.map((x) => [x.id, x.title]));
+      const gallery = await loadPublicReportPhotos(list.map((report) => report.id));
       if (active)
         setPhotos(
-          rows.flatMap((row, index) => {
-            const url = signed.data?.[index]?.signedUrl;
-            return url
-              ? [{ reportId: row.report_id, title: titles.get(row.report_id) ?? "Трофей", url }]
-              : [];
-          }),
+          list
+            .flatMap((report) =>
+              (gallery[report.id] ?? []).map((url) => ({
+                reportId: report.id,
+                title: report.title,
+                url,
+              })),
+            )
+            .slice(0, 36),
         );
     })()
       .catch(() => {

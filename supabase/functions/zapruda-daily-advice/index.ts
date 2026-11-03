@@ -48,6 +48,99 @@ function anonKey(): string {
   }
 }
 
+type XaiRejectionCode =
+  | "XAI_INSUFFICIENT_CREDITS"
+  | "XAI_INVALID_API_KEY"
+  | "XAI_MODEL_UNAVAILABLE"
+  | "XAI_ACCESS_DENIED"
+  | "XAI_RATE_LIMITED"
+  | "XAI_REQUEST_REJECTED"
+  | "XAI_PROVIDER_UNAVAILABLE";
+
+class XaiHttpError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code: XaiRejectionCode,
+  ) {
+    super(`xAI HTTP ${status}`);
+  }
+}
+
+async function xaiRejectionCode(response: Response): Promise<XaiRejectionCode> {
+  const fallback: XaiRejectionCode =
+    response.status === 401
+      ? "XAI_INVALID_API_KEY"
+      : response.status === 403
+        ? "XAI_ACCESS_DENIED"
+        : response.status === 404
+          ? "XAI_MODEL_UNAVAILABLE"
+          : response.status === 429
+            ? "XAI_RATE_LIMITED"
+            : response.status >= 500
+              ? "XAI_PROVIDER_UNAVAILABLE"
+              : "XAI_REQUEST_REJECTED";
+  // xAI may return HTTP 400 for both key and billing/request failures. Inspect
+  // only a bounded JSON error, then discard it. Never log, persist or return it.
+  if (![400, 403].includes(response.status)) {
+    await response.body?.cancel().catch(() => {});
+    return fallback;
+  }
+  const reader = response.body?.getReader();
+  if (!reader) return fallback;
+  let finished = false;
+  try {
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        finished = true;
+        break;
+      }
+      size += value.length;
+      if (size > 4096) return fallback;
+      chunks.push(value);
+    }
+    const bytes = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.length;
+    }
+    const payload: unknown = await new Response(bytes).json();
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) return fallback;
+    const record = payload as Record<string, unknown>;
+    const nested =
+      record.error && typeof record.error === "object" && !Array.isArray(record.error)
+        ? (record.error as Record<string, unknown>)
+        : {};
+    const text = [record.code, record.message, record.error, nested.code, nested.message]
+      .filter((value): value is string => typeof value === "string")
+      .join(" ")
+      .toLowerCase();
+    if (
+      /insufficient[_ -](?:credits|balance|funds|quota)|no (?:available |remaining )?credits|(?:does not|doesn't|do not|don't) have (?:any )?credits|credit balance (?:is )?(?:empty|exhausted)|spending limit/.test(
+        text,
+      )
+    )
+      return "XAI_INSUFFICIENT_CREDITS";
+    if (/invalid[_ -](?:api[_ -]?)?key|incorrect api[_ -]?key|malformed api[_ -]?key/.test(text))
+      return "XAI_INVALID_API_KEY";
+    if (
+      /model[_ -](?:not[_ -]found|unavailable|not[_ -]supported)|model.{0,100}(?:does not exist|not found|not available|deprecated|retired)/.test(
+        text,
+      )
+    )
+      return "XAI_MODEL_UNAVAILABLE";
+    return fallback;
+  } catch {
+    return fallback;
+  } finally {
+    if (!finished) await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "POST") return respond(405, { error: "Method not allowed" });
@@ -182,8 +275,7 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!upstream.ok) {
-      await upstream.body?.cancel().catch(() => {});
-      throw new Error(`xAI HTTP ${upstream.status}`);
+      throw new XaiHttpError(upstream.status, await xaiRejectionCode(upstream));
     }
     const payload = (await upstream.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
@@ -193,12 +285,13 @@ Deno.serve(async (req: Request) => {
   } catch (err) {
     // Only fixed diagnostics may reach the user-readable journal. Provider bodies
     // and arbitrary exception messages can contain credentials or request details.
-    const errorMessage =
-      err instanceof Error && /^xAI HTTP \d{3}$/.test(err.message)
-        ? err.message
+    const code =
+      err instanceof XaiHttpError
+        ? err.code
         : err instanceof Error && err.name === "TimeoutError"
           ? "XAI_TIMEOUT"
           : "XAI_UPSTREAM_ERROR";
+    const errorMessage = err instanceof XaiHttpError ? `${err.message}; ${code}` : code;
     await admin.rpc("complete_ai_daily_advice_slot", {
       p_id: rowId,
       p_lease_token: leaseToken,
@@ -209,6 +302,7 @@ Deno.serve(async (req: Request) => {
     });
     return respond(502, {
       error: "ИИ не ответил. Успешный совет не засчитан. Попробуй позже.",
+      code,
       advice_day: adviceDay,
     });
   }
