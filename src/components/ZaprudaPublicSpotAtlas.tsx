@@ -5,11 +5,16 @@ import { approvedMapUrl, isApprovedPublicSpot, type PublicSpot } from "@/lib/app
 
 /** Public-only ZAPRUDA SPOT atlas. No user coordinates, no paid/private location lookups. */
 export function ZaprudaPublicSpotAtlas() {
+  const stagingOnly =
+    import.meta.env["VITE_SUPABASE_URL"] === "https://yudtbifopfnjtjanaqrd.supabase.co" ||
+    (typeof window !== "undefined" &&
+      /^deploy-preview-[0-9]+--zapruda1[.]netlify[.]app$/.test(window.location.hostname));
   const [spots, setSpots] = useState<PublicSpot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!stagingOnly) return;
     let active = true;
     void supabase
       .from("zc_public_spots")
@@ -28,9 +33,11 @@ export function ZaprudaPublicSpotAtlas() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [stagingOnly]);
 
   const mapUrl = useMemo(() => approvedMapUrl(spots), [spots]);
+
+  if (!stagingOnly) return null;
 
   return (
     <section
