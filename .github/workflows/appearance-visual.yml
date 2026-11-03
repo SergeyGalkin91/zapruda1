@@ -1,4 +1,4 @@
-name: ZAPRUDA Electric Blue viewport review
+name: ZAPRUDA Electric Blue cross-browser review
 # Review-only browser smoke: no private keys or production Supabase access.
 on:
   push:
@@ -16,7 +16,7 @@ permissions:
 jobs:
   visual-appearance:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       NITRO_PRESET: node-server
       VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
@@ -34,11 +34,11 @@ jobs:
         run: |
           bun run build
           test -f .output/server/index.mjs
-      - name: Install Chromium and Playwright
+      - name: Install Chromium, Firefox, WebKit and Playwright
         run: |
           bun add --dev playwright
-          bunx playwright install --with-deps chromium
-      - name: Check mobile 390px and desktop 1440px, save screenshots
+          bunx playwright install --with-deps chromium firefox webkit
+      - name: Check mobile 390px and desktop 1440px in three engines; save screenshots
         shell: bash
         run: |
           set -euo pipefail
@@ -61,12 +61,15 @@ jobs:
             cat appearance-evidence/server.log
             exit 1
           fi
-          node scripts/visual-theme-smoke.cjs
+          for engine in chromium webkit firefox; do
+            echo "Checking appearance in $engine"
+            VISUAL_BROWSER="$engine" node scripts/visual-theme-smoke.cjs
+          done
       - name: Upload viewport screenshots and metrics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: electric-blue-appearance-evidence
+          name: electric-blue-cross-browser-evidence
           path: appearance-evidence/
           if-no-files-found: ignore
           retention-days: 14

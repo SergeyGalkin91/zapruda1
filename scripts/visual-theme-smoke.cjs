@@ -1,12 +1,15 @@
 /**
  * Browser-level, read-only appearance acceptance for #76.
  * Uses a CI Supabase placeholder: never logs in, writes data or calls production endpoints.
- * Requires a locally started Nitro app and playwright Chromium.
+ * Requires a locally started Nitro app and Playwright browsers.
  */
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { chromium } = require("playwright");
+const { chromium, webkit, firefox } = require("playwright");
+const ENGINE = process.env.VISUAL_BROWSER || "chromium";
+const ENGINES = { chromium, webkit, firefox };
+assert(ENGINE in ENGINES, "Unsupported VISUAL_BROWSER: " + ENGINE);
 
 const BASE = process.env.VISUAL_BASE_URL || "http://127.0.0.1:3000";
 const OUT = path.resolve(process.env.VISUAL_OUTPUT_DIR || "appearance-evidence");
@@ -47,7 +50,7 @@ for (const [name, ratio] of Object.entries(paletteRatios)) {
 }
 
 function fileFor(viewport, name) {
-  return path.join(OUT, viewport + "-" + name + ".png");
+  return path.join(OUT, ENGINE + "-" + viewport + "-" + name + ".png");
 }
 async function variables(page) {
   return page.evaluate(() => {
@@ -83,8 +86,13 @@ async function openRoute(page, route) {
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
-  const evidence = { runAt: new Date().toISOString(), paletteRatios, viewports: [] };
+  const browser = await ENGINES[ENGINE].launch({ headless: true });
+  const evidence = {
+    runAt: new Date().toISOString(),
+    browser: ENGINE,
+    paletteRatios,
+    viewports: [],
+  };
   try {
     for (const viewport of [
       { label: "mobile-390", width: 390, height: 844, mobile: true },
@@ -92,11 +100,26 @@ async function openRoute(page, route) {
     ]) {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
-        isMobile: viewport.mobile,
+        isMobile: viewport.mobile && ENGINE !== "firefox",
         hasTouch: viewport.mobile,
         deviceScaleFactor: 1,
         locale: "ru-RU",
         reducedMotion: "reduce",
+      });
+      // Stub only the isolated CI placeholder host. Real app behavior/DOM and
+      // theme state still run in-browser; cross-origin network is not under test.
+      // Without this WebKit logs unhandled CORS errors for the intentionally
+      // non-existent host, which are unrelated to appearance regressions.
+      await context.route("https://ci-placeholder.supabase.co/**", async (route) => {
+        const url = new URL(route.request().url());
+        await route.fulfill({
+          status: url.pathname.startsWith("/auth/") ? 401 : 200,
+          contentType: "application/json",
+          headers: { "access-control-allow-origin": "*" },
+          body: url.pathname.startsWith("/auth/")
+            ? JSON.stringify({ message: "No test session", code: "not_authenticated" })
+            : "[]",
+        });
       });
       const page = await context.newPage();
       const runtimeErrors = [];
@@ -232,17 +255,24 @@ async function openRoute(page, route) {
           routes: checks,
           browserErrors: runtimeErrors,
         });
-        console.log("PASS appearance viewport:", viewport.label, "routes", checks.length);
+        console.log(
+          "PASS appearance browser:",
+          ENGINE,
+          "viewport:",
+          viewport.label,
+          "routes",
+          checks.length,
+        );
       } finally {
         await page.close();
         await context.close();
       }
     }
     console.log("PASS palette ratios:", JSON.stringify(paletteRatios));
-    console.log("PASS all browser appearance checks");
+    console.log("PASS all browser appearance checks:", ENGINE);
   } finally {
     await browser.close();
-    fs.writeFileSync(path.join(OUT, "results.json"), JSON.stringify(evidence, null, 2));
+    fs.writeFileSync(path.join(OUT, ENGINE + "-results.json"), JSON.stringify(evidence, null, 2));
   }
 })().catch((error) => {
   console.error("VISUAL APPEARANCE FAILURE:", error);
