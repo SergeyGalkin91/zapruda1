@@ -303,3 +303,103 @@
 @media (max-width: 639px) {
   .z-room-row { min-height: 80px; gap: 0.75rem; }
 }
+
+/*
+ * Issue #76: Electric Blue MUST NOT inherit green/black surfaces from the
+ * separately approved Matte Black theme. The original design remains untouched.
+ * Existing pages use literal Tailwind arbitrary colors: overriding only --card
+ * does not change them. These selectors apply ONLY when Electric Blue is chosen.
+ * Keep photos, transparent overlays, neutral white text and lime CTAs intact.
+ */
+:root[data-zapruda-background="electric-blue"] {
+  --z-theme-blue-surface: #1B2D71;
+  --z-theme-blue-elevated: #243B83;
+  --z-theme-blue-header: #12255E;
+  --z-theme-eggplant: #614051;
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class*="bg-[#0D100C]"],
+  [class*="bg-[#171C14]"],
+  [class*="bg-[#080A09]"],
+  [class*="bg-[#171527]"],
+  [class*="bg-[#0B0D0B]"],
+  [class*="bg-[#121A12]"],
+  [class*="bg-[#141D20]"],
+  [class*="bg-[#141914]"],
+  [class*="bg-[#17151D]"],
+  [class*="bg-[#101314]"],
+  [class*="bg-[#151812]"],
+  [class*="bg-[#171a15]"],
+  [class*="bg-[#070B10]"],
+  [class*="bg-[#0D121C]"],
+  [class*="bg-[#060B10]"],
+  [class*="bg-[#151825]"],
+  [class*="bg-[#171528]"],
+  [class*="bg-[#151925]"],
+  [class*="bg-[#0E120F]"],
+  [class*="bg-[#10131A]"],
+  [class*="bg-[#0B1019]"],
+  [class*="bg-[#0A0C16]"],
+  [class*="bg-[#292140]"],
+  [class*="bg-[#211B2D]"],
+  [class*="bg-[#11131B]"],
+  [class*="bg-[#1B1B2A]"],
+  [class*="bg-[#0C100E]"],
+  [class*="bg-[#191522]"],
+  [class*="bg-[#1A1D19]"],
+  [class*="bg-[#111511]"],
+  [class*="bg-[#1A2016]"],
+  [class*="bg-[#151915]"],
+  [class*="bg-[#0E120E]"],
+  [class*="bg-[#151A14]"],
+  [class*="bg-[#161D13]"]
+) {
+  background-color: var(--z-theme-blue-surface);
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class*="from-[#1B2718]"],
+  [class*="from-[#1E251A]"],
+  [class*="from-[#27321b]"],
+  [class*="from-[#1F1B29]"]
+) {
+  background-image: linear-gradient(135deg, #2454BA 0%, #1B2D71 54%, #614051 100%);
+}
+/* Header, mobile navigation and menu are consistently blue, not dark green. */
+:root[data-zapruda-background="electric-blue"] header.sticky,
+:root[data-zapruda-background="electric-blue"] nav[aria-label="Мобильная навигация"] {
+  background-color: rgb(18 37 94 / 96%);
+}
+:root[data-zapruda-background="electric-blue"] nav[aria-label="Остальные разделы"] {
+  background-color: var(--z-theme-blue-elevated);
+}
+/* Chat's independently configurable green/forest presets never bleed into
+   the application's Electric Blue selection. Explicit lime outgoing messages
+   and higher-contrast incoming messages are retained. */
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window {
+  background: #1B2D71;
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble:not(.zapruda-chat-own-bubble):not(.zapruda-chat-incoming-bubble) {
+  background-color: #243B83;
+  border-color: #526BB6;
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-incoming-bubble {
+  background-color: #614051;
+  border-color: #956C88;
+  color: #F9ECF7;
+}
+/* Purple utilities from the original graphics become eggplant surfaces only
+   in Electric Blue; light labels remain legible, not dark-on-blue. */
+:root[data-zapruda-background="electric-blue"] [class*="bg-[#A78BFA]"],
+:root[data-zapruda-background="electric-blue"] [class*="bg-[#A99AD9]"] {
+  background-color: #614051;
+}
+:root[data-zapruda-background="electric-blue"] [class*="text-[#A78BFA]"],
+:root[data-zapruda-background="electric-blue"] [class*="text-[#A99AD9]"],
+:root[data-zapruda-background="electric-blue"] [class*="text-[#C4B5FD]"],
+:root[data-zapruda-background="electric-blue"] [class*="text-[#DDD6FE]"] {
+  color: #F9ECF7;
+}
+:root[data-zapruda-background="electric-blue"] [class*="border-[#A78BFA]"],
+:root[data-zapruda-background="electric-blue"] [class*="border-[#A99AD9]"] {
+  border-color: #956C88;
+}
