@@ -172,10 +172,7 @@ async function main() {
   const ownerQueue = await invoke(users.get("OWNER"), "queue");
   if (process.env.ZAPRUDA_SPOT_E2E_REQUIRE_MODERATOR === "true") {
     assert.ifError(ownerQueue.error);
-    assert.ok(
-      Array.isArray(ownerQueue.data?.queue),
-      "OWNER must be appointed as SPOT moderator",
-    );
+    assert.ok(Array.isArray(ownerQueue.data?.queue), "OWNER must be appointed as SPOT moderator");
     console.log("PASS: owner is appointed SPOT moderator");
     const { data: approved, error: catalogError } = await users.get("OWNER")
       .from("zc_public_spots")
@@ -186,9 +183,7 @@ async function main() {
     assert.ifError(catalogError);
     assert.ok(
       approved?.some((spot) =>
-        spot.disciplines?.some((league) =>
-          league === "street" || league === "ultralight",
-        ),
+        spot.disciplines?.some((league) => league === "street" || league === "ultralight"),
       ),
       "No legally reviewed STREET or UL pilot SPOT is approved",
     );
