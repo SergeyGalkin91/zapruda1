@@ -9,7 +9,7 @@ services:
         GIT_SHA: ${ZAPRUDA_GIT_SHA:-local-staging}
         VITE_SUPABASE_URL: ${STAGING_SUPABASE_URL:?Set STAGING_SUPABASE_URL in private environment}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${STAGING_SUPABASE_PUBLISHABLE_KEY:?Set STAGING_SUPABASE_PUBLISHABLE_KEY in private environment}
-    image: zapruda-community:0.7.0-staging
+    image: zapruda-community:0.7.1-staging
     ports:
       - "127.0.0.1:3080:3000"
     restart: unless-stopped

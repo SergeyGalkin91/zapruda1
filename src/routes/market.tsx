@@ -1,5 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, BadgeCheck, Camera, MapPin, PackageCheck, ShieldCheck, Wrench } from "lucide-react";
+import {
+  ArrowUpRight,
+  BadgeCheck,
+  Camera,
+  MapPin,
+  PackageCheck,
+  ShieldCheck,
+  Wrench,
+} from "lucide-react";
 import { Shell } from "@/components/Shell";
 
 export const Route = createFileRoute("/market")({
@@ -8,7 +16,8 @@ export const Route = createFileRoute("/market")({
       { title: "Барахолка — в разработке | ZAPRUDA" },
       {
         name: "description",
-        content: "Барахолка ZAPRUDA готовится к запуску. В будущем здесь можно будет покупать и продавать рыболовные снасти.",
+        content:
+          "Барахолка ZAPRUDA готовится к запуску. В будущем здесь можно будет покупать и продавать рыболовные снасти.",
       },
     ],
   }),
@@ -53,7 +62,9 @@ function MarketComingSoon() {
             <Wrench aria-hidden="true" className="size-3.5" />
             Раздел в разработке
           </div>
-          <p className="mt-8 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">ZAPRUDA / MARKETPLACE</p>
+          <p className="mt-8 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">
+            ZAPRUDA / MARKETPLACE
+          </p>
           <h1 className="mt-3 text-4xl font-black leading-[1.1] tracking-tight text-white sm:text-6xl">
             Барахолка <span className="text-lime-300">для своих.</span>
           </h1>
@@ -71,7 +82,10 @@ function MarketComingSoon() {
             <span className="text-sm text-zinc-500">Объявления пока недоступны</span>
           </div>
         </div>
-        <div className="pointer-events-none absolute -bottom-9 -right-3 hidden select-none text-[11rem] font-black leading-none tracking-[-0.12em] text-lime-300/[0.05] lg:block" aria-hidden="true">
+        <div
+          className="pointer-events-none absolute -bottom-9 -right-3 hidden select-none text-[11rem] font-black leading-none tracking-[-0.12em] text-lime-300/[0.05] lg:block"
+          aria-hidden="true"
+        >
           Z.
         </div>
       </section>
@@ -79,21 +93,32 @@ function MarketComingSoon() {
       <section className="mt-10" aria-labelledby="market-plans-heading">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-lime-300">Что появится здесь</p>
-            <h2 id="market-plans-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Разрабатываем с умом</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-lime-300">
+              Что появится здесь
+            </p>
+            <h2 id="market-plans-heading" className="mt-2 text-2xl font-bold sm:text-3xl">
+              Разрабатываем с умом
+            </h2>
           </div>
-          <span className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-400">Планы, не готовые функции</span>
+          <span className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-400">
+            Планы, не готовые функции
+          </span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {plannedFeatures.map((feature) => {
             const Icon = feature.icon;
             return (
-              <article key={feature.number} className="rounded-2xl border border-white/10 bg-white/[0.025] p-5 transition hover:border-lime-300/25 sm:p-6">
+              <article
+                key={feature.number}
+                className="rounded-2xl border border-white/10 bg-white/[0.025] p-5 transition hover:border-lime-300/25 sm:p-6"
+              >
                 <div className="mb-5 flex items-start justify-between">
                   <div className="flex size-11 items-center justify-center rounded-xl border border-lime-300/25 bg-lime-300/[0.06] text-lime-300">
                     <Icon aria-hidden="true" className="size-5" strokeWidth={1.6} />
                   </div>
-                  <span className="text-xs font-bold tracking-widest text-zinc-600">{feature.number}</span>
+                  <span className="text-xs font-bold tracking-widest text-zinc-600">
+                    {feature.number}
+                  </span>
                 </div>
                 <h3 className="text-base font-bold text-white">{feature.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">{feature.text}</p>
@@ -105,16 +130,23 @@ function MarketComingSoon() {
 
       <section className="mt-6 flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#151711] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div className="flex items-start gap-3">
-          <BadgeCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-lime-300" strokeWidth={1.7} />
+          <BadgeCheck
+            aria-hidden="true"
+            className="mt-0.5 size-5 shrink-0 text-lime-300"
+            strokeWidth={1.7}
+          />
           <div>
             <h2 className="font-bold">Сначала — надёжная основа</h2>
             <p className="mt-1 max-w-xl text-sm leading-6 text-zinc-400">
-              Сейчас приоритет у ленты рыбалок, фотоотчётов, общения и профилей. К барахолке вернёмся,
-              когда будут готовы безопасность, модерация и удобный процесс публикации.
+              Сейчас приоритет у ленты рыбалок, фотоотчётов, общения и профилей. К барахолке
+              вернёмся, когда будут готовы безопасность, модерация и удобный процесс публикации.
             </p>
           </div>
         </div>
-        <Link to="/reports/new" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-lime-300/35 px-4 py-3 text-sm font-bold text-lime-300 transition hover:bg-lime-300/10">
+        <Link
+          to="/reports/new"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-lime-300/35 px-4 py-3 text-sm font-bold text-lime-300 transition hover:bg-lime-300/10"
+        >
           Новый отчёт <ArrowUpRight aria-hidden="true" className="size-4" />
         </Link>
       </section>

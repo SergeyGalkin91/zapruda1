@@ -47,12 +47,16 @@ export function ReactionBar({
         nextCounts[option.type] = rows.filter((row) => row.reaction_type === option.type).length;
       }
       setCounts(nextCounts);
-      setSelected(currentUserId
-        ? rows.filter((row) => row.user_id === currentUserId).map((row) => row.reaction_type)
-        : []);
+      setSelected(
+        currentUserId
+          ? rows.filter((row) => row.user_id === currentUserId).map((row) => row.reaction_type)
+          : [],
+      );
       setError("");
     } catch (cause) {
-      setError("Не удалось загрузить реакции: " + (cause instanceof Error ? cause.message : "ошибка сети"));
+      setError(
+        "Не удалось загрузить реакции: " + (cause instanceof Error ? cause.message : "ошибка сети"),
+      );
     } finally {
       setLoading(false);
     }
@@ -63,22 +67,31 @@ export function ReactionBar({
     void loadReactions();
     const channel = supabase
       .channel("report-reactions-" + reportId)
-      .on("postgres_changes", {
-        event: "*",
-        schema: "public",
-        table: "reactions",
-        filter: "report_id=eq." + reportId,
-      }, () => void loadReactions())
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "reactions",
+          filter: "report_id=eq." + reportId,
+        },
+        () => void loadReactions(),
+      )
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [reportId, loadReactions]);
 
   const toggle = async (emoji: string, type: string) => {
     if (busy) return;
     if (!reportId) {
       const active = selected.includes(emoji);
-      setSelected((current) => active ? current.filter((x) => x !== emoji) : [...current, emoji]);
-      setCounts((current) => ({ ...current, [emoji]: Math.max(0, (current[emoji] ?? 0) + (active ? -1 : 1)) }));
+      setSelected((current) => (active ? current.filter((x) => x !== emoji) : [...current, emoji]));
+      setCounts((current) => ({
+        ...current,
+        [emoji]: Math.max(0, (current[emoji] ?? 0) + (active ? -1 : 1)),
+      }));
       return;
     }
     if (!userId) {
@@ -89,7 +102,7 @@ export function ReactionBar({
     setBusy(type);
     setError("");
     try {
-      if (import.meta.env.VITE_ENABLE_ATOMIC_REACTIONS === "true") {
+      if (import.meta.env["VITE_ENABLE_ATOMIC_REACTIONS"] === "true") {
         // Enable only for STAGING after its RPC has been deployed and verified.
         const { error: rpcError } = await supabase.rpc(
           "toggle_report_reaction_atomic" as never,
@@ -100,14 +113,24 @@ export function ReactionBar({
         // Compatibility path until the RPC is approved and deployed to production.
         await toggleReportReaction(
           type,
-          () => supabase.from("reactions").select("id,reaction_type").eq("report_id", reportId).eq("user_id", userId),
+          () =>
+            supabase
+              .from("reactions")
+              .select("id,reaction_type")
+              .eq("report_id", reportId)
+              .eq("user_id", userId),
           (ids) => supabase.from("reactions").delete().in("id", ids),
-          () => supabase.from("reactions").insert({ report_id: reportId, user_id: userId, reaction_type: type }),
+          () =>
+            supabase
+              .from("reactions")
+              .insert({ report_id: reportId, user_id: userId, reaction_type: type }),
         );
       }
       await loadReactions();
     } catch (e) {
-      setError("Не удалось сохранить реакцию: " + (e instanceof Error ? e.message : "неизвестная ошибка"));
+      setError(
+        "Не удалось сохранить реакцию: " + (e instanceof Error ? e.message : "неизвестная ошибка"),
+      );
     } finally {
       setBusy(null);
     }
@@ -130,19 +153,31 @@ export function ReactionBar({
               onClick={() => void toggle(emoji, type)}
               className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition hover:-translate-y-0.5 hover:bg-secondary disabled:opacity-60 ${isSelected ? "border-primary bg-primary/10" : "border-border"} ${compact ? "px-2 py-1" : ""}`}
             >
-              <span>{emoji}</span><span className="text-xs tabular-nums">{counts[countKey] ?? 0}</span>
+              <span>{emoji}</span>
+              <span className="text-xs tabular-nums">{counts[countKey] ?? 0}</span>
             </button>
           );
         })}
       </div>
-      {error && <div className="mt-2 flex flex-wrap items-center gap-2" role="status">
-        <span className="text-xs text-destructive">{error}</span>
-        {reportId && <button type="button" className="min-h-10 rounded-lg border border-[#D7FF35]/40 px-3 text-xs font-semibold text-[#D7FF35] disabled:opacity-60" disabled={loading || Boolean(busy)} onClick={() => void loadReactions()}>
-          {loading ? "Загрузка…" : "Повторить"}
-        </button>}
-      </div>}
+      {error && (
+        <div className="mt-2 flex flex-wrap items-center gap-2" role="status">
+          <span className="text-xs text-destructive">{error}</span>
+          {reportId && (
+            <button
+              type="button"
+              className="min-h-10 rounded-lg border border-[#D7FF35]/40 px-3 text-xs font-semibold text-[#D7FF35] disabled:opacity-60"
+              disabled={loading || Boolean(busy)}
+              onClick={() => void loadReactions()}
+            >
+              {loading ? "Загрузка…" : "Повторить"}
+            </button>
+          )}
+        </div>
+      )}
       {reportId && !userId && !loading && !error && (
-        <p className="mt-2 text-xs text-muted-foreground">Войди в аккаунт, чтобы ставить реакции.</p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Войди в аккаунт, чтобы ставить реакции.
+        </p>
       )}
     </div>
   );

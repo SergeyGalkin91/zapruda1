@@ -11,10 +11,19 @@ export function ActivityTracker() {
     let lastActionAt = 0;
     let lastSubmittedAt = 0;
     let submitting = false;
-    const touched = () => { if (document.visibilityState === "visible") lastActionAt = Date.now(); };
+    const touched = () => {
+      if (document.visibilityState === "visible") lastActionAt = Date.now();
+    };
 
-    void supabase.auth.getUser().then(({ data }) => { activeId = data.user?.id ?? null; }).catch(() => {});
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    void supabase.auth
+      .getUser()
+      .then(({ data }) => {
+        activeId = data.user?.id ?? null;
+      })
+      .catch(() => {});
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       activeId = session?.user?.id ?? null;
     });
 
@@ -23,7 +32,7 @@ export function ActivityTracker() {
       if (Date.now() - lastActionAt > 75_000 || Date.now() - lastSubmittedAt < FIVE_MINUTES) return;
       submitting = true;
       // The DB provides the 5-minute server-time window, user may only insert their own id.
-      const { error } = await (supabase as any).from("user_activity_windows").insert({ user_id: activeId });
+      const { error } = await supabase.from("user_activity_windows").insert({ user_id: activeId });
       if (!error || error.code === "23505") lastSubmittedAt = Date.now();
       submitting = false;
     };
@@ -32,7 +41,9 @@ export function ActivityTracker() {
     window.addEventListener("keydown", touched);
     window.addEventListener("scroll", touched, { passive: true });
     window.addEventListener("touchstart", touched, { passive: true });
-    const timer = window.setInterval(() => { void pulse(); }, 20_000);
+    const timer = window.setInterval(() => {
+      void pulse();
+    }, 20_000);
     return () => {
       window.clearInterval(timer);
       subscription.unsubscribe();
