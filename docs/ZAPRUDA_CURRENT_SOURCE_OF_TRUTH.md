@@ -1,3 +1,5 @@
+> **Официальный домен (решение владельца от 04.11.2026):** `zaprudacommunity.ru` — приобретён, в панели регистратора «Активен», оплачен до **04.11.2027**; NS: `ns1.nameself.com` / `ns2.nameself.com`. Покупка и регистрация **не подтверждают** работающий веб-сайт или корректный TLS/DNS. Подключение, STAGING/production разведение, Auth redirects и приёмка описаны в [ZAPRUDA_OFFICIAL_DOMAIN.md](ZAPRUDA_OFFICIAL_DOMAIN.md). Не менять `main`, production и DNS без разрешения.
+
 # ZAPRUDA COMMUNITY — рабочий кандидат v0.7.5 SPOT
 
 **Актуальная рабочая ветка:** `release/v0.7.5-spot`, [PR #85](https://github.com/SergeyGalkin91/zapruda1/pull/85). Пакет приложения — **0.7.5**. Статус: подготовка пилота, не production-релиз.
