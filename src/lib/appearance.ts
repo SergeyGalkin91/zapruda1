@@ -1,5 +1,5 @@
 /** Local-only appearance settings. Never stores passwords or account information. */
-export type AppBackground = "classic" | "forest" | "graphite" | "night";
+export type AppBackground = "classic" | "forest" | "graphite" | "night" | "bright-blue";
 export type ChatBackground = "plain" | "forest" | "slate" | "water";
 export type Appearance = { background: AppBackground; chat: ChatBackground };
 
@@ -13,6 +13,7 @@ export const APP_BACKGROUNDS: ReadonlyArray<{
   { value: "forest", title: "Лес", description: "Тёмные зелёные оттенки", preview: "linear-gradient(140deg,#10251A,#07100D)" },
   { value: "graphite", title: "Графит", description: "Спокойный тёмно-серый", preview: "linear-gradient(140deg,#292D31,#101215)" },
   { value: "night", title: "Ночная вода", description: "Глубокий сине-зелёный", preview: "linear-gradient(140deg,#132C32,#071216)" },
+  { value: "bright-blue", title: "Яркий синий", description: "Сочный синий фон, лайм и фиолетовый остаются", preview: "radial-gradient(circle at 24% 10%,#3275FF 0%,#1147C5 52%,#071D66 100%)" },
 ];
 
 export const CHAT_BACKGROUNDS: ReadonlyArray<{
