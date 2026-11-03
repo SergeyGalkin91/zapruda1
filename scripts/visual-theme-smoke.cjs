@@ -172,10 +172,10 @@ async function openRoute(page, route) {
           panel: getComputedStyle(document.querySelector('section[aria-labelledby="app-background-title"]')).backgroundColor,
           headerGradient: getComputedStyle(document.querySelector("main header")).backgroundImage,
         }));
-        assert.equal(settingsSurfaces.panel, "rgb(21, 45, 114)", "Settings panel kept its old olive fill");
+        assert.equal(settingsSurfaces.panel, "rgb(26, 54, 127)", "Settings panel kept its old olive fill");
         assert(
-          settingsSurfaces.headerGradient.includes("25, 79, 187") ||
-            settingsSurfaces.headerGradient.includes("25,79,187"),
+          settingsSurfaces.headerGradient.includes("32, 82, 187") ||
+            settingsSurfaces.headerGradient.includes("32,82,187"),
           "Settings hero kept its old olive gradient",
         );
         assert.equal(await blue.getAttribute("aria-pressed"), "true");
@@ -215,8 +215,8 @@ async function openRoute(page, route) {
               };
             });
             assert.equal(feedSurface.hero, "rgb(21, 45, 114)", "Feed hero retained matte/olive surface");
-            assert.equal(feedSurface.street, "rgb(21, 45, 114)", "Street card retained dark green");
-            assert.equal(feedSurface.helpCard, "rgb(32, 60, 136)", "Lime-tinted card looked olive");
+            assert.equal(feedSurface.street, "rgb(32, 58, 134)", "Street card retained dark green");
+            assert.equal(feedSurface.helpCard, "rgb(32, 58, 134)", "Lime-tinted card looked olive");
           }
           checks.push({ route, background: actual.background, overflow: actual.horizontalOverflow });
           if (route === "/" || route === "/chat") {
