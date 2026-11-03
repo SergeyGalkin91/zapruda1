@@ -126,7 +126,25 @@ async function main() {
   for (const role of ["SEATED", "RACER_A", "RACER_B"]) {
     const { data, error } = await invoke(users.get(role), "queue");
     assert.ok(error || data?.error, "Non-moderator may read review queue: " + role);
-    console.log("PASS: moderation queue access denied for " + role);
+    const forbiddenReview = await invoke(users.get(role), "review", {
+      catch_id: randomUUID(),
+      decision: "verified",
+      lawful: true,
+      ul_gear_valid: true,
+      micro_welfare_valid: true,
+    });
+    assert.ok(
+      forbiddenReview.error || forbiddenReview.data?.error,
+      "Non-moderator could approve a catch: " + role,
+    );
+    const forbiddenEvidence = await invoke(users.get(role), "evidence", {
+      catch_id: randomUUID(),
+    });
+    assert.ok(
+      forbiddenEvidence.error || forbiddenEvidence.data?.error,
+      "Non-moderator could read private evidence: " + role,
+    );
+    console.log("PASS: queue/review/private-evidence denied for " + role);
   }
 
   for (const role of roles) {
