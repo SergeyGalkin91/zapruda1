@@ -196,7 +196,10 @@ Deno.serve(async (req: Request) => {
       if (action === "subscribe") {
         const { error } = await userClient
           .from("zc_spot_subscriptions")
-          .upsert({ user_id: user.id, spot_id: spotId }, { onConflict: "user_id,spot_id", ignoreDuplicates: true });
+          .upsert(
+            { user_id: user.id, spot_id: spotId },
+            { onConflict: "user_id,spot_id", ignoreDuplicates: true },
+          );
         return error
           ? respond({ error: "Subscription denied" }, 400, origin)
           : respond({ subscribed: true }, 200, origin);
