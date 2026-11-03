@@ -87,10 +87,10 @@ async function negativeUploadProbe(client) {
   form.set("captured_at", new Date().toISOString());
   const { data, error } = await client.functions.invoke(API, { body: form });
   assert.ok(error || data?.error, "Unapproved spot received a catch");
-  const rejected =
-    error?.context && typeof error.context.json === "function"
-      ? await error.context.json().catch(() => null)
-      : data;
+  let rejected = data;
+  if (error?.context && typeof error.context.json === "function") {
+    rejected = await error.context.json().catch(() => null);
+  }
   assert.equal(rejected?.error, "Record submission rejected", "Wrong negative-upload rejection");
   const after = await invoke(client, "mine");
   assert.ifError(after.error);
@@ -172,7 +172,10 @@ async function main() {
   const ownerQueue = await invoke(users.get("OWNER"), "queue");
   if (process.env.ZAPRUDA_SPOT_E2E_REQUIRE_MODERATOR === "true") {
     assert.ifError(ownerQueue.error);
-    assert.ok(Array.isArray(ownerQueue.data?.queue), "OWNER must be appointed as SPOT moderator");
+    assert.ok(
+      Array.isArray(ownerQueue.data?.queue),
+      "OWNER must be appointed as SPOT moderator",
+    );
     console.log("PASS: owner is appointed SPOT moderator");
     const { data: approved, error: catalogError } = await users.get("OWNER")
       .from("zc_public_spots")
@@ -199,9 +202,7 @@ async function main() {
   for (const client of users.values()) {
     await client.auth.signOut();
   }
-  console.log(
-    "SPOT v0.7.5 AUTHORIZATION PREFLIGHT PASS (read-only; not a live catch / KING E2E).",
-  );
+  console.log("SPOT v0.7.5 AUTHORIZATION PREFLIGHT PASS (read-only; not a live catch / KING E2E).");
 }
 
 main().catch((error) => {
