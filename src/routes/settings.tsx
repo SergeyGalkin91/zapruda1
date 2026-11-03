@@ -4,7 +4,7 @@ import { ArrowLeft, Check, MessageCircle, Monitor, RotateCcw, Settings2, ShieldC
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  APP_BACKGROUNDS, CHAT_BACKGROUNDS, DEFAULT_APPEARANCE,
+  APP_BACKGROUNDS, CHAT_BACKGROUNDS, ELECTRIC_BLUE_CHAT_PREVIEWS, DEFAULT_APPEARANCE,
   loadAppearance, applyAppearance, saveAppearance, type Appearance,
 } from "@/lib/appearance";
 
@@ -92,17 +92,20 @@ function SettingsPage() {
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {CHAT_BACKGROUNDS.map(item => {
             const selected = appearance.chat === item.value;
+            const display = appearance.background === "electric-blue"
+              ? ELECTRIC_BLUE_CHAT_PREVIEWS[item.value]
+              : item;
             return <button key={item.value} type="button" aria-pressed={selected}
               onClick={() => change({ ...appearance, chat: item.value })}
               className={"rounded-2xl border p-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35] " +
                 (selected ? "border-[#D7FF35] bg-[#D7FF35]/10" : "border-white/10 bg-black/15 hover:border-[#D7FF35]/45")}>
-              <span className="relative block h-20 overflow-hidden rounded-xl border border-white/10" style={{ background: item.preview }}>
+              <span className="relative block h-20 overflow-hidden rounded-xl border border-white/10" style={{ background: display.preview }}>
                 <span className="absolute left-3 top-3 rounded-lg bg-black/30 px-3 py-1.5 text-[10px] text-white">Привет, как клёв?</span>
                 <span className="absolute bottom-3 right-3 rounded-lg border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[10px] text-[#D7FF35]">Отлично! 🎣</span>
                 {selected && <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-[#D7FF35] text-black"><Check className="size-4" /></span>}
               </span>
-              <span className="mt-3 block text-sm font-bold text-white">{item.title}</span>
-              <span className="mt-1 block text-xs text-zinc-400">{item.description}</span>
+              <span className="mt-3 block text-sm font-bold text-white">{display.title}</span>
+              <span className="mt-1 block text-xs text-zinc-400">{display.description}</span>
             </button>;
           })}
         </div>
