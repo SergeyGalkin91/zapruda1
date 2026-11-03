@@ -1,1 +1,5 @@
 project_id = "sonvniuwtvzzyuglscah"
+
+# Deploy to an explicitly selected STAGING project only until privacy acceptance.
+[functions.report-photo-access]
+verify_jwt = false
