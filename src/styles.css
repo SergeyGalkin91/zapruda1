@@ -157,6 +157,64 @@
   color: #F9ECF7;
 }
 
+/* #76 — Electric Blue must not inherit legacy olive/forest hardcoded cards.
+   Restrict remapping to the optional mode; original Matte Black has NO overrides.
+   Exact class attribute selectors target existing Tailwind arbitrary-color tokens,
+   including the persistent mobile nav and route-local card surfaces. */
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]/95"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#080A09]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#080A09]/95"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171C14]"] {
+  background-color: #102E88 !important;
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0B]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#121A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#141914]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151915]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0C100E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#111511]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A2016]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151A14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0E120E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0E120F]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151812]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171a15]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#161D13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A1D19]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#27321b]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1E251A]"] {
+  background-color: #1B2D71 !important;
+}
+/* These legacy olive hero gradients were authored as static utilities.
+   Replace their composite gradient ONLY while Electric Blue is selected. */
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1E251A]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#27321b]"] {
+  background-image: linear-gradient(135deg, #243B83, #1239A6 58%, #614051) !important;
+}
+/* The settings page and hero cards use dark green legacy surfaces.
+   Keep their lime labels, switch focus and original geometry untouched. */
+:root[data-zapruda-background="electric-blue"] [class~="hover:bg-[#1A2016]"]:hover {
+  background-color: #243B83 !important;
+}
+/* Extra scope for fixed green chat backgrounds when the user has left
+   an old preference selected; Electric Blue should not display forest green. */
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window {
+  background: #132E7A !important;
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble:not(.zapruda-chat-own-bubble) {
+  background-color: #614051 !important;
+  border-color: #92718B !important;
+  color: #F9ECF7 !important;
+}
+
 :root[data-zapruda-background="classic"] body { background: #090B09; }
 
 /* Chat backgrounds are scoped to message timelines: message readability is preserved. */
