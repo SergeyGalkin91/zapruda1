@@ -1,0 +1,43 @@
+# Explicitly run only on approved STAGING after review.
+# Workflow_dispatch registration on GitHub may require this workflow on default branch.
+# The repository secret STAGING_DATABASE_URL must include the STAGING project ref.
+name: ZAPRUDA STAGING geo RLS tests
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  staging-geo-rls:
+    name: Temporary reports / guest / stranger / owner / forged-admin
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail closed unless a STAGING database is explicitly configured
+        shell: bash
+        env:
+          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${STAGING_DATABASE_URL:-}" ]]; then
+            echo "::error::STAGING_DATABASE_URL repository secret is missing. No tests ran."
+            exit 1
+          fi
+          if [[ "$STAGING_DATABASE_URL" != *"yudtbifopfnjtjanaqrd"* ]]; then
+            echo "::error::Database URI does not identify the approved STAGING project. Refusing to run."
+            exit 1
+          fi
+          echo "::add-mask::$STAGING_DATABASE_URL"
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+      - name: Run rollback-only regression tests against STAGING
+        shell: bash
+        env:
+          STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          psql "$STAGING_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f supabase/tests/security/zapruda_geo_rls_staging.sql
