@@ -28,6 +28,7 @@ jobs:
       ZAPRUDA_E2E_RACER_B_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_B_EMAIL }}
       ZAPRUDA_E2E_RACER_B_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_B_PASSWORD }}
       ZAPRUDA_SPOT_E2E_REQUIRE_MODERATOR: ${{ vars.ZAPRUDA_SPOT_E2E_REQUIRE_MODERATOR }}
+      ZAPRUDA_SPOT_E2E_UPLOAD_PROBE: ${{ vars.ZAPRUDA_SPOT_E2E_UPLOAD_PROBE }}
     steps:
       - name: Checkout audited release branch
         uses: actions/checkout@v4
