@@ -375,7 +375,7 @@ describe("Yandex AI lease, quota and safe provider errors (offline handler tests
       provider: "yandex-ai-studio",
       configuration: "ready",
       primary_model: "deepseek-v4.1-flash",
-      fallback_model: "aliceai-llm-flash",
+      fallback_model: "yandexgpt-5.1",
       web_search_enabled: false,
     });
     expect(JSON.stringify(body)).not.toContain("test-only-not-a-real-key");
