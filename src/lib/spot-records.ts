@@ -62,9 +62,9 @@ export type ModeratedCatch = Readonly<{
   seasonId?: string;
 }>;
 
-export type Evaluation =
-  | { eligible: true; score: number; recordKey: string }
-  | { eligible: false; reason: string };
+type EligibleRecord = { eligible: true; score: number; recordKey: string };
+type IneligibleRecord = { eligible: false; reason: string };
+export type Evaluation = EligibleRecord | IneligibleRecord;
 
 export const NOMINATION_TITLES: Readonly<Record<RecordNomination, string>> = {
   "spot-big-fish": "KING OF THE SPOT",
@@ -98,7 +98,11 @@ function matchesLeagueRule(category: RecordCategory): boolean {
         method === "ultralight"
       );
     case "carpfishing":
-      return nomination === "carp-big-fish" && scopeType === "waterbody" && method === "carpfishing";
+      return (
+        nomination === "carp-big-fish" &&
+        scopeType === "waterbody" &&
+        method === "carpfishing"
+      );
     case "winter":
       return (
         nomination === "ice-big-fish" &&
@@ -211,12 +215,7 @@ export function shouldReplaceRecord(
  * Pure notification routing key. Delivery must be transactionally enqueued
  * after an actual server-side title change, never directly from client input.
  */
-export function titleChangedEventKey(
-  category: RecordCategory,
-  newCatchId: string,
-): string | null {
+export function titleChangedEventKey(category: RecordCategory, newCatchId: string): string | null {
   const key = recordCategoryKey(category);
-  return key && isNonEmpty(newCatchId)
-    ? JSON.stringify(["title-changed", key, newCatchId])
-    : null;
+  return key && isNonEmpty(newCatchId) ? JSON.stringify(["title-changed", key, newCatchId]) : null;
 }
