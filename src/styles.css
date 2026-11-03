@@ -655,3 +655,17 @@
 :root[data-zapruda-background="electric-blue"] [class~="text-[#B6BFB1]"] {
   color: #DDE6FF;
 }
+
+/* Electric Blue chat timeline mirrors palette-aware chat preview choices. */
+:root[data-zapruda-background="electric-blue"][data-zapruda-chat="plain"] .zapruda-chat-window {
+  background: linear-gradient(140deg, #152D72 0%, #0B2058 100%);
+}
+:root[data-zapruda-background="electric-blue"][data-zapruda-chat="forest"] .zapruda-chat-window {
+  background: radial-gradient(circle at 25% 20%, #614051 0%, #16285D 75%, #0B2058 100%);
+}
+:root[data-zapruda-background="electric-blue"][data-zapruda-chat="slate"] .zapruda-chat-window {
+  background: linear-gradient(140deg, #203A86 0%, #0B2058 100%);
+}
+:root[data-zapruda-background="electric-blue"][data-zapruda-chat="water"] .zapruda-chat-window {
+  background: radial-gradient(circle at 40% 0%, #1458DB 0%, #1239A6 55%, #0B2058 100%);
+}
