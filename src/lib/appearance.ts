@@ -1,5 +1,5 @@
 /** Local-only appearance settings. Never stores passwords or account information. */
-export type AppBackground = "classic" | "forest" | "graphite" | "night";
+export type AppBackground = "classic" | "electric-blue" | "forest" | "graphite" | "night";
 export type ChatBackground = "plain" | "forest" | "slate" | "water";
 export type Appearance = { background: AppBackground; chat: ChatBackground };
 
@@ -8,8 +8,10 @@ export const DEFAULT_APPEARANCE: Appearance = { background: "classic", chat: "pl
 
 export const APP_BACKGROUNDS: ReadonlyArray<{
   value: AppBackground; title: string; description: string; preview: string;
+  secondaryAccent?: string;
 }> = [
-  { value: "classic", title: "Классика", description: "Чёрный с фирменным лаймом", preview: "linear-gradient(140deg,#090B09,#1A2115)" },
+  { value: "classic", title: "Matte Black", description: "Матовый чёрный · лайм + сиреневый (по умолчанию)", preview: "linear-gradient(140deg,#090B09,#1A2115)", secondaryAccent: "#A99AD9" },
+  { value: "electric-blue", title: "Electric Blue", description: "Яркий синий · лайм + баклажановый", preview: "linear-gradient(145deg,#1760E8,#1239A6 65%,#091D57)", secondaryAccent: "#614051" },
   { value: "forest", title: "Лес", description: "Тёмные зелёные оттенки", preview: "linear-gradient(140deg,#10251A,#07100D)" },
   { value: "graphite", title: "Графит", description: "Спокойный тёмно-серый", preview: "linear-gradient(140deg,#292D31,#101215)" },
   { value: "night", title: "Ночная вода", description: "Глубокий сине-зелёный", preview: "linear-gradient(140deg,#132C32,#071216)" },
