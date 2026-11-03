@@ -10,9 +10,11 @@ permissions:
   contents: read
 jobs:
   conversion:
-    runs-on: ubuntu-latest
+    # Playwright 1.58.2 supports this image; ubuntu-latest now selects 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
         browser: [chromium, firefox]
     env:
