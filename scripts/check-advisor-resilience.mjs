@@ -7,6 +7,7 @@ assert.ok(["chromium", "firefox"].includes(engine));
 const browser = await (engine === "firefox" ? firefox : chromium).launch();
 const base = "http://127.0.0.1:4191";
 const results = [];
+let currentPage;
 mkdirSync("qa/advisor", { recursive: true });
 // Disconnected HTTP fixtures only. This token has no valid signature and is
 // never sent to any real Supabase project. These are UI tests, not live JWT E2E.
@@ -47,6 +48,7 @@ try {
           { user, token },
         );
       const page = await context.newPage();
+      currentPage = page;
       const errors = [],
         production = [],
         writes = [],
@@ -80,6 +82,12 @@ try {
       });
       await page.goto(base + "/assistant", { waitUntil: "domcontentloaded" });
       await page.getByRole("heading", { name: "План рыбалки и совет Grok", exact: true }).waitFor();
+      // The server-rendered form is visible before React attaches handlers.
+      // Wait for the disconnected Auth fixture's client render before typing;
+      // a hung Auth path is separately covered by the component regression.
+      if (authenticated)
+        await page.getByRole("button", { name: "Добавить совет Grok", exact: true }).waitFor();
+      else await page.getByRole("link", { name: "войди в аккаунт", exact: true }).waitFor();
       const place = page.getByRole("textbox", { name: "Водоём / примерное место", exact: true });
       await place.fill("QA синтетический водоём");
       await page.getByRole("combobox", { name: "Рыба", exact: true }).selectOption("Окунь");
@@ -147,6 +155,12 @@ try {
     JSON.stringify({ transport: "disconnected synthetic HTTP fixtures", results }, null, 2),
   );
   console.log("PASS advisor availability", JSON.stringify(results));
+} catch (error) {
+  if (currentPage && !currentPage.isClosed())
+    await currentPage
+      .screenshot({ path: `qa/advisor/${engine}-failure.png`, fullPage: true })
+      .catch(() => {});
+  throw error;
 } finally {
   await browser.close();
 }
