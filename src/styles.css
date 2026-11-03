@@ -909,3 +909,12 @@
   background-color: #203A86 !important;
   background-image: none !important;
 }
+:root[data-zapruda-background="electric-blue"] .z-electric-feed-eggplant {
+  background-color: #614051 !important;
+  background-image: none !important;
+  border-color: #A983A0 !important;
+}
+:root[data-zapruda-background="electric-blue"] .z-electric-hero-glow {
+  background-color: rgb(97 64 81 / 24%) !important;
+}
+
