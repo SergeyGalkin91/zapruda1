@@ -128,6 +128,18 @@
 :root[data-zapruda-background="night"] body {
   background: radial-gradient(ellipse 85% 60% at 50% -15%,#17404A 0%,#09161A 72%,#070D13 100%) fixed;
 }
+/* Opt-in bright blue only: classic matte black remains the default. Brand accents stay unchanged. */
+:root[data-zapruda-background="bright-blue"] {
+  --background: #1048B6;
+  --card: #164497;
+  --secondary: #2856AC;
+  --muted: #17428D;
+  --border: #5479CB;
+  --input: #426ABF;
+}
+:root[data-zapruda-background="bright-blue"] body {
+  background: linear-gradient(155deg, #2262D8 0%, #1048B6 45%, #09285E 100%) fixed;
+}
 :root[data-zapruda-background="classic"] body { background: #090B09; }
 
 /* Chat backgrounds are scoped to message timelines: message readability is preserved. */
