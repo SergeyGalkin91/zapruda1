@@ -3,6 +3,7 @@ import {
   APP_BACKGROUNDS,
   APPEARANCE_STORAGE_KEY,
   DEFAULT_APPEARANCE,
+  ELECTRIC_BLUE_CHAT_PREVIEWS,
   applyAppearance,
   loadAppearance,
   normalizeAppearance,
@@ -52,9 +53,9 @@ describe("ZAPRUDA appearance preferences", () => {
     expect(document.documentElement.dataset["zaprudaBackground"]).toBe("classic");
   });
 
-  it("preserves legacy saved choices and rejects unknown background values", () => {
+  it("converts legacy green backgrounds to Matte Black and rejects unknown values", () => {
     expect(normalizeAppearance({ background: "forest", chat: "plain" })).toEqual({
-      background: "forest",
+      background: "classic",
       chat: "plain",
     });
     expect(normalizeAppearance({ background: "not-a-theme", chat: "water" })).toEqual({
@@ -65,6 +66,22 @@ describe("ZAPRUDA appearance preferences", () => {
       background: "electric-blue",
       chat: "plain",
     });
+  });
+
+  it("offers only the approved Matte Black and Electric Blue app backgrounds", () => {
+    expect(APP_BACKGROUNDS.map((item) => item.value)).toEqual(["classic", "electric-blue"]);
+    expect(normalizeAppearance({ background: "night", chat: "plain" }).background).toBe(
+      "classic",
+    );
+  });
+
+  it("has blue and eggplant chat previews in Electric Blue, without green", () => {
+    expect(ELECTRIC_BLUE_CHAT_PREVIEWS.forest.title).toBe("Баклажановый");
+    expect(ELECTRIC_BLUE_CHAT_PREVIEWS.forest.preview).toContain("#614051");
+    expect(ELECTRIC_BLUE_CHAT_PREVIEWS.water.preview).toContain("#1239A6");
+    for (const item of Object.values(ELECTRIC_BLUE_CHAT_PREVIEWS)) {
+      expect(item.preview).not.toMatch(/#29472B|#101A12|#234750/i);
+    }
   });
 
   it("recovers from invalid saved JSON without breaking app startup", () => {
