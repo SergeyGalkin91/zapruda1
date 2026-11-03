@@ -1,0 +1,4 @@
+v0.7.5 SPOT JWT staging E2E request marker.
+Do not edit until four distinct confirmed users and protected staging-e2e environment secrets are ready.
+Changing only this file on release/v0.7.5-spot starts protected signed-JWT preflight.
+No credentials belong in this file.
