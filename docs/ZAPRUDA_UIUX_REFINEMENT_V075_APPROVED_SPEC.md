@@ -117,6 +117,58 @@ Keep **TROPHY KING** as the canonical verified BOAT FISHING nomination. Add a se
 
 **Acceptance:** subtitles can appear in trophy profile cards, public leaderboards and title-change notifications *only after verified title award*. Use real species identifier from server-authenticated moderation. Do not calculate a subjective "monster" tier from weights until an owner-approved per-species rule exists. Preserve scope, season, species and canonical title; no fake holder, photo or measurements. Ensure readable responsive typography at 320/390px and keep EXIF, GPS and original evidence private. Future user-adjustable tone (дерзко/сдержанно) is optional; defaults require owner UX approval.
 
+## Trophy thresholds & notification processing (owner direction; numeric values PENDING owner approval)
+**Purpose:** no noisy worldwide notification for each catch; species-specific minimum weight to qualify for an editorial trophy caption, with no maximum weight. Distinguish **verified catch**, **current KING record** and **trophy eligibility**. A new local KING may weigh below trophy threshold; it gets a neutral server-authenticated record message, **not** the `ЛЮТЫЙ СУДАК!` fanfare. Conversely a verified trophy may not beat the current KING; it can earn a trophy badge while not becoming champion.
+
+### Suggested thresholds — DRAFT, not validated ecological/legal standards
+All server processing uses integer grams; UI converts to kilograms. Threshold comparison is inclusive `>=`; no upper bound.
+| Species | Trophy grams >= | Exceptional grams >= | Editorial caption |
+|---|---:|---:|---|
+| Судак | 4000 | 8000 | ЛЮТЫЙ СУДАК! |
+| Щука | 7000 | 12000 | ЩУКА-МОНСТР! |
+| Окунь | 1000 | 2000 | ПОЛОСАТЫЙ БОСС! |
+| Берш | 700 | 1200 | БЕРШ-БЕСТИЯ! |
+| Жерех | 4000 | 7000 | РЕЧНАЯ ТОРПЕДА! |
+| Сом | 20000 | 50000 | УСАТЫЙ ТИТАН! |
+| Голавль | 1500 | 3000 | ЛОБАСТЫЙ БОСС! |
+| Налим | 3000 | 6000 | НОЧНОЙ МОНСТР! |
+| Карп | 10000 | 20000 | КАРПОВЫЙ ГИГАНТ! |
+| Лещ | 2000 | 4000 | БРОНЗОВЫЙ ТЯЖЕЛОВЕС! |
+| Unconfigured species | none / suppress automated trophy signal | none | Neutral verified catch only |
+
+**Pending decisions:** owner validates each threshold (possibly region/league dependent) and whether fishing-specific trophy eligibility must be limited by legal season, length, release/welfare rules. Display a config version and effective date; never silently recalculate historical trophy grades on threshold edits. Never use photo-recognition output as authoritative species or weight.
+
+### State machine (server side)
+`draft → submitted → pending_review → verified | rejected → revoked` with terminal/reversal audit as appropriate.
+1. User submits catch + one proof bundle; unverified data can show `На проверке` to OWNER only, **no public trophy badges, title fanfare, social/push notification**. Optional owner-only receipt of submission is separate.
+2. Independent authorized moderator verifies species, single-fish weight, measurement evidence, provenance, method, geography/legal and evidence privacy; no self approval. Evidence integrity and duplicate/similar proof require review.
+3. On server transaction commit, calculate separately:
+   - eligibility for KING category via existing `spot-records.ts` deterministic policy and single-holder arbitration,
+   - `trophy_level`: `none` if below configured threshold or species unconfigured; `trophy` if weight >= min; `exceptional` if >= exceptional. No max.
+   - public sharing eligibility: author opt-in, only safe metadata, explicitly approved photos.
+4. Persist immutable event `catch_verified`; `trophy_awarded` only on threshold crossing (one event per catch / threshold config version), `title_changed` only on real record holder transition; attach moderation decision, deterministic idempotency key. Do not send inside database transaction; enqueue only after successful commit.
+5. Notifications scoped and routed *after* transaction:
+   - **owner inbox**: verified trophy/title change immediately (in-app, subject to preference for push); submit status via private activity.
+   - **previous title holder**: direct notification only on actually lost title (not for every large fish).
+   - **subscribers to same verified spot/league**: optional `title_changed` and `exceptional_trophy` if consent and follow preference. Default **in-app only**; push off until explicitly opted in.
+   - **followers of author**: `exceptional_trophy` only when author opts to share and recipients opt into trophy notifications.
+   - **other cities, nonfollowers, visitors**: NO blanket broadcast. Global public discoverability only via approved feed, separate opt-in editorial digest after moderation and rate limit.
+6. Deduplicate delivery per `(event_id, recipient_id, channel)`, honor mute / block / unsubscribe / privacy, per-user frequency cap (suggest max 1 trophy push per spot per day, digest overflow), quiet hours local to user and safe notifications without exact location/EXIF. Repeated server requests and retries never duplicate awards/notifications.
+7. Revocation/error handling: withdraw badge/title; rebuild current title atomically from eligible verified candidates; emit `trophy_revoked`/`title_changed` only if state genuinely changed; remove/revoke public derived image according to privacy. Cancellation of queued notifications and corrective notifications to affected users where already delivered.
+8. UI style: only display crown animation for recipient after trusted verified award, under 200ms, reduced-motion no animation. Normal verified catch quiet; true exceptional trophy uses species slogan. When trophy threshold not met but KING title changes, use `Новый KING OF THE SPOT` without "monster" language.
+9. No separate KPI or achievements awarded from mere chat activity under `TROPHY KING`; activity ranks use independent badges/progression.
+
+### Acceptance matrix
+- [ ] Boundary: at threshold minus 1 gram => `none`; exactly threshold => `trophy`; exceptional boundary => `exceptional`; arbitrarily high legal weight remains exceptional; unknown species no automated slogan.
+- [ ] Champion below trophy limit: record change YES, trophy popup NO. Trophy catch below reigning champion: trophy YES, `title_changed` NO.
+- [ ] Pending/rejected/duplicate proof/private/illegal/self-reviewed events: public trophy/notification NO.
+- [ ] Four independent signed JWT users, outsider, actual moderator: privacy, authorization, opt-in, rate limits, idempotency and no cross-user disclosure.
+- [ ] Scope per approved spot/league, subscription/follow logic, current user mute/block; never broadcast all users. No blanket push; digest overflow.
+- [ ] Concurrency: two simultaneous challengers => single KING and one event per successful title transition; correct prior holder.
+- [ ] Revocation, edited evidence, author deletion and consent withdrawal retracts public trophy and stops future notifications.
+- [ ] Unit conversion UI uses grams underlying; portrait mobile 320/390, large text and restrained crown animation; no public EXIF/GPS.
+- [ ] No production deployment, DB migration, live push provider, public champion or active threshold rules before numeric-owner approval and staging E2E.
+
 ## Design system contract
 | Token role | Matte Black target | Electric Blue target |
 |---|---|---|
