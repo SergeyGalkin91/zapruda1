@@ -1,0 +1,5 @@
+ZAPRUDA v0.7.5 SPOT protected real-JWT preflight request
+Source branch: release/v0.7.5-spot
+Target: designated STAGING yudtbifopfnjtjanaqrd
+Mode: read-only 4 distinct JWT accounts; no fake catches, titles or spots.
+Requested on: 2026-11-03.
