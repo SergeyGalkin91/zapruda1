@@ -918,3 +918,47 @@
   background-color: rgb(97 64 81 / 24%) !important;
 }
 
+
+
+/* ZAPRUDA UI/UX Refinement: semantic foundations (owner approved) */
+/* Additive-only tokens. Historical component colors are migrated in separate,
+   screenshot-reviewed slices; locked Matte Black / Electric Blue stay intact. */
+:root {
+  --zc-ui-bg: #090B0C;
+  --zc-ui-surface: #141A1E;
+  --zc-ui-surface-raised: #1B2024;
+  --zc-ui-accent: #D7FF35;
+  --zc-ui-secondary: #A99AD9;
+  --zc-ui-outline: #343640;
+  --zc-ui-ink: #FFFFFF;
+}
+:root[data-zapruda-background="electric-blue"] {
+  --zc-ui-bg: #1239A6;
+  --zc-ui-surface: #19357F;
+  --zc-ui-surface-raised: #23438D;
+  --zc-ui-accent: #D7FF35;
+  --zc-ui-secondary: #E2E8FF;
+  --zc-ui-outline: #5B75C0;
+  --zc-ui-ink: #FFFFFF;
+}
+
+/* Keyboard users must see focus even on custom themed interactive surfaces. */
+:where(a, button, input, select, textarea, summary, [role="button"]):focus-visible {
+  outline: 2px solid var(--zc-ui-accent);
+  outline-offset: 3px;
+}
+
+/* Keep existing button geometry but guarantee an accessible minimum target. */
+.btn-primary, .btn-ghost {
+  min-height: 44px;
+}
+
+/* Respect OS motion preference without changing theme colors or navigation. */
+@media (prefers-reduced-motion: reduce) {
+  :where(a, button, input, select, textarea, summary) {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
