@@ -99,8 +99,7 @@ function matchesLeagueRule(category: RecordCategory): boolean {
       );
     case "carpfishing":
       return (
-        nomination === "carp-big-fish" && scopeType === "waterbody" &&
-        method === "carpfishing"
+        nomination === "carp-big-fish" && scopeType === "waterbody" && method === "carpfishing"
       );
     case "winter":
       return (
