@@ -24,7 +24,13 @@ describe("v0.7.5 public map: no private or unapproved coordinates", () => {
   });
 
   it("only passes verified public coordinates to the third party", () => {
-    const privateCandidate = { ...approved, id: "secret", public_lat: 55.1234, public_lng: 39.9876, state: "candidate" };
+    const privateCandidate = {
+      ...approved,
+      id: "secret",
+      public_lat: 55.1234,
+      public_lng: 39.9876,
+      state: "candidate",
+    };
     const url = approvedMapUrl([privateCandidate, approved]);
     expect(url).toContain("43.95%2C56.25");
     expect(url).not.toContain("39.9876");
