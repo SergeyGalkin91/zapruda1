@@ -99,6 +99,21 @@ async function openRoute(page, route) {
         locale: "ru-RU",
         reducedMotion: "reduce",
       });
+      // Stub only the isolated CI placeholder host. Real app behavior/DOM and
+      // theme state still run in-browser; cross-origin network is not under test.
+      // Without this WebKit logs unhandled CORS errors for the intentionally
+      // non-existent host, which are unrelated to appearance regressions.
+      await context.route("https://ci-placeholder.supabase.co/**", async (route) => {
+        const url = new URL(route.request().url());
+        await route.fulfill({
+          status: url.pathname.startsWith("/auth/") ? 401 : 200,
+          contentType: "application/json",
+          headers: { "access-control-allow-origin": "*" },
+          body: url.pathname.startsWith("/auth/")
+            ? JSON.stringify({ message: "No test session", code: "not_authenticated" })
+            : "[]",
+        });
+      });
       const page = await context.newPage();
       const runtimeErrors = [];
       page.on("pageerror", (e) => runtimeErrors.push(e.message));
