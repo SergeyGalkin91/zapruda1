@@ -26,8 +26,8 @@ begin
  where message in ('PRIVATE RLS QA','OTHER USER RLS QA');
  select count(*) into owns from public.zc_spot_notifications where message='PRIVATE RLS QA';
  if observed<>1 or owns<>1 then raise exception 'Notification RLS exposed another user'; end if;
- if has_table_privilege(current_user,'zc_spot_internal.catches','SELECT') then
-  raise exception 'Authenticated role has private catch SELECT';
+ if has_schema_privilege(current_user,'zc_spot_internal','USAGE') then
+  raise exception 'Authenticated role has private schema USAGE';
  end if;
 end $qa$;
 reset role;
