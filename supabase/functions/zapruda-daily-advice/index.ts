@@ -197,7 +197,10 @@ Deno.serve(async (req: Request) => {
         signal: AbortSignal.timeout(8000),
       });
     } catch {
-      return respond(503, { error: "Не удалось проверить доступ к ИИ", code: "XAI_PROVIDER_UNAVAILABLE" });
+      return respond(503, {
+        error: "Не удалось проверить доступ к ИИ",
+        code: "XAI_PROVIDER_UNAVAILABLE",
+      });
     }
     if (!response.ok) {
       const code = await xaiRejectionCode(response);
@@ -205,14 +208,21 @@ Deno.serve(async (req: Request) => {
     }
     try {
       const payload: unknown = await response.json();
-      const models = payload && typeof payload === "object" && !Array.isArray(payload)
-        ? (payload as { data?: Array<{ id?: unknown }> }).data
-        : undefined;
+      const models =
+        payload && typeof payload === "object" && !Array.isArray(payload)
+          ? (payload as { data?: Array<{ id?: unknown }> }).data
+          : undefined;
       if (!Array.isArray(models) || !models.some((item) => item?.id === model)) {
-        return respond(503, { error: "Выбранная модель Grok недоступна этому ключу", code: "XAI_MODEL_UNAVAILABLE" });
+        return respond(503, {
+          error: "Выбранная модель Grok недоступна этому ключу",
+          code: "XAI_MODEL_UNAVAILABLE",
+        });
       }
     } catch {
-      return respond(503, { error: "Не удалось проверить список моделей ИИ", code: "XAI_PROVIDER_UNAVAILABLE" });
+      return respond(503, {
+        error: "Не удалось проверить список моделей ИИ",
+        code: "XAI_PROVIDER_UNAVAILABLE",
+      });
     }
   }
 
