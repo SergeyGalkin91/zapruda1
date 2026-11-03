@@ -25,6 +25,7 @@ create table if not exists public.zc_public_spots (
 alter table public.zc_public_spots enable row level security;
 revoke all on public.zc_public_spots from public, anon, authenticated;
 grant select on public.zc_public_spots to anon, authenticated;
+grant select,insert,update,delete on public.zc_public_spots to service_role;
 drop policy if exists zc_spots_public_approved on public.zc_public_spots;
 create policy zc_spots_public_approved on public.zc_public_spots for select
   to anon, authenticated using (state = 'approved' and reviewed_at is not null);
@@ -72,7 +73,6 @@ create table if not exists zc_spot_internal.categories (
   scope_id text not null check(length(trim(scope_id)) > 0),
   species_id text,
   season_id text,
-  category_key text not null unique,
   created_at timestamptz not null default now(),
   constraint category_valid check (
     (league='street' and nomination in ('spot-big-fish','spot-longest') and scope_type='spot'
@@ -88,11 +88,9 @@ create table if not exists zc_spot_internal.categories (
         and scope_type in ('waterbody','municipality','region','country')
         and method in ('boat-spinning','boat-vertical','boat-trolling')
         and species_id is not null)
-  ),
-  constraint category_key_consistent check (
-    category_key = jsonb_build_array(league,nomination,method,scope_type,scope_id,species_id,season_id)::text
   )
 );
+create unique index if not exists zc_record_category_unique on zc_spot_internal.categories(league,nomination,method,scope_type,scope_id,coalesce(species_id,''),coalesce(season_id,''));
 create table if not exists zc_spot_internal.title_holders (
   category_id uuid primary key references zc_spot_internal.categories(id) on delete restrict,
   catch_id uuid not null references zc_spot_internal.catches(id) on delete restrict,
