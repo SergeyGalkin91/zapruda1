@@ -17,7 +17,7 @@ export const APP_BACKGROUNDS: ReadonlyArray<{
     value: "classic",
     title: "Matte Black",
     description: "Матовый чёрный · лайм + сиреневый (по умолчанию)",
-    preview: "linear-gradient(140deg,#090B09,#1A2115)",
+    preview: "linear-gradient(140deg,#090B0C,#181A21)",
     secondaryAccent: "#A99AD9",
   },
   {
