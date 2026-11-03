@@ -25,6 +25,14 @@ begin
   exception when raise_exception then
     if sqlerrm='Unverified catch was crowned' then raise; end if;
   end;
+  begin
+    perform zc_spot_internal.moderate_catch(a,owner_uuid,'verified');
+    raise exception 'Fake evidence path was accepted';
+  exception when raise_exception then
+    if sqlerrm='Fake evidence path was accepted' then raise; end if;
+  end;
+  insert into storage.objects(bucket_id,name)
+    values('zc-spot-evidence-staging','qa-rollback/never-public.jpg');
   if not zc_spot_internal.moderate_catch(a,owner_uuid,'verified') then raise exception 'Cannot verify'; end if;
   if not zc_spot_internal.award_verified_catch(a,cat) then raise exception 'First title not awarded'; end if;
   if zc_spot_internal.award_verified_catch(a,cat) then raise exception 'Double-award same catch'; end if;
@@ -34,6 +42,8 @@ begin
    values(b,'qa-rollback/never-public-2.jpg','scale',true);
   insert into zc_spot_internal.capture_scopes(catch_id,scope_type,scope_id,approved)
    values(b,'region','52',true);
+  insert into storage.objects(bucket_id,name)
+    values('zc-spot-evidence-staging','qa-rollback/never-public-2.jpg');
   perform zc_spot_internal.moderate_catch(b,owner_uuid,'verified');
   if not zc_spot_internal.award_verified_catch(b,cat) then raise exception 'Improved title not awarded'; end if;
   select catch_id,score into holder,v_score from zc_spot_internal.title_holders where category_id=cat;
