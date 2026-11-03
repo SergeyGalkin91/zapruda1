@@ -58,6 +58,47 @@
 - Approve/deny shows confirmation state and precise error; historic winners and notifications derived from approved DB result only.
 - **Acceptance:** signed JWT owner, outsider and explicitly authorized independent moderator; no fake approved spot or invented trophy; private evidence inaccessible to outsider; submit/reject/approve/revoke/race/live notification tests where authorized. Do not call this phase complete on read-only preflight PASS alone.
 
+## Phase 4A — STREET FISHING, SPOT hierarchy and the FULL title system (owner correction)
+**Required product scope; not optional decorative badges.** This section extends Phase 4; no changes to the approved global five-tab navigation.
+
+### Distinguish the three surfaces
+1. **ZAPRUDA STREET** (`/street`) = personal urban fishing session with start/end timer, approximate area, per-fish notes and route to `/reports/new`. Current state lives in browser localStorage; not a verified trophy and not server-synced. The report form has a Street-session import action; preserve opt-in and idempotence, don't silently publish.
+2. **SPOT / ZARUBA** = approved geographic competition points; submission of a specific real fish to a server-reviewed nomination; no automatic champion for a local Street-session.
+3. **Titles / ranking history** = records from independent authorized moderation, never determined by UI text, photo alone, geography in untrusted metadata, or non-public user location.
+
+### Canonical title families from `src/lib/spot-records.ts`
+| League | Nomination key | Canonical title | Unit / selection | Geography |
+| --- | --- | --- | --- | --- |
+| STREET FISHING | `spot-big-fish` | **KING OF THE SPOT** | greatest verified single-fish mass (g) | approved SPOT, by qualifying method |
+| STREET FISHING | `spot-longest` | **LENGTH KING** | greatest verified length (mm) | approved SPOT, by qualifying method |
+| ULTRALIGHT / MICROJIG | `ul-big-fish` | **KING OF UL** | greatest verified single-fish mass (g), UL tackle check | approved UL SPOT |
+| ULTRALIGHT / MICROJIG | `ul-smallest` | **MICRO KING** | smallest verified length (mm), welfare review; not deliberately targeting juvenile fish | **same UL league/spot**, not a separate league |
+| CARPFISHING | `carp-big-fish` | **KING OF THE LAKE** | greatest verified mass (g), species-specific carp/grass carp | waterbody |
+| WINTER FISHING | `ice-big-fish` | **KING OF THE ICE** | greatest verified mass (g) | region + season + method + species, **no exact spot required** |
+| BOAT FISHING | `boat-big-fish` | **TROPHY KING** | greatest verified mass (g), species-specific | waterbody / municipality / region / country |
+
+Current policy only replaces an incumbent with a **strictly better** score; ties do not displace the leader. Historical/seasonal title lifecycle and tie policy require explicit owner decision. A title must be tied to a category key (league + nomination + method + scope + optional species/season) and not granted globally to a user based on a single catch.
+
+### Required interface architecture
+- `/street`: hero `STREET FISHING`, one primary action **Начать сессию** or **Продолжить сессию**, elapsed timer, local catch log, then **Оформить отчёт**; separate secondary link **Участвовать в SPOT** if qualifying approved spots exist. Clear distinction `Личный дневник · не участвует в рейтинге`.
+- SPOT discovery: user first chooses one of the five disciplines (only available STAGING/approved leagues enabled, others `Скоро` with explanatory state); then scope/approved spot, nomination and rules; only confirmed map pins.
+- A SPOT card: official name, city/region, eligible disciplines/method, two nominations where applicable, real participant/leader counts if available, **Участвовать** primary and **Рейтинг** secondary; no fake leaders, sample coordinates or unlocked private pins.
+- Verified nomination card: icon/crown + canonical title, verified value/unit, species/method/scope, valid season where relevant, moderation timestamp, profile/avatar only with explicit consent; separate `Нет подтверждённого рекорда` state.
+- Catch state UI: **Черновик → Подано → На проверке → Подтверждено / Отклонено / Отозвано**. Display only states actually backed by server; UI may group statuses for readability but must never pretend a server verification happened.
+- Leaderboard: current holder, challenger if any, **История титула** (winner/record transitions), tie rule disclosure, server-derived counts and explicit scope `этот спот` vs `этот водоём` vs `регион`; accurate title revocation, no stale crown after reversal.
+- Angler profile: `Мои подтверждённые титулы` and `История достижений` separated from local sessions and unverified reports; no imaginary ranks/earned badges. Achievement badge is an independently modelled concept, not an alias for SPOT champion.
+- Chat/Community hooks: user can voluntarily share a **public safe record card** or link a finished Street session to a report; never automatically send precise GPS/evidence originals or reveal protected fishing spots.
+
+### Additional UX acceptance
+- [ ] Real-world flow `Start Street session → record catch → finish → opt-in report → choose safe visibility` survives refresh, failed upload and cancellation without duplicate public entities.
+- [ ] UI visibly distinguishes diary catch, unverified report, pending SPOT proof, confirmed champion and revoked champion.
+- [ ] Each of the seven title names is correct and category-bound; MICRO KING remains inside UL and uses independent ethical moderation.
+- [ ] Empty approved-spot catalog yields helpful no-spots state, no fake KING cards and no fabricated participant numbers.
+- [ ] Public leaderboard/notifications do not leak exact GPS, private evidence, EXIF, unconsented photos or identities.
+- [ ] Real JWT tests for different owners/moderator and attempts at self-approval; concurrency and revoked-title cases; no claims of a full live KING E2E before all required gates.
+- [ ] Smartphone 320/390px: one primary action per screen, clear status labels, touch targets ≥44×44px, accessible expansion for title rules and nomination selection.
+- [ ] Stage rollout by league: STREET+UL first; CARP/WINTER/BOAT future phases until real data, moderation and tests support them; **do not show a disabled future league as an active released feature**.
+
 ## Design system contract
 | Token role | Matte Black target | Electric Blue target |
 |---|---|---|
