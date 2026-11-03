@@ -1,1 +1,0 @@
-Format SPOT new component and Edge function only; feature branch, 2026-11-03.
