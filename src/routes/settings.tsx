@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   APP_BACKGROUNDS,
   CHAT_BACKGROUNDS,
+  ELECTRIC_BLUE_CHAT_PREVIEWS,
   DEFAULT_APPEARANCE,
   loadAppearance,
   applyAppearance,
@@ -181,6 +182,10 @@ function SettingsPage() {
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {CHAT_BACKGROUNDS.map((item) => {
                 const selected = appearance.chat === item.value;
+                const display =
+                  appearance.background === "electric-blue"
+                    ? ELECTRIC_BLUE_CHAT_PREVIEWS[item.value]
+                    : item;
                 return (
                   <button
                     key={item.value}
@@ -196,7 +201,7 @@ function SettingsPage() {
                   >
                     <span
                       className="relative block h-20 overflow-hidden rounded-xl border border-white/10"
-                      style={{ background: item.preview }}
+                      style={{ background: display.preview }}
                     >
                       <span className="absolute left-3 top-3 rounded-lg bg-black/30 px-3 py-1.5 text-[10px] text-white">
                         Привет, как клёв?
@@ -210,8 +215,8 @@ function SettingsPage() {
                         </span>
                       )}
                     </span>
-                    <span className="mt-3 block text-sm font-bold text-white">{item.title}</span>
-                    <span className="mt-1 block text-xs text-zinc-400">{item.description}</span>
+                    <span className="mt-3 block text-sm font-bold text-white">{display.title}</span>
+                    <span className="mt-1 block text-xs text-zinc-400">{display.description}</span>
                   </button>
                 );
               })}
