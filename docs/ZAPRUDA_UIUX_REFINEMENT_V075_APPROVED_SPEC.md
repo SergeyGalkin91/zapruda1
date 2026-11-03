@@ -99,6 +99,24 @@ Current policy only replaces an incumbent with a **strictly better** score; ties
 - [ ] Smartphone 320/390px: one primary action per screen, clear status labels, touch targets ≥44×44px, accessible expansion for title rules and nomination selection.
 - [ ] Stage rollout by league: STREET+UL first; CARP/WINTER/BOAT future phases until real data, moderation and tests support them; **do not show a disabled future league as an active released feature**.
 
+## TROPHY KING — species-specific editorial nicknames (owner-requested)
+Keep **TROPHY KING** as the canonical verified BOAT FISHING nomination. Add a separate optional **editorial subtitle** keyed to the confirmed species (not a new ranking title, not a claim of unnatural size). Style: energetic street-fishing language; accessible sentence-case fallback for formal tables and screen readers.
+
+| Fish | Punchy display subtitle | Reserved alternative |
+| --- | --- | --- |
+| Судак | **ЛЮТЫЙ СУДАК!** | Судачий трофей |
+| Щука | **ЩУКА-МУТАНТ!** | Щучья королева |
+| Окунь | **ПОЛОСАТЫЙ МОНСТР!** | Король полосатых |
+| Берш | **БЕРШ-БЕСТИЯ!** | Редкий трофей |
+| Жерех | **РЕЧНАЯ ТОРПЕДА!** | Серебряный хищник |
+| Сом | **УСАТЫЙ ТИТАН!** | Речной гигант |
+| Голавль | **ЛОБАСТЫЙ БОСС!** | Краснопёрый трофей |
+| Налим | **НОЧНОЙ МОНСТР!** | Хозяин глубин |
+| Форель | **ПЯТНИСТАЯ МОЛНИЯ!** | Форелевый трофей |
+| Other species | **ТРОФЕЙ ПОДТВЕРЖДЁН** | Подтверждённый рекорд |
+
+**Acceptance:** subtitles can appear in trophy profile cards, public leaderboards and title-change notifications *only after verified title award*. Use real species identifier from server-authenticated moderation. Do not calculate a subjective "monster" tier from weights until an owner-approved per-species rule exists. Preserve scope, season, species and canonical title; no fake holder, photo or measurements. Ensure readable responsive typography at 320/390px and keep EXIF, GPS and original evidence private. Future user-adjustable tone (дерзко/сдержанно) is optional; defaults require owner UX approval.
+
 ## Design system contract
 | Token role | Matte Black target | Electric Blue target |
 |---|---|---|
