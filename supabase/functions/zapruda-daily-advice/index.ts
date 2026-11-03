@@ -2,8 +2,8 @@ import { createClient } from "npm:@supabase/supabase-js@2.49.0";
 import { DEFAULT_PRIMARY, DEFAULT_FALLBACK, generateYandexAdvice, modelUri, YandexProviderError } from "./yandex-provider.ts";
 
 /**
- * Daily fishing advice via xAI Grok.
- * Secrets: XAI_API_KEY, optional XAI_MODEL, XAI_API_BASE.
+ * Daily fishing advice via Yandex AI Studio: DeepSeek V4.1 Flash with Alice AI fallback.
+ * Secrets: YANDEX_AI_API_KEY, YANDEX_AI_FOLDER_ID, optional YANDEX_AI_WEB_SEARCH_ENABLED.
  * Quota claim is atomic via claim_ai_daily_advice_slot / complete_ai_daily_advice_slot.
  */
 
