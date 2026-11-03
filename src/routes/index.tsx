@@ -392,7 +392,7 @@ function Feed() {
   return (
     <Shell>
       <section className="relative mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0B0D0B] z-electric-feed-hero px-5 py-7 sm:px-8 sm:py-9">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#D7FF35]/[0.09] blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#D7FF35]/[0.09] z-electric-hero-glow blur-3xl" />
         <div className="relative">
           <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D7FF35]">
             ZAPRUDA COMMUNITY / CONCEPT 01
@@ -435,7 +435,7 @@ function Feed() {
             </Link>
             <Link
               to="/reports/new"
-              className="group rounded-2xl border border-white/15 bg-[#141D20] p-5 transition hover:border-[#D7FF35]"
+              className="group rounded-2xl border border-white/15 bg-[#141D20] z-electric-feed-action p-5 transition hover:border-[#D7FF35]"
             >
               <span className="text-2xl" aria-hidden="true">
                 🐟
@@ -447,7 +447,7 @@ function Feed() {
             </Link>
             <Link
               to="/communities"
-              className="group rounded-2xl border border-[#A78BFA]/35 bg-[#141D20] p-5 transition hover:border-[#A78BFA]"
+              className="group rounded-2xl border border-[#A78BFA]/35 bg-[#141D20] z-electric-feed-eggplant p-5 transition hover:border-[#A78BFA]"
             >
               <span className="text-2xl" aria-hidden="true">
                 ⚡
