@@ -272,6 +272,9 @@ Deno.serve(async (req: Request) => {
     answer,
     already_used: false,
     advice_day: adviceDay,
-    model,
+    model: usedModel,
+    provider: providerSource,
+    web_search: webSearch,
+    sources,
   });
 });
