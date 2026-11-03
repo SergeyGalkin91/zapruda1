@@ -5,7 +5,7 @@
  */
 const API_BASE = "https://ai.api.cloud.yandex.net/v1";
 export const DEFAULT_PRIMARY = "deepseek-v4.1-flash";
-export const DEFAULT_FALLBACK = "aliceai-llm-flash";
+export const DEFAULT_FALLBACK = "yandexgpt-5.1";
 
 export type ProviderConfig = {
   key: string;
