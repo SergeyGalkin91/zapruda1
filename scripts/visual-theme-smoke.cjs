@@ -104,7 +104,7 @@ async function openRoute(page, route) {
         assert(await black.isVisible(), "Matte Black selector missing");
         assert(await blue.isVisible(), "Electric Blue selector missing");
         assert.equal(await black.getAttribute("aria-pressed"), "true", "Matte default not selected");
-        await page.screenshot({ path: fileFor(viewport.label, "settings-matte"), fullPage: true });
+        await page.screenshot({ path: fileFor(viewport.label, "settings-matte"), fullPage: false });
 
         await blue.click();
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "electric-blue");
@@ -114,7 +114,15 @@ async function openRoute(page, route) {
         assert.equal(after.undergroundViolet, COLORS.eggplant);
         assert(after.bodyBackground.includes("radial-gradient"), "Electric Blue gradient did not apply");
         assert.equal(await blue.getAttribute("aria-pressed"), "true");
-        await page.screenshot({ path: fileFor(viewport.label, "settings-electric-blue"), fullPage: true });
+        // Fixed backgrounds render correctly while scrolling; Chromium fullPage
+        // screenshots falsely show white after the first viewport. Capture both
+        // real viewport positions instead of stitching a full-page image.
+        await page.screenshot({ path: fileFor(viewport.label, "settings-electric-blue"), fullPage: false });
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        await page.waitForTimeout(250);
+        assert.equal((await variables(page)).background, COLORS.blue);
+        await page.screenshot({ path: fileFor(viewport.label, "settings-electric-blue-bottom"), fullPage: false });
+        await page.evaluate(() => window.scrollTo(0, 0));
 
         await page.reload({ waitUntil: "domcontentloaded" });
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "electric-blue");
@@ -132,7 +140,14 @@ async function openRoute(page, route) {
           if (route === "/" || route === "/chat") {
             await page.screenshot({
               path: fileFor(viewport.label, route === "/" ? "feed-electric-blue" : "chat-electric-blue"),
-              fullPage: true,
+              fullPage: false,
+            });
+            await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+            await page.waitForTimeout(250);
+            assert.equal((await variables(page)).background, COLORS.blue);
+            await page.screenshot({
+              path: fileFor(viewport.label, route === "/" ? "feed-electric-blue-bottom" : "chat-electric-blue-bottom"),
+              fullPage: false,
             });
           }
         }
