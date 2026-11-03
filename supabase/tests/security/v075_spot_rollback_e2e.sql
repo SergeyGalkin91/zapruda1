@@ -2,7 +2,7 @@
 -- No lasting data changes; uses an existing Auth user without emitting personal data.
 begin;
 do $qa$
-declare owner_uuid uuid; a uuid; b uuid; cat uuid; proof_uuid uuid; score int; holder uuid; changed boolean;
+declare owner_uuid uuid; a uuid; b uuid; cat uuid; proof_uuid uuid; v_score int; holder uuid; changed boolean;
 begin
   select id into owner_uuid from auth.users order by created_at limit 1;
   if owner_uuid is null then raise exception 'Missing STAGING test principal'; end if;
@@ -36,8 +36,8 @@ begin
    values(b,'region','52',true);
   perform zc_spot_internal.moderate_catch(b,owner_uuid,'verified');
   if not zc_spot_internal.award_verified_catch(b,cat) then raise exception 'Improved title not awarded'; end if;
-  select catch_id,score into holder,score from zc_spot_internal.title_holders where category_id=cat;
-  if holder<>b or score<>18000 then raise exception 'Current holder wrong'; end if;
+  select catch_id,score into holder,v_score from zc_spot_internal.title_holders where category_id=cat;
+  if holder<>b or v_score<>18000 then raise exception 'Current holder wrong'; end if;
   if (select count(*) from zc_spot_internal.title_history where category_id=cat)<>2 then raise exception 'Title history missing'; end if;
   if (select count(*) from zc_spot_internal.notification_outbox where category_id=cat)<>2 then raise exception 'Outbox missing'; end if;
   if (select count(*) from public.zc_public_spots where state='approved')<>0 then raise exception 'Unexpected approved spot during QA'; end if;
