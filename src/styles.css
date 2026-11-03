@@ -129,6 +129,19 @@
   background: radial-gradient(ellipse 85% 60% at 50% -15%,#17404A 0%,#09161A 72%,#070D13 100%) fixed;
 }
 :root[data-zapruda-background="classic"] body { background: #090B09; }
+/* Optional vivid blue app background. Matte black remains the unmodified default. */
+:root[data-zapruda-background="bright-blue"] {
+  --background: #0B329B;
+  --card: #10295A;
+  --secondary: #1A3A7A;
+  --muted: #153264;
+  --border: #4266A1;
+  --input: #31548E;
+}
+:root[data-zapruda-background="bright-blue"] body {
+  background: radial-gradient(ellipse 100% 70% at 28% -15%, #2568F8 0%, #1040BA 42%, #0B329B 73%, #07183F 100%) fixed;
+}
+
 
 /* Chat backgrounds are scoped to message timelines: message readability is preserved. */
 :root[data-zapruda-chat="plain"] .zapruda-chat-window {

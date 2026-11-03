@@ -62,7 +62,7 @@ function SettingsPage() {
         <h2 id="app-background-title" className="flex items-center gap-2 text-lg font-black text-white">
           <Monitor className="size-5 text-[#D7FF35]" /> Фон приложения
         </h2>
-        <p className="mt-2 text-sm text-zinc-400">Задаёт основу оформления страниц. Фирменные цвета кнопок сохраняются для читаемости.</p>
+        <p className="mt-2 text-sm text-zinc-400">По умолчанию — матовый чёрный. По желанию включи «Яркий синий»; фирменные лаймовые и фиолетовые акценты сохраняются.</p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {APP_BACKGROUNDS.map(item => {
             const selected = appearance.background === item.value;
