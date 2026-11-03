@@ -210,9 +210,16 @@ Deno.serve(async (req: Request) => {
       const payload: unknown = await response.json();
       const models =
         payload && typeof payload === "object" && !Array.isArray(payload)
-          ? (payload as { data?: Array<{ id?: unknown }> }).data
+          ? (payload as { data?: Array<{ id?: unknown; aliases?: unknown }> }).data
           : undefined;
-      if (!Array.isArray(models) || !models.some((item) => item?.id === model)) {
+      if (
+        !Array.isArray(models) ||
+        !models.some(
+          (item) =>
+            item?.id === model ||
+            (Array.isArray(item?.aliases) && item.aliases.includes(model)),
+        )
+      ) {
         return respond(503, {
           error: "Выбранная модель Grok недоступна этому ключу",
           code: "XAI_MODEL_UNAVAILABLE",
