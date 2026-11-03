@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { brokeredPreviewStorage } from './previewAuthStorage';
+import { validateClientConfiguration } from './clientConfiguration';
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith('sb_publishable_') || value.startsWith('sb_secret_');
@@ -52,11 +53,9 @@ function createSupabaseClient() {
   // Browser previews do not provide Node's process global. Keep the SSR
   // fallback only on the server to avoid a ReferenceError in Lovable Preview.
   const serverEnv = typeof process !== 'undefined' ? process.env : undefined;
-  // Public project configuration fallback for Lovable hosting, which does not inject
-  // VITE_* values or Node environment variables in all deployment modes.
-  // This is a publishable client key, NOT a Supabase secret/service-role key.
-  let SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || serverEnv?.['SUPABASE_URL'] || 'https://sonvniuwtvzzyuglscah.supabase.co';
-  let SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || serverEnv?.['SUPABASE_PUBLISHABLE_KEY'] || 'sb_publishable_86B9kOH2BUNOuHyYoHX4qw_FbuLHl5E';
+  // Require explicit configuration; a missing local environment must not select production.
+  let SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || serverEnv?.['SUPABASE_URL'];
+  let SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || serverEnv?.['SUPABASE_PUBLISHABLE_KEY'];
 
   // Netlify deploy previews must never inherit or fall back to PROD credentials.
   // Force the isolated STAGING project on both browser and Netlify preview SSR.
@@ -68,19 +67,17 @@ function createSupabaseClient() {
     SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_GHxXu3_sK5YtuXeftTfwSQ_hK0F5mx8';
   }
 
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    const missing = [
-      ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
-      ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : []),
-    ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
-    console.error(`[Supabase] ${message}`);
-    throw new Error(message);
-  }
+  const config = validateClientConfiguration({
+    url: SUPABASE_URL,
+    publishableKey: SUPABASE_PUBLISHABLE_KEY,
+    hostname: typeof window !== 'undefined' ? window.location.hostname : undefined,
+    development: import.meta.env.DEV,
+    context: serverEnv?.['CONTEXT'],
+  });
 
-  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  return createClient<Database>(config.url, config.publishableKey, {
     global: {
-      fetch: createSupabaseFetch(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY),
+      fetch: createSupabaseFetch(config.url, config.publishableKey),
     },
     auth: {
       storage: brokeredPreviewStorage(),

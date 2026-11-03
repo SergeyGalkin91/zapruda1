@@ -89,11 +89,11 @@ function Messages() {
     const seq = ++msgSeq.current;
     const { data, error: qerr } = await db.from("social_messages")
       .select("id,thread_id,sender_id,kind,body,location_title,latitude,longitude,created_at")
-      .eq("thread_id", id).order("created_at", { ascending: true }).limit(200);
+      .eq("thread_id", id).order("created_at", { ascending: false }).order("id", { ascending: false }).limit(200);
     // Drop stale responses (thread switched, newer request, or unmounted).
     if (!mounted.current || seq !== msgSeq.current || activeRef.current !== id) return;
     if (qerr) setError("Не удалось загрузить переписку: " + qerr.message);
-    else setMessages((data ?? []) as Dm[]);
+    else setMessages(([...(data ?? [])].reverse()) as Dm[]);
   }, []);
 
   // Inbox: initial load + realtime only for threads involving the current user.

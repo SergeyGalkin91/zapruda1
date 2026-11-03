@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useRef, type FormEvent } from "react";
 import { MapPin, Plus, Users, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { localDateTimeToIso, toLocalDateTimeInput } from "@/lib/meetup-datetime";
 
 type Post = { id:string;owner_id:string;country_code:string;region_code:string;city_code:string;title:string;description:string;status:string };
 type Member = { post_id:string;user_id:string;role:string;status:string };
@@ -27,6 +28,12 @@ export function SocialMeetups(){
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const latestRequest=useRef(0);
+ const chatRequest=useRef(0);
+ const messageRequest=useRef(0);
+ const activeRef=useRef("");
+ const accessRef=useRef({userId,members});
+ accessRef.current={userId,members};
+ useEffect(()=>()=>{latestRequest.current++;chatRequest.current++;messageRequest.current++;activeRef.current="";},[]);
  const refresh=useCallback(async()=>{
    const request=++latestRequest.current;
    const {data:auth}=await supabase.auth.getUser();
@@ -50,6 +57,36 @@ export function SocialMeetups(){
  useEffect(()=>{void refresh()},[refresh]);
  const membership=(id:string)=>members.find(m=>m.post_id===id&&m.user_id===userId);
  const accepted=(id:string)=>membership(id)?.status==="accepted";
+ const hasChatAccess=useCallback((id:string)=>accessRef.current.members.some(m=>m.post_id===id&&m.user_id===accessRef.current.userId&&m.status==="accepted"),[]);
+ const clearChat=useCallback(()=>{
+   chatRequest.current++;messageRequest.current++;activeRef.current="";
+   setActive("");setMessages([]);setPrivatePlace("");setMeetingAt("");setDetailsReady(false);setDraft("");
+ },[]);
+ const activeAccepted=active&&accepted(active)?active:"";
+ useEffect(()=>{if(active&&!activeAccepted)clearChat();},[active,activeAccepted,clearChat]);
+ const fetchMessages=useCallback(async(id:string)=>{
+   const request=++messageRequest.current;
+   const currentUser=accessRef.current.userId;
+   const [member,result]=await Promise.all([
+     db.from("meetup_members").select("status").eq("post_id",id).eq("user_id",currentUser).maybeSingle(),
+     db.from("meetup_messages").select("id,sender_id,body,created_at").eq("post_id",id).order("created_at",{ascending:false}).order("id",{ascending:false}).limit(100)
+   ]);
+   if(request!==messageRequest.current||activeRef.current!==id||!hasChatAccess(id))return;
+   if(member.error||member.data?.status!=="accepted"){
+     clearChat();setError("Доступ к чату сходки больше не подтверждён. Обновите объявления.");return;
+   }
+   if(result.error){setError("Не удалось загрузить переписку: "+result.error.message);return;}
+   setMessages([...(result.data??[])].reverse());
+ },[clearChat,hasChatAccess]);
+ useEffect(()=>{
+   if(!activeAccepted)return;
+   // Polling works even when the table is not enabled for Realtime publication.
+   const update=()=>{if(document.visibilityState!=="hidden")void fetchMessages(activeAccepted);};
+   const timer=window.setInterval(update,10000);
+   window.addEventListener("focus",update);
+   document.addEventListener("visibilitychange",update);
+   return()=>{window.clearInterval(timer);window.removeEventListener("focus",update);document.removeEventListener("visibilitychange",update);};
+ },[activeAccepted,fetchMessages]);
  async function create(e:FormEvent){
    e.preventDefault();if(!userId||busy)return;
    setBusy(true);setError("");setNotice("");
@@ -75,30 +112,34 @@ export function SocialMeetups(){
    setBusy(false);if(err)setError(err.message);else await refresh();
  }
  async function saveDetails(e:FormEvent){
-   e.preventDefault();if(!active||!accepted(active)||posts.find(p=>p.id===active)?.owner_id!==userId||busy)return;
+   e.preventDefault();if(!active||!accepted(active)||!detailsReady||posts.find(p=>p.id===active)?.owner_id!==userId||busy)return;
+   let meeting_at:string|null;
+   try{meeting_at=localDateTimeToIso(meetingAt);}catch{setError("Укажите корректное местное время встречи.");return;}
+   const id=active;
    setBusy(true);setError("");
-   const {error:err}=await db.from("meetup_private_details").upsert({post_id:active,owner_id:userId,private_place:privatePlace.trim()||null,meeting_at:meetingAt?new Date(meetingAt).toISOString():null},{onConflict:"post_id"});
+   const {error:err}=await db.from("meetup_private_details").upsert({post_id:id,owner_id:userId,private_place:privatePlace.trim()||null,meeting_at},{onConflict:"post_id"});
    setBusy(false);if(err){setError("Не удалось сохранить приватные детали: "+err.message);return;}
-   setNotice("Приватные детали сохранены");await openChat(active);
+   if(activeRef.current===id){setNotice("Приватные детали сохранены");await openChat(id);}
  }
  async function openChat(id:string){
    if(!accepted(id)){setError("Чат доступен только принятым участникам");return;}
-   setDetailsReady(false);
+   const request=++chatRequest.current;
+   messageRequest.current++;activeRef.current=id;setActive(id);
+   setDetailsReady(false);setPrivatePlace("");setMeetingAt("");setMessages([]);setDraft("");setError("");
    const {data:details,error:detailsError}=await db.from("meetup_private_details").select("private_place,meeting_at").eq("post_id",id).maybeSingle();
+   if(request!==chatRequest.current||activeRef.current!==id||!hasChatAccess(id))return;
    if(detailsError){setError("Ошибка доступа к месту встречи: "+detailsError.message);return;}
-   setPrivatePlace(details?.private_place??"");setMeetingAt(details?.meeting_at?new Date(details.meeting_at).toISOString().slice(0,16):"");
+   setPrivatePlace(details?.private_place??"");setMeetingAt(toLocalDateTimeInput(details?.meeting_at));
    setDetailsReady(true);
-   const {data,error:err}=await db.from("meetup_messages").select("id,sender_id,body,created_at").eq("post_id",id).order("created_at",{ascending:true}).limit(100);
-   if(err){setError(err.message);return;}
-   if(!accepted(id))return;
-   setMessages(data??[]);setActive(id);
+   await fetchMessages(id);
  }
  async function send(e:FormEvent){
    e.preventDefault();if(!draft.trim()||!accepted(active)||busy)return;
+   const id=active;
    setBusy(true);
-   const {error:err}=await db.from("meetup_messages").insert({post_id:active,sender_id:userId,body:draft.trim()});
+   const {error:err}=await db.from("meetup_messages").insert({post_id:id,sender_id:userId,body:draft.trim()});
    setBusy(false);if(err){setError(err.message);return;}
-   setDraft("");await openChat(active);
+   if(activeRef.current===id){setDraft("");await fetchMessages(id);}
  }
  const shown=posts.filter(p=>(!country||p.country_code===country.trim().toUpperCase())&&(!region||p.region_code===region.trim())&&(!city||p.city_code===city.trim()));
  return <section className="z-underground mt-6 space-y-4 p-5">
@@ -148,6 +189,6 @@ export function SocialMeetups(){
    <div className="max-h-64 space-y-2 overflow-y-auto">{messages.map(m=><p key={m.id} className="text-sm text-zinc-200">{m.sender_id===userId?"Вы":"Участник"}: {m.body}</p>)}</div>
    <div className="flex gap-2"><input required maxLength={1500} value={draft} onChange={e=>setDraft(e.target.value)} className="min-w-0 flex-1 rounded-lg border border-white/20 bg-black/40 p-3" placeholder="Сообщение"/><button disabled={busy} className="btn-primary">Отправить</button></div>
   </form>}
-  {active&&accepted(active)&&posts.find(p=>p.id===active)?.owner_id===userId&&<form onSubmit={saveDetails} className="space-y-2 rounded-xl border border-white/10 p-4"><h3 className="font-bold">Приватные детали для участников</h3><input maxLength={500} value={privatePlace} onChange={e=>setPrivatePlace(e.target.value)} placeholder="Точное место встречи" className="w-full rounded-lg border border-white/20 bg-black/40 p-3"/><input type="datetime-local" value={meetingAt} onChange={e=>setMeetingAt(e.target.value)} className="w-full rounded-lg border border-white/20 bg-black/40 p-3"/><button disabled={busy} className="btn-primary">Сохранить место и время</button></form>}
+  {active&&accepted(active)&&detailsReady&&posts.find(p=>p.id===active)?.owner_id===userId&&<form onSubmit={saveDetails} className="space-y-2 rounded-xl border border-white/10 p-4"><h3 className="font-bold">Приватные детали для участников</h3><input maxLength={500} value={privatePlace} onChange={e=>setPrivatePlace(e.target.value)} placeholder="Точное место встречи" className="w-full rounded-lg border border-white/20 bg-black/40 p-3"/><input type="datetime-local" value={meetingAt} onChange={e=>setMeetingAt(e.target.value)} className="w-full rounded-lg border border-white/20 bg-black/40 p-3"/><button disabled={busy} className="btn-primary">Сохранить место и время</button></form>}
  </section>
 }

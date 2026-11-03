@@ -4,7 +4,7 @@ Scope: [PR #63](https://github.com/SergeyGalkin91/zapruda1/pull/63), feature bra
 
 ## Current result
 
-**118 local tests PASS across 9 files**, including **34 disconnected PostgreSQL security/state checks** and **49 offline tests executing the actual Edge handler sources**. Frozen installation, application build, migration filename audit, meetup static guards, E2E script syntax and targeted test-file lint/format checks PASS.
+**148 local tests PASS across 12 files**, including **34 disconnected PostgreSQL security/state checks**, **49 offline tests executing the actual Edge handler sources**, and **30 client/chat/time regression cases**. Frozen installation, application build, migration filename audit, meetup static guards, E2E script syntax and targeted test-file lint/format checks PASS. Authenticated live E2E remains blocked as described below.
 
 Two corrective SQL migrations were applied only to STAGING. Both Edge functions are ACTIVE **v4**, with `verify_jwt=true`; deployed source readback matches the validated files exactly. Two real unauthenticated HTTP POST checks returned **401**. These requests prove gateway rejection only.
 
@@ -69,13 +69,28 @@ The prepared real-JWT scripts now include the JSON-null and non-numeric weather-
 | Check | Result |
 | --- | --- |
 | `bun install --frozen-lockfile` | PASS, Bun 1.4.4; no lockfile changes required |
-| `bun run test` | PASS, 118 tests / 9 files |
+| `npm test -- --maxWorkers=2 --reporter=dot` | PASS, 148 tests / 12 files after synchronizing the client/chat follow-up with the remote branch |
 | `bun run build` | PASS, client + SSR + Nitro; no application deployment |
 | `node scripts/check-migration-versions.mjs` | PASS for new conflicts; 3 known historical collision groups remain for separate reconciliation |
 | `node scripts/check-meetup-guards.mjs` | PASS, static only |
 | Syntax checks for competition, both meetup and Edge E2E scripts | PASS |
 | Prettier + ESLint for new/changed test files and helpers | PASS |
 | STAGING function readback + unauthenticated gateway rejection | PASS; does not count as authenticated live E2E |
+
+## Client/chat follow-up before the local pilot
+
+The current product scope and pilot sequence are defined in [the current source of truth](ZAPRUDA_CURRENT_SOURCE_OF_TRUTH.md). This section records technical evidence only.
+
+- Removed the browser client's implicit production URL/key fallback. Missing configuration now fails before client initialization; development, localhost and recognized staging/preview contexts reject the known production project. The existing Netlify preview pin remains on STAGING. Server-only secret keys are rejected without echoing their values. Tests cover the actual lazy-client entry point as well as configuration validation.
+- Meetup chats now request the latest 100 messages and display them chronologically; direct messages do the same for the latest 200. Older-message pagination is still pending.
+- Open meetup chats refresh every 10 seconds while visible and on focus/visibility return. Refreshing messages or sending a message preserves unsaved private-place/time edits. No Realtime publication or database configuration was changed.
+- Request guards discard late responses after switching chats. Membership is rechecked during message refresh; revoked access clears cached messages and private meeting details.
+- Meetup `datetime-local` now displays local wall time rather than sliced UTC. Minute-precision save round trips are covered for Moscow, Almaty and New York, including UTC date boundaries and invalid input.
+- Six component tests use synthetic in-memory transport, not Supabase users or hosted RLS. Together with 18 configuration and six time cases, the full local suite is **148/148 PASS**. Targeted ESLint, preview-isolation checks, meetup static guards and `git diff --check` also pass. `npm run build` passes without deployment.
+- Full `tsc --noEmit` remains **FAIL: 45 existing diagnostics, zero in the changed source/test files** with the checked-in route tree. Build-generated route-tree churn was excluded from this patch. Separate route maintenance is required: generation nests existing admin child routes under a parent without an Outlet; this follow-up does not claim those pages have been verified.
+- Local browser screenshot execution could not start: the available Playwright installation lacked Chromium, and its browser download failed. The existing isolated GitHub browser-smoke job now includes **390 px**, captures all tested widths, and retains screenshots for seven days. Results/artifacts must be checked on this patch's exact commit; adding capture is not evidence of a successful run. The anonymous communities smoke does not validate authenticated chats.
+- Read-only STAGING recheck still returned **3 Auth users / 2 confirmed**. Browser readback still showed **zero `staging-e2e` secrets**. No accounts, passwords, schema, Edge deployments, payment settings or production data were changed in this follow-up. The four authenticated functional E2E gates remain **0/4 confirmed PASS**.
+- Revalidated on 03.11.2026 after merging the current remote branch without rewriting history: **148/148 tests PASS** with two Vitest workers (8.86 s), meetup static guards/migration audit/diff checks PASS, and a fresh read-only Auth count remains **3 / 2 confirmed**. The unrestricted local test run hit two 5 s timeouts (one existing Edge case and one chat case); the bounded run changed neither assertions nor timeout thresholds. GitHub build/browser results must be checked on the published commit separately.
 
 ## Actual Actions execution
 
