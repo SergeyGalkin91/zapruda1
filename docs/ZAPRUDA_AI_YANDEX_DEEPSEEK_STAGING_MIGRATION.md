@@ -3,7 +3,7 @@
 
 ## Approved model strategy
 - Primary: **DeepSeek V4.1 Flash** through Yandex AI Studio; canonical URI `gpt://{folder_id}/deepseek-v4.1-flash`.
-- Backup: **Alice AI LLM Flash** (current supported Russian model, rather than older YandexGPT Lite 5 which is scheduled for retirement 2026-11-15); canonical URI `gpt://{folder_id}/aliceai-llm-flash`.
+- Backup: **YandexGPT Pro 5.1** (current supported Russian model, rather than older YandexGPT Lite 5 which is scheduled for retirement 2026-11-15); canonical URI `gpt://{folder_id}/yandexgpt-5.1`.
 - Search: Yandex AI Studio **Web Search** via `POST https://ai.api.cloud.yandex.net/v1/responses`. Configurable flag defaults to OFF until commercial/data/security acceptance. Web tool sends only a preapproved fish/time-of-day category, never personal notes, raw waterbody text, chat, paid coordinates or GPS.
 - Core text completion `POST https://ai.api.cloud.yandex.net/v1/chat/completions` with `Authorization: Api-Key ...`, server-side exclusively. Fixed official domain; no user-provided base URLs.
 - Existing Supabase Auth, atomic `claim_ai_daily_advice_slot`/`complete_ai_daily_advice_slot`, error retry semantics, local clock and UI surface preserved.
@@ -14,7 +14,7 @@ Configure secrets in **Supabase STAGING project `yudtbifopfnjtjanaqrd` only**, n
 - `YANDEX_AI_API_KEY`: scoped Yandex service account API key, limited `yc.ai.foundationModels.execute` and least-privilege role needed for selected API.
 - `YANDEX_AI_FOLDER_ID`: folder ID for the above service account and models.
 - `YANDEX_AI_PRIMARY_MODEL=deepseek-v4.1-flash` (optional default).
-- `YANDEX_AI_FALLBACK_MODEL=aliceai-llm-flash` (optional default).
+- `YANDEX_AI_FALLBACK_MODEL=yandexgpt-5.1` (optional default).
 - `YANDEX_AI_WEB_SEARCH_ENABLED=false` at first; switch to `true` only after quota, source/data protection and region/network tests.
 The legacy `XAI_API_KEY`, `XAI_MODEL`, `XAI_API_BASE` are no longer used by the new function. **Do not delete existing secrets until cutover and rollback verified**.
 
@@ -28,7 +28,7 @@ The legacy `XAI_API_KEY`, `XAI_MODEL`, `XAI_API_BASE` are no longer used by the 
 7. **Rollback**: use previous Edge function version; keep old function and secrets until smoke, in-app receipt, role/security and backup tested.
 
 ## Confirmed technical constraints
-- DeepSeek V4 Flash and YandexGPT Lite 5 are scheduled for withdrawal on 2026-11-15; use DeepSeek V4.1 and Alice AI Flash instead.
+- DeepSeek V4 Flash and YandexGPT Lite 5 are scheduled for withdrawal on 2026-11-15; use DeepSeek V4.1 and YandexGPT Pro 5.1 instead.
 - A successful call returns actual `model`, `provider`, `web_search`, and verified source links when available. Existing React client can ignore additive fields; user should not be led to believe Web Search or weather were used when they were not.
 - Separate externally hosted Supabase frontend and authentication still need a **from-Russia-without-VPN** connection and response-time test. Russian model hosting alone is NOT end-to-end reachability.
 - Existing xAI preflight `xai-access.ts` is legacy, retained for old rollback/PR work only; no new runtime import.
