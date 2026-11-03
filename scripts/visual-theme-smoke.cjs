@@ -80,7 +80,12 @@ async function openRoute(page, route) {
 
 (async () => {
   const browser = await ENGINES[ENGINE].launch({ headless: true });
-  const evidence = { runAt: new Date().toISOString(), browser: ENGINE, paletteRatios, viewports: [] };
+  const evidence = {
+    runAt: new Date().toISOString(),
+    browser: ENGINE,
+    paletteRatios,
+    viewports: [],
+  };
   try {
     for (const viewport of [
       { label: "mobile-390", width: 390, height: 844, mobile: true },
@@ -174,7 +179,14 @@ async function openRoute(page, route) {
           routes: checks,
           browserErrors: runtimeErrors,
         });
-        console.log("PASS appearance browser:", ENGINE, "viewport:", viewport.label, "routes", checks.length);
+        console.log(
+          "PASS appearance browser:",
+          ENGINE,
+          "viewport:",
+          viewport.label,
+          "routes",
+          checks.length,
+        );
       } finally {
         await page.close();
         await context.close();
