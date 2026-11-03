@@ -94,9 +94,7 @@ const forbiddenRgb = forbidden.map((hex) => {
               matches.push({
                 tag: element.tagName,
                 className:
-                  typeof element.className === "string"
-                    ? element.className.slice(0, 160)
-                    : "",
+                  typeof element.className === "string" ? element.className.slice(0, 160) : "",
                 solid,
                 gradient: gradient.slice(0, 200),
               });
