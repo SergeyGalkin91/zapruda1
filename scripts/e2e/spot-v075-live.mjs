@@ -87,9 +87,10 @@ async function negativeUploadProbe(client) {
   form.set("captured_at", new Date().toISOString());
   const { data, error } = await client.functions.invoke(API, { body: form });
   assert.ok(error || data?.error, "Unapproved spot received a catch");
-  const rejected = error?.context && typeof error.context.json === "function"
-    ? await error.context.json().catch(() => null)
-    : data;
+  const rejected =
+    error?.context && typeof error.context.json === "function"
+      ? await error.context.json().catch(() => null)
+      : data;
   assert.equal(rejected?.error, "Record submission rejected", "Wrong negative-upload rejection");
   const after = await invoke(client, "mine");
   assert.ifError(after.error);
