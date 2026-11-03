@@ -200,6 +200,29 @@ async function openRoute(page, route) {
           const actual = await openRoute(page, route);
           assert.equal(actual.theme, "electric-blue", route + ": preference lost during navigation");
           assert.equal(actual.background, COLORS.blue, route + ": blue CSS token missing");
+          if (route === "/") {
+            const surfaces = await page.evaluate(() => {
+              const selectors = [
+                '[class~="bg-[#0B0D0B]"]',
+                '[class~="bg-[#121A12]"]',
+                '[class~="bg-[#D7FF35]/10"]',
+                '[class~="from-[#1B2718]"]',
+              ];
+              return selectors.flatMap((selector) =>
+                [...document.querySelectorAll(selector)].slice(0, 3).map((el) => {
+                  const style = getComputedStyle(el);
+                  return {
+                    selector,
+                    className: typeof el.className === "string" ? el.className.slice(0, 180) : "",
+                    bg: style.backgroundColor,
+                    bgImage: style.backgroundImage.slice(0, 220),
+                    matchesSelector: el.matches(selector),
+                  };
+                }),
+              );
+            });
+            console.log("THEME SURFACE DIAGNOSTICS", ENGINE, viewport.label, JSON.stringify(surfaces));
+          }
           await assertNoOliveSurfaces(page, route);
           if (route === "/") {
             const feedSurface = await page.evaluate(() => {
