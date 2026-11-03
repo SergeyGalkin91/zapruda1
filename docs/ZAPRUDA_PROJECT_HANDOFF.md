@@ -1,3 +1,5 @@
+> **P0 НАЙДЕНО 04.11:** frontend/isolated STAGING расходятся по 22 используемым таблицам (31 vs 61 public base tables). См. [schema gap](ZAPRUDA_STAGING_SCHEMA_GAP_20261104.md). Не принимать guest screenshots за hosted-функциональность чата/отчётов/снастей. Required-store preflight останавливает частичную публикацию; новые source guards не объявляются заменой schema/E2E.
+
 # Актуальное продолжение — 04.11.2026, v0.7.5 SPOT
 
 Сначала читать [текущее состояние](ZAPRUDA_CURRENT_STATE_20261104.md), [приёмку DeepSeek](ZAPRUDA_DEEPSEEK_STAGING_ACCEPTANCE.md), [release gates](ZAPRUDA_V075_SPOT_RELEASE_READINESS.md), [legacy cleanup](ZAPRUDA_LEGACY_CLEANUP.md) и [утверждённый UX-spec](ZAPRUDA_UIUX_REFINEMENT_V075_APPROVED_SPEC.md). Design lock v0.6.0-admin-rc.1 неизменен. PR #93/#92 канонические; #94/#91 закрыты как точные дубли в main. Сверять точный head Actions, а не старое описание.

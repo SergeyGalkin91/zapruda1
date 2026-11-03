@@ -34,7 +34,7 @@ function Label({ t, children }: { t: string; children: React.ReactNode }) {
   );
 }
 
-function NewReport() {
+export function NewReport() {
   const navigate = useNavigate();
   const [catches, setCatches] = useState<Catch[]>([{ species: "", weight: "", length: "" }]);
   const [title, setTitle] = useState("");
@@ -64,11 +64,13 @@ function NewReport() {
   const [uploadedCount, setUploadedCount] = useState(0);
   const [progress, setProgress] = useState("");
   const draftKey = useRef<string | null>(null);
+  const alive = useRef(true);
   const photoUploadIds = useRef(new Map<File, string>());
   const [draftReady, setDraftReady] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
   useEffect(() => {
     let active = true;
+    alive.current = true;
     void supabase.auth
       .getUser()
       .then(({ data }) => {
@@ -120,6 +122,7 @@ function NewReport() {
       });
     return () => {
       active = false;
+      alive.current = false;
     };
   }, []);
   useEffect(() => {
@@ -330,11 +333,27 @@ function NewReport() {
   async function identifyFish() {
     const photo = photos[0];
     if (!photo || aiWorking) return;
+    const actor = draftKey.current?.slice("zapruda-report-draft-v1-".length);
     setAiWorking(true);
     setAiMessage("");
     try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (!alive.current) return;
+      if (
+        sessionError ||
+        !actor ||
+        sessionData.session?.user.id !== actor ||
+        sessionData.session.user.is_anonymous ||
+        !sessionData.session.user.email_confirmed_at
+      )
+        throw new Error("Confirmed session required");
+      const token = sessionData.session.access_token;
       // Compress locally; do not transmit an oversized original image.
       const bitmap = await createImageBitmap(photo);
+      if (!alive.current) {
+        bitmap.close();
+        return;
+      }
       const scale = Math.min(1, 960 / Math.max(bitmap.width, bitmap.height));
       const canvas = document.createElement("canvas");
       canvas.width = Math.max(1, Math.round(bitmap.width * scale));
@@ -346,7 +365,9 @@ function NewReport() {
       const image_data_url = canvas.toDataURL("image/jpeg", 0.72);
       const { data, error: resultError } = await supabase.functions.invoke("identify-fish-photo", {
         body: { image_data_url },
+        headers: { Authorization: `Bearer ${token}` },
       });
+      if (!alive.current) return;
       if (resultError) throw new Error(data?.error || resultError.message);
       if (data?.error) throw new Error(data.error);
       const found =
@@ -367,12 +388,10 @@ function NewReport() {
           "ИИ не смог надёжно определить рыбу. Впиши вид вручную — отчёт можно публиковать.",
         );
       }
-    } catch (cause) {
-      setAiMessage(
-        cause instanceof Error ? cause.message : "ИИ-подсказка пока недоступна. Впиши вид вручную.",
-      );
+    } catch {
+      if (alive.current) setAiMessage("ИИ-подсказка пока недоступна. Впиши вид вручную.");
     } finally {
-      setAiWorking(false);
+      if (alive.current) setAiWorking(false);
     }
   }
 
@@ -383,6 +402,11 @@ function NewReport() {
     e.preventDefault();
     if (saving) return;
     setError("");
+    const actor = draftKey.current?.slice("zapruda-report-draft-v1-".length);
+    if (!actor) {
+      setError("Сначала войди в аккаунт, потом публикуй отчёт.");
+      return;
+    }
     const cleanTitle = title.trim();
     if (!cleanTitle) {
       setError("Укажи название отчёта.");
@@ -414,9 +438,23 @@ function NewReport() {
     setSaving(true);
     try {
       const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (!alive.current) return;
       if (authError) throw authError;
       const user = authData.user;
       if (!user) throw new Error("Сначала войди в аккаунт, потом публикуй отчёт.");
+      if (user.id !== actor) throw new Error("Сессия изменилась. Открой отчёт из своего аккаунта.");
+      if (user.is_anonymous || !user.email_confirmed_at)
+        throw new Error("Подтверди почту, чтобы публиковать отчёты.");
+
+      // Verify the catch store before any report INSERT when fish were entered.
+      // A no-catch outing must not probe or create a fish record.
+      const hasCatches = catches.some((caught) => caught.species.trim());
+      if (hasCatches) {
+        const { error: catchStoreError } = await supabase.from("catches").select("id").limit(1);
+        if (!alive.current) return;
+        if (catchStoreError)
+          throw new Error("Публикация временно недоступна. Черновик сохранён — попробуй позже.");
+      }
 
       // Don't create a report with photos until the optional database migration exists.
       if (!savedReportId && photos.length) {
@@ -424,10 +462,10 @@ function NewReport() {
           .from("report_photos")
           .select("id")
           .limit(1);
+        if (!alive.current) return;
         if (photosTableError) {
           throw new Error(
-            "Фотографии пока не подключены в Supabase. Потребуется миграция report_photos. " +
-              photosTableError.message,
+            "Публикация с фотографиями временно недоступна. Черновик сохранён — попробуй позже.",
           );
         }
       }
@@ -459,12 +497,13 @@ function NewReport() {
           })
           .select("id")
           .single();
+        if (!alive.current) return;
         if (reportError) throw reportError;
         reportId = report.id;
         setSavedReportId(reportId);
       }
 
-      if (!savedCatches) {
+      if (!savedCatches && hasCatches) {
         // If the previous insert succeeded but its response was lost, do not insert the same catch twice.
         // The batch insert is atomic, so an existing catch means this report already has its saved batch.
         const { data: existingCatches, error: existingError } = await supabase
@@ -472,6 +511,7 @@ function NewReport() {
           .select("id")
           .eq("report_id", reportId)
           .limit(1);
+        if (!alive.current) return;
         if (existingError)
           throw new Error("Не удалось проверить сохранённый улов: " + existingError.message);
         const alreadyStored = Boolean(existingCatches?.length);
@@ -490,6 +530,7 @@ function NewReport() {
               }));
         if (validCatches.length) {
           const { error: catchesError } = await supabase.from("catches").insert(validCatches);
+          if (!alive.current) return;
           if (catchesError) throw new Error("Не удалось сохранить улов: " + catchesError.message);
         }
         setSavedCatches(true);
@@ -501,6 +542,7 @@ function NewReport() {
         photoUploadIds.current.set(photo, photoId);
         setProgress(`Обрабатываем фото ${i + 1} из ${photos.length}…`);
         const prepared = await prepareReportPhoto(photo);
+        if (!alive.current) return;
         const body = new FormData();
         body.set("report_id", reportId);
         body.set("photo_id", photoId);
@@ -510,6 +552,7 @@ function NewReport() {
           "report-photo-upload",
           { body },
         );
+        if (!alive.current) return;
         if (uploadError || photoResult?.photo_id !== photoId) {
           throw new Error("Не удалось обработать фотографию. Повтори загрузку.");
         }
@@ -524,9 +567,11 @@ function NewReport() {
             supabase.from("catches").select("id,species").eq("report_id", reportId),
             supabase.from("report_photos").select("id").eq("report_id", reportId).limit(1),
           ]);
+          if (!alive.current) return;
           const photoId = savedPhotos.data?.[0]?.id;
           if (photoId && savedFish.data?.length) {
             for (const caught of savedFish.data) {
+              if (!alive.current) return;
               const species = catalogFishes.find(
                 (x) => x.name.toLowerCase() === caught.species.trim().toLowerCase(),
               );
@@ -551,6 +596,7 @@ function NewReport() {
         }
       }
       setProgress("");
+      if (!alive.current) return;
       if (draftKey.current) {
         try {
           localStorage.removeItem(draftKey.current);
@@ -560,13 +606,14 @@ function NewReport() {
       }
       await navigate({ to: "/" });
     } catch (caught) {
+      if (!alive.current) return;
       setProgress("");
       const message = caught instanceof Error ? caught.message : "Не удалось опубликовать отчёт.";
       setError(
         savedReportId ? "Отчёт уже сохранён. " + message + " Можно повторить загрузку." : message,
       );
     } finally {
-      setSaving(false);
+      if (alive.current) setSaving(false);
     }
   }
 

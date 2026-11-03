@@ -1,0 +1,49 @@
+# STAGING schema gap — 04.11.2026 (Москва)
+
+Read-only инвентаризация через Supabase и фактические `.from(...)` обращения frontend-кода. Данные пользователей/координаты не читались и не копировались. STAGING: **31** public base table; production: **61**. Найдены **22** используемые в `src` таблицы, имеющиеся в PROD и отсутствующие в STAGING. Отдельно через `to_regclass` и pg_class подтверждено: chat_places, chat_messages, catches, comments и private_fishing_marks отсутствуют и не замещены public views. Клиент не переименовывает эти обращения при подключении к STAGING.
+
+Это структурная проверка совместимости. Она не является signed-JWT функциональным тестом. Динамические таблицы, все RPC и колоночные различия этим списком не исчерпываются.
+
+| Отсутствующая таблица | Обращения frontend |
+|---|---|
+| `ai_memberships` | `src/routes/analytics.tsx` |
+| `angler_gear` | `src/components/AnglerTackleCabinet.tsx`, `src/routes/analytics.tsx`, `src/routes/profile.tsx` |
+| `angler_gear_sets` | `src/components/AnglerGearSets.tsx`, `src/routes/analytics.tsx`, `src/routes/profile.tsx` |
+| `atlas_catch_claims` | `src/routes/reports.new.tsx` |
+| `atlas_fish_species` | `src/routes/atlas.tsx`, `src/routes/reports.new.tsx` |
+| `atlas_waterbodies` | `src/routes/atlas.tsx`, `src/routes/reports.new.tsx` |
+| `atlas_waterbody_species` | `src/routes/atlas.tsx`, `src/routes/reports.new.tsx` |
+| `beta_test_applications` | `src/components/ActivityAchievements.tsx` |
+| `catches` | `src/routes/reports.new.tsx` |
+| `chat_message_photos` | `src/routes/chat.tsx` |
+| `chat_message_reactions` | `src/routes/chat.tsx` |
+| `chat_messages` | `src/routes/chat.tsx` |
+| `chat_places` | `src/routes/chat.tsx` |
+| `comments` | `src/routes/index.tsx` |
+| `community_requests` | `src/routes/admin.feedback.tsx`, `src/routes/admin.index.tsx`, `src/routes/admin.operations.tsx`, `src/routes/feedback.tsx` |
+| `follows` | `src/routes/messages.tsx` |
+| `guide_booking_inquiries` | `src/components/GuideBookings.tsx`, `src/routes/admin.operations.tsx` |
+| `guide_verification_applications` | `src/components/GuideVerification.tsx`, `src/routes/admin.index.tsx`, `src/routes/moderation.tsx` |
+| `private_fishing_marks` | `src/components/PrivateFishingMarks.tsx`, `src/routes/analytics.tsx`, `src/routes/messages.tsx` |
+| `spearfishing_profiles` | `src/routes/spearfishing.tsx` |
+| `user_activity_windows` | `src/components/ActivityTracker.tsx` |
+| `zapruda_admins` | `src/components/Shell.tsx`, `src/routes/admin.feedback.tsx`, `src/routes/admin.index.tsx`, `src/routes/admin.operations.tsx`, `src/routes/analytics.tsx`, `src/routes/finance.tsx`, `src/routes/moderation.tsx`, `src/routes/settings.tsx` |
+
+## Последствия и внесённое исправление
+
+- `reports.new.tsx` раньше создавал fishing_reports, затем безусловно читал catches, в том числе для выезда без улова. При отсутствующей зависимости этот порядок допускает частично созданный отчёт. Теперь доступность catches проверяется **до первого INSERT**. При отказе черновик сохраняется, записи отчёта с внесённым уловом не создаются. Отчёт с полностью пустым уловом теперь не читает/не пишет catches; это отдельная регрессия. Hosted приёмка всего отчёта ещё не подтверждена. Проверка report_photos для публикаций с фото сохранена; интерфейс не показывает внутренние SQL/миграционные сообщения.
+- Публикация привязана к аккаунту, которому принадлежит локальный draft key; смена сессии и unmount прекращают старое продолжение. ИИ-подсказка по фото привязана к захваченному токену и не отправляет изображение после unmount.
+- Пять offline UI регрессий проверяют отказ preflight без INSERT, сохранение черновика, запрет публикации A под B, остановку поздней публикации и запрет поздней отправки фото. Это не настоящие JWT и не замена hosted acceptance.
+- Публичный чат/комментарии, Атлас, полный кабинет снастей, личные метки, операторские и некоторые дополнительные сценарии нельзя объявить принятыми в STAGING по гостевым screenshots или зелёному build. У source и production есть эти интерфейсы/таблицы; схема isolated STAGING пока не выровнена.
+
+## Порядок безопасного выравнивания
+
+1. В отдельной target delta сверить обязательные колонки/constraints/indexes/functions **каждой** группы; не повторять вслепую старые migrations и не копировать permissive production grants.
+2. Первая группа — catches/comments для целостности отчёта/ленты. Вторая — публичный чат и санитизация chat media. Затем owner-only снасти/метки и optional Atlas. Операторские/платёжные роли — отдельный gate; никого автоматически не назначать.
+3. На одноразовом Postgres проверить FK, RLS owner/stranger/guest, отсутствие служебного повышения прав, cleanup/rollback, конкуренцию и retries. Новые таблицы не наполнять выдуманными публичными уловами, точками или пользователями.
+4. После выполнения защищённого workflow — реальные signed JWT/API/browser сценарии на STAGING, включая негативные и очистку только своих QA-данных. Именно этот live gate сейчас не может запуститься (см. CURRENT_STATE и run 41736781269).
+5. Production, пользовательские данные, admin/moderator assignments и ключи не менять. Schema delta здесь **не применена**; этот документ является аудитом и порядком работ, а не отчётом об успешном выравнивании.
+
+## Решение о готовности
+
+Полный пилот всего приложения — **NO-GO** до устранения критичных schema gaps и реального E2E. Узкая проверка SPOT authorization, приватного photo transport, SQL award/revoke и UI presentation имеет отдельные доказательства; она не доказывает полный чат/отчёты/профиль.

@@ -24,3 +24,5 @@
 Последний published базовый SHA 3bcade1: все 12 обычных workflow PASS. Дополнительная root-session безопасность и 4 размера visual smoke публикуются следующей ревизией существующего #93. Локальная проверка этой ревизии: 375/375, 29 файлов, TypeScript/lint/build PASS (6 прежних lint warnings). Итоговый статус CI — только по head этого PR.
 
 Профиль/аналитика после смены пользователя очищаются AuthSessionBoundary; same-user token refresh сохраняет черновик. Сам wizard в три шага, server unread receipts и активные CARP/WINTER/BOAT не реализованы этой ревизией и остаются NOT STARTED/PARTIAL согласно spec. В STAGING нет private_fishing_marks: существующий UI личных меток не считается работающей hosted-функцией. Нужны отдельные schema/dependency/real-JWT gates.
+
+**P0 BLOCKED:** [22 frontend-referenced таблицы отсутствуют в isolated STAGING](ZAPRUDA_STAGING_SCHEMA_GAP_20261104.md), включая catches/comments/public-chat. Required-store preflight предотвращает создание частичного отчёта и сохраняет draft; он не заменяет недостающую схему. Полный staging pilot этого UI не готов.
