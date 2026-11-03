@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feature/issue76-electric-blue-background
+  pull_request:
+    branches:
+      - fix/issue61-v071-p0-stages-5-8
   workflow_dispatch:
 
 permissions:
