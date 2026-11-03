@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.49.0";
+import { checkXaiAccess, normalizeXaiBase, normalizeXaiKey } from "./xai-access.ts";
 
 /**
  * Daily fishing advice via xAI Grok.
@@ -48,6 +49,99 @@ function anonKey(): string {
   }
 }
 
+type XaiRejectionCode =
+  | "XAI_INSUFFICIENT_CREDITS"
+  | "XAI_INVALID_API_KEY"
+  | "XAI_MODEL_UNAVAILABLE"
+  | "XAI_ACCESS_DENIED"
+  | "XAI_RATE_LIMITED"
+  | "XAI_REQUEST_REJECTED"
+  | "XAI_PROVIDER_UNAVAILABLE";
+
+class XaiHttpError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code: XaiRejectionCode,
+  ) {
+    super(`xAI HTTP ${status}`);
+  }
+}
+
+async function xaiRejectionCode(response: Response): Promise<XaiRejectionCode> {
+  const fallback: XaiRejectionCode =
+    response.status === 401
+      ? "XAI_INVALID_API_KEY"
+      : response.status === 403
+        ? "XAI_ACCESS_DENIED"
+        : response.status === 404
+          ? "XAI_MODEL_UNAVAILABLE"
+          : response.status === 429
+            ? "XAI_RATE_LIMITED"
+            : response.status >= 500
+              ? "XAI_PROVIDER_UNAVAILABLE"
+              : "XAI_REQUEST_REJECTED";
+  // xAI may return HTTP 400 for both key and billing/request failures. Inspect
+  // only a bounded JSON error, then discard it. Never log, persist or return it.
+  if (![400, 403].includes(response.status)) {
+    await response.body?.cancel().catch(() => {});
+    return fallback;
+  }
+  const reader = response.body?.getReader();
+  if (!reader) return fallback;
+  let finished = false;
+  try {
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        finished = true;
+        break;
+      }
+      size += value.length;
+      if (size > 4096) return fallback;
+      chunks.push(value);
+    }
+    const bytes = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.length;
+    }
+    const payload: unknown = await new Response(bytes).json();
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) return fallback;
+    const record = payload as Record<string, unknown>;
+    const nested =
+      record.error && typeof record.error === "object" && !Array.isArray(record.error)
+        ? (record.error as Record<string, unknown>)
+        : {};
+    const text = [record.code, record.message, record.error, nested.code, nested.message]
+      .filter((value): value is string => typeof value === "string")
+      .join(" ")
+      .toLowerCase();
+    if (
+      /insufficient[_ -](?:credits|balance|funds|quota)|no (?:available |remaining )?credits|(?:does not|doesn't|do not|don't) have (?:any )?credits|credit balance (?:is )?(?:empty|exhausted)|spending limit/.test(
+        text,
+      )
+    )
+      return "XAI_INSUFFICIENT_CREDITS";
+    if (/invalid[_ -](?:api[_ -]?)?key|incorrect api[_ -]?key|malformed api[_ -]?key/.test(text))
+      return "XAI_INVALID_API_KEY";
+    if (
+      /model[_ -](?:not[_ -]found|unavailable|not[_ -]supported)|model.{0,100}(?:does not exist|not found|not available|deprecated|retired)/.test(
+        text,
+      )
+    )
+      return "XAI_MODEL_UNAVAILABLE";
+    return fallback;
+  } catch {
+    return fallback;
+  } finally {
+    if (!finished) await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "POST") return respond(405, { error: "Method not allowed" });
@@ -55,9 +149,11 @@ Deno.serve(async (req: Request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const key = anonKey();
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const xaiKey = Deno.env.get("XAI_API_KEY") ?? "";
-  const model = Deno.env.get("XAI_MODEL") || "grok-3-mini";
-  const apiBase = (Deno.env.get("XAI_API_BASE") || "https://api.x.ai/v1").replace(/\/$/, "");
+  const rawKey = Deno.env.get("XAI_API_KEY") ?? "";
+  const xaiKey = normalizeXaiKey(rawKey);
+  const model = (Deno.env.get("XAI_MODEL") || "grok-3-mini").trim();
+  const rawBase = Deno.env.get("XAI_API_BASE") || "https://api.x.ai/v1";
+  const apiBase = normalizeXaiBase(rawBase);
 
   if (!supabaseUrl || !key) return respond(503, { error: "Backend not configured" });
 
@@ -73,7 +169,6 @@ Deno.serve(async (req: Request) => {
     return respond(401, { error: "Войди в ZAPRUDA" });
   }
   if (!serviceKey) return respond(503, { error: "Service role not configured" });
-  if (!xaiKey) return respond(503, { error: "ИИ-сервис временно недоступен (ключ не настроен)" });
   const userId = authData.user.id;
 
   let body: Record<string, unknown> = {};
@@ -91,9 +186,83 @@ Deno.serve(async (req: Request) => {
   const target = sanitize(body.target, 80) || "Любой хищник";
   const timeOfDay = sanitize(body.time, 40) || "Утро";
   const notes = sanitize(body.notes, 400);
-  if (location.length < 2) return respond(400, { error: "Укажи водоём или место" });
+  const diagnosticOnly = body.action === "diagnose";
+  const staging = supabaseUrl === "https://yudtbifopfnjtjanaqrd.supabase.co";
+  if (diagnosticOnly && (!staging || !authData.user.email_confirmed_at)) return respond(404, {});
+  if (!diagnosticOnly && location.length < 2)
+    return respond(400, { error: "Укажи водоём или место" });
 
   const adviceDay = moscowAdviceDay();
+  const { data: stored, error: storedError } = await userClient
+    .from("ai_daily_advices")
+    .select("status,attempts,answer,lease_expires_at")
+    .eq("user_id", userId)
+    .eq("advice_day", adviceDay)
+    .maybeSingle();
+  const cached =
+    stored?.status === "ready" && typeof stored.answer === "string" && stored.answer.length >= 40;
+  const failureLimit = stored?.status === "failed" && stored.attempts >= 3;
+  const inFlight =
+    stored?.status === "pending" && Date.parse(stored.lease_expires_at ?? "") > Date.now();
+  if (!diagnosticOnly) {
+    if (cached)
+      return respond(200, { answer: stored.answer, already_used: true, advice_day: adviceDay });
+    if (storedError)
+      return respond(503, {
+        error: "Журнал ИИ временно недоступен",
+        code: "ADVICE_JOURNAL_UNAVAILABLE",
+      });
+    if (failureLimit)
+      return respond(429, {
+        error: "Дневной предел неудачных попыток достигнут",
+        code: "ADVICE_FAILURE_LIMIT",
+        advice_day: adviceDay,
+      });
+    if (inFlight)
+      return respond(409, {
+        error: "Запрос уже обрабатывается",
+        code: "ADVICE_IN_PROGRESS",
+        advice_day: adviceDay,
+      });
+  }
+  if (!apiBase || !/^[a-zA-Z0-9][a-zA-Z0-9._:-]{1,127}$/.test(model)) {
+    return respond(503, {
+      error: "Некорректная настройка ИИ",
+      code: !apiBase ? "XAI_ENDPOINT_CONFIGURATION" : "XAI_MODEL_CONFIGURATION",
+    });
+  }
+  // The existing key stays server-side. Introspection returns only fixed states,
+  // never account/team identifiers, ACL text, provider payloads or key fragments.
+  if (staging) {
+    const access = await checkXaiAccess(
+      { key: xaiKey, base: apiBase, model },
+      xaiRejectionCode,
+      fetch,
+    );
+    if (diagnosticOnly)
+      return respond(200, {
+        diagnostic_only: true,
+        ...access,
+        key_normalized: rawKey !== xaiKey,
+        endpoint_normalized: rawBase.replace(/\/$/, "") !== apiBase,
+        endpoint: apiBase === "https://api.x.ai/v1" ? "global" : "us",
+        quota: storedError
+          ? "unknown"
+          : cached
+            ? "cached"
+            : failureLimit
+              ? "failed_limit"
+              : inFlight
+                ? "in_progress"
+                : "available",
+        advice_day: adviceDay,
+      });
+    if (!access.canGenerate)
+      return respond(503, { error: "Провайдер ИИ отклонил проверку доступа", code: access.code });
+  } else if (!xaiKey) {
+    return respond(503, { error: "ИИ-сервис временно недоступен", code: "XAI_KEY_FORMAT" });
+  }
+
   const promptSummary = `${location} · ${target} · ${timeOfDay}`;
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -182,8 +351,7 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!upstream.ok) {
-      await upstream.body?.cancel().catch(() => {});
-      throw new Error(`xAI HTTP ${upstream.status}`);
+      throw new XaiHttpError(upstream.status, await xaiRejectionCode(upstream));
     }
     const payload = (await upstream.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
@@ -193,12 +361,13 @@ Deno.serve(async (req: Request) => {
   } catch (err) {
     // Only fixed diagnostics may reach the user-readable journal. Provider bodies
     // and arbitrary exception messages can contain credentials or request details.
-    const errorMessage =
-      err instanceof Error && /^xAI HTTP \d{3}$/.test(err.message)
-        ? err.message
+    const code =
+      err instanceof XaiHttpError
+        ? err.code
         : err instanceof Error && err.name === "TimeoutError"
           ? "XAI_TIMEOUT"
           : "XAI_UPSTREAM_ERROR";
+    const errorMessage = err instanceof XaiHttpError ? `${err.message}; ${code}` : code;
     await admin.rpc("complete_ai_daily_advice_slot", {
       p_id: rowId,
       p_lease_token: leaseToken,
@@ -209,6 +378,7 @@ Deno.serve(async (req: Request) => {
     });
     return respond(502, {
       error: "ИИ не ответил. Успешный совет не засчитан. Попробуй позже.",
+      code,
       advice_day: adviceDay,
     });
   }

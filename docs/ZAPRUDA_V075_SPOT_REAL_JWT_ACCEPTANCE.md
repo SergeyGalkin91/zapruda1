@@ -2,13 +2,13 @@
 **Status 2026-11-03:** test infrastructure committed. No live JWT result is asserted until the protected workflow succeeds.
 
 ## Read-only real JWT gate
-- Source: `scripts/e2e/spot-v075-live.mjs`; runner: `.github/workflows/v075-spot-jwt-staging.yml`.
+- Source: `scripts/e2e/spot-v075-live.mjs`; runner: `.github/workflows/spot-v075-staging-jwt.yml`.
 - Existing GitHub environment: `staging-e2e` with the exact secrets in `docs/V071_STAGING_E2E_RUNBOOK.md`.
 - Only STAGING URL is permitted: `https://yudtbifopfnjtjanaqrd.supabase.co`.
 - Four distinct, email-confirmed identities must sign in using real password/JWT; no passwords or access tokens in logs.
 - Read-only checks: each user's personal catches and notifications, denial of queue/review/evidence to non-moderators, wrong/unknown spot rejection. Optional `ZAPRUDA_SPOT_E2E_UPLOAD_PROBE=true` performs a negative, synthetic-PNG upload against an invalid spot, verifies rejection and unchanged catches; no fake public champion.
 - The workflow uses GitHub Environment protection; triggering it does not circumvent required reviewers, configuration or credentials.
-- Manual default-branch dispatch may be unavailable. To trigger branch-only, edit `.github/spot-e2e-request.txt` on `release/v0.7.5-spot`; the workflow has branch/path-scoped push trigger.
+- Manual default-branch dispatch may be unavailable. To trigger branch-only, edit `.github/spot-v075-e2e-request.txt` on `release/v0.7.5-spot`; the workflow has branch/path-scoped push trigger.
 - If no protected secrets exist, expect a FAIL/BLOCKED run, **not** a successful E2E.
 - GitHub connector's fetch_commit_workflow_runs covers pull-request-triggered runs and may not list the push-only protected test. Read actual job logs from Actions before making a live E2E success claim.
 

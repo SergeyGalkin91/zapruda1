@@ -5,6 +5,7 @@ import { Shell } from "@/components/Shell";
 import { ReactionBar } from "@/components/ReactionBar";
 import { DailyFishingBrief } from "@/components/DailyFishingBrief";
 import { supabase } from "@/integrations/supabase/client";
+import { loadPublicReportPhotos } from "@/lib/public-report-photos";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,7 +53,15 @@ type Comment = {
   } | null;
 };
 
-function ReportPhotoGallery({ photos, title }: { photos: string[]; title: string }) {
+function ReportPhotoGallery({
+  photos,
+  title,
+  onPhotoError,
+}: {
+  photos: string[];
+  title: string;
+  onPhotoError: () => void;
+}) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -84,6 +93,7 @@ function ReportPhotoGallery({ photos, title }: { photos: string[]; title: string
           >
             <img
               src={src}
+              onError={onPhotoError}
               loading="lazy"
               alt={`${title} — фото ${index + 1}`}
               className={`w-full object-cover transition duration-300 group-hover:scale-[1.025] ${photos.length === 1 || (photos.length === 3 && index === 0) ? "aspect-[16/10]" : "aspect-[4/3]"}`}
@@ -111,6 +121,7 @@ function ReportPhotoGallery({ photos, title }: { photos: string[]; title: string
           />
           <img
             src={photos[activeIndex]}
+            onError={onPhotoError}
             alt={`${title} — фото ${activeIndex + 1}`}
             className="pointer-events-none relative max-h-[85vh] max-w-[95vw] object-contain"
           />
@@ -272,6 +283,23 @@ function Feed() {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const requestRef = useRef(false);
   const initialPageRequested = useRef(false);
+  const photoRetries = useRef(new Map<string, { at: number; pending: boolean }>());
+  const refreshPhotos = useCallback((reportId: string) => {
+    const last = photoRetries.current.get(reportId);
+    if (last?.pending || (last && Date.now() - last.at < 10_000)) return;
+    const attempt = { at: Date.now(), pending: true };
+    photoRetries.current.set(reportId, attempt);
+    void loadPublicReportPhotos([reportId])
+      .then((next) => {
+        setPhotosByReport((current) => ({ ...current, [reportId]: next[reportId] ?? [] }));
+      })
+      .catch(() => {
+        setPhotosByReport((current) => ({ ...current, [reportId]: [] }));
+      })
+      .finally(() => {
+        attempt.pending = false;
+      });
+  }, []);
 
   const loadPage = useCallback(
     async (reset = false) => {
@@ -311,30 +339,11 @@ function Feed() {
           if (page.length) {
             // The photo table is optional until its migration is applied.
             // Never let a missing gallery backend prevent fishing reports from loading.
-            const { data: photoRows, error: photoError } = await supabase
-              .from("report_photos")
-              .select("report_id,storage_path,sort_order")
-              .in(
-                "report_id",
-                page.map((report) => report.id),
-              )
-              .order("sort_order", { ascending: true });
-
-            if (!photoError && photoRows?.length) {
-              const { data: signedUrls, error: signingError } = await supabase.storage
-                .from("report-photos")
-                .createSignedUrls(
-                  photoRows.map((photo) => photo.storage_path),
-                  3600,
-                );
-              if (!signingError && signedUrls) {
-                const next: Record<string, string[]> = {};
-                photoRows.forEach((photo, index) => {
-                  const signedUrl = signedUrls[index]?.signedUrl;
-                  if (signedUrl) (next[photo.report_id] ??= []).push(signedUrl);
-                });
-                setPhotosByReport((current) => (reset ? next : { ...current, ...next }));
-              }
+            try {
+              const next = await loadPublicReportPhotos(page.map((report) => report.id));
+              setPhotosByReport((current) => (reset ? next : { ...current, ...next }));
+            } catch {
+              // The gallery remains optional; never fall back to an original file.
             }
           }
           setError("");
@@ -519,7 +528,11 @@ function Feed() {
                   </h2>
                   {report.body && <p className="mt-2 whitespace-pre-wrap text-sm">{report.body}</p>}
                 </div>
-                <ReportPhotoGallery photos={photosByReport[report.id] ?? []} title={report.title} />
+                <ReportPhotoGallery
+                  photos={photosByReport[report.id] ?? []}
+                  title={report.title}
+                  onPhotoError={() => refreshPhotos(report.id)}
+                />
                 <div className="flex flex-wrap gap-2 text-xs">
                   {report.location_name && (
                     <div className="space-y-2">

@@ -3,15 +3,23 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
+import {
+  checkXaiAccess,
+  normalizeXaiBase,
+  normalizeXaiKey,
+} from "../../supabase/functions/zapruda-daily-advice/xai-access";
 
 type EdgeHandler = (request: Request) => Promise<Response>;
 type FunctionName = "openweather-current" | "zapruda-daily-advice";
 type HandlerOptions = {
   providerStatus?: number;
   providerError?: Error;
+  providerResponse?: Response;
   anonymous?: boolean;
   authError?: boolean;
   rpc?: (name: string, args: Record<string, unknown>) => Promise<unknown>;
+  storedAdvice?: Record<string, unknown>;
+  env?: Record<string, string>;
 };
 
 // Execute the actual handler source with only its Deno host and dependencies mocked.
@@ -27,14 +35,29 @@ function loadHandler(name: FunctionName, providerBody = "{}", options: HandlerOp
   const client = {
     auth: {
       getUser: vi.fn(async () => ({
-        data: { user: { id: "offline-unit-user", is_anonymous: options.anonymous ?? false } },
+        data: {
+          user: {
+            id: "offline-unit-user",
+            is_anonymous: options.anonymous ?? false,
+            email_confirmed_at: "2026-01-01T00:00:00Z",
+          },
+        },
         error: options.authError ? { message: "Offline invalid token fixture" } : null,
       })),
     },
     rpc,
+    from: () => {
+      const query = {
+        select: () => query,
+        eq: () => query,
+        maybeSingle: async () => ({ data: options.storedAdvice ?? null, error: null }),
+      };
+      return query;
+    },
   };
-  const providerFetch = vi.fn(async () => {
+  const providerFetch = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => {
     if (options.providerError) throw options.providerError;
+    if (options.providerResponse) return options.providerResponse;
     return new Response(providerBody, { status: options.providerStatus ?? 200 });
   });
   const source = readFileSync(
@@ -51,10 +74,20 @@ function loadHandler(name: FunctionName, providerBody = "{}", options: HandlerOp
         return { createClient: () => client };
       }
       if (specifier === "jsr:@supabase/functions-js/edge-runtime.d.ts") return {};
+      if (specifier === "./xai-access.ts")
+        return { checkXaiAccess, normalizeXaiBase, normalizeXaiKey };
       throw new Error(`Unexpected dependency: ${specifier}`);
     },
     Deno: {
-      env: { get: () => "offline-test-placeholder" },
+      env: {
+        get: (name: string) =>
+          options.env?.[name] ??
+          (name === "XAI_API_BASE"
+            ? "https://api.x.ai/v1"
+            : name === "XAI_MODEL"
+              ? "grok-3-mini"
+              : "offline-test-placeholder"),
+      },
       serve(fn: EdgeHandler) {
         handler = fn;
       },
@@ -304,4 +337,182 @@ describe("Grok lease and provider failures (offline handler tests)", () => {
       ).toMatchObject({ p_success: false });
     },
   );
+
+  it.each([
+    [
+      400,
+      { code: "insufficient_credits", error: "Private team has no available credits" },
+      "XAI_INSUFFICIENT_CREDITS",
+    ],
+    [400, { error: "Your team does not have any credits" }, "XAI_INSUFFICIENT_CREDITS"],
+    [403, { error: { message: "Spending limit reached" } }, "XAI_INSUFFICIENT_CREDITS"],
+    [
+      400,
+      { error: { code: "invalid_api_key", message: "Incorrect API key provided" } },
+      "XAI_INVALID_API_KEY",
+    ],
+    [401, { message: "Private authorization details" }, "XAI_INVALID_API_KEY"],
+    [400, { error: "The model does not exist" }, "XAI_MODEL_UNAVAILABLE"],
+    [404, { message: "Private model details" }, "XAI_MODEL_UNAVAILABLE"],
+    [403, { error: "Forbidden" }, "XAI_ACCESS_DENIED"],
+    [429, { error: "Private quota diagnostic" }, "XAI_RATE_LIMITED"],
+    [500, { error: "Misleading insufficient_credits diagnostic" }, "XAI_PROVIDER_UNAVAILABLE"],
+  ] as const)(
+    "classifies HTTP %s without exposing the provider body",
+    async (status, payload, code) => {
+      const marker = "DO_NOT_EXPOSE_KEY_TEAM_OR_GPS";
+      const { handler, rpc } = loadHandler(
+        "zapruda-daily-advice",
+        JSON.stringify({ ...payload, private: marker }),
+        {
+          providerStatus: status,
+          rpc: rpcSuccess,
+        },
+      );
+      const response = await handler(adviceRequest());
+      expect(response.status).toBe(502);
+      const body = await response.json();
+      expect(body.code).toBe(code);
+      expect(JSON.stringify(body)).not.toContain(marker);
+      const completions = rpc.mock.calls.filter(
+        ([name]) => name === "complete_ai_daily_advice_slot",
+      );
+      expect(completions).toHaveLength(1);
+      expect(completions[0]?.[1]).toMatchObject({
+        p_success: false,
+        p_answer: "",
+        p_error_message: `xAI HTTP ${status}; ${code}`,
+      });
+      expect(JSON.stringify(completions)).not.toContain(marker);
+    },
+  );
+
+  it.each([
+    "{",
+    "null",
+    "[]",
+    '"no available credits"',
+    JSON.stringify({ extra: { code: "insufficient_credits" } }),
+  ])("keeps an unrecognized HTTP 400 payload private: %s", async (payload) => {
+    const { handler, rpc } = loadHandler("zapruda-daily-advice", payload, {
+      providerStatus: 400,
+      rpc: rpcSuccess,
+    });
+    const response = await handler(adviceRequest());
+    expect(response.status).toBe(502);
+    expect((await response.json()).code).toBe("XAI_REQUEST_REJECTED");
+    expect(
+      rpc.mock.calls.find(([name]) => name === "complete_ai_daily_advice_slot")?.[1],
+    ).toMatchObject({ p_error_message: "xAI HTTP 400; XAI_REQUEST_REJECTED", p_success: false });
+  });
+
+  it("cancels an oversized error stream without waiting for its end", async () => {
+    const cancel = vi.fn();
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(4097).fill(65));
+      },
+      cancel,
+    });
+    const { handler } = loadHandler("zapruda-daily-advice", "", {
+      providerResponse: new Response(stream, { status: 400 }),
+      rpc: rpcSuccess,
+    });
+    const response = await handler(adviceRequest());
+    expect((await response.json()).code).toBe("XAI_REQUEST_REJECTED");
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("never copies an unknown provider code or message into the response or journal", async () => {
+    const marker = "PRIVATE_TOKEN_XYZ_123";
+    const { handler, rpc } = loadHandler(
+      "zapruda-daily-advice",
+      JSON.stringify({
+        code: marker,
+        error: { code: marker, message: marker },
+      }),
+      { providerStatus: 400, rpc: rpcSuccess },
+    );
+    const response = await handler(adviceRequest());
+    const body = await response.json();
+    expect(body.code).toBe("XAI_REQUEST_REJECTED");
+    expect(JSON.stringify({ body, calls: rpc.mock.calls })).not.toContain(marker);
+  });
+});
+
+describe("Daily advice cached access and safe diagnostics (offline handler tests)", () => {
+  const storedAnswer =
+    "Previously generated genuine-model fixture content, long enough for the validation.";
+  it("returns a ready cached answer without any provider call during an outage", async () => {
+    const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice", "", {
+      storedAdvice: { status: "ready", answer: storedAnswer, attempts: 1 },
+      providerError: new Error("Offline outage fixture"),
+      env: { SUPABASE_URL: "https://yudtbifopfnjtjanaqrd.supabase.co" },
+    });
+    const response = await handler(request(JSON.stringify({ location: "Offline fixture" })));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ answer: storedAnswer, already_used: true });
+    expect(providerFetch).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+  it.each([
+    [{ status: "failed", attempts: 3 }, 429, "ADVICE_FAILURE_LIMIT"],
+    [
+      {
+        status: "pending",
+        attempts: 1,
+        lease_expires_at: new Date(Date.now() + 60_000).toISOString(),
+      },
+      409,
+      "ADVICE_IN_PROGRESS",
+    ],
+  ] as const)(
+    "honors a stored quota/lease before provider work: %j",
+    async (storedAdvice, status, code) => {
+      const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice", "", {
+        storedAdvice,
+      });
+      const response = await handler(request(JSON.stringify({ location: "Offline fixture" })));
+      expect(response.status).toBe(status);
+      expect((await response.json()).code).toBe(code);
+      expect(providerFetch).not.toHaveBeenCalled();
+      expect(rpc).not.toHaveBeenCalled();
+    },
+  );
+  it("diagnoses an invalid key without consuming a slot or disclosing provider content", async () => {
+    const { handler, providerFetch, rpc } = loadHandler(
+      "zapruda-daily-advice",
+      JSON.stringify({ error: "PRIVATE_PROVIDER_ID" }),
+      {
+        providerStatus: 401,
+        env: {
+          SUPABASE_URL: "https://yudtbifopfnjtjanaqrd.supabase.co",
+          XAI_API_KEY: 'Bearer "offline-key-fixture"',
+        },
+      },
+    );
+    const response = await handler(request(JSON.stringify({ action: "diagnose" })));
+    expect(response.status).toBe(200);
+    const result = await response.json();
+    expect(result).toMatchObject({
+      diagnostic_only: true,
+      canGenerate: false,
+      code: "XAI_INVALID_API_KEY",
+      stage: "account",
+      accountHttp: 401,
+      key_normalized: true,
+    });
+    expect(JSON.stringify(result)).not.toMatch(/PRIVATE|offline-key|Bearer/);
+    expect(providerFetch).toHaveBeenCalledTimes(1);
+    expect(rpc).not.toHaveBeenCalled();
+    expect(providerFetch.mock.calls[0]?.[1]?.headers).toMatchObject({
+      Authorization: "Bearer offline-key-fixture",
+    });
+  });
+  it("does not expose the diagnostic action outside STAGING", async () => {
+    const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice");
+    expect((await handler(request(JSON.stringify({ action: "diagnose" })))).status).toBe(404);
+    expect(providerFetch).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
+  });
 });

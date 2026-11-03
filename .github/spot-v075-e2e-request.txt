@@ -6,3 +6,5 @@ No credentials belong in this file.
 Requested 2026-11-03 after user confirmed staging-e2e secrets were saved; signed JWT read-only preflight.
 
 2026-11-04: protected follow-up with signed JWT negative multipart upload; rejects unapproved spot and verifies zero persisted catches. No real catch or champion is created.
+
+2026-11-04 MSK: consolidated source candidate; verify real four-user SPOT boundary, PRIVATE metadata-bearing JPEG upload/access/cleanup, and existing xAI key diagnosis plus actual generation/cache. Never publish a transport fixture or appoint a moderator.

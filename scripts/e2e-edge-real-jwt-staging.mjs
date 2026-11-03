@@ -79,7 +79,19 @@ try {
   // A real advice consumes the test user's daily quota. Repeated request must not spend twice.
   const input = { location: "QA Нижний Новгород река Ока", target: "Окунь", time: "Утро" };
   const first = await invoke("zapruda-daily-advice", jwt, input);
-  assert.equal(first.status, 200, "Live xAI answer must return 200");
+  const codes = new Set([
+    "XAI_INSUFFICIENT_CREDITS",
+    "XAI_INVALID_API_KEY",
+    "XAI_MODEL_UNAVAILABLE",
+    "XAI_ACCESS_DENIED",
+    "XAI_RATE_LIMITED",
+    "XAI_REQUEST_REJECTED",
+    "XAI_PROVIDER_UNAVAILABLE",
+    "XAI_TIMEOUT",
+    "XAI_UPSTREAM_ERROR",
+  ]);
+  const diagnostic = codes.has(first.json.code) ? first.json.code : "XAI_UNCLASSIFIED";
+  assert.equal(first.status, 200, `Live xAI answer must return 200; ${diagnostic}`);
   assert.equal(
     first.json.advice_day,
     new Intl.DateTimeFormat("en-CA", {
