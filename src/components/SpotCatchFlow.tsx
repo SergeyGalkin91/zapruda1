@@ -139,7 +139,7 @@ export function SpotCatchFlow() {
         const updated = await spotAction<{ queue: QueueRow[] }>("queue");
         setQueue(updated.queue ?? []);
       }
-      if (action === "subscribe") setMessage("Подписка на спот оформлена.");
+      if (action === "subscribe") setMessage("Подписка на спот и выбранную дисциплину оформлена.");
       if (action === "mine" || action === "inbox" || action === "review") await refreshOwn();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Не удалось выполнить действие.");
@@ -281,10 +281,10 @@ export function SpotCatchFlow() {
             <button
               type="button"
               disabled={busy}
-              onClick={() => void act("subscribe", { spot_id: spotId })}
+              onClick={() => void act("subscribe", { spot_id: spotId, league })}
               className="text-sm font-semibold text-[#D7FF35] underline"
             >
-              Подписаться на смену KING на этом споте
+              Подписаться на смену KING в этой дисциплине
             </button>
           )}
           {!!catches.length && (
