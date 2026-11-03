@@ -44,7 +44,7 @@ export class YandexProviderError extends Error {
 }
 
 const headers = (config: ProviderConfig) => ({
-  "Authorization": `Api-Key ${config.key}`,
+  Authorization: `Api-Key ${config.key}`,
   "Content-Type": "application/json",
   "x-folder-id": config.folderId,
 });
@@ -53,11 +53,17 @@ const safeJson = async (response: Response): Promise<unknown> => {
     await response.body?.cancel().catch(() => {});
     const status = response.status;
     throw new YandexProviderError(
-      status === 401 ? "YANDEX_INVALID_KEY"
-        : status === 403 ? "YANDEX_ACCESS_DENIED"
-        : status === 429 ? "YANDEX_RATE_LIMITED"
-        : status >= 500 ? "YANDEX_UPSTREAM_UNAVAILABLE"
-        : status === 404 ? "YANDEX_MODEL_UNAVAILABLE" : "YANDEX_REQUEST_REJECTED",
+      status === 401
+        ? "YANDEX_INVALID_KEY"
+        : status === 403
+          ? "YANDEX_ACCESS_DENIED"
+          : status === 429
+            ? "YANDEX_RATE_LIMITED"
+            : status >= 500
+              ? "YANDEX_UPSTREAM_UNAVAILABLE"
+              : status === 404
+                ? "YANDEX_MODEL_UNAVAILABLE"
+                : "YANDEX_REQUEST_REJECTED",
       status,
     );
   }
@@ -66,7 +72,10 @@ const safeJson = async (response: Response): Promise<unknown> => {
 
 function extractResponseText(payload: unknown): string {
   if (!payload || typeof payload !== "object") return "";
-  const value = payload as { output_text?: unknown; output?: Array<{ type?: string; content?: Array<{ type?: string; text?: unknown }> }> };
+  const value = payload as {
+    output_text?: unknown;
+    output?: Array<{ type?: string; content?: Array<{ type?: string; text?: unknown }> }>;
+  };
   if (typeof value.output_text === "string") return value.output_text;
   return (value.output ?? [])
     .flatMap((part) => part.content ?? [])
@@ -76,26 +85,38 @@ function extractResponseText(payload: unknown): string {
 }
 function extractSources(payload: unknown): Array<{ title: string; url: string }> {
   if (!payload || typeof payload !== "object") return [];
-  const parts = (payload as { output?: Array<{ content?: Array<{ annotations?: Array<{ type?: string; url?: string; title?: string }> }> }> }).output ?? [];
+  const parts =
+    (
+      payload as {
+        output?: Array<{
+          content?: Array<{ annotations?: Array<{ type?: string; url?: string; title?: string }> }>;
+        }>;
+      }
+    ).output ?? [];
   const seen = new Set<string>();
   const sources: Array<{ title: string; url: string }> = [];
-  for (const part of parts) for (const content of part.content ?? []) for (const a of content.annotations ?? []) {
-    if (a.type !== "url_citation" || typeof a.url !== "string") continue;
-    try {
-      const url = new URL(a.url);
-      if (!["https:", "http:"].includes(url.protocol) || url.username || url.password) continue;
-      if (seen.has(url.href)) continue;
-      seen.add(url.href);
-      sources.push({ title: String(a.title ?? url.hostname).slice(0, 120), url: url.href });
-    } catch { /* Provider annotation was not a valid URL. */ }
-    if (sources.length >= 5) return sources;
-  }
+  for (const part of parts)
+    for (const content of part.content ?? [])
+      for (const a of content.annotations ?? []) {
+        if (a.type !== "url_citation" || typeof a.url !== "string") continue;
+        try {
+          const url = new URL(a.url);
+          if (!["https:", "http:"].includes(url.protocol) || url.username || url.password) continue;
+          if (seen.has(url.href)) continue;
+          seen.add(url.href);
+          sources.push({ title: String(a.title ?? url.hostname).slice(0, 120), url: url.href });
+        } catch {
+          /* Provider annotation was not a valid URL. */
+        }
+        if (sources.length >= 5) return sources;
+      }
   return sources;
 }
 export function canRetryWithFallback(error: unknown): boolean {
-  return error instanceof YandexProviderError &&
-    [429, 500, 502, 503, 504].includes(error.status) ||
-    error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
+  return (
+    (error instanceof YandexProviderError && [429, 500, 502, 503, 504].includes(error.status)) ||
+    (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError"))
+  );
 }
 
 async function fetchSearchContext(
@@ -152,10 +173,13 @@ async function fetchCompletion(
     }),
     signal: AbortSignal.timeout(25000),
   });
-  const payload = await safeJson(response) as { choices?: Array<{ message?: { content?: unknown } }> };
-  const answer = typeof payload?.choices?.[0]?.message?.content === "string"
-    ? payload.choices[0].message.content.trim().slice(0, 8000)
-    : "";
+  const payload = (await safeJson(response)) as {
+    choices?: Array<{ message?: { content?: unknown } }>;
+  };
+  const answer =
+    typeof payload?.choices?.[0]?.message?.content === "string"
+      ? payload.choices[0].message.content.trim().slice(0, 8000)
+      : "";
   if (answer.length < 40) throw new YandexProviderError("YANDEX_EMPTY_ANSWER", 502);
   return answer;
 }
@@ -182,11 +206,25 @@ export async function generateYandexAdvice(
     }
   }
   try {
-    const answer = await fetchCompletion(config, config.primaryModel, input.systemPrompt, input.userPrompt, searchContext, requester);
+    const answer = await fetchCompletion(
+      config,
+      config.primaryModel,
+      input.systemPrompt,
+      input.userPrompt,
+      searchContext,
+      requester,
+    );
     return { answer, model: config.primaryModel, source: "yandex-deepseek", webSearch, sources };
   } catch (error) {
     if (!canRetryWithFallback(error) || config.fallbackModel === config.primaryModel) throw error;
-    const answer = await fetchCompletion(config, config.fallbackModel, input.systemPrompt, input.userPrompt, searchContext, requester);
+    const answer = await fetchCompletion(
+      config,
+      config.fallbackModel,
+      input.systemPrompt,
+      input.userPrompt,
+      searchContext,
+      requester,
+    );
     return { answer, model: config.fallbackModel, source: "yandex-fallback", webSearch, sources };
   }
 }

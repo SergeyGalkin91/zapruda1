@@ -1,5 +1,11 @@
 import { createClient } from "npm:@supabase/supabase-js@2.49.0";
-import { DEFAULT_PRIMARY, DEFAULT_FALLBACK, generateYandexAdvice, modelUri, YandexProviderError } from "./yandex-provider.ts";
+import {
+  DEFAULT_PRIMARY,
+  DEFAULT_FALLBACK,
+  generateYandexAdvice,
+  modelUri,
+  YandexProviderError,
+} from "./yandex-provider.ts";
 
 /**
  * Daily fishing advice via Yandex AI Studio: DeepSeek V4.1 Flash with Alice AI fallback.
@@ -145,19 +151,34 @@ Deno.serve(async (req: Request) => {
       configuration = err instanceof Error ? err.message : "YANDEX_CONFIGURATION_ERROR";
     }
     return respond(200, {
-      diagnostic_only: true, provider: "yandex-ai-studio", configuration,
-      primary_model: yandex.primaryModel, fallback_model: yandex.fallbackModel,
+      diagnostic_only: true,
+      provider: "yandex-ai-studio",
+      configuration,
+      primary_model: yandex.primaryModel,
+      fallback_model: yandex.fallbackModel,
       web_search_enabled: yandex.webSearchEnabled,
-      quota: storedError ? "unknown" : cached ? "cached" : failureLimit ? "failed_limit" : inFlight ? "in_progress" : "available",
+      quota: storedError
+        ? "unknown"
+        : cached
+          ? "cached"
+          : failureLimit
+            ? "failed_limit"
+            : inFlight
+              ? "in_progress"
+              : "available",
       advice_day: adviceDay,
     });
   }
-  if (!yandex.key) return respond(503, { error: "ИИ пока не настроен", code: "YANDEX_KEY_MISSING" });
+  if (!yandex.key)
+    return respond(503, { error: "ИИ пока не настроен", code: "YANDEX_KEY_MISSING" });
   try {
     modelUri(yandex.folderId, yandex.primaryModel);
     modelUri(yandex.folderId, yandex.fallbackModel);
   } catch {
-    return respond(503, { error: "Некорректная настройка модели", code: "YANDEX_CONFIGURATION_ERROR" });
+    return respond(503, {
+      error: "Некорректная настройка модели",
+      code: "YANDEX_CONFIGURATION_ERROR",
+    });
   }
 
   const promptSummary = `${location} · ${target} · ${timeOfDay}`;
@@ -233,7 +254,12 @@ Deno.serve(async (req: Request) => {
   let webSearch = "disabled";
   let sources: Array<{ title: string; url: string }> = [];
   try {
-    const result = await generateYandexAdvice(yandex, { systemPrompt, userPrompt, target, timeOfDay });
+    const result = await generateYandexAdvice(yandex, {
+      systemPrompt,
+      userPrompt,
+      target,
+      timeOfDay,
+    });
     answer = result.answer;
     usedModel = result.model;
     providerSource = result.source;
@@ -241,13 +267,25 @@ Deno.serve(async (req: Request) => {
     sources = result.sources;
   } catch (err) {
     // Only fixed codes; no provider bodies, keys, input text or credentials in logs.
-    const code = err instanceof YandexProviderError ? err.code :
-      err instanceof Error && err.name === "TimeoutError" ? "YANDEX_TIMEOUT" : "YANDEX_UPSTREAM_ERROR";
+    const code =
+      err instanceof YandexProviderError
+        ? err.code
+        : err instanceof Error && err.name === "TimeoutError"
+          ? "YANDEX_TIMEOUT"
+          : "YANDEX_UPSTREAM_ERROR";
     await admin.rpc("complete_ai_daily_advice_slot", {
-      p_id: rowId, p_lease_token: leaseToken, p_success: false,
-      p_answer: "", p_model: yandex.primaryModel, p_error_message: code,
+      p_id: rowId,
+      p_lease_token: leaseToken,
+      p_success: false,
+      p_answer: "",
+      p_model: yandex.primaryModel,
+      p_error_message: code,
     });
-    return respond(502, { error: "ИИ не ответил. Успешный совет не засчитан. Попробуй позже.", code, advice_day: adviceDay });
+    return respond(502, {
+      error: "ИИ не ответил. Успешный совет не засчитан. Попробуй позже.",
+      code,
+      advice_day: adviceDay,
+    });
   }
 
   const { data: completion, error: completionError } = await admin.rpc(
