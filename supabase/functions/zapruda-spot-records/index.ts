@@ -150,6 +150,39 @@ Deno.serve(async (req: Request) => {
       return error ? respond({error:"Review failed",detail:error.message},403,origin)
         : respond({review:data},200,origin);
     }
+    if (action === "evidence") {
+      const catchId = body["catch_id"];
+      if (typeof catchId !== "string" || !/^[0-9a-f-]{36}$/i.test(catchId)) {
+        return respond({ error: "Invalid catch ID" },400,origin);
+      }
+      // This SECURITY DEFINER RPC checks the authenticated user's moderator role.
+      const { data:key,error:roleError } = await userClient.rpc("zc_spot_evidence_key",{
+        p_catch_id:catchId,
+      });
+      if (roleError || typeof key !== "string") {
+        return respond({ error: "Moderator evidence access denied" },403,origin);
+      }
+      const { data:signed,error:signError } = await admin.storage.from(BUCKET).createSignedUrl(key,60);
+      return signError || !signed?.signedUrl
+        ? respond({error:"Evidence unavailable"},503,origin)
+        : respond({url:signed.signedUrl,expires_in:60},200,origin);
+    }
+    if (action === "subscribe" || action === "unsubscribe") {
+      const spotId=body["spot_id"];
+      if (typeof spotId !== "string" || !/^[0-9a-f-]{36}$/i.test(spotId)) {
+        return respond({error:"Invalid spot ID"},400,origin);
+      }
+      if (action === "subscribe") {
+        const {error}=await userClient.from("zc_spot_subscriptions")
+          .upsert({user_id:user.id,spot_id:spotId},{onConflict:"user_id,spot_id"});
+        return error ? respond({error:"Subscription denied"},400,origin)
+          : respond({subscribed:true},200,origin);
+      }
+      const {error}=await userClient.from("zc_spot_subscriptions")
+        .delete().eq("user_id",user.id).eq("spot_id",spotId);
+      return error ? respond({error:"Unsubscribe failed"},400,origin)
+        : respond({subscribed:false},200,origin);
+    }
     if (action === "inbox") {
       const { data,error } = await userClient.from("zc_spot_notifications")
         .select("id,message,created_at,read_at").eq("user_id",user.id)
