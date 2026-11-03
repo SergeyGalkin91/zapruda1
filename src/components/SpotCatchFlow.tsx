@@ -50,6 +50,8 @@ export function SpotCatchFlow() {
   const [weight, setWeight] = useState("");
   const [length, setLength] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
+  const [capturedAt, setCapturedAt] = useState("");
+  const [reviewChecked, setReviewChecked] = useState<Record<string, boolean>>({});
   const [catches, setCatches] = useState<CatchRow[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [queue, setQueue] = useState<QueueRow[] | null>(null);
@@ -102,7 +104,9 @@ export function SpotCatchFlow() {
       body.set("species", species);
       body.set("weight_g", weight);
       body.set("length_mm", length);
-      body.set("captured_at", new Date().toISOString());
+      const parsedDate = new Date(capturedAt);
+      if (!Number.isFinite(parsedDate.getTime())) throw new Error("Укажи дату поимки.");
+      body.set("captured_at", parsedDate.toISOString());
       const { data, error } = await supabase.functions.invoke("zapruda-spot-records", {
         body,
       });
@@ -217,7 +221,13 @@ export function SpotCatchFlow() {
                 onChange={(event) => setPhoto(event.target.files?.[0] ?? null)}
                 className="mt-1 block w-full text-xs" />
             </label>
-            <button type="submit" disabled={busy || !eligible.length || !spotId || !photo}
+            <label className="text-sm text-zinc-300">
+              Дата и время поимки
+              <input type="datetime-local" required value={capturedAt}
+                onChange={(event) => setCapturedAt(event.target.value)}
+                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3" />
+            </label>
+            <button type="submit" disabled={busy || !eligible.length || !spotId || !photo || !capturedAt}
               className="rounded-xl bg-[#D7FF35] p-3 font-black text-black disabled:opacity-40">
               <Fish className="mr-2 inline size-4" aria-hidden="true" />
               Отправить на проверку
@@ -270,13 +280,27 @@ export function SpotCatchFlow() {
                   <img src={evidence[item.catch_id]} alt="Закрытое фотодоказательство"
                     className="max-h-72 rounded-xl object-contain" />
                 )}
+                <label className="flex items-start gap-2 text-xs text-zinc-300">
+                  <input
+                    type="checkbox"
+                    checked={reviewChecked[item.catch_id] ?? false}
+                    onChange={(event) => setReviewChecked((old) => ({
+                      ...old,
+                      [item.catch_id]: event.target.checked,
+                    }))}
+                  />
+                  Я лично проверил открытое фото, показания измерения, разрешённость ловли,
+                  территорию и соответствие заявленной снасти.
+                </label>
                 <div className="flex flex-wrap gap-2">
-                  <button disabled={busy} type="button"
+                  <button
+                    disabled={busy || !evidence[item.catch_id] || !reviewChecked[item.catch_id]}
+                    type="button"
                     onClick={() => void act("review",{
                       catch_id:item.catch_id,decision:"verified",lawful:true,
                       ul_gear_valid:item.league==="ultralight",micro_welfare_valid:false,
                     })}
-                    className="rounded-lg bg-[#D7FF35] px-3 py-2 text-xs font-black text-black">
+                    className="rounded-lg bg-[#D7FF35] px-3 py-2 text-xs font-black text-black disabled:opacity-40">
                     Подтвердить проверенный улов
                   </button>
                   <button disabled={busy} type="button"
