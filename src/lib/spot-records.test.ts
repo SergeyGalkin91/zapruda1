@@ -62,10 +62,16 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
 
   it("requires a moderated capture scope rather than trusting a home city", () => {
     expect(
-      evaluateCatchForRecord(spot, { ...verified, scopes: [{ type: "spot", id: "other" }] }).eligible,
+      evaluateCatchForRecord(spot, {
+        ...verified,
+        scopes: [{ type: "spot", id: "other" }],
+      }).eligible,
     ).toBe(false);
     expect(
-      evaluateCatchForRecord(spot, { ...verified, scopes: [{ type: "region", id: "nnov" }] }).eligible,
+      evaluateCatchForRecord(spot, {
+        ...verified,
+        scopes: [{ type: "region", id: "nnov" }],
+      }).eligible,
     ).toBe(false);
   });
 
@@ -82,7 +88,9 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
       Number.POSITIVE_INFINITY,
       Number.MAX_SAFE_INTEGER + 1,
     ]) {
-      expect(evaluateCatchForRecord(spot, { ...verified, weightGrams: weight }).eligible).toBe(false);
+      expect(
+        evaluateCatchForRecord(spot, { ...verified, weightGrams: weight }).eligible,
+      ).toBe(false);
     }
   });
 
@@ -160,7 +168,9 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
     expect(
       evaluateCatchForRecord({ ...carp, speciesId: "grass-carp" }, fish).eligible,
     ).toBe(false);
-    expect(recordCategoryKey(carp)).not.toEqual(recordCategoryKey({ ...carp, speciesId: "grass-carp" }));
+    expect(recordCategoryKey(carp)).not.toEqual(
+      recordCategoryKey({ ...carp, speciesId: "grass-carp" }),
+    );
   });
 
   it("supports winter region + season WITHOUT any spot or GPS", () => {
@@ -222,7 +232,9 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
     expect(recordCategoryKey(spot)).not.toBe(recordCategoryKey(similar));
     expect(titleChangedEventKey(spot, "catch-a")).toBe(titleChangedEventKey(spot, "catch-a"));
     expect(titleChangedEventKey(spot, "catch-a")).not.toBe(titleChangedEventKey(spot, "catch-b"));
-    expect(titleChangedEventKey(similar, "catch-a")).not.toBe(titleChangedEventKey(spot, "catch-a"));
+    expect(titleChangedEventKey(similar, "catch-a")).not.toBe(
+      titleChangedEventKey(spot, "catch-a"),
+    );
     expect(titleChangedEventKey(spot, "")).toBeNull();
   });
 
