@@ -31,6 +31,10 @@ export const Route = createFileRoute("/settings")({
   component: SettingsPage,
 });
 
+const VISIBLE_APP_BACKGROUNDS = APP_BACKGROUNDS.filter(
+  (item) => item.value === "classic" || item.value === "electric-blue",
+);
+
 function SettingsPage() {
   const [appearance, setAppearance] = useState<Appearance>(DEFAULT_APPEARANCE);
   const [notice, setNotice] = useState("");
@@ -105,7 +109,7 @@ function SettingsPage() {
             входа.
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {APP_BACKGROUNDS.filter((item) => item.value === "classic" || item.value === "electric-blue").map((item) => {
+            {VISIBLE_APP_BACKGROUNDS.map((item) => {
               const selected = appearance.background === item.value;
               return (
                 <button
@@ -168,8 +172,7 @@ function SettingsPage() {
               ? "В Electric Blue оформление чата подчиняется синей палитре: синий, лайм и баклажановый. Отдельные лесные фоны доступны в Matte Black."
               : "Отдельное оформление области сообщений в общем и личных чатах."}
           </p>
-          {appearance.background !== "electric-blue" && (
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className={appearance.background === "electric-blue" ? "hidden" : "mt-5 grid gap-3 sm:grid-cols-2"}>
             {CHAT_BACKGROUNDS.map((item) => {
               const selected = appearance.chat === item.value;
               return (
@@ -212,7 +215,6 @@ function SettingsPage() {
               );
             })}
           </div>
-          )}
           <div className="mt-4 flex flex-wrap gap-3 text-sm">
             <Link
               search={{ place: "", topic: "general", country: "" }}
