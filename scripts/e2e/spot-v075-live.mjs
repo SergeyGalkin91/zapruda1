@@ -174,7 +174,8 @@ async function main() {
     assert.ifError(ownerQueue.error);
     assert.ok(Array.isArray(ownerQueue.data?.queue), "OWNER must be appointed as SPOT moderator");
     console.log("PASS: owner is appointed SPOT moderator");
-    const { data: approved, error: catalogError } = await users.get("OWNER")
+    const ownerClient = users.get("OWNER");
+    const { data: approved, error: catalogError } = await ownerClient
       .from("zc_public_spots")
       .select("id,disciplines")
       .eq("state", "approved")
