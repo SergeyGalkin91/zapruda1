@@ -59,6 +59,7 @@ function GeographicChat() {
   const [uid, setUid] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [roomLastMessages, setRoomLastMessages] = useState<Partial<Record<ChatTopic, { body: string; created_at: string }>>>({});
   const [reactions, setReactions] = useState<ChatReaction[]>([]);
   const [reactingTo, setReactingTo] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -124,6 +125,30 @@ function GeographicChat() {
   const regions = places.filter(p => p.parent_id === country?.id && p.level === "region");
   const cities = places.filter(p => p.parent_id === region?.id && p.level === "city");
   const currentTopic = TOPICS.find(t => t.key === topic) || TOPICS[0];
+
+  // Read-only last-message previews for the selected geographic scope.
+  // No invented unread counts or mock messages; errors leave the descriptive fallback.
+  useEffect(() => {
+    if (!uid || threadOpen) { setRoomLastMessages({}); return; }
+    let active = true;
+    setRoomLastMessages({});
+    void (async () => {
+      const { data, error: previewError } = await api.from("chat_messages")
+        .select("topic,body,created_at")
+        .eq("place_id", placeId)
+        .order("created_at", { ascending: false })
+        .limit(250);
+      if (!active || previewError) return;
+      const latest: Partial<Record<ChatTopic, { body: string; created_at: string }>> = {};
+      for (const row of data || []) {
+        if (VALID_TOPICS.includes(row.topic as ChatTopic) && !latest[row.topic as ChatTopic]) {
+          latest[row.topic as ChatTopic] = { body: row.body, created_at: row.created_at };
+        }
+      }
+      setRoomLastMessages(latest);
+    })();
+    return () => { active = false; };
+  }, [uid, placeId, threadOpen, refreshIndex]);
 
   function go(id: string, newTopic: ChatTopic = topic) {
     if (pendingPhotoMessageId) {
@@ -303,22 +328,22 @@ function GeographicChat() {
   }
 
   return <Shell>
-    {!threadOpen && <header className="mb-4 rounded-[26px] border border-[#252A38] bg-[#070B10] px-4 pb-5 pt-5 sm:px-7 sm:pt-7">
-      <div className="mb-7 flex items-center justify-between gap-3">
-        <div className="min-w-0 scale-110 origin-left"><Wordmark /></div>
+    {!threadOpen && <header className="mb-5 rounded-[26px] border border-[#273247] bg-[#070B10] px-4 pb-6 pt-6 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <div className="min-w-0 origin-left"><Wordmark /></div>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => { setRoomSearchOpen(open => !open); setRoomSearch(""); }} aria-expanded={roomSearchOpen} aria-label="Поиск тематических чатов" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-white hover:text-[#D7FF35]"><Search className="size-6" /></button>
+          <button type="button" onClick={() => { setRoomSearchOpen(open => !open); setRoomSearch(""); }} aria-expanded={roomSearchOpen} aria-label={roomSearchOpen ? "Закрыть поиск комнат" : "Поиск тематических чатов"} className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-white hover:text-[#D7FF35]"><Search className="size-6" /></button>
           <Link to="/reports/new" className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/75 text-2xl font-light text-white hover:border-[#D7FF35] hover:text-[#D7FF35]" aria-label="Создать отчёт"><Plus className="size-6" /></Link>
         </div>
       </div>
-      {roomSearchOpen && <label className="mb-4 block text-xs text-zinc-300">Найти комнату
-        <input autoFocus className="field mt-1 w-full" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} maxLength={80} placeholder="Трофеи, вода, напарники…" />
-      </label>}
-      <h1 className="text-[clamp(1.7rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
-      <div className="mt-6 grid grid-cols-[0.8fr_1.2fr_1.5fr] gap-2" role="group" aria-label="Фильтр чатов">
+      {roomSearchOpen && <div className="mb-4"><label htmlFor="zapruda-room-search" className="block text-xs text-zinc-300">Найти комнату</label>
+        <div className="mt-1 flex items-center gap-2"><input id="zapruda-room-search" autoFocus className="field min-w-0 flex-1" type="search" value={roomSearch} onChange={e => setRoomSearch(e.target.value)} onKeyDown={e => { if (e.key === "Escape") { setRoomSearch(""); setRoomSearchOpen(false); } }} maxLength={80} placeholder="Трофеи, вода, напарники…" />{roomSearch && <button type="button" onClick={() => setRoomSearch("")} className="min-h-11 shrink-0 rounded-xl border border-white/20 px-3 text-xs font-bold text-white hover:border-[#D7FF35] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">Очистить</button>}</div>
+      </div>}
+      <h1 className="break-words text-[clamp(1.65rem,6vw,3.2rem)] font-black uppercase leading-[1.04] tracking-[-0.045em] text-white">СВОИ НА СВЯЗИ</h1>
+      <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="Фильтр чатов">
         <span className="flex min-h-11 items-center justify-center rounded-2xl bg-[#D7FF35] px-2 text-sm font-black text-[#10140A]" aria-current="true">Все</span>
-        <span className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9]" title="Фильтр появится после реализации учёта участия в чатах">Мои чаты</span>
-        <span className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9]" title="Появится после подключения учёта прочтений">Непрочитанные</span>
+        <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60" title="Появится после подключения истории участия">Мои чаты</button>
+        <button type="button" disabled aria-disabled="true" className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9] opacity-60" title="Появится после подключения учёта прочтений">Непрочитанные</button>
       </div>
     </header>}
 
@@ -328,23 +353,25 @@ function GeographicChat() {
       Для просмотра чатов и отправки сообщений <Link search={{ mode: "in" }} to="/auth" className="font-bold text-[#D7FF35] underline">войди в аккаунт</Link>.
     </p>}
 
-    {uid && <div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
+    {<div className="grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
       {!threadOpen && <section className="lg:col-span-2" aria-label="Тематические чаты ZAPRUDA">
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#A99AD9]">Тематические комнаты · выбери обсуждение</p>
-        <div className="overflow-hidden rounded-[20px] border border-[#23283A] bg-[#070B10] px-3 sm:px-5">
+        <div className="overflow-hidden rounded-[24px] border border-[#263044] bg-[#060B10] px-3 sm:px-5">
+          {roomSearch.trim() && !TOPICS.some(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))) && <div role="status" className="space-y-3 p-5 text-sm text-[#B4A1D7]"><p>По запросу «{roomSearch.trim()}» комнат не найдено.</p><button type="button" onClick={() => setRoomSearch("")} className="min-h-11 rounded-xl border border-[#D7FF35]/40 px-4 font-bold text-[#D7FF35]">Сбросить поиск</button></div>}
           {TOPICS.filter(t => (t.label + " " + t.description).toLocaleLowerCase("ru-RU").includes(roomSearch.trim().toLocaleLowerCase("ru-RU"))).map((t) => (
-            <button key={t.key} type="button" onClick={() => go(placeId, t.key)}
+            <button key={t.key} type="button" onClick={() => uid ? go(placeId, t.key) : void navigate({ to: "/auth", search: { mode: "in" } })}
               aria-pressed={topic === t.key}
-              className={"flex w-full min-h-[98px] items-center gap-4 border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
+              className={"z-room-row border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
                 (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")}>
-              <span className="relative flex size-[68px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34304D] bg-[#151925]" aria-hidden="true">
-                <img src={ROOM_PHOTOS[t.key]} loading="lazy" alt="" className="absolute inset-0 size-full object-cover" onError={e=>{ e.currentTarget.style.display="none"; }} />
+              <span className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34435E] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]" aria-hidden="true">
+                <img src={ROOM_PHOTOS[t.key]} loading="lazy" alt="" className="absolute inset-0 size-full object-cover" onError={e=>{ e.currentTarget.style.display="none"; e.currentTarget.nextElementSibling?.classList.remove("hidden"); }} />
                 <span className="relative z-10 hidden text-2xl text-[#D7FF35]">{t.icon}</span>
               </span>
               <span className="min-w-0">
-                <span className="block text-base font-black text-white">{t.label}</span>
-                <span className="mt-1 block text-xs leading-5 text-[#A99AD9]">{t.description}</span>
+                <span className="block truncate text-base font-black text-white">{t.label}</span>
+                <span className="mt-1 block truncate text-xs leading-5 text-[#A99AD9]">{roomLastMessages[t.key]?.body || t.description}</span>
               </span>
+              <span className="min-w-0 max-w-16 text-right text-[10px] tabular-nums text-[#B4A1D7]">{roomLastMessages[t.key] && <time dateTime={roomLastMessages[t.key]!.created_at}>{new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</time>}</span>
             </button>
           ))}
         </div>
@@ -430,8 +457,8 @@ function GeographicChat() {
             </button>
           </span>)}
         </nav>
-        <div className="panel flex min-h-[650px] flex-col overflow-hidden">
-          <div className="border-b border-white/10 p-4">
+        <div className="flex min-h-[650px] flex-col overflow-hidden rounded-[24px] border border-[#34304D] bg-[#0B1019] shadow-[0_22px_60px_rgba(0,0,0,.32)]">
+          <div className="border-b border-[#34304D] bg-[linear-gradient(130deg,#171729,#0B1119)] p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-black text-white">
@@ -455,7 +482,7 @@ function GeographicChat() {
             </div>
             <p className="mt-3 text-xs text-zinc-500">{currentTopic.description}</p>
           </div>
-          <div className="zapruda-chat-window min-h-[360px] flex-1 space-y-5 overflow-y-auto bg-[#090C0B] p-4 sm:p-6" aria-live="polite">
+          <div className="zapruda-chat-window min-h-[360px] flex-1 space-y-5 overflow-y-auto bg-[#0A0C16] p-3 sm:p-6" aria-live="polite">
             {chatLoading&&<p className="text-sm text-zinc-400">Загружаем сообщения ветки…</p>}
             {chatError&&<p role="alert" className="rounded-xl border border-red-400/30 bg-red-950/15 p-3 text-sm text-red-200">{chatError}</p>}
             {!chatLoading&&!chatError&&!messages.length&&<p className="rounded-xl border border-dashed border-white/15 p-5 text-sm text-zinc-400">
@@ -473,7 +500,7 @@ function GeographicChat() {
                   {new Date(message.created_at).toLocaleString("ru-RU",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
                 </time>
               </div>
-              <div className={"zapruda-chat-bubble whitespace-pre-wrap break-words rounded-[20px] border px-4 py-3 text-sm leading-6 "+(message.user_id===uid?"zapruda-chat-own-bubble ":"zapruda-chat-incoming-bubble ")+(message.user_id===uid?"rounded-tr-sm border-[#D7FF35] bg-[#D7FF35] text-[#11170A] shadow-[0_8px_28px_rgba(215,255,53,0.12)]":"rounded-tl-sm border-[#3E345B] bg-[#292140] text-[#F5F2FF]")}>
+              <div className={"zapruda-chat-bubble whitespace-pre-wrap break-words rounded-2xl border px-4 py-3 text-sm leading-6 "+(message.user_id===uid?"zapruda-chat-own-bubble ":"zapruda-chat-incoming-bubble ")+(message.user_id===uid?"rounded-tr-sm border-[#D7FF35] bg-[#D7FF35] text-[#11170A] shadow-[0_8px_28px_rgba(215,255,53,0.12)]":"rounded-tl-sm border-[#3E345B] bg-[#292140] text-[#F5F2FF]")}>
                 {message.body}
                 {photoUrls[message.id] && <a href={photoUrls[message.id]} target="_blank" rel="noopener noreferrer" className="mt-3 block overflow-hidden rounded-xl border border-black/10">
                   <img src={photoUrls[message.id]} alt="Фото из рыболовного чата" loading="lazy" className="max-h-72 max-w-full rounded-xl object-contain" />

@@ -1,0 +1,64 @@
+name: v0.7.1 Meetup real-JWT STAGING E2E (protected)
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/issue61-v071-p0-stages-5-8]
+    paths: [.github/staging-e2e-request.txt]
+permissions:
+  contents: read
+concurrency:
+  group: staging-e2e-meetup-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  meetup-real-jwt:
+    if: github.ref_name == 'release/v0.7.1-integration-20261102' || github.ref_name == 'fix/issue61-v071-p0-stages-5-8'
+    environment: staging-e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Validate protected STAGING config
+        env:
+          URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+          KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+          OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
+          OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
+          INVITEE_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
+          INVITEE_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_A_PASSWORD }}
+          SEATED_EMAIL: ${{ secrets.ZAPRUDA_E2E_SEATED_EMAIL }}
+          SEATED_PASSWORD: ${{ secrets.ZAPRUDA_E2E_SEATED_PASSWORD }}
+          RACER_A_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
+          RACER_A_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_A_PASSWORD }}
+          RACER_B_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_B_EMAIL }}
+          RACER_B_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_B_PASSWORD }}
+        run: |
+          test "$URL" = "https://yudtbifopfnjtjanaqrd.supabase.co" || { echo "Only STAGING allowed"; exit 1; }
+          for name in KEY OWNER_EMAIL OWNER_PASSWORD INVITEE_EMAIL INVITEE_PASSWORD SEATED_EMAIL SEATED_PASSWORD RACER_A_EMAIL RACER_A_PASSWORD RACER_B_EMAIL RACER_B_PASSWORD; do
+            test -n "${!name}" || { echo "Missing protected config: $name"; exit 1; }
+          done
+      - name: Two independent JWTs and private data authorization
+        env:
+          ZAPRUDA_E2E_STAGING_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+          ZAPRUDA_E2E_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+          ZAPRUDA_E2E_OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
+          ZAPRUDA_E2E_OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
+          ZAPRUDA_E2E_INVITEE_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
+          ZAPRUDA_E2E_INVITEE_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_A_PASSWORD }}
+        run: node scripts/e2e-meetups-two-real-jwt.mjs
+      - name: Concurrent third-seat admission (four independent JWTs)
+        env:
+          ZAPRUDA_E2E_STAGING_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+          ZAPRUDA_E2E_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+          ZAPRUDA_E2E_OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
+          ZAPRUDA_E2E_OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
+          ZAPRUDA_E2E_SEATED_EMAIL: ${{ secrets.ZAPRUDA_E2E_SEATED_EMAIL }}
+          ZAPRUDA_E2E_SEATED_PASSWORD: ${{ secrets.ZAPRUDA_E2E_SEATED_PASSWORD }}
+          ZAPRUDA_E2E_RACER_A_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
+          ZAPRUDA_E2E_RACER_A_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_A_PASSWORD }}
+          ZAPRUDA_E2E_RACER_B_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_B_EMAIL }}
+          ZAPRUDA_E2E_RACER_B_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_B_PASSWORD }}
+        run: node scripts/e2e-meetups-third-seat-race.mjs

@@ -1,3 +1,4 @@
+import { toggleReportReaction } from "@/lib/report-reaction-toggle";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,32 +29,33 @@ export function ReactionBar({
 
   const loadReactions = useCallback(async () => {
     if (!reportId) return;
-    const { data: authData } = await supabase.auth.getUser();
-    const currentUserId = authData.user?.id ?? null;
-    setUserId(currentUserId);
+    setLoading(true);
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      const currentUserId = authData.user?.id ?? null;
+      setUserId(currentUserId);
 
-    const { data, error: queryError } = await supabase
-      .from("reactions")
-      .select("id,user_id,reaction_type")
-      .eq("report_id", reportId);
+      const { data, error: queryError } = await supabase
+        .from("reactions")
+        .select("id,user_id,reaction_type")
+        .eq("report_id", reportId);
+      if (queryError) throw queryError;
 
-    if (queryError) {
-      setError("Не удалось загрузить реакции: " + queryError.message);
+      const rows = (data ?? []) as ReactionRow[];
+      const nextCounts: Record<string, number> = {};
+      for (const option of options) {
+        nextCounts[option.type] = rows.filter((row) => row.reaction_type === option.type).length;
+      }
+      setCounts(nextCounts);
+      setSelected(currentUserId
+        ? rows.filter((row) => row.user_id === currentUserId).map((row) => row.reaction_type)
+        : []);
+      setError("");
+    } catch (cause) {
+      setError("Не удалось загрузить реакции: " + (cause instanceof Error ? cause.message : "ошибка сети"));
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const rows = (data ?? []) as ReactionRow[];
-    const nextCounts: Record<string, number> = {};
-    for (const option of options) {
-      nextCounts[option.type] = rows.filter((row) => row.reaction_type === option.type).length;
-    }
-    setCounts(nextCounts);
-    setSelected(currentUserId
-      ? rows.filter((row) => row.user_id === currentUserId).map((row) => row.reaction_type)
-      : []);
-    setLoading(false);
-    setError("");
   }, [reportId]);
 
   useEffect(() => {
@@ -87,26 +89,21 @@ export function ReactionBar({
     setBusy(type);
     setError("");
     try {
-      const { data, error: findError } = await supabase
-        .from("reactions")
-        .select("id")
-        .eq("report_id", reportId)
-        .eq("user_id", userId)
-        .eq("reaction_type", type);
-
-      if (findError) throw findError;
-      const existing = data ?? [];
-      if (existing.length) {
-        const { error: deleteError } = await supabase
-          .from("reactions")
-          .delete()
-          .in("id", existing.map((row) => row.id));
-        if (deleteError) throw deleteError;
+      if (import.meta.env.VITE_ENABLE_ATOMIC_REACTIONS === "true") {
+        // Enable only for STAGING after its RPC has been deployed and verified.
+        const { error: rpcError } = await supabase.rpc(
+          "toggle_report_reaction_atomic" as never,
+          { p_report_id: reportId, p_reaction_type: type } as never,
+        );
+        if (rpcError) throw rpcError;
       } else {
-        const { error: insertError } = await supabase
-          .from("reactions")
-          .insert({ report_id: reportId, user_id: userId, reaction_type: type });
-        if (insertError) throw insertError;
+        // Compatibility path until the RPC is approved and deployed to production.
+        await toggleReportReaction(
+          type,
+          () => supabase.from("reactions").select("id,reaction_type").eq("report_id", reportId).eq("user_id", userId),
+          (ids) => supabase.from("reactions").delete().in("id", ids),
+          () => supabase.from("reactions").insert({ report_id: reportId, user_id: userId, reaction_type: type }),
+        );
       }
       await loadReactions();
     } catch (e) {
@@ -138,7 +135,12 @@ export function ReactionBar({
           );
         })}
       </div>
-      {error && <p className="mt-2 text-xs text-destructive" role="status">{error}</p>}
+      {error && <div className="mt-2 flex flex-wrap items-center gap-2" role="status">
+        <span className="text-xs text-destructive">{error}</span>
+        {reportId && <button type="button" className="min-h-10 rounded-lg border border-[#D7FF35]/40 px-3 text-xs font-semibold text-[#D7FF35] disabled:opacity-60" disabled={loading || Boolean(busy)} onClick={() => void loadReactions()}>
+          {loading ? "Загрузка…" : "Повторить"}
+        </button>}
+      </div>}
       {reportId && !userId && !loading && !error && (
         <p className="mt-2 text-xs text-muted-foreground">Войди в аккаунт, чтобы ставить реакции.</p>
       )}
