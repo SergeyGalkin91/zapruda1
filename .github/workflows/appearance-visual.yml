@@ -65,6 +65,8 @@ jobs:
             echo "Checking appearance in $engine"
             VISUAL_BROWSER="$engine" node scripts/visual-theme-smoke.cjs
           done
+          # Verify actual CSS colors; previous screenshots revealed green hardcoded surfaces.
+          node scripts/issue76-no-green-audit.cjs
       - name: Upload viewport screenshots and metrics
         if: always()
         uses: actions/upload-artifact@v4
