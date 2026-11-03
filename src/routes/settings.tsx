@@ -64,7 +64,7 @@ function SettingsPage() {
         </h2>
         <p className="mt-2 text-sm text-zinc-400">Matte Black остаётся основным. Electric Blue — яркий синий фон с лаймовыми и баклажановыми акцентами. Выбор сохраняется в этом браузере, в том числе после повторного входа.</p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {APP_BACKGROUNDS.map(item => {
+          {APP_BACKGROUNDS.filter((item) => item.value === "classic" || item.value === "electric-blue").map(item => {
             const selected = appearance.background === item.value;
             return <button key={item.value} type="button" aria-pressed={selected}
               onClick={() => change({ ...appearance, background: item.value })}
@@ -89,7 +89,13 @@ function SettingsPage() {
           <MessageCircle className="size-5 text-[#D7FF35]" /> Фон чатов
         </h2>
         <p className="mt-2 text-sm text-zinc-400">Отдельное оформление области сообщений в общем и личных чатах.</p>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        {appearance.background === "electric-blue" ? (
+            <div className="mt-5 rounded-2xl border border-[#614051]/70 bg-[#614051] p-4 text-sm text-white">
+              <p className="font-bold text-[#D7FF35]">Electric Blue · Чаты</p>
+              <p className="mt-1 text-[#F9ECF7]">В синей теме сообщения оформляются в синих и баклажановых оттенках с лаймовыми акцентами. Тёмно-зелёные фоны не используются.</p>
+            </div>
+          ) : (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {CHAT_BACKGROUNDS.map(item => {
             const selected = appearance.chat === item.value;
             const display = appearance.background === "electric-blue"
@@ -109,7 +115,8 @@ function SettingsPage() {
             </button>;
           })}
         </div>
-        <div className="mt-4 flex flex-wrap gap-3 text-sm">
+          )}
+          <div className="mt-4 flex flex-wrap gap-3 text-sm">
           <Link search={{ place: "", topic: "general", country: "" }} to="/chat" className="font-semibold text-[#D7FF35] hover:underline">Открыть общий чат →</Link>
           <Link to="/messages" search={{ mark: "" }} className="font-semibold text-[#D7FF35] hover:underline">Открыть личные сообщения →</Link>
         </div>
