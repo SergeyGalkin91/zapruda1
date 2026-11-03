@@ -186,6 +186,36 @@ Deno.serve(async (req: Request) => {
   const notes = sanitize(body.notes, 400);
   if (location.length < 2) return respond(400, { error: "Укажи водоём или место" });
 
+  // Fail closed BEFORE claiming the user's daily slot. Verify the provider key,
+  // model access and endpoint with a read-only API call; never disclose secrets.
+  // Keep this check scoped to STAGING until the protected E2E proves it.
+  if (supabaseUrl === "https://yudtbifopfnjtjanaqrd.supabase.co") {
+    let response: Response;
+    try {
+      response = await fetch(`${apiBase}/models`, {
+        headers: { Authorization: `Bearer ${xaiKey}` },
+        signal: AbortSignal.timeout(8000),
+      });
+    } catch {
+      return respond(503, { error: "Не удалось проверить доступ к ИИ", code: "XAI_PROVIDER_UNAVAILABLE" });
+    }
+    if (!response.ok) {
+      const code = await xaiRejectionCode(response);
+      return respond(503, { error: "Провайдер ИИ отклонил проверку доступа", code });
+    }
+    try {
+      const payload: unknown = await response.json();
+      const models = payload && typeof payload === "object" && !Array.isArray(payload)
+        ? (payload as { data?: Array<{ id?: unknown }> }).data
+        : undefined;
+      if (!Array.isArray(models) || !models.some((item) => item?.id === model)) {
+        return respond(503, { error: "Выбранная модель Grok недоступна этому ключу", code: "XAI_MODEL_UNAVAILABLE" });
+      }
+    } catch {
+      return respond(503, { error: "Не удалось проверить список моделей ИИ", code: "XAI_PROVIDER_UNAVAILABLE" });
+    }
+  }
+
   const adviceDay = moscowAdviceDay();
   const promptSummary = `${location} · ${target} · ${timeOfDay}`;
   const admin = createClient(supabaseUrl, serviceKey, {
