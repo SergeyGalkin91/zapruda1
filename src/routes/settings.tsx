@@ -105,7 +105,7 @@ function SettingsPage() {
             входа.
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {APP_BACKGROUNDS.map((item) => {
+            {APP_BACKGROUNDS.filter((item) => item.value === "classic" || item.value === "electric-blue").map((item) => {
               const selected = appearance.background === item.value;
               return (
                 <button
@@ -166,7 +166,13 @@ function SettingsPage() {
           <p className="mt-2 text-sm text-zinc-400">
             Отдельное оформление области сообщений в общем и личных чатах.
           </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {appearance.background === "electric-blue" ? (
+            <div className="mt-5 rounded-2xl border border-[#614051]/70 bg-[#614051] p-4 text-sm text-white">
+              <p className="font-bold text-[#D7FF35]">Electric Blue · Чаты</p>
+              <p className="mt-1 text-[#F9ECF7]">В синей теме сообщения оформляются в синих и баклажановых оттенках с лаймовыми акцентами. Тёмно-зелёные фоны не используются.</p>
+            </div>
+          ) : (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {CHAT_BACKGROUNDS.map((item) => {
               const selected = appearance.chat === item.value;
               return (
@@ -204,6 +210,7 @@ function SettingsPage() {
               );
             })}
           </div>
+          )}
           <div className="mt-4 flex flex-wrap gap-3 text-sm">
             <Link
               search={{ place: "", topic: "general", country: "" }}
