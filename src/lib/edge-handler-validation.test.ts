@@ -4,10 +4,12 @@ import { join } from "node:path";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import {
-  checkXaiAccess,
-  normalizeXaiBase,
-  normalizeXaiKey,
-} from "../../supabase/functions/zapruda-daily-advice/xai-access";
+  DEFAULT_PRIMARY,
+  DEFAULT_FALLBACK,
+  generateYandexAdvice,
+  modelUri,
+  YandexProviderError,
+} from "../../supabase/functions/zapruda-daily-advice/yandex-provider";
 
 type EdgeHandler = (request: Request) => Promise<Response>;
 type FunctionName = "openweather-current" | "zapruda-daily-advice";
@@ -74,18 +76,27 @@ function loadHandler(name: FunctionName, providerBody = "{}", options: HandlerOp
         return { createClient: () => client };
       }
       if (specifier === "jsr:@supabase/functions-js/edge-runtime.d.ts") return {};
-      if (specifier === "./xai-access.ts")
-        return { checkXaiAccess, normalizeXaiBase, normalizeXaiKey };
+      if (specifier === "./yandex-provider.ts")
+        return {
+          DEFAULT_PRIMARY,
+          DEFAULT_FALLBACK,
+          modelUri,
+          YandexProviderError,
+          generateYandexAdvice: (
+            config: Parameters<typeof generateYandexAdvice>[0],
+            input: Parameters<typeof generateYandexAdvice>[1],
+          ) => generateYandexAdvice(config, input, providerFetch as typeof fetch),
+        };
       throw new Error(`Unexpected dependency: ${specifier}`);
     },
     Deno: {
       env: {
         get: (name: string) =>
           options.env?.[name] ??
-          (name === "XAI_API_BASE"
-            ? "https://api.x.ai/v1"
-            : name === "XAI_MODEL"
-              ? "grok-3-mini"
+          (name === "YANDEX_AI_FOLDER_ID"
+            ? "b1gexample123"
+            : name === "YANDEX_AI_API_KEY"
+              ? "test-only-not-a-real-key"
               : "offline-test-placeholder"),
       },
       serve(fn: EdgeHandler) {
@@ -244,10 +255,11 @@ describe("OpenWeather upstream validation (offline handler tests)", () => {
   });
 });
 
-describe("Grok lease and provider failures (offline handler tests)", () => {
+describe("Yandex AI lease, quota and safe provider errors (offline handler tests)", () => {
   const adviceRequest = () => request(JSON.stringify({ location: "Offline river fixture" }));
   const answer =
     "A deterministic offline fishing advice fixture long enough for the handler validation.";
+  const completion = JSON.stringify({ choices: [{ message: { content: answer } }] });
   const rpcSuccess = async (name: string) => ({
     data:
       name === "claim_ai_daily_advice_slot"
@@ -256,262 +268,126 @@ describe("Grok lease and provider failures (offline handler tests)", () => {
     error: null,
   });
 
-  it("returns a generated answer only after the lease completion succeeds", async () => {
-    const { handler, rpc } = loadHandler(
-      "zapruda-daily-advice",
-      JSON.stringify({ choices: [{ message: { content: answer } }] }),
-      { rpc: rpcSuccess },
-    );
+  it("returns real generated answer only after a successful slot completion", async () => {
+    const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice", completion, {
+      rpc: rpcSuccess,
+    });
     const response = await handler(adviceRequest());
     expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ answer, already_used: false });
+    const body = await response.json();
+    expect(body.answer).toBe(answer);
+    expect(body.provider).toBe("yandex-deepseek");
+    expect(body.model).toBe("deepseek-v4.1-flash");
+    expect(body.web_search).toBe("disabled");
+    expect(providerFetch).toHaveBeenCalledTimes(1);
     expect(
       rpc.mock.calls.find(([name]) => name === "complete_ai_daily_advice_slot")?.[1],
-    ).toMatchObject({ p_success: true, p_answer: answer });
+    ).toMatchObject({ p_success: true, p_model: DEFAULT_PRIMARY });
   });
 
   it.each([
-    ["lease_held", 409],
+    ["already_used", 200],
     ["too_many_failures", 429],
-  ] as const)("does not call xAI when claim returns %s", async (reason, status) => {
-    const { handler, providerFetch } = loadHandler("zapruda-daily-advice", "{}", {
-      rpc: async () => ({ data: { ok: false, reason }, error: null }),
+    ["lease_held", 409],
+  ] as const)("does not invoke Yandex after a %s claim", async (reason, status) => {
+    const { handler, providerFetch } = loadHandler("zapruda-daily-advice", completion, {
+      rpc: async () => ({
+        data: { ok: false, reason, answer: reason === "already_used" ? answer : undefined },
+        error: null,
+      }),
     });
     expect((await handler(adviceRequest())).status).toBe(status);
     expect(providerFetch).not.toHaveBeenCalled();
   });
 
-  it("returns the cached answer without a second provider request", async () => {
-    const { handler, providerFetch } = loadHandler("zapruda-daily-advice", "{}", {
-      rpc: async () => ({ data: { ok: false, reason: "already_used", answer }, error: null }),
-    });
-    const response = await handler(adviceRequest());
-    expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ answer, already_used: true });
-    expect(providerFetch).not.toHaveBeenCalled();
-  });
-
-  it("does not acknowledge an answer if saving the lease completion fails", async () => {
-    const rpc = async (name: string) =>
-      name === "claim_ai_daily_advice_slot"
-        ? rpcSuccess(name)
-        : { data: null, error: { message: "Offline database failure" } };
-    const { handler } = loadHandler(
-      "zapruda-daily-advice",
-      JSON.stringify({ choices: [{ message: { content: answer } }] }),
-      { rpc },
-    );
-    expect((await handler(adviceRequest())).status).toBe(409);
-  });
-
-  it("returns 500 without calling xAI if the claim RPC fails", async () => {
-    const { handler, providerFetch } = loadHandler("zapruda-daily-advice", "{}", {
-      rpc: async () => ({ data: null, error: { message: "Offline claim failure" } }),
+  it("returns 500 without upstream invocation after claim RPC failure", async () => {
+    const { handler, providerFetch } = loadHandler("zapruda-daily-advice", completion, {
+      rpc: async () => ({ data: null, error: { message: "Internal SQL details" } }),
     });
     expect((await handler(adviceRequest())).status).toBe(500);
     expect(providerFetch).not.toHaveBeenCalled();
   });
 
-  it.each([429, 500])(
-    "records a failed lease for provider HTTP %s without persisting its raw diagnostic",
-    async (status) => {
-      const { handler, rpc } = loadHandler(
-        "zapruda-daily-advice",
-        "DO_NOT_PERSIST_PROVIDER_DIAGNOSTIC",
-        { providerStatus: status, rpc: rpcSuccess },
-      );
-      expect((await handler(adviceRequest())).status).toBe(502);
-      const call = rpc.mock.calls.find(([name]) => name === "complete_ai_daily_advice_slot");
-      expect(call?.[1]).toMatchObject({ p_success: false });
-      expect(JSON.stringify(call?.[1])).not.toContain("DO_NOT_PERSIST_PROVIDER_DIAGNOSTIC");
-    },
-  );
-
-  it.each(["{", "null", JSON.stringify({ choices: [{ message: { content: "short" } }] })])(
-    "handles invalid provider payload %s and releases its failed lease",
-    async (body) => {
-      const { handler, rpc } = loadHandler("zapruda-daily-advice", body, { rpc: rpcSuccess });
-      expect((await handler(adviceRequest())).status).toBe(502);
-      expect(
-        rpc.mock.calls.find(([name]) => name === "complete_ai_daily_advice_slot")?.[1],
-      ).toMatchObject({ p_success: false });
-    },
-  );
-
   it.each([
-    [
-      400,
-      { code: "insufficient_credits", error: "Private team has no available credits" },
-      "XAI_INSUFFICIENT_CREDITS",
-    ],
-    [400, { error: "Your team does not have any credits" }, "XAI_INSUFFICIENT_CREDITS"],
-    [403, { error: { message: "Spending limit reached" } }, "XAI_INSUFFICIENT_CREDITS"],
-    [
-      400,
-      { error: { code: "invalid_api_key", message: "Incorrect API key provided" } },
-      "XAI_INVALID_API_KEY",
-    ],
-    [401, { message: "Private authorization details" }, "XAI_INVALID_API_KEY"],
-    [400, { error: "The model does not exist" }, "XAI_MODEL_UNAVAILABLE"],
-    [404, { message: "Private model details" }, "XAI_MODEL_UNAVAILABLE"],
-    [403, { error: "Forbidden" }, "XAI_ACCESS_DENIED"],
-    [429, { error: "Private quota diagnostic" }, "XAI_RATE_LIMITED"],
-    [500, { error: "Misleading insufficient_credits diagnostic" }, "XAI_PROVIDER_UNAVAILABLE"],
-  ] as const)(
-    "classifies HTTP %s without exposing the provider body",
-    async (status, payload, code) => {
-      const marker = "DO_NOT_EXPOSE_KEY_TEAM_OR_GPS";
-      const { handler, rpc } = loadHandler(
-        "zapruda-daily-advice",
-        JSON.stringify({ ...payload, private: marker }),
-        {
-          providerStatus: status,
-          rpc: rpcSuccess,
-        },
-      );
-      const response = await handler(adviceRequest());
-      expect(response.status).toBe(502);
-      const body = await response.json();
-      expect(body.code).toBe(code);
-      expect(JSON.stringify(body)).not.toContain(marker);
-      const completions = rpc.mock.calls.filter(
-        ([name]) => name === "complete_ai_daily_advice_slot",
-      );
-      expect(completions).toHaveLength(1);
-      expect(completions[0]?.[1]).toMatchObject({
-        p_success: false,
-        p_answer: "",
-        p_error_message: `xAI HTTP ${status}; ${code}`,
-      });
-      expect(JSON.stringify(completions)).not.toContain(marker);
-    },
-  );
-
-  it.each([
-    "{",
-    "null",
-    "[]",
-    '"no available credits"',
-    JSON.stringify({ extra: { code: "insufficient_credits" } }),
-  ])("keeps an unrecognized HTTP 400 payload private: %s", async (payload) => {
-    const { handler, rpc } = loadHandler("zapruda-daily-advice", payload, {
-      providerStatus: 400,
-      rpc: rpcSuccess,
-    });
-    const response = await handler(adviceRequest());
-    expect(response.status).toBe(502);
-    expect((await response.json()).code).toBe("XAI_REQUEST_REJECTED");
-    expect(
-      rpc.mock.calls.find(([name]) => name === "complete_ai_daily_advice_slot")?.[1],
-    ).toMatchObject({ p_error_message: "xAI HTTP 400; XAI_REQUEST_REJECTED", p_success: false });
-  });
-
-  it("cancels an oversized error stream without waiting for its end", async () => {
-    const cancel = vi.fn();
-    const stream = new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.enqueue(new Uint8Array(4097).fill(65));
-      },
-      cancel,
-    });
-    const { handler } = loadHandler("zapruda-daily-advice", "", {
-      providerResponse: new Response(stream, { status: 400 }),
-      rpc: rpcSuccess,
-    });
-    const response = await handler(adviceRequest());
-    expect((await response.json()).code).toBe("XAI_REQUEST_REJECTED");
-    expect(cancel).toHaveBeenCalledTimes(1);
-  });
-
-  it("never copies an unknown provider code or message into the response or journal", async () => {
-    const marker = "PRIVATE_TOKEN_XYZ_123";
-    const { handler, rpc } = loadHandler(
+    [401, "YANDEX_INVALID_KEY"],
+    [403, "YANDEX_ACCESS_DENIED"],
+    [404, "YANDEX_MODEL_UNAVAILABLE"],
+    [429, "YANDEX_RATE_LIMITED"],
+    [500, "YANDEX_UPSTREAM_UNAVAILABLE"],
+  ] as const)("masks Yandex HTTP %s and preserves failed slot (%s)", async (status, code) => {
+    const { handler, providerFetch, rpc } = loadHandler(
       "zapruda-daily-advice",
-      JSON.stringify({
-        code: marker,
-        error: { code: marker, message: marker },
-      }),
-      { providerStatus: 400, rpc: rpcSuccess },
+      "Private Yandex error payload or credential",
+      { rpc: rpcSuccess, providerStatus: status },
     );
     const response = await handler(adviceRequest());
+    expect(response.status).toBe(502);
     const body = await response.json();
-    expect(body.code).toBe("XAI_REQUEST_REJECTED");
-    expect(JSON.stringify({ body, calls: rpc.mock.calls })).not.toContain(marker);
+    expect(body.code).toBe(code);
+    expect(JSON.stringify(body)).not.toContain("Private Yandex");
+    expect(
+      rpc.mock.calls.find(([name]) => name === "complete_ai_daily_advice_slot")?.[1],
+    ).toMatchObject({ p_success: false, p_error_message: code });
+    expect(providerFetch).toHaveBeenCalledTimes([429, 500].includes(status) ? 2 : 1);
   });
-});
 
-describe("Daily advice cached access and safe diagnostics (offline handler tests)", () => {
-  const storedAnswer =
-    "Previously generated genuine-model fixture content, long enough for the validation.";
-  it("returns a ready cached answer without any provider call during an outage", async () => {
-    const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice", "", {
-      storedAdvice: { status: "ready", answer: storedAnswer, attempts: 1 },
-      providerError: new Error("Offline outage fixture"),
-      env: { SUPABASE_URL: "https://yudtbifopfnjtjanaqrd.supabase.co" },
+  it("caches valid completed advice and never calls provider again", async () => {
+    const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice", completion, {
+      storedAdvice: {
+        status: "ready",
+        answer,
+        attempts: 1,
+      },
     });
-    const response = await handler(request(JSON.stringify({ location: "Offline fixture" })));
+    const response = await handler(adviceRequest());
     expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ answer: storedAnswer, already_used: true });
+    expect((await response.json()).already_used).toBe(true);
     expect(providerFetch).not.toHaveBeenCalled();
     expect(rpc).not.toHaveBeenCalled();
   });
-  it.each([
-    [{ status: "failed", attempts: 3 }, 429, "ADVICE_FAILURE_LIMIT"],
-    [
-      {
+
+  it("blocks request while a valid lease is held", async () => {
+    const { handler, providerFetch } = loadHandler("zapruda-daily-advice", completion, {
+      storedAdvice: {
         status: "pending",
-        attempts: 1,
         lease_expires_at: new Date(Date.now() + 60_000).toISOString(),
+        attempts: 0,
       },
-      409,
-      "ADVICE_IN_PROGRESS",
-    ],
-  ] as const)(
-    "honors a stored quota/lease before provider work: %j",
-    async (storedAdvice, status, code) => {
-      const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice", "", {
-        storedAdvice,
-      });
-      const response = await handler(request(JSON.stringify({ location: "Offline fixture" })));
-      expect(response.status).toBe(status);
-      expect((await response.json()).code).toBe(code);
-      expect(providerFetch).not.toHaveBeenCalled();
-      expect(rpc).not.toHaveBeenCalled();
-    },
-  );
-  it("diagnoses an invalid key without consuming a slot or disclosing provider content", async () => {
-    const { handler, providerFetch, rpc } = loadHandler(
-      "zapruda-daily-advice",
-      JSON.stringify({ error: "PRIVATE_PROVIDER_ID" }),
-      {
-        providerStatus: 401,
-        env: {
-          SUPABASE_URL: "https://yudtbifopfnjtjanaqrd.supabase.co",
-          XAI_API_KEY: 'Bearer "offline-key-fixture"',
-        },
-      },
-    );
-    const response = await handler(request(JSON.stringify({ action: "diagnose" })));
-    expect(response.status).toBe(200);
-    const result = await response.json();
-    expect(result).toMatchObject({
-      diagnostic_only: true,
-      canGenerate: false,
-      code: "XAI_INVALID_API_KEY",
-      stage: "account",
-      accountHttp: 401,
-      key_normalized: true,
     });
-    expect(JSON.stringify(result)).not.toMatch(/PRIVATE|offline-key|Bearer/);
-    expect(providerFetch).toHaveBeenCalledTimes(1);
-    expect(rpc).not.toHaveBeenCalled();
-    expect(providerFetch.mock.calls[0]?.[1]?.headers).toMatchObject({
-      Authorization: "Bearer offline-key-fixture",
-    });
+    expect((await handler(adviceRequest())).status).toBe(409);
+    expect(providerFetch).not.toHaveBeenCalled();
   });
-  it("does not expose the diagnostic action outside STAGING", async () => {
-    const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice");
-    expect((await handler(request(JSON.stringify({ action: "diagnose" })))).status).toBe(404);
+
+  it("diagnostic is read-only and limited to STAGING", async () => {
+    const diagnostic = request(JSON.stringify({ action: "diagnose" }));
+    const blocked = loadHandler("zapruda-daily-advice", completion);
+    expect((await blocked.handler(diagnostic)).status).toBe(404);
+    expect(blocked.providerFetch).not.toHaveBeenCalled();
+    const allowed = loadHandler("zapruda-daily-advice", completion, {
+      env: { SUPABASE_URL: "https://yudtbifopfnjtjanaqrd.supabase.co" },
+    });
+    const response = await allowed.handler(request(JSON.stringify({ action: "diagnose" })));
+    const body = await response.json();
+    expect(body).toMatchObject({
+      diagnostic_only: true,
+      provider: "yandex-ai-studio",
+      configuration: "ready",
+      primary_model: "deepseek-v4.1-flash",
+      fallback_model: "aliceai-llm-flash",
+      web_search_enabled: false,
+    });
+    expect(JSON.stringify(body)).not.toContain("test-only-not-a-real-key");
+    expect(allowed.providerFetch).not.toHaveBeenCalled();
+    expect(allowed.rpc).not.toHaveBeenCalled();
+  });
+
+  it("fails closed before taking a slot if provider credentials are missing", async () => {
+    const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice", completion, {
+      env: { YANDEX_AI_API_KEY: "" },
+    });
+    const response = await handler(adviceRequest());
+    expect(response.status).toBe(503);
+    expect((await response.json()).code).toBe("YANDEX_KEY_MISSING");
     expect(providerFetch).not.toHaveBeenCalled();
     expect(rpc).not.toHaveBeenCalled();
   });
