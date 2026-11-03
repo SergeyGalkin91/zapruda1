@@ -1,0 +1,32 @@
+name: v0.7.5 SPOT feature-branch formatter
+on:
+  push:
+    branches:
+      - release/v0.7.5-spot
+    paths:
+      - .github/v075-spot-format-request.txt
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.repository == 'SergeyGalkin91/zapruda1' && github.ref == 'refs/heads/release/v0.7.5-spot'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: oven-sh/setup-bun@v2
+      - name: Install exact repository dependencies
+        run: bun install --frozen-lockfile
+      - name: Format ONLY new SPOT files
+        run: |
+          bunx prettier --write src/components/SpotCatchFlow.tsx supabase/functions/zapruda-spot-records/index.ts
+      - name: Commit only formatting changes on feature branch
+        run: |
+          if ! git diff --quiet -- src/components/SpotCatchFlow.tsx supabase/functions/zapruda-spot-records/index.ts; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/components/SpotCatchFlow.tsx supabase/functions/zapruda-spot-records/index.ts
+            git commit -m "style(spot): format new SPOT files"
+            git push origin HEAD:release/v0.7.5-spot
+          fi
