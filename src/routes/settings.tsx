@@ -79,7 +79,7 @@ function SettingsPage() {
         >
           <ArrowLeft className="size-4" /> Вернуться к ленте
         </Link>
-        <header className="rounded-3xl border border-[#D7FF35]/25 bg-gradient-to-br from-[#1B2718] to-[#10150E] p-5 sm:p-7">
+        <header className="rounded-3xl border border-[#D7FF35]/25 z-electric-settings-hero bg-gradient-to-br from-[#1B2718] to-[#10150E] p-5 sm:p-7">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[#D7FF35]">
             ZAPRUDA / ПЕРСОНАЛИЗАЦИЯ
           </p>
@@ -94,7 +94,7 @@ function SettingsPage() {
 
         <section
           aria-labelledby="app-background-title"
-          className="rounded-3xl border border-white/10 bg-[#141914] p-5 sm:p-7"
+          className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7"
         >
           <h2
             id="app-background-title"
@@ -158,7 +158,7 @@ function SettingsPage() {
 
         <section
           aria-labelledby="chat-background-title"
-          className="rounded-3xl border border-white/10 bg-[#141914] p-5 sm:p-7"
+          className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7"
         >
           <h2
             id="chat-background-title"
@@ -241,7 +241,7 @@ function SettingsPage() {
         </section>
 
         {developer && (
-          <section className="rounded-3xl border border-white/10 bg-[#141914] p-5 sm:p-7">
+          <section className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7">
             <h2 className="text-lg font-black text-white">Яндекс Карты · API для тестирования</h2>
             <p className="mt-2 text-xs leading-5 text-zinc-400">
               Сейчас в ZAPRUDA работает виджет Яндекс Карт. Чтобы выбирать личные точки кликом,
