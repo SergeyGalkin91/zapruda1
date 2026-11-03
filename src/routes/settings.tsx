@@ -172,7 +172,11 @@ function SettingsPage() {
               ? "В Electric Blue оформление чата подчиняется синей палитре: синий, лайм и баклажановый. Отдельные лесные фоны доступны в Matte Black."
               : "Отдельное оформление области сообщений в общем и личных чатах."}
           </p>
-          <div className={appearance.background === "electric-blue" ? "hidden" : "mt-5 grid gap-3 sm:grid-cols-2"}>
+          <div
+            className={
+              appearance.background === "electric-blue" ? "hidden" : "mt-5 grid gap-3 sm:grid-cols-2"
+            }
+          >
             {CHAT_BACKGROUNDS.map((item) => {
               const selected = appearance.chat === item.value;
               return (
