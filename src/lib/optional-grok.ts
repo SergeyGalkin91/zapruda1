@@ -26,7 +26,7 @@ export async function requestOptionalGrok(
   const timer = setTimeout(() => {
     timedOut = true;
     controller.abort();
-  }, options.timeoutMs ?? 30_000);
+  }, options.timeoutMs ?? 45_000);
   try {
     const result = Promise.resolve().then(async (): Promise<GrokResult> => {
       if (controller.signal.aborted) return { ok: false, reason: "cancelled" };

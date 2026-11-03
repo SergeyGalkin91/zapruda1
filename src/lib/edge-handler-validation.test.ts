@@ -3,6 +3,11 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
+import {
+  checkXaiAccess,
+  normalizeXaiBase,
+  normalizeXaiKey,
+} from "../../supabase/functions/zapruda-daily-advice/xai-access";
 
 type EdgeHandler = (request: Request) => Promise<Response>;
 type FunctionName = "openweather-current" | "zapruda-daily-advice";
@@ -13,6 +18,8 @@ type HandlerOptions = {
   anonymous?: boolean;
   authError?: boolean;
   rpc?: (name: string, args: Record<string, unknown>) => Promise<unknown>;
+  storedAdvice?: Record<string, unknown>;
+  env?: Record<string, string>;
 };
 
 // Execute the actual handler source with only its Deno host and dependencies mocked.
@@ -28,13 +35,27 @@ function loadHandler(name: FunctionName, providerBody = "{}", options: HandlerOp
   const client = {
     auth: {
       getUser: vi.fn(async () => ({
-        data: { user: { id: "offline-unit-user", is_anonymous: options.anonymous ?? false } },
+        data: {
+          user: {
+            id: "offline-unit-user",
+            is_anonymous: options.anonymous ?? false,
+            email_confirmed_at: "2026-01-01T00:00:00Z",
+          },
+        },
         error: options.authError ? { message: "Offline invalid token fixture" } : null,
       })),
     },
     rpc,
+    from: () => {
+      const query = {
+        select: () => query,
+        eq: () => query,
+        maybeSingle: async () => ({ data: options.storedAdvice ?? null, error: null }),
+      };
+      return query;
+    },
   };
-  const providerFetch = vi.fn(async () => {
+  const providerFetch = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => {
     if (options.providerError) throw options.providerError;
     if (options.providerResponse) return options.providerResponse;
     return new Response(providerBody, { status: options.providerStatus ?? 200 });
@@ -53,10 +74,20 @@ function loadHandler(name: FunctionName, providerBody = "{}", options: HandlerOp
         return { createClient: () => client };
       }
       if (specifier === "jsr:@supabase/functions-js/edge-runtime.d.ts") return {};
+      if (specifier === "./xai-access.ts")
+        return { checkXaiAccess, normalizeXaiBase, normalizeXaiKey };
       throw new Error(`Unexpected dependency: ${specifier}`);
     },
     Deno: {
-      env: { get: () => "offline-test-placeholder" },
+      env: {
+        get: (name: string) =>
+          options.env?.[name] ??
+          (name === "XAI_API_BASE"
+            ? "https://api.x.ai/v1"
+            : name === "XAI_MODEL"
+              ? "grok-3-mini"
+              : "offline-test-placeholder"),
+      },
       serve(fn: EdgeHandler) {
         handler = fn;
       },
@@ -406,5 +437,82 @@ describe("Grok lease and provider failures (offline handler tests)", () => {
     const body = await response.json();
     expect(body.code).toBe("XAI_REQUEST_REJECTED");
     expect(JSON.stringify({ body, calls: rpc.mock.calls })).not.toContain(marker);
+  });
+});
+
+describe("Daily advice cached access and safe diagnostics (offline handler tests)", () => {
+  const storedAnswer =
+    "Previously generated genuine-model fixture content, long enough for the validation.";
+  it("returns a ready cached answer without any provider call during an outage", async () => {
+    const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice", "", {
+      storedAdvice: { status: "ready", answer: storedAnswer, attempts: 1 },
+      providerError: new Error("Offline outage fixture"),
+      env: { SUPABASE_URL: "https://yudtbifopfnjtjanaqrd.supabase.co" },
+    });
+    const response = await handler(request(JSON.stringify({ location: "Offline fixture" })));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ answer: storedAnswer, already_used: true });
+    expect(providerFetch).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+  it.each([
+    [{ status: "failed", attempts: 3 }, 429, "ADVICE_FAILURE_LIMIT"],
+    [
+      {
+        status: "pending",
+        attempts: 1,
+        lease_expires_at: new Date(Date.now() + 60_000).toISOString(),
+      },
+      409,
+      "ADVICE_IN_PROGRESS",
+    ],
+  ] as const)(
+    "honors a stored quota/lease before provider work: %j",
+    async (storedAdvice, status, code) => {
+      const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice", "", {
+        storedAdvice,
+      });
+      const response = await handler(request(JSON.stringify({ location: "Offline fixture" })));
+      expect(response.status).toBe(status);
+      expect((await response.json()).code).toBe(code);
+      expect(providerFetch).not.toHaveBeenCalled();
+      expect(rpc).not.toHaveBeenCalled();
+    },
+  );
+  it("diagnoses an invalid key without consuming a slot or disclosing provider content", async () => {
+    const { handler, providerFetch, rpc } = loadHandler(
+      "zapruda-daily-advice",
+      JSON.stringify({ error: "PRIVATE_PROVIDER_ID" }),
+      {
+        providerStatus: 401,
+        env: {
+          SUPABASE_URL: "https://yudtbifopfnjtjanaqrd.supabase.co",
+          XAI_API_KEY: 'Bearer "offline-key-fixture"',
+        },
+      },
+    );
+    const response = await handler(request(JSON.stringify({ action: "diagnose" })));
+    expect(response.status).toBe(200);
+    const result = await response.json();
+    expect(result).toMatchObject({
+      diagnostic_only: true,
+      canGenerate: false,
+      code: "XAI_INVALID_API_KEY",
+      stage: "account",
+      accountHttp: 401,
+      key_normalized: true,
+    });
+    expect(JSON.stringify(result)).not.toMatch(/PRIVATE|offline-key|Bearer/);
+    expect(providerFetch).toHaveBeenCalledTimes(1);
+    expect(rpc).not.toHaveBeenCalled();
+    expect(providerFetch.mock.calls[0]?.[1]?.headers).toMatchObject({
+      Authorization: "Bearer offline-key-fixture",
+    });
+  });
+  it("does not expose the diagnostic action outside STAGING", async () => {
+    const { handler, providerFetch, rpc } = loadHandler("zapruda-daily-advice");
+    expect((await handler(request(JSON.stringify({ action: "diagnose" })))).status).toBe(404);
+    expect(providerFetch).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
   });
 });

@@ -1,0 +1,56 @@
+name: "v0.7.5 SPOT real JWT STAGING preflight (protected)"
+on:
+  push:
+    branches:
+      - release/v0.7.5-spot
+    paths:
+      - .github/spot-v075-e2e-request.txt
+permissions:
+  contents: read
+concurrency:
+  group: spot-v075-staging-jwt
+  cancel-in-progress: false
+jobs:
+  staging-jwt-preflight:
+    if: github.repository == 'SergeyGalkin91/zapruda1'
+    runs-on: ubuntu-latest
+    environment: staging-e2e
+    timeout-minutes: 12
+    env:
+      ZAPRUDA_E2E_STAGING_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+      ZAPRUDA_E2E_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+      ZAPRUDA_E2E_OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
+      ZAPRUDA_E2E_OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
+      ZAPRUDA_E2E_SEATED_EMAIL: ${{ secrets.ZAPRUDA_E2E_SEATED_EMAIL }}
+      ZAPRUDA_E2E_SEATED_PASSWORD: ${{ secrets.ZAPRUDA_E2E_SEATED_PASSWORD }}
+      ZAPRUDA_E2E_RACER_A_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
+      ZAPRUDA_E2E_RACER_A_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_A_PASSWORD }}
+      ZAPRUDA_E2E_RACER_B_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_B_EMAIL }}
+      ZAPRUDA_E2E_RACER_B_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_B_PASSWORD }}
+      ZAPRUDA_SPOT_E2E_REQUIRE_MODERATOR: ${{ vars.ZAPRUDA_SPOT_E2E_REQUIRE_MODERATOR }}
+      ZAPRUDA_SPOT_E2E_UPLOAD_PROBE: "true"
+    steps:
+      - name: Checkout audited release branch
+        uses: actions/checkout@v4
+      - name: Prepare Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - name: Frozen dependency installation
+        run: bun install --frozen-lockfile
+      - name: Verify four real signed JWT sessions and role isolation
+        if: ${{ !cancelled() }}
+        run: node scripts/e2e/spot-v075-live.mjs
+      - name: Real JWT private photo upload, metadata protection and cleanup
+        if: ${{ !cancelled() }}
+        run: node scripts/e2e/v075-private-photo-live.mjs
+      - name: Diagnose xAI access and verify actual generation, persistence and cache
+        if: ${{ !cancelled() }}
+        run: node scripts/e2e/v075-xai-live.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v075-real-jwt-safe-results
+          path: qa/v075-safe/
+          if-no-files-found: ignore
+          retention-days: 7

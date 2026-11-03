@@ -4,6 +4,7 @@ import { Camera, ImagePlus, Trash2, Sparkles } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
+import { prepareReportPhoto } from "@/lib/report-photo";
 
 export const Route = createFileRoute("/reports/new")({
   head: () => ({
@@ -63,6 +64,7 @@ function NewReport() {
   const [uploadedCount, setUploadedCount] = useState(0);
   const [progress, setProgress] = useState("");
   const draftKey = useRef<string | null>(null);
+  const photoUploadIds = useRef(new Map<File, string>());
   const [draftReady, setDraftReady] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
   useEffect(() => {
@@ -495,26 +497,21 @@ function NewReport() {
 
       for (const [i, photo] of photos.entries()) {
         if (i < uploadedCount) continue;
-        const extension =
-          photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
-        const path = `${user.id}/${reportId}/${crypto.randomUUID()}.${extension}`;
-        setProgress(`Загружаем фото ${i + 1} из ${photos.length}…`);
-        const { error: uploadError } = await supabase.storage
-          .from("report-photos")
-          .upload(path, photo, { contentType: photo.type, cacheControl: "3600", upsert: false });
-        if (uploadError) throw new Error("Не удалось загрузить фото: " + uploadError.message);
-
-        const { error: photoRecordError } = await supabase.from("report_photos").insert({
-          report_id: reportId,
-          user_id: user.id,
-          storage_path: path,
-          sort_order: i,
-        });
-        if (photoRecordError) {
-          await supabase.storage.from("report-photos").remove([path]);
-          throw new Error(
-            "Фото загружено, но не удалось привязать к отчёту: " + photoRecordError.message,
-          );
+        const photoId = photoUploadIds.current.get(photo) ?? crypto.randomUUID();
+        photoUploadIds.current.set(photo, photoId);
+        setProgress(`Обрабатываем фото ${i + 1} из ${photos.length}…`);
+        const prepared = await prepareReportPhoto(photo);
+        const body = new FormData();
+        body.set("report_id", reportId);
+        body.set("photo_id", photoId);
+        body.set("sort_order", String(i));
+        body.set("file", prepared, "photo.jpg");
+        const { data: photoResult, error: uploadError } = await supabase.functions.invoke(
+          "report-photo-upload",
+          { body },
+        );
+        if (uploadError || photoResult?.photo_id !== photoId) {
+          throw new Error("Не удалось обработать фотографию. Повтори загрузку.");
         }
         setUploadedCount(i + 1);
       }
@@ -843,8 +840,8 @@ function NewReport() {
             </div>
           )}
           <p className="text-xs leading-5 text-muted-foreground">
-            Файлы сохраняются в защищённом хранилище. Фотографии общедоступных отчётов будут видны в
-            ленте; фото закрытых отчётов останутся доступны только владельцу.
+            Перед загрузкой удаляются метаданные фотографии, включая GPS. В общей ленте будет
+            обработанная копия. Проверь, не раскрывают ли текст и само изображение место рыбалки.
           </p>
         </section>
 

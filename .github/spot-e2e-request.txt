@@ -1,0 +1,9 @@
+ZAPRUDA v0.7.5 SPOT protected real-JWT preflight request
+Source branch: release/v0.7.5-spot
+Target: designated STAGING yudtbifopfnjtjanaqrd
+Mode: read-only 4 distinct JWT accounts; no fake catches, titles or spots.
+Requested on: 2026-11-03.
+
+Retest after consolidating existing scripts/e2e/spot-v075-live.mjs and formatting fixes.
+
+2026-11-03: re-run alternate protected SPOT read-only workflow after base runner exited pre-steps; never bypass human environment approval.

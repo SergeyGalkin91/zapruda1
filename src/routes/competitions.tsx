@@ -2,6 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { ZaprudaPublicSpotAtlas } from "@/components/ZaprudaPublicSpotAtlas";
+import { SpotCatchFlow } from "@/components/SpotCatchFlow";
+import { SpotLeaderboards } from "@/components/SpotLeaderboards";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/competitions")({
@@ -99,6 +102,10 @@ function CompetitionsPage() {
           </article>
         ))}
       </div>
+
+      <ZaprudaPublicSpotAtlas />
+      <SpotLeaderboards />
+      <SpotCatchFlow />
     </Shell>
   );
 }

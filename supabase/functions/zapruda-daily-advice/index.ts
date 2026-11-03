@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.49.0";
+import { checkXaiAccess, normalizeXaiBase, normalizeXaiKey } from "./xai-access.ts";
 
 /**
  * Daily fishing advice via xAI Grok.
@@ -148,9 +149,11 @@ Deno.serve(async (req: Request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const key = anonKey();
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const xaiKey = Deno.env.get("XAI_API_KEY") ?? "";
-  const model = Deno.env.get("XAI_MODEL") || "grok-3-mini";
-  const apiBase = (Deno.env.get("XAI_API_BASE") || "https://api.x.ai/v1").replace(/\/$/, "");
+  const rawKey = Deno.env.get("XAI_API_KEY") ?? "";
+  const xaiKey = normalizeXaiKey(rawKey);
+  const model = (Deno.env.get("XAI_MODEL") || "grok-3-mini").trim();
+  const rawBase = Deno.env.get("XAI_API_BASE") || "https://api.x.ai/v1";
+  const apiBase = normalizeXaiBase(rawBase);
 
   if (!supabaseUrl || !key) return respond(503, { error: "Backend not configured" });
 
@@ -166,7 +169,6 @@ Deno.serve(async (req: Request) => {
     return respond(401, { error: "Войди в ZAPRUDA" });
   }
   if (!serviceKey) return respond(503, { error: "Service role not configured" });
-  if (!xaiKey) return respond(503, { error: "ИИ-сервис временно недоступен (ключ не настроен)" });
   const userId = authData.user.id;
 
   let body: Record<string, unknown> = {};
@@ -184,9 +186,83 @@ Deno.serve(async (req: Request) => {
   const target = sanitize(body.target, 80) || "Любой хищник";
   const timeOfDay = sanitize(body.time, 40) || "Утро";
   const notes = sanitize(body.notes, 400);
-  if (location.length < 2) return respond(400, { error: "Укажи водоём или место" });
+  const diagnosticOnly = body.action === "diagnose";
+  const staging = supabaseUrl === "https://yudtbifopfnjtjanaqrd.supabase.co";
+  if (diagnosticOnly && (!staging || !authData.user.email_confirmed_at)) return respond(404, {});
+  if (!diagnosticOnly && location.length < 2)
+    return respond(400, { error: "Укажи водоём или место" });
 
   const adviceDay = moscowAdviceDay();
+  const { data: stored, error: storedError } = await userClient
+    .from("ai_daily_advices")
+    .select("status,attempts,answer,lease_expires_at")
+    .eq("user_id", userId)
+    .eq("advice_day", adviceDay)
+    .maybeSingle();
+  const cached =
+    stored?.status === "ready" && typeof stored.answer === "string" && stored.answer.length >= 40;
+  const failureLimit = stored?.status === "failed" && stored.attempts >= 3;
+  const inFlight =
+    stored?.status === "pending" && Date.parse(stored.lease_expires_at ?? "") > Date.now();
+  if (!diagnosticOnly) {
+    if (cached)
+      return respond(200, { answer: stored.answer, already_used: true, advice_day: adviceDay });
+    if (storedError)
+      return respond(503, {
+        error: "Журнал ИИ временно недоступен",
+        code: "ADVICE_JOURNAL_UNAVAILABLE",
+      });
+    if (failureLimit)
+      return respond(429, {
+        error: "Дневной предел неудачных попыток достигнут",
+        code: "ADVICE_FAILURE_LIMIT",
+        advice_day: adviceDay,
+      });
+    if (inFlight)
+      return respond(409, {
+        error: "Запрос уже обрабатывается",
+        code: "ADVICE_IN_PROGRESS",
+        advice_day: adviceDay,
+      });
+  }
+  if (!apiBase || !/^[a-zA-Z0-9][a-zA-Z0-9._:-]{1,127}$/.test(model)) {
+    return respond(503, {
+      error: "Некорректная настройка ИИ",
+      code: !apiBase ? "XAI_ENDPOINT_CONFIGURATION" : "XAI_MODEL_CONFIGURATION",
+    });
+  }
+  // The existing key stays server-side. Introspection returns only fixed states,
+  // never account/team identifiers, ACL text, provider payloads or key fragments.
+  if (staging) {
+    const access = await checkXaiAccess(
+      { key: xaiKey, base: apiBase, model },
+      xaiRejectionCode,
+      fetch,
+    );
+    if (diagnosticOnly)
+      return respond(200, {
+        diagnostic_only: true,
+        ...access,
+        key_normalized: rawKey !== xaiKey,
+        endpoint_normalized: rawBase.replace(/\/$/, "") !== apiBase,
+        endpoint: apiBase === "https://api.x.ai/v1" ? "global" : "us",
+        quota: storedError
+          ? "unknown"
+          : cached
+            ? "cached"
+            : failureLimit
+              ? "failed_limit"
+              : inFlight
+                ? "in_progress"
+                : "available",
+        advice_day: adviceDay,
+      });
+    if (!access.canGenerate)
+      return respond(503, { error: "Провайдер ИИ отклонил проверку доступа", code: access.code });
+  } else if (!xaiKey) {
+    return respond(503, { error: "ИИ-сервис временно недоступен", code: "XAI_KEY_FORMAT" });
+  }
+
   const promptSummary = `${location} · ${target} · ${timeOfDay}`;
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },

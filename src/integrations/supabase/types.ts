@@ -8,6 +8,48 @@ export type Database = {
   };
   public: {
     Tables: {
+      zc_public_spots: {
+        Row: {
+          id: string;
+          name: string;
+          city: string;
+          region: string;
+          waterbody_name: string;
+          public_lat: number | null;
+          public_lng: number | null;
+          disciplines: string[];
+          state: string;
+          reviewed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          city: string;
+          region: string;
+          waterbody_name: string;
+          public_lat?: number | null;
+          public_lng?: number | null;
+          disciplines?: string[];
+          state?: string;
+          reviewed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          city?: string;
+          region?: string;
+          waterbody_name?: string;
+          public_lat?: number | null;
+          public_lng?: number | null;
+          disciplines?: string[];
+          state?: string;
+          reviewed_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       admin_email_notifications: {
         Row: {
           attempts: number;
@@ -3076,6 +3118,10 @@ export type Database = {
       };
     };
     Functions: {
+      zc_spot_public_leaderboard: {
+        Args: { p_spot_id: string; p_league: string };
+        Returns: Json;
+      };
       accept_guide_quote: {
         Args: { p_id: string; p_method: string };
         Returns: undefined;

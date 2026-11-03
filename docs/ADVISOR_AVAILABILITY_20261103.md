@@ -20,7 +20,7 @@ quota or add an AI journal entry. Inputs and the local result stay in component
 memory for the current tab; signing out or switching accounts clears them. The
 rules plan remains available while Auth is loading, to guests, during a Grok
 request and after the server's daily success/failure quota is reached. A Grok
-request has a 30-second client wait limit; a timed-out server job may finish
+request has a 45-second client wait limit (including provider access checks); a timed-out server job may finish
 later, so the journal can be refreshed. Server quota enforcement is unchanged.
 
 The existing Matte Black/Electric Blue styling, routes, navigation and access
