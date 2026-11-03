@@ -18,6 +18,7 @@ import {
   Settings2,
   ChartNoAxesCombined,
   ShieldCheck,
+  Trophy,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
@@ -205,6 +206,18 @@ export function Shell({ children }: { children: ReactNode }) {
                 <div className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.19em] text-[#D7FF35]">
                   ZAPRUDA / Разделы
                 </div>
+                {(isNetlifyStagingPreview ||
+                  import.meta.env["VITE_SUPABASE_URL"] ===
+                    "https://yudtbifopfnjtjanaqrd.supabase.co") && (
+                  <Link
+                    to="/competitions"
+                    className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]"
+                  >
+                    <Trophy className="size-4 text-[#D7FF35]" aria-hidden="true" />
+                    ZARUBA · SPOT (STAGING)
+                    <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
+                  </Link>
+                )}
                 {otherNav.map(({ to, label, Icon }) => (
                   <Link
                     key={to}
