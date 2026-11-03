@@ -105,7 +105,7 @@ function SettingsPage() {
             входа.
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {APP_BACKGROUNDS.map((item) => {
+            {APP_BACKGROUNDS.filter((item) => item.value === "classic" || item.value === "electric-blue").map((item) => {
               const selected = appearance.background === item.value;
               return (
                 <button
@@ -164,8 +164,11 @@ function SettingsPage() {
             <MessageCircle className="size-5 text-[#D7FF35]" /> Фон чатов
           </h2>
           <p className="mt-2 text-sm text-zinc-400">
-            Отдельное оформление области сообщений в общем и личных чатах.
+            {appearance.background === "electric-blue"
+              ? "В Electric Blue оформление чата подчиняется синей палитре: синий, лайм и баклажановый. Отдельные лесные фоны доступны в Matte Black."
+              : "Отдельное оформление области сообщений в общем и личных чатах."}
           </p>
+          {appearance.background !== "electric-blue" && (
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {CHAT_BACKGROUNDS.map((item) => {
               const selected = appearance.chat === item.value;
@@ -209,6 +212,7 @@ function SettingsPage() {
               );
             })}
           </div>
+          )}
           <div className="mt-4 flex flex-wrap gap-3 text-sm">
             <Link
               search={{ place: "", topic: "general", country: "" }}
