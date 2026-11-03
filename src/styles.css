@@ -128,6 +128,35 @@
 :root[data-zapruda-background="night"] body {
   background: radial-gradient(ellipse 85% 60% at 50% -15%,#17404A 0%,#09161A 72%,#070D13 100%) fixed;
 }
+/* Optional Electric Blue: the default matte-black theme above is unchanged.
+   Eggplant is used on filled surfaces with light text, not as text on blue,
+   where its contrast would be insufficient. */
+:root[data-zapruda-background="electric-blue"] {
+  --background: #1239A6;
+  --card: #1B2D71;
+  --secondary: #22387E;
+  --muted: #1D3274;
+  --muted-foreground: #DEE4FF;
+  --border: #536AB1;
+  --input: #536AB1;
+  --z-surface: #12255E;
+  --z-card: #1B2D71;
+  --z-card-elevated: #243B83;
+  --z-violet: #614051;
+  --z-stroke: rgba(216,225,255,.25);
+}
+:root[data-zapruda-background="electric-blue"] body {
+  background: radial-gradient(ellipse 105% 75% at 45% -10%, #1B68EC 0%, #1239A6 57%, #091D57 100%) fixed;
+}
+:root[data-zapruda-background="electric-blue"] .z-underground {
+  background: var(--z-surface);
+}
+:root[data-zapruda-background="electric-blue"] .z-underground-chip {
+  background: #614051;
+  border-color: #976F86;
+  color: #F9ECF7;
+}
+
 :root[data-zapruda-background="classic"] body { background: #090B09; }
 
 /* Chat backgrounds are scoped to message timelines: message readability is preserved. */
