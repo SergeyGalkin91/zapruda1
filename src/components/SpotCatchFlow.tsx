@@ -50,6 +50,7 @@ export function SpotCatchFlow() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [capturedAt, setCapturedAt] = useState("");
   const [reviewChecked, setReviewChecked] = useState<Record<string, boolean>>({});
+  const [microWelfareChecked, setMicroWelfareChecked] = useState<Record<string, boolean>>({});
   const [catches, setCatches] = useState<CatchRow[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [queue, setQueue] = useState<QueueRow[] | null>(null);
@@ -350,6 +351,23 @@ export function SpotCatchFlow() {
                   Я лично проверил открытое фото, показания измерения, разрешённость ловли,
                   территорию и соответствие заявленной снасти.
                 </label>
+                {item.league === "ultralight" && (
+                  <label className="flex items-start gap-2 text-xs text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={microWelfareChecked[item.catch_id] ?? false}
+                      onChange={(event) =>
+                        setMicroWelfareChecked((old) => ({
+                          ...old,
+                          [item.catch_id]: event.target.checked,
+                        }))
+                      }
+                    />
+                    Дополнительная проверка MICRO KING: улов случайный, ловля молоди не была
+                    целью, охраняемые виды и ограничения не нарушены. Без этого подтверждения
+                    возможен только KING OF UL.
+                  </label>
+                )}
                 <div className="flex flex-wrap gap-2">
                   <button
                     disabled={busy || !evidence[item.catch_id] || !reviewChecked[item.catch_id]}
@@ -360,7 +378,7 @@ export function SpotCatchFlow() {
                         decision: "verified",
                         lawful: true,
                         ul_gear_valid: item.league === "ultralight",
-                        micro_welfare_valid: false,
+                        micro_welfare_valid: microWelfareChecked[item.catch_id] === true,
                       })
                     }
                     className="rounded-lg bg-[#D7FF35] px-3 py-2 text-xs font-black text-black disabled:opacity-40"
