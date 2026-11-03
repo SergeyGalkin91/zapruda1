@@ -184,7 +184,12 @@ function SettingsPage() {
                 >
                   <span
                     className="relative block h-20 overflow-hidden rounded-xl border border-white/10"
-                    style={{ background: item.preview }}
+                    style={{
+                      background:
+                        appearance.background === "electric-blue"
+                          ? "linear-gradient(135deg, #1B2D71 0%, #614051 100%)"
+                          : item.preview,
+                    }}
                   >
                     <span className="absolute left-3 top-3 rounded-lg bg-black/30 px-3 py-1.5 text-[10px] text-white">
                       Привет, как клёв?
