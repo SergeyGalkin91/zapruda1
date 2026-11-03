@@ -36,6 +36,9 @@ function SettingsPage() {
   const [notice, setNotice] = useState("");
   const [developer, setDeveloper] = useState(false);
   const [yandexKey, setYandexKey] = useState("");
+  const selectableBackgrounds = APP_BACKGROUNDS.filter(
+    (item) => item.value === "classic" || item.value === "electric-blue",
+  );
 
   useEffect(() => {
     const saved = loadAppearance();
@@ -105,9 +108,7 @@ function SettingsPage() {
             входа.
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {APP_BACKGROUNDS.filter(
-              (item) => item.value === "classic" || item.value === "electric-blue",
-            ).map((item) => {
+            {selectableBackgrounds.map((item) => {
               const selected = appearance.background === item.value;
               return (
                 <button
@@ -214,7 +215,7 @@ function SettingsPage() {
                   </button>
                 );
               })}
-              </div>
+            </div>
           )}
           <div className="mt-4 flex flex-wrap gap-3 text-sm">
             <Link
