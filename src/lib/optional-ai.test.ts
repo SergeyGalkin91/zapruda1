@@ -4,7 +4,7 @@ const input = { location: "Ока", target: "Окунь", time: "Утро", note
 const answer = "Offline synthetic AI response long enough for the successful-response contract.";
 afterEach(() => vi.useRealTimers());
 
-describe("Optional Grok request boundary", () => {
+describe("Optional AI request boundary", () => {
   it("accepts a real response contract and preserves cached status", async () => {
     const invoke = vi.fn(async () => ({ data: { answer, already_used: true }, error: null }));
     expect(await requestOptionalAdvice(input, invoke)).toEqual({

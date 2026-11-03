@@ -19,3 +19,11 @@ Workflow `yandex-canary-staging.yml` → защищённый environment `stagi
 Исходный `zapruda-daily-advice` остаётся legacy v14. После действительных PASS требуется отдельное разрешение владельца на STAGING cutover. Перед ним сохранить version/source fingerprint и зависимости XAI. При rollback возвращается исходная функция; новые приватные фото ACL остаются закрытыми, координатные GRANT назад не открываются. Production не затрагивается.
 
 Россия без VPN: BLOCKED до измерения физическим браузером на российском мобильном интернете цепочки frontend → Auth → Edge → Yandex → UI; фиксировать оператор/время/статусы/задержки, не API key и не GPS. Результат международного GitHub runner этим измерением не считается.
+
+## Фактический результат текущей сессии
+
+**DONE:** canary v2 ACTIVE, JWT true, оба файла проверены readback; 41 offline provider/handler тест поверх сохранённых legacy проверок; Deno и все 12 обычных CI на 3bcade1 PASS. Новая правка root-session safety не меняет provider-код.
+
+**BLOCKED:** protected run 41736781269 остановлен до runner в обеих попытках, ни diagnose, ни generation не исполнялись. Подробность в двух GitHub Annotations, недоступных текущему подключению. Нужен их текст для точного действия. Не утверждаем, что Yandex key/folder, IAM, баланс, primary или backup работают/не работают. No-quota diagnose, actual upstream, ready journal и concurrency/cache остаются открытыми gates.
+
+**NOT STARTED:** STAGING original-route cutover (нужно отдельное разрешение после PASS), отключение зависимых XAI secrets, Web Search acceptance, измерение российским мобильным оператором без VPN.

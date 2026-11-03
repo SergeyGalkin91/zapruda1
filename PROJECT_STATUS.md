@@ -1,3 +1,5 @@
+> **ИСТОРИЧЕСКИЙ СРЕЗ 02.11.2026.** Текущий статус v0.7.5 SPOT от 04.11.2026: [docs/ZAPRUDA_CURRENT_STATE_20261104.md](docs/ZAPRUDA_CURRENT_STATE_20261104.md). Новое направление ИИ — Yandex/DeepSeek через отдельную canary. Приведённые ниже прежние блокеры и обозначения не подменяют живые результаты Actions.
+
 # ZAPRUDA COMMUNITY — CURRENT STATUS (v0.7.1 integration)
 
 As of 2026-11-02, source of truth for this candidate is `release/v0.7.1-integration-20261102`.

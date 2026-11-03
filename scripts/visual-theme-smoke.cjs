@@ -119,7 +119,9 @@ async function openRoute(page, route) {
   };
   try {
     for (const viewport of [
+      { label: "mobile-320", width: 320, height: 740, mobile: true },
       { label: "mobile-390", width: 390, height: 844, mobile: true },
+      { label: "tablet-768", width: 768, height: 1024, mobile: false },
       { label: "desktop-1440", width: 1440, height: 900, mobile: false },
     ]) {
       const context = await browser.newContext({
@@ -195,7 +197,7 @@ async function openRoute(page, route) {
         assert.equal(persisted.background, COLORS.blue, "Blue preference lost after reload");
         assert.equal(await page.getByRole("button", {name:/Electric Blue/}).first().getAttribute("aria-pressed"), "true");
 
-        const routes = ["/", "/communities", "/partners", "/chat", "/profile"];
+        const routes = ["/", "/communities", "/partners", "/chat", "/profile", "/assistant", "/reports/new", "/street", "/competitions", "/messages"];
         const checks = [];
         for (const route of routes) {
           const actual = await openRoute(page, route);
@@ -219,6 +221,9 @@ async function openRoute(page, route) {
             assert.equal(feedSurface.helpCard, "rgb(32, 58, 134)", "Lime-tinted card looked olive");
           }
           checks.push({ route, background: actual.background, overflow: actual.horizontalOverflow });
+          if (["/assistant", "/reports/new", "/street", "/competitions"].includes(route)) {
+            await page.screenshot({ path: fileFor(viewport.label, route.slice(1).replaceAll("/", "-") + "-electric-blue"), fullPage: true });
+          }
           if (route === "/" || route === "/chat") {
             await page.screenshot({
               path: fileFor(viewport.label, route === "/" ? "feed-electric-blue" : "chat-electric-blue"),
@@ -243,6 +248,14 @@ async function openRoute(page, route) {
         await page.reload({ waitUntil: "domcontentloaded" });
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "classic");
         assert.equal((await variables(page)).background, COLORS.matte, "Matte preference lost after reload");
+        const matteChecks = [];
+        for (const route of routes) {
+          const actual = await openRoute(page, route);
+          assert.equal(actual.theme, "classic", route + ": matte preference lost");
+          assert.equal(actual.background, COLORS.matte, route + ": matte background changed");
+          await page.screenshot({ path: fileFor(viewport.label, (route === "/" ? "feed" : route.slice(1).replaceAll("/", "-")) + "-matte"), fullPage: route === "/reports/new" });
+          matteChecks.push({ route, overflow: actual.horizontalOverflow });
+        }
         assert.deepEqual(runtimeErrors, [], "Browser JS errors: " + runtimeErrors.join(" | "));
         evidence.viewports.push({
           viewport: viewport.label,
@@ -251,6 +264,7 @@ async function openRoute(page, route) {
           bluePersistedAfterReload: persisted.theme,
           matteRestored: restored.theme,
           routes: checks,
+          matteRoutes: matteChecks,
           browserErrors: runtimeErrors,
         });
         console.log(

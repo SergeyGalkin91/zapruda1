@@ -14,12 +14,12 @@
 ## Фактический STAGING
 
 - `zapruda-daily-advice` v14: legacy xAI, JWT true. Не переключён на Yandex.
-- `zapruda-daily-advice-yandex`: отдельная canary, JWT true; её актуальный код и версия сверяются после deploy.
+- `zapruda-daily-advice-yandex` v2 ACTIVE, JWT true: после deploy оба файла точно совпали с исходниками кандидата. Deno check PASS на 3bcade1 (run 41737399352 и 41737705897).
 - `zapruda-spot-records` v11: отзыв подтверждения, пересчёт KING и идемпотентные решения, JWT true.
 - `report-photo-upload` v7, JWT true. `report-photo-access` v2, gateway проверяет RLS/видимость и JWT для приватного доступа/DELETE; public GET имеет verify_jwt=false намеренно.
 - `openweather-current` v11, JWT true, сохранён отдельно от ИИ.
 - Новые применённые migration deltas: 20261103215846 `v075_report_coordinate_acl`; 20261103215853 `v075_report_photo_access_gate`; 20261103224908 `v075_spot_revocation_recalculation`.
-- Последний readback до нового canary smoke: 1 приватный отчёт, 0 публичных; 0 точных координат; 0 модераторов, спотов, уловов, KING и SPOT evidence; 0 производных фото. После нового smoke необходим повторный readback.
+- Последний readback после JWT photo smoke и deploy Yandex v2: 1 приватный отчёт, 0 публичных; 0 точных координат; 0 модераторов, спотов, уловов, KING и SPOT evidence; 0 производных фото. QA-отчётов не осталось; `report_photos` и оба тестируемых media buckets пусты. Таблицы `private_fishing_marks` в STAGING нет: личные метки/платная аналитика требуют отдельного выравнивания зависимостей и реальной приёмки.
 - Advisors: INFO RLS без policy — 11 таблиц (в том числе закрытая internal schema); WARN guarded SECURITY DEFINER entrypoints — 11 (два новых защищённых RPC); WARN leaked-password protection — 1. Категории не устранены и не скрываются; новые RPC имеют проверку allowlist/подтверждённой почты и запрет самопроверки.
 
 ## Матрица PR и порядок
@@ -49,3 +49,17 @@ PROD read-only: 5 публичных отчётов, заполненных то
 ## Проверки нового кандидата перед публикацией
 
 370/370 Vitest в 28 файлах, TypeScript, ESLint (0 ошибок, 6 прежних предупреждений), production build — PASS локально. Включены 41 offline контрактная/handler проверка Yandex поверх сохранённых 329 базовых тестов. CI и hosted smoke на новом точном SHA проверяются отдельно.
+
+## Обновление после консолидации
+
+- Source a8760db: отдельная canary, безопасные provider contracts, нейтральный клиент, актуальные пять документов, CSS foundations из #92. Commit 3bcade1 исправляет установку npm-зависимостей в Deno check. На точном 3bcade1 прошли все 12 обычных workflow, включая frontend/Node/Docker, фото, PostgreSQL, Deno, isolation, СХОДКИ и браузеры. Дополнительные повторные PR-triggered прогоны того же SHA не считаются отдельными функциями.
+- Новая проверка безопасности обнаружила, что профиль и аналитика самостоятельно не подписывались на смену Auth. Добавлен общий AuthSessionBoundary над Outlet: меняется пользователь/выход → обнуляется QueryClient и размонтируется прежнее состояние маршрутов; тот же user при TOKEN_REFRESHED → черновики сохраняются. Пять offline UI регрессий подтверждают очистку и отбрасывание запоздавшего ответа. Это не signed-JWT E2E.
+- Перед публикацией последнего safety/browser изменения локально прошли **375 тестов / 29 файлов**, TypeScript, ESLint (0 ошибок / 6 прежних предупреждений) и build. Deno/provider-код не изменился после 3bcade1; canary v2 остаётся точным readback.
+- Guest visual smoke расширен на 320/390/768/1440, обе темы, Chromium/WebKit/Firefox, десять маршрутов, скриншоты и отсутствие горизонтального переполнения. Новый результат читается на точном последнем SHA; это не реальный мобильный оператор, не authenticated E2E и не pixel-perfect одобрение по отсутствующему бинарному эталону пяти телефонов.
+- Source scan: credential-shaped private-key patterns не найдены; значения ключей/ответов/GPS не выводились. Это не гарантия полного исторического secret scanning. Публичные report queries используют явные безопасные колонки; private GPS table напрямую клиентом не запрашивается.
+
+## BLOCKED: реальный Yandex
+
+[Protected run 41736781269](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41736781269): два запуска завершились failure **до запуска runner**, steps отсутствуют и job logs не созданы. `/pending_deployments` пуст. Это не результат запроса Yandex и не доказательство неверного ключа. Check-run сообщает две Annotations; подключение не позволяет читать этот endpoint или настройки Environment. Для точного исправления нужен текст этих Annotations от владельца. Предположение о запрете ветки Environment нельзя выдавать за прочитанную причину. После устранения ограничения можно повторить только failed job: canary v2 уже развёрнута, существующие тестовые аккаунты/секреты используются без новой передачи паролей.
+
+В этом подключении server-secret values не извлекались. Локально корректная конфигурация Yandex, IAM, баланс, реальная primary/backup, journal/cache/concurrency и текущая погода новым Yandex workflow пока **не подтверждены**: скрипт до них не дошёл. Не переключать исходный маршрут и не закрывать #89 как завершённую замену.

@@ -2,6 +2,8 @@
 
 Сначала читать [текущее состояние](ZAPRUDA_CURRENT_STATE_20261104.md), [приёмку DeepSeek](ZAPRUDA_DEEPSEEK_STAGING_ACCEPTANCE.md), [release gates](ZAPRUDA_V075_SPOT_RELEASE_READINESS.md), [legacy cleanup](ZAPRUDA_LEGACY_CLEANUP.md) и [утверждённый UX-spec](ZAPRUDA_UIUX_REFINEMENT_V075_APPROVED_SPEC.md). Design lock v0.6.0-admin-rc.1 неизменен. PR #93/#92 канонические; #94/#91 закрыты как точные дубли в main. Сверять точный head Actions, а не старое описание.
 
+Актуальный canary v2 уже в STAGING, source readback совпал; protected run 41736781269 блокирован до runner, требуется текст GitHub Annotations. Текущий active original route v14 остаётся legacy. Новая общая граница Auth очищает состояние маршрутов/QueryClient при смене личности и сохраняет его при same-user token refresh.
+
 Приоритет: настоящий Yandex canary upstream и backup → проверенная квота/хранение → отдельное разрешение на STAGING cutover → legacy cleanup. Не требовать очередной смены xAI ключа: последнее отклонение подтверждено read-only диагностикой. Сохранить локальный планировщик, бесплатные СХОДКИ, обе темы и текущую навигацию. Действующий ИИ-маршрут пока не переключён.
 
 Main, production, платежи и публичный релиз запрещены без отдельного разрешения. Ни одного модератора/фиктивного публичного спота не назначать/не создавать ради зелёного теста. Отдельно нужны реальные KING и российский мобильный сетевой замер. Ниже сохранён исторический handoff, не новая дорожная карта.

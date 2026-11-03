@@ -102,8 +102,8 @@ describe("Fishing advisor availability and source integrity", () => {
     });
     render(<FishingAdvisor />);
     fill();
-    const grok = await screen.findByRole("button", { name: "Добавить совет ИИ" });
-    fireEvent.click(grok);
+    const advice = await screen.findByRole("button", { name: "Добавить совет ИИ" });
+    fireEvent.click(advice);
     await screen.findByText(
       "ИИ временно недоступен. План по правилам готов — им можно пользоваться.",
     );
@@ -115,7 +115,7 @@ describe("Fishing advisor availability and source integrity", () => {
     makePlan();
     expect(plan()).toHaveTextContent("Волга");
     expect(mocks.invoke).toHaveBeenCalledTimes(1);
-    expect(grok).toBeEnabled();
+    expect(advice).toBeEnabled();
   });
   it("keeps local planning available while a ИИ request is pending", async () => {
     let complete: (value: { data: unknown; error: unknown }) => void = () => {};
@@ -156,13 +156,13 @@ describe("Fishing advisor availability and source integrity", () => {
       });
       render(<FishingAdvisor />);
       fill();
-      const grok = await screen.findByRole("button", {
+      const advice = await screen.findByRole("button", {
         name:
           status === "ready"
             ? "Совет ИИ на сегодня получен"
             : "Запросы ИИ на сегодня приостановлены",
       });
-      expect(grok).toBeDisabled();
+      expect(advice).toBeDisabled();
       makePlan();
       expect(plan()).toBeVisible();
       expect(mocks.invoke).not.toHaveBeenCalled();
