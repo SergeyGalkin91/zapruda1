@@ -106,8 +106,11 @@ async function fetchSearchContext(
 ): Promise<{ context: string; sources: Array<{ title: string; url: string }> }> {
   // IMPORTANT: never forward private user notes, raw spot text, GPS, photos, profile or JWT to web search.
   // Search only generic fishing methods and legal advice by species/time; no user location.
-  const species = target.slice(0, 80).replace(/[\r\n]/g, " ");
-  const period = timeOfDay.slice(0, 40).replace(/[\r\n]/g, " ");
+  // Use a strict allow-list: user-supplied target could otherwise contain a secret GPS.
+  const knownSpecies = ["Щука", "Судак", "Окунь", "Жерех", "Голавль", "Сом"];
+  const species = knownSpecies.includes(target) ? target : "любительская рыбалка";
+  const knownPeriods = ["Утро", "День", "Вечер", "Ночь"];
+  const period = knownPeriods.includes(timeOfDay) ? timeOfDay : "день";
   const response = await requester(`${API_BASE}/responses`, {
     method: "POST",
     headers: headers(config),
