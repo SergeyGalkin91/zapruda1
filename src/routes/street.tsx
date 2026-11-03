@@ -276,7 +276,7 @@ function StreetPage() {
                   to="/reports/new"
                   className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#D7FF35] px-4 font-black text-black"
                 >
-                  Оформить отчёт <ArrowRight className="size-4" />
+                  Оформить отчёт из сессии <ArrowRight className="size-4" />
                 </Link>
                 <button
                   type="button"
@@ -297,9 +297,9 @@ function StreetPage() {
               </div>
             )}
             <p className="text-xs leading-5 text-zinc-500">
-              Запись локальная: после перехода к отчёту данные автоматически не переносятся. Если
-              очистить данные браузера, сессия исчезнет. Для публикации используй существующую форму
-              отчёта.
+              Сессия хранится только в этом браузере. Чтобы перенести уловы в публикацию: нажми
+              «Оформить отчёт», затем на форме отчёта — «Перенести Street-сессию». Если очистить
+              данные браузера, локальная сессия исчезнет.
             </p>
           </section>
         )}
