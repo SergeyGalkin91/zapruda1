@@ -36,9 +36,15 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
       eligible: true,
       score: 3200,
     });
-    expect(shouldReplaceRecord(spot, { ...verified, catchId: "b", weightGrams: 3300 }, verified)).toBe(true);
-    expect(shouldReplaceRecord(spot, { ...verified, catchId: "b", weightGrams: 3200 }, verified)).toBe(false);
-    expect(shouldReplaceRecord(spot, { ...verified, catchId: "b", weightGrams: 3199 }, verified)).toBe(false);
+    expect(
+      shouldReplaceRecord(spot, { ...verified, catchId: "b", weightGrams: 3300 }, verified),
+    ).toBe(true);
+    expect(
+      shouldReplaceRecord(spot, { ...verified, catchId: "b", weightGrams: 3200 }, verified),
+    ).toBe(false);
+    expect(
+      shouldReplaceRecord(spot, { ...verified, catchId: "b", weightGrams: 3199 }, verified),
+    ).toBe(false);
     expect(shouldReplaceRecord(spot, verified, verified)).toBe(false);
   });
 
@@ -55,13 +61,27 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
   });
 
   it("requires a moderated capture scope rather than trusting a home city", () => {
-    expect(evaluateCatchForRecord(spot, { ...verified, scopes: [{ type: "spot", id: "other" }] }).eligible).toBe(false);
-    expect(evaluateCatchForRecord(spot, { ...verified, scopes: [{ type: "region", id: "nnov" }] }).eligible).toBe(false);
+    expect(
+      evaluateCatchForRecord(spot, { ...verified, scopes: [{ type: "spot", id: "other" }] }).eligible,
+    ).toBe(false);
+    expect(
+      evaluateCatchForRecord(spot, { ...verified, scopes: [{ type: "region", id: "nnov" }] }).eligible,
+    ).toBe(false);
   });
 
   it("rejects incompatible methods, missing measurements and invalid numbers", () => {
-    expect(evaluateCatchForRecord(spot, { ...verified, method: "boat-spinning" }).eligible).toBe(false);
-    for (const weight of [null, 0, -5, 1.2, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1]) {
+    expect(
+      evaluateCatchForRecord(spot, { ...verified, method: "boat-spinning" }).eligible,
+    ).toBe(false);
+    for (const weight of [
+      null,
+      0,
+      -5,
+      1.2,
+      Number.NaN,
+      Number.POSITIVE_INFINITY,
+      Number.MAX_SAFE_INTEGER + 1,
+    ]) {
       expect(evaluateCatchForRecord(spot, { ...verified, weightGrams: weight }).eligible).toBe(false);
     }
   });
@@ -102,11 +122,21 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
     const micro: RecordCategory = { ...ul, nomination: "ul-smallest" };
     expect(NOMINATION_TITLES[micro.nomination]).toBe("MICRO KING");
     expect(recordCategoryKey(micro)).not.toEqual(recordCategoryKey(ul));
-    expect(shouldReplaceRecord(ul, { ...ulCatch, catchId: "b", weightGrams: 4000 }, ulCatch)).toBe(true);
-    expect(shouldReplaceRecord(micro, { ...ulCatch, catchId: "b", lengthMm: 600 }, ulCatch)).toBe(true);
-    expect(shouldReplaceRecord(micro, { ...ulCatch, catchId: "b", lengthMm: 800 }, ulCatch)).toBe(false);
-    expect(evaluateCatchForRecord(ul, { ...ulCatch, ultralightGearAccepted: false }).eligible).toBe(false);
-    expect(evaluateCatchForRecord(micro, { ...ulCatch, targetedJuvenile: true }).eligible).toBe(false);
+    expect(
+      shouldReplaceRecord(ul, { ...ulCatch, catchId: "b", weightGrams: 4000 }, ulCatch),
+    ).toBe(true);
+    expect(
+      shouldReplaceRecord(micro, { ...ulCatch, catchId: "b", lengthMm: 600 }, ulCatch),
+    ).toBe(true);
+    expect(
+      shouldReplaceRecord(micro, { ...ulCatch, catchId: "b", lengthMm: 800 }, ulCatch),
+    ).toBe(false);
+    expect(
+      evaluateCatchForRecord(ul, { ...ulCatch, ultralightGearAccepted: false }).eligible,
+    ).toBe(false);
+    expect(
+      evaluateCatchForRecord(micro, { ...ulCatch, targetedJuvenile: true }).eligible,
+    ).toBe(false);
     const { targetedJuvenile: _welfare, ...notReviewed } = ulCatch;
     expect(evaluateCatchForRecord(micro, notReviewed).eligible).toBe(false);
   });
@@ -127,7 +157,9 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
       scopes: [{ type: "waterbody", id: "ku zh" }],
     };
     expect(evaluateCatchForRecord(carp, fish).eligible).toBe(true);
-    expect(evaluateCatchForRecord({ ...carp, speciesId: "grass-carp" }, fish).eligible).toBe(false);
+    expect(
+      evaluateCatchForRecord({ ...carp, speciesId: "grass-carp" }, fish).eligible,
+    ).toBe(false);
     expect(recordCategoryKey(carp)).not.toEqual(recordCategoryKey({ ...carp, speciesId: "grass-carp" }));
   });
 
@@ -176,8 +208,12 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
     };
     expect(evaluateCatchForRecord(boat, catchOnOka).eligible).toBe(true);
     expect(evaluateCatchForRecord({ ...boat, scopeId: "77" }, catchOnOka).eligible).toBe(false);
-    expect(evaluateCatchForRecord({ ...boat, speciesId: "zander" }, catchOnOka).eligible).toBe(false);
-    expect(evaluateCatchForRecord({ ...boat, scopeType: "country", scopeId: "RU" }, catchOnOka).eligible).toBe(true);
+    expect(
+      evaluateCatchForRecord({ ...boat, speciesId: "zander" }, catchOnOka).eligible,
+    ).toBe(false);
+    expect(
+      evaluateCatchForRecord({ ...boat, scopeType: "country", scopeId: "RU" }, catchOnOka).eligible,
+    ).toBe(true);
     expect(evaluateCatchForRecord(spot, catchOnOka).eligible).toBe(false);
   });
 
