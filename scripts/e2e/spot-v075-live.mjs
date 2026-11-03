@@ -173,6 +173,22 @@ async function main() {
     assert.ifError(ownerQueue.error);
     assert.ok(Array.isArray(ownerQueue.data?.queue), "OWNER must be appointed as SPOT moderator");
     console.log("PASS: owner is appointed SPOT moderator");
+    const { data: approved, error: catalogError } = await users.get("OWNER")
+      .from("zc_public_spots")
+      .select("id,disciplines")
+      .eq("state", "approved")
+      .not("reviewed_at", "is", null)
+      .limit(100);
+    assert.ifError(catalogError);
+    assert.ok(
+      approved?.some((spot) =>
+        spot.disciplines?.some((league) =>
+          league === "street" || league === "ultralight",
+        ),
+      ),
+      "No legally reviewed STREET or UL pilot SPOT is approved",
+    );
+    console.log("PASS: approved STREET / UL spot exists in STAGING");
   } else {
     console.log(
       "INFO: moderator appointment not asserted; set ZAPRUDA_SPOT_E2E_REQUIRE_MODERATOR=true after authorization",
@@ -182,7 +198,9 @@ async function main() {
   for (const client of users.values()) {
     await client.auth.signOut();
   }
-  console.log("SPOT v0.7.5 JWT PREFLIGHT PASS; no records or spots were created.");
+  console.log(
+    "SPOT v0.7.5 AUTHORIZATION PREFLIGHT PASS (read-only; not a live catch / KING E2E).",
+  );
 }
 
 main().catch((error) => {
