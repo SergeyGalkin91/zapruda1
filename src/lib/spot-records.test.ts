@@ -107,7 +107,8 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
     expect(shouldReplaceRecord(micro, { ...ulCatch, catchId: "b", lengthMm: 800 }, ulCatch)).toBe(false);
     expect(evaluateCatchForRecord(ul, { ...ulCatch, ultralightGearAccepted: false }).eligible).toBe(false);
     expect(evaluateCatchForRecord(micro, { ...ulCatch, targetedJuvenile: true }).eligible).toBe(false);
-    expect(evaluateCatchForRecord(micro, { ...ulCatch, targetedJuvenile: undefined }).eligible).toBe(false);
+    const { targetedJuvenile: _welfare, ...notReviewed } = ulCatch;
+    expect(evaluateCatchForRecord(micro, notReviewed).eligible).toBe(false);
   });
 
   it("keeps carp and grass carp in distinct verified waterbody rankings", () => {
@@ -149,7 +150,8 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
     };
     expect(evaluateCatchForRecord(winter, fish).eligible).toBe(true);
     expect(evaluateCatchForRecord(winter, { ...fish, seasonId: "2025-26" }).eligible).toBe(false);
-    expect(recordCategoryKey({ ...winter, seasonId: undefined })).toBeNull();
+    const { seasonId: _season, ...withoutSeason } = winter;
+    expect(recordCategoryKey(withoutSeason)).toBeNull();
   });
 
   it("supports separate TROPHY KING scopes without confusing neighboring regions", () => {
