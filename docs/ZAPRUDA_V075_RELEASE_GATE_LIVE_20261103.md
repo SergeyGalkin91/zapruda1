@@ -42,3 +42,9 @@ At 2026-11-03 STAGING, `has_column_privilege` reports `anon` and `authenticated`
 5. Perform real human-moderated SPOT flow; obtain release decision separately.
 
 **Never use emulator/SQL-fixture PASS as proof of a real authenticated browser flow. No synthetic trophy or bypass of human spot review.**
+
+## Additional verification after initial audit
+
+- **Grok STAGING only**: deployed `zapruda-daily-advice` **v11 ACTIVE**, `verify_jwt=true`; deployment source exactly matches [draft PR #89 latest validation](https://github.com/SergeyGalkin91/zapruda1/pull/89), including model aliases. No change to production. The exact PR head `f36aecc3a93a170440293012c043213117049925` achieved quality CI PASS (run 41705063629); end-to-end success is **not** established by this code check.
+- **Protected xAI/OpenWeather real JWT attempt 4** requested through GitHub [run 41669574476](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41669574476). On last inspection `status=pending`, no PASS yet. Never claim resolved until completed success.
+- Official xAI `GET /v1/models` lists models available to the authenticating key; available aliases may appear in `aliases` and are checked by our updated preflight. The provider may still reject request/credit/access independently.
