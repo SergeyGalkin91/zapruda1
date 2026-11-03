@@ -28,9 +28,7 @@ async function spotAction<T>(action: string, extra: Record<string, unknown> = {}
     body: { action, ...extra },
   });
   if (error || data?.error) {
-    throw new Error(
-      typeof data?.error === "string" ? data.error : "Операция недоступна.",
-    );
+    throw new Error(typeof data?.error === "string" ? data.error : "Операция недоступна.");
   }
   return data as T;
 }
@@ -76,7 +74,9 @@ export function SpotCatchFlow() {
       if (!active) return;
       setSpots((data ?? []) as Spot[]);
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [allowed]);
 
   const eligible = spots.filter((spot) => spot.disciplines.includes(league));
@@ -158,8 +158,8 @@ export function SpotCatchFlow() {
         </p>
         <h2 className="mt-2 text-xl font-black text-white">Проверенный улов — заявка на KING</h2>
         <p className="mt-2 text-sm text-zinc-400">
-          Первая волна: STREET и ULTRALIGHT. Фотография остаётся в закрытом хранилище.
-          До проверки модератором рекорд не меняется.
+          Первая волна: STREET и ULTRALIGHT. Фотография остаётся в закрытом хранилище. До проверки
+          модератором рекорд не меняется.
         </p>
       </header>
       {!uid ? (
@@ -171,7 +171,10 @@ export function SpotCatchFlow() {
               Дисциплина
               <select
                 value={league}
-                onChange={(event) => { setLeague(event.target.value as "street" | "ultralight"); setSpotId(""); }}
+                onChange={(event) => {
+                  setLeague(event.target.value as "street" | "ultralight");
+                  setSpotId("");
+                }}
                 className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
               >
                 <option value="street">STREET FISHING</option>
@@ -188,14 +191,19 @@ export function SpotCatchFlow() {
               >
                 <option value="">Выбрать спот</option>
                 {eligible.map((spot) => (
-                  <option key={spot.id} value={spot.id}>{spot.name} · {spot.city}</option>
+                  <option key={spot.id} value={spot.id}>
+                    {spot.name} · {spot.city}
+                  </option>
                 ))}
               </select>
             </label>
             <label className="text-sm text-zinc-300">
               Вид рыбы
-              <select value={species} onChange={(event) => setSpecies(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3">
+              <select
+                value={species}
+                onChange={(event) => setSpecies(event.target.value)}
+                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
+              >
                 <option value="pike">Щука</option>
                 <option value="zander">Судак</option>
                 <option value="perch">Окунь</option>
@@ -205,45 +213,77 @@ export function SpotCatchFlow() {
             </label>
             <label className="text-sm text-zinc-300">
               Вес одной рыбы, г
-              <input required min="1" max="200000" type="number" value={weight}
+              <input
+                required
+                min="1"
+                max="200000"
+                type="number"
+                value={weight}
                 onChange={(event) => setWeight(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3" />
+                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
+              />
             </label>
             <label className="text-sm text-zinc-300">
               Длина, мм
-              <input required min="1" max="4000" type="number" value={length}
+              <input
+                required
+                min="1"
+                max="4000"
+                type="number"
+                value={length}
                 onChange={(event) => setLength(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3" />
+                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
+              />
             </label>
             <label className="text-sm text-zinc-300">
               Фото рыбы и измерения (макс. 12 МБ)
-              <input required type="file" accept="image/jpeg,image/png,image/webp"
+              <input
+                required
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={(event) => setPhoto(event.target.files?.[0] ?? null)}
-                className="mt-1 block w-full text-xs" />
+                className="mt-1 block w-full text-xs"
+              />
             </label>
             <label className="text-sm text-zinc-300">
               Дата и время поимки
-              <input type="datetime-local" required value={capturedAt}
+              <input
+                type="datetime-local"
+                required
+                value={capturedAt}
                 onChange={(event) => setCapturedAt(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3" />
+                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
+              />
             </label>
-            <button type="submit" disabled={busy || !eligible.length || !spotId || !photo || !capturedAt}
-              className="rounded-xl bg-[#D7FF35] p-3 font-black text-black disabled:opacity-40">
+            <button
+              type="submit"
+              disabled={busy || !eligible.length || !spotId || !photo || !capturedAt}
+              className="rounded-xl bg-[#D7FF35] p-3 font-black text-black disabled:opacity-40"
+            >
               <Fish className="mr-2 inline size-4" aria-hidden="true" />
               Отправить на проверку
             </button>
-            <button type="button" disabled={busy} onClick={() => void refreshOwn()}
-              className="rounded-xl border border-white/20 p-3 text-sm font-bold">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void refreshOwn()}
+              className="rounded-xl border border-white/20 p-3 text-sm font-bold"
+            >
               Мои уловы и уведомления
             </button>
           </form>
           {!eligible.length && (
-            <p className="text-xs text-zinc-400">Пока нет юридически проверенных спотов для этой дисциплины.</p>
+            <p className="text-xs text-zinc-400">
+              Пока нет юридически проверенных спотов для этой дисциплины.
+            </p>
           )}
           {eligible.length > 0 && spotId && (
-            <button type="button" disabled={busy}
-              onClick={() => void act("subscribe",{spot_id:spotId})}
-              className="text-sm font-semibold text-[#D7FF35] underline">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void act("subscribe", { spot_id: spotId })}
+              className="text-sm font-semibold text-[#D7FF35] underline"
+            >
               Подписаться на смену KING на этом споте
             </button>
           )}
@@ -259,35 +299,53 @@ export function SpotCatchFlow() {
           {!!notices.length && (
             <div className="space-y-2 text-sm text-zinc-300">
               <h3 className="font-black text-white">Уведомления</h3>
-              {notices.map((item) => <p key={item.id}>{item.message}</p>)}
+              {notices.map((item) => (
+                <p key={item.id}>{item.message}</p>
+              ))}
             </div>
           )}
           <div className="border-t border-white/10 pt-4">
-            <button type="button" disabled={busy} onClick={() => void act("queue")}
-              className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void act("queue")}
+              className="flex items-center gap-2 text-sm font-semibold text-zinc-300"
+            >
               <ShieldCheck className="size-4" /> Очередь модератора (только уполномоченные)
             </button>
             {queue?.map((item) => (
-              <article key={item.catch_id} className="mt-3 space-y-3 rounded-xl border border-white/10 p-3">
+              <article
+                key={item.catch_id}
+                className="mt-3 space-y-3 rounded-xl border border-white/10 p-3"
+              >
                 <p className="text-sm text-white">
                   {item.species} · {item.weight_g} г · {item.length_mm} мм · {item.league}
                 </p>
-                <button type="button" disabled={busy} onClick={() => void act("evidence",{catch_id:item.catch_id})}
-                  className="text-xs font-bold text-[#D7FF35] underline">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void act("evidence", { catch_id: item.catch_id })}
+                  className="text-xs font-bold text-[#D7FF35] underline"
+                >
                   Открыть фото на 60 секунд
                 </button>
                 {evidence[item.catch_id] && (
-                  <img src={evidence[item.catch_id]} alt="Закрытое фотодоказательство"
-                    className="max-h-72 rounded-xl object-contain" />
+                  <img
+                    src={evidence[item.catch_id]}
+                    alt="Закрытое фотодоказательство"
+                    className="max-h-72 rounded-xl object-contain"
+                  />
                 )}
                 <label className="flex items-start gap-2 text-xs text-zinc-300">
                   <input
                     type="checkbox"
                     checked={reviewChecked[item.catch_id] ?? false}
-                    onChange={(event) => setReviewChecked((old) => ({
-                      ...old,
-                      [item.catch_id]: event.target.checked,
-                    }))}
+                    onChange={(event) =>
+                      setReviewChecked((old) => ({
+                        ...old,
+                        [item.catch_id]: event.target.checked,
+                      }))
+                    }
                   />
                   Я лично проверил открытое фото, показания измерения, разрешённость ловли,
                   территорию и соответствие заявленной снасти.
@@ -296,16 +354,27 @@ export function SpotCatchFlow() {
                   <button
                     disabled={busy || !evidence[item.catch_id] || !reviewChecked[item.catch_id]}
                     type="button"
-                    onClick={() => void act("review",{
-                      catch_id:item.catch_id,decision:"verified",lawful:true,
-                      ul_gear_valid:item.league==="ultralight",micro_welfare_valid:false,
-                    })}
-                    className="rounded-lg bg-[#D7FF35] px-3 py-2 text-xs font-black text-black disabled:opacity-40">
+                    onClick={() =>
+                      void act("review", {
+                        catch_id: item.catch_id,
+                        decision: "verified",
+                        lawful: true,
+                        ul_gear_valid: item.league === "ultralight",
+                        micro_welfare_valid: false,
+                      })
+                    }
+                    className="rounded-lg bg-[#D7FF35] px-3 py-2 text-xs font-black text-black disabled:opacity-40"
+                  >
                     Подтвердить проверенный улов
                   </button>
-                  <button disabled={busy} type="button"
-                    onClick={() => void act("review",{catch_id:item.catch_id,decision:"rejected"})}
-                    className="rounded-lg border border-red-400/40 px-3 py-2 text-xs text-red-300">
+                  <button
+                    disabled={busy}
+                    type="button"
+                    onClick={() =>
+                      void act("review", { catch_id: item.catch_id, decision: "rejected" })
+                    }
+                    className="rounded-lg border border-red-400/40 px-3 py-2 text-xs text-red-300"
+                  >
                     Отклонить
                   </button>
                 </div>
@@ -316,7 +385,11 @@ export function SpotCatchFlow() {
               </article>
             ))}
           </div>
-          {message && <p role="status" className="text-sm text-[#D7FF35]">{message}</p>}
+          {message && (
+            <p role="status" className="text-sm text-[#D7FF35]">
+              {message}
+            </p>
+          )}
         </>
       )}
     </section>
