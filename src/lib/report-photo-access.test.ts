@@ -45,13 +45,12 @@ describe("Photo visibility gateway (offline handler regressions, not live JWT E2
     expect((await createReportPhotoAccessHandler(deps)(request())).status).toBe(404);
   });
   it("does not serve stale bytes after the canonical photo path changes", async () => {
-    deps.resolve
-      .mockResolvedValueOnce({ path, owner: false, ready: true })
-      .mockResolvedValueOnce({
-        path: path.replace("10000000", "30000000"),
-        owner: false,
-        ready: true,
-      });
+    deps.resolve.mockResolvedValueOnce({ path, owner: false, ready: true });
+    deps.resolve.mockResolvedValueOnce({
+      path: path.replace("10000000", "30000000"),
+      owner: false,
+      ready: true,
+    });
     expect((await createReportPhotoAccessHandler(deps)(request())).status).toBe(404);
   });
   it.each(["../original.jpg", `other/${photo}.jpg`, `${path}/extra`])(
