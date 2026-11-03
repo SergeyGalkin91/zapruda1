@@ -40,7 +40,7 @@ describe("Yandex AI provider contract", () => {
     expect(result.model).toBe(DEFAULT_PRIMARY);
     expect(result.sources).toEqual([]);
     expect(request).toHaveBeenCalledTimes(1);
-    const [url, options] = request.mock.calls[0];
+    const [url, options] = request.mock.calls[0]!;
     expect(url).toBe("https://ai.api.cloud.yandex.net/v1/chat/completions");
     expect((options.headers as Record<string, string>)["Authorization"]).toBe("Api-Key test-only-not-a-real-key");
     const body = JSON.parse(String(options.body));
