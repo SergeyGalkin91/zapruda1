@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { requestOptionalGrok } from "./optional-grok";
+import { requestOptionalAdvice } from "./optional-ai";
 const input = { location: "Ока", target: "Окунь", time: "Утро", notes: "" };
 const answer = "Offline synthetic AI response long enough for the successful-response contract.";
 afterEach(() => vi.useRealTimers());
@@ -7,7 +7,7 @@ afterEach(() => vi.useRealTimers());
 describe("Optional Grok request boundary", () => {
   it("accepts a real response contract and preserves cached status", async () => {
     const invoke = vi.fn(async () => ({ data: { answer, already_used: true }, error: null }));
-    expect(await requestOptionalGrok(input, invoke)).toEqual({
+    expect(await requestOptionalAdvice(input, invoke)).toEqual({
       ok: true,
       answer,
       alreadyUsed: true,
@@ -17,7 +17,7 @@ describe("Optional Grok request boundary", () => {
   it.each([null, {}, { answer: "short" }, { answer, error: "PRIVATE_PROVIDER_DIAGNOSTIC" }])(
     "does not invent an AI answer for %j",
     async (data) => {
-      expect(await requestOptionalGrok(input, async () => ({ data, error: null }))).toEqual({
+      expect(await requestOptionalAdvice(input, async () => ({ data, error: null }))).toEqual({
         ok: false,
         reason: "unavailable",
       });
@@ -30,13 +30,13 @@ describe("Optional Grok request boundary", () => {
         { status: 502 },
       ),
     };
-    expect(await requestOptionalGrok(input, async () => ({ data: null, error }))).toEqual({
+    expect(await requestOptionalAdvice(input, async () => ({ data: null, error }))).toEqual({
       ok: false,
       reason: "unavailable",
     });
   });
   it("contains thrown network failures", async () => {
-    const result = await requestOptionalGrok(input, async () => {
+    const result = await requestOptionalAdvice(input, async () => {
       throw new Error("PRIVATE_NETWORK_DIAGNOSTIC");
     });
     expect(result).toEqual({ ok: false, reason: "unavailable" });
@@ -44,7 +44,7 @@ describe("Optional Grok request boundary", () => {
   it("settles and aborts a request even when its transport never resolves", async () => {
     vi.useFakeTimers();
     let received: AbortSignal | undefined;
-    const pending = requestOptionalGrok(
+    const pending = requestOptionalAdvice(
       input,
       (_input, signal) => {
         received = signal;
@@ -61,13 +61,13 @@ describe("Optional Grok request boundary", () => {
     const controller = new AbortController();
     controller.abort();
     const invoke = vi.fn();
-    expect(await requestOptionalGrok(input, invoke, { signal: controller.signal })).toEqual({
+    expect(await requestOptionalAdvice(input, invoke, { signal: controller.signal })).toEqual({
       ok: false,
       reason: "cancelled",
     });
     expect(invoke).not.toHaveBeenCalled();
     const active = new AbortController();
-    const pending = requestOptionalGrok(input, () => new Promise(() => {}), {
+    const pending = requestOptionalAdvice(input, () => new Promise(() => {}), {
       signal: active.signal,
     });
     active.abort();
@@ -75,7 +75,7 @@ describe("Optional Grok request boundary", () => {
   });
   it("identifies an expired sign-in without copying raw errors", async () => {
     expect(
-      await requestOptionalGrok(input, async () => ({
+      await requestOptionalAdvice(input, async () => ({
         data: null,
         error: { context: new Response("private", { status: 401 }) },
       })),

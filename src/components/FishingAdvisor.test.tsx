@@ -80,7 +80,7 @@ describe("Fishing advisor availability and source integrity", () => {
     expect(mocks.invoke).not.toHaveBeenCalled();
     expect(mocks.from).not.toHaveBeenCalled();
   });
-  it("creates a guest plan without a Grok request or journal write", async () => {
+  it("creates a guest plan without a ИИ request or journal write", async () => {
     mocks.getUser.mockResolvedValue({ data: { user: null } });
     render(<FishingAdvisor />);
     await screen.findByRole("link", { name: "войди в аккаунт" });
@@ -102,22 +102,22 @@ describe("Fishing advisor availability and source integrity", () => {
     });
     render(<FishingAdvisor />);
     fill();
-    const grok = await screen.findByRole("button", { name: "Добавить совет Grok" });
+    const grok = await screen.findByRole("button", { name: "Добавить совет ИИ" });
     fireEvent.click(grok);
     await screen.findByText(
-      "Grok временно недоступен. План по правилам готов — им можно пользоваться.",
+      "ИИ временно недоступен. План по правилам готов — им можно пользоваться.",
     );
     expect(plan()).toBeVisible();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.queryByText(/PRIVATE_DIAGNOSTIC|XAI_INVALID_API_KEY/)).not.toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Совет Grok за сегодня" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Совет ИИ за сегодня" })).not.toBeInTheDocument();
     fill("Волга");
     makePlan();
     expect(plan()).toHaveTextContent("Волга");
     expect(mocks.invoke).toHaveBeenCalledTimes(1);
     expect(grok).toBeEnabled();
   });
-  it("keeps local planning available while a Grok request is pending", async () => {
+  it("keeps local planning available while a ИИ request is pending", async () => {
     let complete: (value: { data: unknown; error: unknown }) => void = () => {};
     mocks.invoke.mockImplementation(
       () =>
@@ -127,18 +127,18 @@ describe("Fishing advisor availability and source integrity", () => {
     );
     render(<FishingAdvisor />);
     fill("Ока");
-    fireEvent.click(await screen.findByRole("button", { name: "Добавить совет Grok" }));
-    await screen.findByRole("button", { name: "Grok готовит дополнение…" });
+    fireEvent.click(await screen.findByRole("button", { name: "Добавить совет ИИ" }));
+    await screen.findByRole("button", { name: "ИИ готовит дополнение…" });
     fill("Волга");
     makePlan();
     expect(plan()).toHaveTextContent("Волга");
     await act(async () => complete({ data: { answer, already_used: false }, error: null }));
     expect(plan()).toHaveTextContent("Волга");
-    expect(screen.getByRole("region", { name: "Совет Grok за сегодня" })).toHaveTextContent("Ока");
+    expect(screen.getByRole("region", { name: "Совет ИИ за сегодня" })).toHaveTextContent("Ока");
     expect(screen.getByRole("textbox", { name: "Водоём / примерное место" })).toHaveValue("Волга");
   });
   it.each(["ready", "failed"] as const)(
-    "preserves the Grok %s quota while keeping local planning",
+    "preserves the ИИ %s quota while keeping local planning",
     async (status) => {
       mocks.history.mockResolvedValue({
         data: [
@@ -159,8 +159,8 @@ describe("Fishing advisor availability and source integrity", () => {
       const grok = await screen.findByRole("button", {
         name:
           status === "ready"
-            ? "Совет Grok на сегодня получен"
-            : "Запросы Grok на сегодня приостановлены",
+            ? "Совет ИИ на сегодня получен"
+            : "Запросы ИИ на сегодня приостановлены",
       });
       expect(grok).toBeDisabled();
       makePlan();
@@ -173,7 +173,7 @@ describe("Fishing advisor availability and source integrity", () => {
     render(<FishingAdvisor />);
     fill();
     makePlan();
-    await screen.findByText("Журнал Grok временно недоступен. План по правилам работает.");
+    await screen.findByText("Журнал ИИ временно недоступен. План по правилам работает.");
     expect(plan()).toBeVisible();
     expect(screen.queryByText(/PRIVATE_HISTORY_DIAGNOSTIC/)).not.toBeInTheDocument();
   });
@@ -200,7 +200,7 @@ describe("Fishing advisor availability and source integrity", () => {
     );
     render(<FishingAdvisor />);
     fill("PRIVATE_OLD_PLACE");
-    fireEvent.click(await screen.findByRole("button", { name: "Добавить совет Grok" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Добавить совет ИИ" }));
     await waitFor(() => expect(mocks.invoke).toHaveBeenCalledTimes(1));
     act(() => mocks.onAuth.mock.calls[0]?.[0]("SIGNED_OUT", null));
     await act(async () =>
