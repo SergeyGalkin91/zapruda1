@@ -1,0 +1,5 @@
+STAGING-only Edge/provider E2E request: 2026-11-03
+Target: yudtbifopfnjtjanaqrd
+Reason: authenticated OpenWeather passes; xAI rejects Grok with HTTP 400.
+Use fixed diagnostic codes to distinguish provider billing/key/model/request rejection.
+This request runs only the existing protected Edge suite; no credential values belong here.

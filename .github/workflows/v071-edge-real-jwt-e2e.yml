@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [fix/issue61-v071-p0-stages-5-8]
-    paths: [.github/staging-e2e-request.txt]
+    paths: [.github/staging-e2e-request.txt, .github/staging-edge-e2e-request.txt]
 permissions:
   contents: read
 concurrency:

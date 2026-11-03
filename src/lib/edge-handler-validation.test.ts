@@ -9,6 +9,7 @@ type FunctionName = "openweather-current" | "zapruda-daily-advice";
 type HandlerOptions = {
   providerStatus?: number;
   providerError?: Error;
+  providerResponse?: Response;
   anonymous?: boolean;
   authError?: boolean;
   rpc?: (name: string, args: Record<string, unknown>) => Promise<unknown>;
@@ -35,6 +36,7 @@ function loadHandler(name: FunctionName, providerBody = "{}", options: HandlerOp
   };
   const providerFetch = vi.fn(async () => {
     if (options.providerError) throw options.providerError;
+    if (options.providerResponse) return options.providerResponse;
     return new Response(providerBody, { status: options.providerStatus ?? 200 });
   });
   const source = readFileSync(
@@ -304,4 +306,105 @@ describe("Grok lease and provider failures (offline handler tests)", () => {
       ).toMatchObject({ p_success: false });
     },
   );
+
+  it.each([
+    [
+      400,
+      { code: "insufficient_credits", error: "Private team has no available credits" },
+      "XAI_INSUFFICIENT_CREDITS",
+    ],
+    [400, { error: "Your team does not have any credits" }, "XAI_INSUFFICIENT_CREDITS"],
+    [403, { error: { message: "Spending limit reached" } }, "XAI_INSUFFICIENT_CREDITS"],
+    [
+      400,
+      { error: { code: "invalid_api_key", message: "Incorrect API key provided" } },
+      "XAI_INVALID_API_KEY",
+    ],
+    [401, { message: "Private authorization details" }, "XAI_INVALID_API_KEY"],
+    [400, { error: "The model does not exist" }, "XAI_MODEL_UNAVAILABLE"],
+    [404, { message: "Private model details" }, "XAI_MODEL_UNAVAILABLE"],
+    [403, { error: "Forbidden" }, "XAI_ACCESS_DENIED"],
+    [429, { error: "Private quota diagnostic" }, "XAI_RATE_LIMITED"],
+    [500, { error: "Misleading insufficient_credits diagnostic" }, "XAI_PROVIDER_UNAVAILABLE"],
+  ] as const)(
+    "classifies HTTP %s without exposing the provider body",
+    async (status, payload, code) => {
+      const marker = "DO_NOT_EXPOSE_KEY_TEAM_OR_GPS";
+      const { handler, rpc } = loadHandler(
+        "zapruda-daily-advice",
+        JSON.stringify({ ...payload, private: marker }),
+        {
+          providerStatus: status,
+          rpc: rpcSuccess,
+        },
+      );
+      const response = await handler(adviceRequest());
+      expect(response.status).toBe(502);
+      const body = await response.json();
+      expect(body.code).toBe(code);
+      expect(JSON.stringify(body)).not.toContain(marker);
+      const completions = rpc.mock.calls.filter(
+        ([name]) => name === "complete_ai_daily_advice_slot",
+      );
+      expect(completions).toHaveLength(1);
+      expect(completions[0]?.[1]).toMatchObject({
+        p_success: false,
+        p_answer: "",
+        p_error_message: `xAI HTTP ${status}; ${code}`,
+      });
+      expect(JSON.stringify(completions)).not.toContain(marker);
+    },
+  );
+
+  it.each([
+    "{",
+    "null",
+    "[]",
+    '"no available credits"',
+    JSON.stringify({ extra: { code: "insufficient_credits" } }),
+  ])("keeps an unrecognized HTTP 400 payload private: %s", async (payload) => {
+    const { handler, rpc } = loadHandler("zapruda-daily-advice", payload, {
+      providerStatus: 400,
+      rpc: rpcSuccess,
+    });
+    const response = await handler(adviceRequest());
+    expect(response.status).toBe(502);
+    expect((await response.json()).code).toBe("XAI_REQUEST_REJECTED");
+    expect(
+      rpc.mock.calls.find(([name]) => name === "complete_ai_daily_advice_slot")?.[1],
+    ).toMatchObject({ p_error_message: "xAI HTTP 400; XAI_REQUEST_REJECTED", p_success: false });
+  });
+
+  it("cancels an oversized error stream without waiting for its end", async () => {
+    const cancel = vi.fn();
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(4097).fill(65));
+      },
+      cancel,
+    });
+    const { handler } = loadHandler("zapruda-daily-advice", "", {
+      providerResponse: new Response(stream, { status: 400 }),
+      rpc: rpcSuccess,
+    });
+    const response = await handler(adviceRequest());
+    expect((await response.json()).code).toBe("XAI_REQUEST_REJECTED");
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("never copies an unknown provider code or message into the response or journal", async () => {
+    const marker = "PRIVATE_TOKEN_XYZ_123";
+    const { handler, rpc } = loadHandler(
+      "zapruda-daily-advice",
+      JSON.stringify({
+        code: marker,
+        error: { code: marker, message: marker },
+      }),
+      { providerStatus: 400, rpc: rpcSuccess },
+    );
+    const response = await handler(adviceRequest());
+    const body = await response.json();
+    expect(body.code).toBe("XAI_REQUEST_REJECTED");
+    expect(JSON.stringify({ body, calls: rpc.mock.calls })).not.toContain(marker);
+  });
 });
