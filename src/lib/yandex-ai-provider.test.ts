@@ -124,7 +124,7 @@ describe("Yandex AI provider contract", () => {
     expect(result.source).toBe("yandex-deepseek");
   });
 
-  it("falls back to Alice AI Flash only for transient DeepSeek failures", async () => {
+  it("falls back to YandexGPT Pro 5.1 only for transient DeepSeek failures", async () => {
     const request = vi.fn(async (_url: string, options: RequestInit) =>
       JSON.parse(String(options.body)).model.includes(DEFAULT_PRIMARY)
         ? new Response("", { status: 503 })
