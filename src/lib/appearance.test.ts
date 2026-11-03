@@ -70,9 +70,7 @@ describe("ZAPRUDA appearance preferences", () => {
 
   it("offers only approved Matte Black and Electric Blue backgrounds", () => {
     expect(APP_BACKGROUNDS.map((item) => item.value)).toEqual(["classic", "electric-blue"]);
-    expect(normalizeAppearance({ background: "night", chat: "plain" }).background).toBe(
-      "classic",
-    );
+    expect(normalizeAppearance({ background: "night", chat: "plain" }).background).toBe("classic");
   });
 
   it("defines only blue/eggplant previews for Electric Blue chat", () => {
