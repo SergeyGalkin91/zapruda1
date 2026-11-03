@@ -391,7 +391,7 @@ function Feed() {
 
   return (
     <Shell>
-      <section className="relative mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0B0D0B] px-5 py-7 sm:px-8 sm:py-9">
+      <section className="relative mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0B0D0B] z-electric-feed-hero px-5 py-7 sm:px-8 sm:py-9">
         <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#D7FF35]/[0.09] blur-3xl" />
         <div className="relative">
           <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D7FF35]">
@@ -406,7 +406,7 @@ function Feed() {
           </p>
           <Link
             to="/street"
-            className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-[#D7FF35]/40 bg-[#121A12] px-5 py-4 transition hover:border-[#D7FF35]"
+            className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-[#D7FF35]/40 bg-[#121A12] z-electric-street-cta px-5 py-4 transition hover:border-[#D7FF35]"
           >
             <span>
               <strong className="block text-lg font-black uppercase tracking-tight text-[#D7FF35]">
@@ -423,7 +423,7 @@ function Feed() {
           <div className="mt-7 grid gap-3 md:grid-cols-3">
             <Link
               to="/assistant"
-              className="group rounded-2xl border border-[#D7FF35]/35 bg-[#D7FF35]/10 p-5 transition hover:border-[#D7FF35] hover:bg-[#D7FF35]/15"
+              className="group rounded-2xl border border-[#D7FF35]/35 bg-[#D7FF35]/10 z-electric-feed-action p-5 transition hover:border-[#D7FF35] hover:bg-[#D7FF35]/15"
             >
               <span className="text-2xl" aria-hidden="true">
                 🎣
