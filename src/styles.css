@@ -303,3 +303,193 @@
 @media (max-width: 639px) {
   .z-room-row { min-height: 80px; gap: 0.75rem; }
 }
+
+
+/* ZAPRUDA v0.7.1: Electric Blue is a FULL background palette, not
+   a blue body behind the original green/black hard-coded panels.
+   All overrides are scoped; Matte Black remains exactly as before. */
+:root[data-zapruda-background="electric-blue"] {
+  --background: #1239A6;
+  --card: #19357F;
+  --secondary: #223D91;
+  --muted: #1D337A;
+  --muted-foreground: #E2E8FF;
+  --border: #5B75C0;
+  --input: #5B75C0;
+  /* Must follow the global :root design-token declaration above. */
+  --z-surface: #102A78;
+  --z-card: #1A367F;
+  --z-card-elevated: #23438D;
+  --z-violet: #614051;
+  --z-stroke: rgba(220,229,255,.28);
+}
+:root[data-zapruda-background="electric-blue"] :is(.z-card, .z-card-hero, .panel, .z-underground) {
+  background-color: var(--z-card);
+  border-color: var(--z-stroke);
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0B]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]/95]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#080A09]/95]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#070B10]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#060B10]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B1019]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0A0C16]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0E120F]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#10140F]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#101210]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0A0D09]/90]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#111610]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0F130F]"] {
+  background-color: #102A78;
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#141914]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151915]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151914]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151A14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151D14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171B16]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171C17]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171C14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171a15]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151812]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#161D13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#121A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151A1E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#141D20]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0C100E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#111511]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A2016]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A1D19]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151925]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171c17]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#17151E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#17151D]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#161B15]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151B14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171528]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151825]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D121C]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A2115]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#132117]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0B]"] {
+  background-color: #1A367F;
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#191522]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#211B2D]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#292140]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171527]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1B1B2A]"] {
+  background-color: #614051;
+}
+/* Tailwind arbitrary opacity classes in sticky navigation and modal cards. */
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]/95"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#080A09]/95"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0A0D09]/90"] {
+  background-color: rgba(15,38,105,.97);
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151915]/95"] {
+  background-color: rgba(26,54,127,.95);
+}
+/* Legacy green/grey-green gradients across headings, gear, trips and profiles. */
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1E251A]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1E251A]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1E251A]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#27321b]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#27321b]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#27321b]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1D2717]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1D2717]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1D2717]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#131A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#131A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#131A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#202C15]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#202C15]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#202C15]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#141B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#141B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#141B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#0F130F]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#0F130F]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#0F130F]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#243019]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#243019]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#243019]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#243219]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#243219]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#243219]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#10140F]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#10140F]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#10140F]"] {
+  background-image: linear-gradient(133deg, #2257C5 0%, #183B92 55%, #614051 135%);
+}
+/* Application shell, chat timelines and activity surfaces follow selected theme. */
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window {
+  background: linear-gradient(160deg, #1A3C91 0%, #102A78 100%);
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble:not(.zapruda-chat-own-bubble):not(.zapruda-chat-incoming-bubble) {
+  background: #1A367F;
+  border-color: #667DC5;
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-incoming-bubble {
+  background: #614051;
+  border-color: #98768C;
+  color: #F9ECF7;
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-own-bubble {
+  background: #D7FF35;
+  border-color: #D7FF35;
+  color: #11170A;
+}
+/* Grey-green navigation labels become blue neutral, lime remains unchanged. */
+:root[data-zapruda-background="electric-blue"] [class~="text-[#949D90]"],
+:root[data-zapruda-background="electric-blue"] [class~="text-[#A5ADA1]"],
+:root[data-zapruda-background="electric-blue"] [class~="text-[#A6B1A0]"],
+:root[data-zapruda-background="electric-blue"] [class~="text-[#B6BFB1]"] {
+  color: #DDE6FF;
+}
