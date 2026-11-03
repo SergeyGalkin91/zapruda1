@@ -98,10 +98,10 @@ function loadHandler(name: FunctionName, providerBody = "{}", options: HandlerOp
             : name === "YANDEX_AI_API_KEY"
               ? "test-only-not-a-real-key"
               : [
-                  "YANDEX_AI_PRIMARY_MODEL",
-                  "YANDEX_AI_FALLBACK_MODEL",
-                  "YANDEX_AI_WEB_SEARCH_ENABLED",
-                ].includes(name)
+                    "YANDEX_AI_PRIMARY_MODEL",
+                    "YANDEX_AI_FALLBACK_MODEL",
+                    "YANDEX_AI_WEB_SEARCH_ENABLED",
+                  ].includes(name)
                 ? undefined
                 : "offline-test-placeholder"),
       },
