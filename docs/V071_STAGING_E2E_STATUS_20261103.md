@@ -1,5 +1,7 @@
 # v0.7.1 STAGING verification report — 2026-11-03 (Europe/Moscow)
 
+> Historical checkpoints: the current type/lint/build verification, 166-test suite and STAGING Edge v5 readback are recorded in [V071_RELEASE_PREFLIGHT_20261103.md](V071_RELEASE_PREFLIGHT_20261103.md). Authenticated live E2E is still blocked; earlier v4/148-test results below are retained as historical evidence.
+
 Scope: [PR #63](https://github.com/SergeyGalkin91/zapruda1/pull/63), feature branch `fix/issue61-v071-p0-stages-5-8`, base `release/v0.7.1-integration-20261102`, STAGING `yudtbifopfnjtjanaqrd`. The PR remains a draft. No production/main changes or merge were performed. No passwords, keys, JWTs or real account identities are included in this report.
 
 ## Current result

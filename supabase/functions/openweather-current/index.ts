@@ -36,7 +36,10 @@ function anonKey(): string {
   const legacy = Deno.env.get("SUPABASE_ANON_KEY");
   if (legacy) return legacy;
   try {
-    return (JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}") as Record<string, string>).default ?? "";
+    return (
+      (JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}") as Record<string, string>)
+        .default ?? ""
+    );
   } catch {
     return "";
   }
@@ -54,8 +57,22 @@ function coordinate(value: unknown): number | null {
 }
 
 const DEG_TO_CARD = [
-  "С", "ССВ", "СВ", "ВСВ", "В", "ВЮВ", "ЮВ", "ЮЮВ",
-  "Ю", "ЮЮЗ", "ЮЗ", "ЗЮЗ", "З", "ЗСЗ", "СЗ", "ССЗ",
+  "С",
+  "ССВ",
+  "СВ",
+  "ВСВ",
+  "В",
+  "ВЮВ",
+  "ЮВ",
+  "ЮЮВ",
+  "Ю",
+  "ЮЮЗ",
+  "ЮЗ",
+  "ЗЮЗ",
+  "З",
+  "ЗСЗ",
+  "СЗ",
+  "ССЗ",
 ];
 
 function windCardinal(deg: number | null | undefined): string {
@@ -70,13 +87,9 @@ Deno.serve(async (req: Request) => {
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const key = anonKey();
-  const owKey =
-    Deno.env.get("OPENWEATHER_API_KEY") ||
-    Deno.env.get("OPENWEATHERMAP_API_KEY") ||
-    "";
+  const owKey = Deno.env.get("OPENWEATHER_API_KEY") || Deno.env.get("OPENWEATHERMAP_API_KEY") || "";
 
   if (!supabaseUrl || !key) return respond(503, { error: "Backend not configured" });
-
 
   const jwt = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
   if (!jwt) return respond(401, { error: "Войди в ZAPRUDA" });
@@ -146,10 +159,10 @@ Deno.serve(async (req: Request) => {
 
   let upstream: Response;
   try {
-    upstream = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?${params.toString()}`,
-      { signal: AbortSignal.timeout(8000), headers: { "User-Agent": "ZaprudaCommunity/1.0" } },
-    );
+    upstream = await fetch(`https://api.openweathermap.org/data/2.5/weather?${params.toString()}`, {
+      signal: AbortSignal.timeout(8000),
+      headers: { "User-Agent": "ZaprudaCommunity/1.0" },
+    });
   } catch {
     return respond(502, { error: "Погодный сервис недоступен" });
   }
@@ -204,8 +217,7 @@ Deno.serve(async (req: Request) => {
     pressure_mmhg:
       pressureHpa != null && Number.isFinite(pressureHpa) ? hpaToMmHg(pressureHpa) : null,
     wind_direction: windCardinal(windDeg ?? null),
-    wind_speed_ms:
-      windMs != null && Number.isFinite(windMs) ? Math.round(windMs * 10) / 10 : null,
+    wind_speed_ms: windMs != null && Number.isFinite(windMs) ? Math.round(windMs * 10) / 10 : null,
   };
 
   // Intentionally omit lat/lon from response body for privacy.

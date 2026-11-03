@@ -1,6 +1,9 @@
 export type ReactionWriteResult = { error: { message: string } | null };
 export type ExistingReaction = { id: string; reaction_type: string };
-export type ReactionFindResult = { data: ExistingReaction[] | null; error: { message: string } | null };
+export type ReactionFindResult = {
+  data: ExistingReaction[] | null;
+  error: { message: string } | null;
+};
 
 export async function toggleReportReaction(
   type: string,
@@ -16,9 +19,9 @@ export async function toggleReportReaction(
     if (inserted.error) throw new Error(inserted.error.message);
     return "added";
   }
-  const deleted = await remove(existing.map(row => row.id));
+  const deleted = await remove(existing.map((row) => row.id));
   if (deleted.error) throw new Error(deleted.error.message);
-  if (existing.every(row => row.reaction_type === type)) return "removed";
+  if (existing.every((row) => row.reaction_type === type)) return "removed";
   const inserted = await add();
   if (inserted.error) throw new Error(inserted.error.message);
   return "switched";

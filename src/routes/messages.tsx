@@ -5,22 +5,55 @@ import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/messages")({
-  head: () => ({ meta: [{ title: "Личные сообщения — ZAPRUDA" }, { name: "description", content: "Личные переписки по согласию и обмен выбранными рыболовными метками." }] }),
-  validateSearch: (query: Record<string, unknown>) => ({ mark: typeof query["mark"] === "string" ? query["mark"] : "", ...(typeof query["to"] === "string" ? { to: query["to"] } : {}) }),
+  head: () => ({
+    meta: [
+      { title: "Личные сообщения — ZAPRUDA" },
+      {
+        name: "description",
+        content: "Личные переписки по согласию и обмен выбранными рыболовными метками.",
+      },
+    ],
+  }),
+  validateSearch: (query: Record<string, unknown>) => ({
+    mark: typeof query["mark"] === "string" ? query["mark"] : "",
+    ...(typeof query["to"] === "string" ? { to: query["to"] } : {}),
+  }),
   component: Messages,
 });
 
 type Person = { id: string; username: string | null; display_name: string | null };
-type Thread = { id: string; requester_id: string; recipient_id: string; status: "pending" | "accepted" | "declined"; created_at: string };
+type Thread = {
+  id: string;
+  requester_id: string;
+  recipient_id: string;
+  status: "pending" | "accepted" | "declined";
+  created_at: string;
+};
 type Mark = { id: string; title: string; latitude: number; longitude: number };
-type Dm = { id: string; thread_id: string; sender_id: string; kind: "text" | "location"; body: string; location_title: string | null; latitude: number | null; longitude: number | null; created_at: string };
-const db = supabase as any;
+type Dm = {
+  id: string;
+  thread_id: string;
+  sender_id: string;
+  kind: "text" | "location";
+  body: string;
+  location_title: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  created_at: string;
+};
+const db = supabase;
 const display = (p?: Person) => p?.display_name || p?.username || "Рыболов";
-const datetime = (s: string) => new Date(s).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const datetime = (s: string) =>
+  new Date(s).toLocaleString("ru-RU", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // Escape ilike wildcards so user input is matched literally.
-const escapeLike = (s: string) => s.replace(/[\\%_]/g, ch => "\\" + ch);
+const escapeLike = (s: string) => s.replace(/[\\%_]/g, (ch) => "\\" + ch);
 const PERSON_COLS = "id,username,display_name";
 
 function Messages() {
@@ -46,32 +79,55 @@ function Messages() {
   const msgSeq = useRef(0);
   const refreshSeq = useRef(0);
   const mounted = useRef(true);
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
-  useEffect(() => { activeRef.current = activeId; }, [activeId]);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    activeRef.current = activeId;
+  }, [activeId]);
 
   const refresh = useCallback(async () => {
     const seq = ++refreshSeq.current;
     const { data: auth, error: ae } = await supabase.auth.getUser();
     if (!mounted.current || seq !== refreshSeq.current) return;
     if (ae || !auth.user) {
-      setUid(""); setLoading(false);
+      setUid("");
+      setLoading(false);
       setError("Для личных сообщений войди в аккаунт.");
       return;
     }
     const id = auth.user.id;
     setUid(id);
     const [t, f, m] = await Promise.all([
-      db.from("social_threads").select("id,requester_id,recipient_id,status,created_at").or("requester_id.eq." + id + ",recipient_id.eq." + id).order("created_at", { ascending: false }),
+      db
+        .from("social_threads")
+        .select("id,requester_id,recipient_id,status,created_at")
+        .or("requester_id.eq." + id + ",recipient_id.eq." + id)
+        .order("created_at", { ascending: false }),
       supabase.from("follows").select("following_id").eq("follower_id", id),
-      supabase.from("private_fishing_marks").select("id,title,latitude,longitude").eq("user_id", id).order("created_at", { ascending: false }).limit(100),
+      supabase
+        .from("private_fishing_marks")
+        .select("id,title,latitude,longitude")
+        .eq("user_id", id)
+        .order("created_at", { ascending: false })
+        .limit(100),
     ]);
     if (!mounted.current || seq !== refreshSeq.current) return;
     const threadRows = (t.data ?? []) as Thread[];
-    const followIds = (f.data ?? []).map(row => row.following_id as string);
-    const peerIds = [...new Set(threadRows.map(r => r.requester_id === id ? r.recipient_id : r.requester_id))];
+    const followIds = (f.data ?? []).map((row) => row.following_id as string);
+    const peerIds = [
+      ...new Set(threadRows.map((r) => (r.requester_id === id ? r.recipient_id : r.requester_id))),
+    ];
     const [pp, fp] = await Promise.all([
-      peerIds.length ? supabase.from("profiles").select(PERSON_COLS).in("id", peerIds) : Promise.resolve({ data: [], error: null }),
-      followIds.length ? supabase.from("profiles").select(PERSON_COLS).in("id", followIds.slice(0, 200)) : Promise.resolve({ data: [], error: null }),
+      peerIds.length
+        ? supabase.from("profiles").select(PERSON_COLS).in("id", peerIds)
+        : Promise.resolve({ data: [], error: null }),
+      followIds.length
+        ? supabase.from("profiles").select(PERSON_COLS).in("id", followIds.slice(0, 200))
+        : Promise.resolve({ data: [], error: null }),
     ]);
     if (!mounted.current || seq !== refreshSeq.current) return;
     const failure = [t.error, f.error, m.error, pp.error, fp.error].find(Boolean);
@@ -81,130 +137,227 @@ function Messages() {
     setFollowing(followIds);
     setMarks((m.data ?? []) as Mark[]);
     setPeerProfiles((pp.data ?? []) as Person[]);
-    setFollowProfiles(((fp.data ?? []) as Person[]).filter(p => p.id !== id));
+    setFollowProfiles(((fp.data ?? []) as Person[]).filter((p) => p.id !== id));
     setLoading(false);
   }, []);
 
   const fetchMessages = useCallback(async (id: string) => {
     const seq = ++msgSeq.current;
-    const { data, error: qerr } = await db.from("social_messages")
+    const { data, error: qerr } = await db
+      .from("social_messages")
       .select("id,thread_id,sender_id,kind,body,location_title,latitude,longitude,created_at")
-      .eq("thread_id", id).order("created_at", { ascending: false }).order("id", { ascending: false }).limit(200);
+      .eq("thread_id", id)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(200);
     // Drop stale responses (thread switched, newer request, or unmounted).
     if (!mounted.current || seq !== msgSeq.current || activeRef.current !== id) return;
     if (qerr) setError("Не удалось загрузить переписку: " + qerr.message);
-    else setMessages(([...(data ?? [])].reverse()) as Dm[]);
+    else setMessages([...(data ?? [])].reverse() as Dm[]);
   }, []);
 
   // Inbox: initial load + realtime only for threads involving the current user.
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
   useEffect(() => {
     if (!uid) return;
     const onChange = () => void refresh();
-    const channel = supabase.channel("zapruda-social-inbox-" + uid)
-      .on("postgres_changes", { event: "*", schema: "public", table: "social_threads", filter: "requester_id=eq." + uid }, onChange)
-      .on("postgres_changes", { event: "*", schema: "public", table: "social_threads", filter: "recipient_id=eq." + uid }, onChange)
+    const channel = supabase
+      .channel("zapruda-social-inbox-" + uid)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "social_threads", filter: "requester_id=eq." + uid },
+        onChange,
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "social_threads", filter: "recipient_id=eq." + uid },
+        onChange,
+      )
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [uid, refresh]);
 
-  const active = threads.find(t => t.id === activeId);
+  const active = threads.find((t) => t.id === activeId);
   const activeAccepted = active?.status === "accepted" ? active.id : "";
 
   // Active thread: load + realtime INSERTs only for the accepted active thread.
   useEffect(() => {
-    if (!activeAccepted) { msgSeq.current++; setMessages([]); return; }
+    if (!activeAccepted) {
+      msgSeq.current++;
+      setMessages([]);
+      return;
+    }
     setMessages([]);
     void fetchMessages(activeAccepted);
-    const channel = supabase.channel("zapruda-dm-" + activeAccepted)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "social_messages", filter: "thread_id=eq." + activeAccepted }, () => void fetchMessages(activeAccepted))
+    const channel = supabase
+      .channel("zapruda-dm-" + activeAccepted)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "social_messages",
+          filter: "thread_id=eq." + activeAccepted,
+        },
+        () => void fetchMessages(activeAccepted),
+      )
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [activeAccepted, fetchMessages]);
 
   useEffect(() => {
-    const update = () => { void refresh(); if (activeRef.current) void fetchMessages(activeRef.current); };
+    const update = () => {
+      void refresh();
+      if (activeRef.current) void fetchMessages(activeRef.current);
+    };
     window.addEventListener("focus", update);
     return () => window.removeEventListener("focus", update);
   }, [refresh, fetchMessages]);
 
-  useEffect(() => { if (initialMark) setSelectedMark(initialMark); }, [initialMark]);
+  useEffect(() => {
+    if (initialMark) setSelectedMark(initialMark);
+  }, [initialMark]);
 
   // Deep link ?to=UUID: fetch that exact profile, never substitute a search match.
   useEffect(() => {
-    if (!uid || !requestedPerson || !UUID_RE.test(requestedPerson) || requestedPerson === uid) { setTarget(null); return; }
+    if (!uid || !requestedPerson || !UUID_RE.test(requestedPerson) || requestedPerson === uid) {
+      setTarget(null);
+      return;
+    }
     let cancelled = false;
-    void supabase.from("profiles").select(PERSON_COLS).eq("id", requestedPerson).maybeSingle().then(({ data }) => {
-      if (!cancelled && mounted.current) setTarget((data as Person | null) ?? null);
-    });
-    return () => { cancelled = true; };
+    void supabase
+      .from("profiles")
+      .select(PERSON_COLS)
+      .eq("id", requestedPerson)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled && mounted.current) setTarget((data as Person | null) ?? null);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [uid, requestedPerson]);
 
   // Server search: debounced 350ms, limit 25, excludes self, ignores stale responses.
   useEffect(() => {
     const q = filter.trim();
-    if (!uid || !q) { setSearchResults([]); return; }
+    if (!uid || !q) {
+      setSearchResults([]);
+      return;
+    }
     let cancelled = false;
     const timer = window.setTimeout(async () => {
       const pattern = "%" + escapeLike(q.slice(0, 64)) + "%";
       // Two separate ilike queries instead of .or() so special chars cannot break the filter.
       const [a, b] = await Promise.all([
-        supabase.from("profiles").select(PERSON_COLS).neq("id", uid).ilike("username", pattern).limit(25),
-        supabase.from("profiles").select(PERSON_COLS).neq("id", uid).ilike("display_name", pattern).limit(25),
+        supabase
+          .from("profiles")
+          .select(PERSON_COLS)
+          .neq("id", uid)
+          .ilike("username", pattern)
+          .limit(25),
+        supabase
+          .from("profiles")
+          .select(PERSON_COLS)
+          .neq("id", uid)
+          .ilike("display_name", pattern)
+          .limit(25),
       ]);
       if (cancelled || !mounted.current) return;
       const merged = new Map<string, Person>();
-      for (const p of [...((a.data ?? []) as Person[]), ...((b.data ?? []) as Person[])]) merged.set(p.id, p);
+      for (const p of [...((a.data ?? []) as Person[]), ...((b.data ?? []) as Person[])])
+        merged.set(p.id, p);
       setSearchResults([...merged.values()].slice(0, 25));
       const e = a.error || b.error;
       if (e) setError("Ошибка поиска: " + e.message);
     }, 350);
-    return () => { cancelled = true; window.clearTimeout(timer); };
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [filter, uid]);
 
-  const getPeer = (t: Thread) => t.requester_id === uid ? t.recipient_id : t.requester_id;
+  const getPeer = (t: Thread) => (t.requester_id === uid ? t.recipient_id : t.requester_id);
 
   const names = useMemo(() => {
     const map = new Map<string, string>();
-    for (const p of [...searchResults, ...followProfiles, ...(target ? [target] : []), ...peerProfiles]) map.set(p.id, display(p));
+    for (const p of [
+      ...searchResults,
+      ...followProfiles,
+      ...(target ? [target] : []),
+      ...peerProfiles,
+    ])
+      map.set(p.id, display(p));
     return map;
   }, [peerProfiles, followProfiles, searchResults, target]);
-  const incoming = threads.filter(t => t.status === "pending" && t.recipient_id === uid);
-  const outgoing = threads.filter(t => t.status === "pending" && t.requester_id === uid);
-  const accepted = threads.filter(t => t.status === "accepted");
+  const incoming = threads.filter((t) => t.status === "pending" && t.recipient_id === uid);
+  const outgoing = threads.filter((t) => t.status === "pending" && t.requester_id === uid);
+  const accepted = threads.filter((t) => t.status === "accepted");
   const visiblePeople = useMemo(() => {
     const base = filter.trim() ? searchResults : followProfiles;
-    const list = target ? [target, ...base.filter(p => p.id !== target.id)] : base;
-    return list.filter(p => p.id !== uid);
+    const list = target ? [target, ...base.filter((p) => p.id !== target.id)] : base;
+    return list.filter((p) => p.id !== uid);
   }, [filter, searchResults, followProfiles, target, uid]);
 
   async function request(person: Person) {
     if (!uid || busy) return;
-    const existing = threads.find(t => getPeer(t) === person.id);
-    if (existing) { setActiveId(existing.id); setNotice(existing.status === "pending" ? "Запрос уже отправлен. Ждём согласия." : existing.status === "declined" ? "Запрос на переписку отклонён." : "Чат открыт."); return; }
-    setBusy(true); setError(""); setNotice("");
-    const { data, error: e } = await db.from("social_threads")
-      .insert({ requester_id: uid, recipient_id: person.id }).select("id").single();
+    const existing = threads.find((t) => getPeer(t) === person.id);
+    if (existing) {
+      setActiveId(existing.id);
+      setNotice(
+        existing.status === "pending"
+          ? "Запрос уже отправлен. Ждём согласия."
+          : existing.status === "declined"
+            ? "Запрос на переписку отклонён."
+            : "Чат открыт.",
+      );
+      return;
+    }
+    setBusy(true);
+    setError("");
+    setNotice("");
+    const { data, error: e } = await db
+      .from("social_threads")
+      .insert({ requester_id: uid, recipient_id: person.id })
+      .select("id")
+      .single();
     setBusy(false);
-    if (e) { setError("Не удалось отправить запрос: " + e.message); return; }
-    setActiveId(data.id); setNotice("Запрос отправлен. Сообщения станут доступны после принятия.");
+    if (e) {
+      setError("Не удалось отправить запрос: " + e.message);
+      return;
+    }
+    setActiveId(data.id);
+    setNotice("Запрос отправлен. Сообщения станут доступны после принятия.");
     await refresh();
   }
 
   async function decide(thread: Thread, status: "accepted" | "declined") {
     if (busy || thread.recipient_id !== uid) return;
-    setBusy(true); setError("");
+    setBusy(true);
+    setError("");
     const { error: e } = await db.from("social_threads").update({ status }).eq("id", thread.id);
     setBusy(false);
-    if (e) { setError("Не удалось ответить: " + e.message); return; }
+    if (e) {
+      setError("Не удалось ответить: " + e.message);
+      return;
+    }
     if (status === "accepted") setActiveId(thread.id);
-    setNotice(status === "accepted" ? "Запрос принят. Теперь можно переписываться." : "Запрос отклонён.");
+    setNotice(
+      status === "accepted" ? "Запрос принят. Теперь можно переписываться." : "Запрос отклонён.",
+    );
     await refresh();
   }
 
   async function toggleFollow(id: string) {
     if (!uid || busy) return;
-    setBusy(true); setError("");
+    setBusy(true);
+    setError("");
     const isFollowing = following.includes(id);
     const { error: e } = isFollowing
       ? await supabase.from("follows").delete().eq("follower_id", uid).eq("following_id", id)
@@ -217,87 +370,317 @@ function Messages() {
   async function sendText(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!uid || !active || active.status !== "accepted" || !draft.trim() || busy) return;
-    setBusy(true); setError("");
+    setBusy(true);
+    setError("");
     const { error: e2 } = await db.from("social_messages").insert({
-      thread_id: active.id, sender_id: uid, kind: "text", body: draft.trim(),
+      thread_id: active.id,
+      sender_id: uid,
+      kind: "text",
+      body: draft.trim(),
     });
     setBusy(false);
-    if (e2) { setError("Сообщение не отправлено: " + e2.message); return; }
-    setDraft(""); await fetchMessages(active.id);
+    if (e2) {
+      setError("Сообщение не отправлено: " + e2.message);
+      return;
+    }
+    setDraft("");
+    await fetchMessages(active.id);
   }
 
   async function sendMark() {
-    const mark = marks.find(m => m.id === selectedMark);
+    const mark = marks.find((m) => m.id === selectedMark);
     if (!mark || !uid || !active || active.status !== "accepted" || busy) return;
     // Explicit confirmation prevents accidental sharing of private coordinates.
-    if (!window.confirm("Отправить «" + mark.title + "» с ТОЧНЫМИ координатами собеседнику? Отправленную копию нельзя отозвать.")) return;
-    setBusy(true); setError("");
+    if (
+      !window.confirm(
+        "Отправить «" +
+          mark.title +
+          "» с ТОЧНЫМИ координатами собеседнику? Отправленную копию нельзя отозвать.",
+      )
+    )
+      return;
+    setBusy(true);
+    setError("");
     const { error: e } = await db.from("social_messages").insert({
-      thread_id: active.id, sender_id: uid, kind: "location", body: "",
-      source_mark_id: mark.id, location_title: mark.title, latitude: mark.latitude, longitude: mark.longitude,
+      thread_id: active.id,
+      sender_id: uid,
+      kind: "location",
+      body: "",
+      source_mark_id: mark.id,
+      location_title: mark.title,
+      latitude: mark.latitude,
+      longitude: mark.longitude,
     });
     setBusy(false);
-    if (e) { setError("Точка не отправлена: " + e.message); return; }
+    if (e) {
+      setError("Точка не отправлена: " + e.message);
+      return;
+    }
     setNotice("Отправлена только выбранная метка. Остальные точки остаются приватными.");
     await fetchMessages(active.id);
   }
 
-  return <Shell>
-    <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-      <div><p className="text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">ZAPRUDA / ОБЩЕНИЕ</p><h1 className="mt-1 text-3xl font-black text-white">Личные сообщения</h1><p className="mt-2 text-sm text-zinc-400">Переписка только после принятия запроса. Подписки не открывают личный чат автоматически.</p></div>
-      <button className="btn-ghost inline-flex" type="button" onClick={() => void refresh()}><RefreshCw className="size-4"/> Обновить</button>
-    </div>
-    {error && <p role="alert" className="mb-4 rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-sm text-red-200">{error} {!uid && <Link to="/auth" search={{ mode: "in" }} className="underline">Войти</Link>}</p>}
-    {notice && <p role="status" className="mb-4 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/5 p-3 text-sm text-[#D7FF35]">{notice}</p>}
-    {loading && <p className="text-zinc-400">Загружаем переписки…</p>}
-    {!!uid && <div className="grid gap-5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-      <div className="space-y-5">
-        <section className="panel p-4"><h2 className="mb-3 flex items-center gap-2 font-bold"><MessageCircle className="size-5 text-[#D7FF35]"/> Переписки ({accepted.length})</h2>
-          {accepted.map(t => <button key={t.id} type="button" onClick={() => setActiveId(t.id)} className={"mb-1 flex w-full items-center justify-between rounded-xl border p-3 text-left text-sm " + (activeId === t.id ? "border-[#D7FF35]/60 bg-[#D7FF35]/10" : "border-white/10")}>{names.get(getPeer(t)) || "Рыболов"}<span className="text-xs text-[#D7FF35]">Открыть</span></button>)}
-          {!accepted.length && <p className="text-sm text-zinc-500">Пока нет подтверждённых переписок.</p>}
-        </section>
-        <section className="panel p-4"><h2 className="mb-3 font-bold">Запросы на переписку ({incoming.length})</h2>
-          {incoming.map(t => <div key={t.id} className="mb-2 rounded-xl border border-white/10 p-3 text-sm">
-            <p className="mb-2 font-semibold">{names.get(t.requester_id) || "Рыболов"} хочет написать тебе</p>
-            <div className="flex gap-2"><button className="btn-primary inline-flex" onClick={() => void decide(t, "accepted")} disabled={busy}><Check className="size-4"/> Принять</button><button className="btn-ghost inline-flex" onClick={() => void decide(t, "declined")} disabled={busy}><X className="size-4"/> Отклонить</button></div>
-          </div>)}
-          {outgoing.map(t => <p key={t.id} className="mb-1 text-xs text-zinc-400">Ожидаем ответа: {names.get(t.recipient_id) || "Рыболов"}</p>)}
-          {!incoming.length && !outgoing.length && <p className="text-xs text-zinc-500">Нет ожидающих запросов.</p>}
-        </section>
-        <section className="panel p-4"><h2 className="mb-2 flex items-center gap-2 font-bold"><UserPlus className="size-5 text-[#D7FF35]"/> Рыболовы</h2>
-          <input className="field mb-3" aria-label="Поиск участников" placeholder="Поиск по никнейму" value={filter} onChange={e => setFilter(e.target.value)}/>
-          <div className="max-h-72 space-y-2 overflow-y-auto">
-            {visiblePeople.map(p => <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 p-3" key={p.id}>
-              <span className="min-w-0 break-all text-sm font-bold">{display(p)}</span><div className="flex gap-2">
-                <button type="button" className="btn-ghost px-2 py-1.5 text-xs" disabled={busy} onClick={() => void toggleFollow(p.id)}>{following.includes(p.id) ? "Отписаться" : "Подписаться"}</button>
-                <button type="button" className="btn-ghost px-2 py-1.5 text-xs" disabled={busy} onClick={() => void request(p)}>{threads.some(t => getPeer(t) === p.id) ? "Чат / запрос" : "Написать"}</button>
-              </div></div>)}
-            {!visiblePeople.length && <p className="text-sm text-zinc-500">Пока нет других пользователей. Для проверки переписки понадобятся два аккаунта.</p>}
-          </div>
-        </section>
+  return (
+    <Shell>
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">
+            ZAPRUDA / ОБЩЕНИЕ
+          </p>
+          <h1 className="mt-1 text-3xl font-black text-white">Личные сообщения</h1>
+          <p className="mt-2 text-sm text-zinc-400">
+            Переписка только после принятия запроса. Подписки не открывают личный чат автоматически.
+          </p>
+        </div>
+        <button className="btn-ghost inline-flex" type="button" onClick={() => void refresh()}>
+          <RefreshCw className="size-4" /> Обновить
+        </button>
       </div>
-      <section className="panel flex min-h-[500px] flex-col overflow-hidden">
-        <div className="border-b border-white/10 p-4"><h2 className="font-bold">{active ? names.get(getPeer(active)) || "Переписка" : "Выбери переписку"}</h2>
-          {active && <p className="text-xs text-zinc-400">{active.status === "accepted" ? "Личный чат · доступен только участникам" : "Ожидаем согласия на переписку"}</p>}
+      {error && (
+        <p
+          role="alert"
+          className="mb-4 rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-sm text-red-200"
+        >
+          {error}{" "}
+          {!uid && (
+            <Link to="/auth" search={{ mode: "in" }} className="underline">
+              Войти
+            </Link>
+          )}
+        </p>
+      )}
+      {notice && (
+        <p
+          role="status"
+          className="mb-4 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/5 p-3 text-sm text-[#D7FF35]"
+        >
+          {notice}
+        </p>
+      )}
+      {loading && <p className="text-zinc-400">Загружаем переписки…</p>}
+      {!!uid && (
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div className="space-y-5">
+            <section className="panel p-4">
+              <h2 className="mb-3 flex items-center gap-2 font-bold">
+                <MessageCircle className="size-5 text-[#D7FF35]" /> Переписки ({accepted.length})
+              </h2>
+              {accepted.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setActiveId(t.id)}
+                  className={
+                    "mb-1 flex w-full items-center justify-between rounded-xl border p-3 text-left text-sm " +
+                    (activeId === t.id ? "border-[#D7FF35]/60 bg-[#D7FF35]/10" : "border-white/10")
+                  }
+                >
+                  {names.get(getPeer(t)) || "Рыболов"}
+                  <span className="text-xs text-[#D7FF35]">Открыть</span>
+                </button>
+              ))}
+              {!accepted.length && (
+                <p className="text-sm text-zinc-500">Пока нет подтверждённых переписок.</p>
+              )}
+            </section>
+            <section className="panel p-4">
+              <h2 className="mb-3 font-bold">Запросы на переписку ({incoming.length})</h2>
+              {incoming.map((t) => (
+                <div key={t.id} className="mb-2 rounded-xl border border-white/10 p-3 text-sm">
+                  <p className="mb-2 font-semibold">
+                    {names.get(t.requester_id) || "Рыболов"} хочет написать тебе
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      className="btn-primary inline-flex"
+                      onClick={() => void decide(t, "accepted")}
+                      disabled={busy}
+                    >
+                      <Check className="size-4" /> Принять
+                    </button>
+                    <button
+                      className="btn-ghost inline-flex"
+                      onClick={() => void decide(t, "declined")}
+                      disabled={busy}
+                    >
+                      <X className="size-4" /> Отклонить
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {outgoing.map((t) => (
+                <p key={t.id} className="mb-1 text-xs text-zinc-400">
+                  Ожидаем ответа: {names.get(t.recipient_id) || "Рыболов"}
+                </p>
+              ))}
+              {!incoming.length && !outgoing.length && (
+                <p className="text-xs text-zinc-500">Нет ожидающих запросов.</p>
+              )}
+            </section>
+            <section className="panel p-4">
+              <h2 className="mb-2 flex items-center gap-2 font-bold">
+                <UserPlus className="size-5 text-[#D7FF35]" /> Рыболовы
+              </h2>
+              <input
+                className="field mb-3"
+                aria-label="Поиск участников"
+                placeholder="Поиск по никнейму"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+              <div className="max-h-72 space-y-2 overflow-y-auto">
+                {visiblePeople.map((p) => (
+                  <div
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 p-3"
+                    key={p.id}
+                  >
+                    <span className="min-w-0 break-all text-sm font-bold">{display(p)}</span>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="btn-ghost px-2 py-1.5 text-xs"
+                        disabled={busy}
+                        onClick={() => void toggleFollow(p.id)}
+                      >
+                        {following.includes(p.id) ? "Отписаться" : "Подписаться"}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-ghost px-2 py-1.5 text-xs"
+                        disabled={busy}
+                        onClick={() => void request(p)}
+                      >
+                        {threads.some((t) => getPeer(t) === p.id) ? "Чат / запрос" : "Написать"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {!visiblePeople.length && (
+                  <p className="text-sm text-zinc-500">
+                    Пока нет других пользователей. Для проверки переписки понадобятся два аккаунта.
+                  </p>
+                )}
+              </div>
+            </section>
+          </div>
+          <section className="panel flex min-h-[500px] flex-col overflow-hidden">
+            <div className="border-b border-white/10 p-4">
+              <h2 className="font-bold">
+                {active ? names.get(getPeer(active)) || "Переписка" : "Выбери переписку"}
+              </h2>
+              {active && (
+                <p className="text-xs text-zinc-400">
+                  {active.status === "accepted"
+                    ? "Личный чат · доступен только участникам"
+                    : "Ожидаем согласия на переписку"}
+                </p>
+              )}
+            </div>
+            <div className="zapruda-chat-window min-h-64 flex-1 space-y-3 overflow-y-auto p-4">
+              {active?.status === "accepted" &&
+                messages.map((m) => (
+                  <div
+                    key={m.id}
+                    className={
+                      "zapruda-chat-bubble max-w-[90%] rounded-2xl border p-3 text-sm " +
+                      (m.sender_id === uid
+                        ? "zapruda-chat-own-bubble ml-auto border-[#D7FF35]/30 bg-[#D7FF35]/10"
+                        : "border-white/10 bg-white/5")
+                    }
+                  >
+                    {m.kind === "location" && m.latitude !== null && m.longitude !== null ? (
+                      <div>
+                        <p className="flex items-center gap-2 font-bold text-[#D7FF35]">
+                          <MapPin className="size-4" /> {m.location_title}
+                        </p>
+                        <p className="my-2 text-xs text-zinc-300">
+                          {m.latitude.toFixed(6)}, {m.longitude.toFixed(6)}
+                        </p>
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-[#D7FF35] underline"
+                          href={
+                            "https://yandex.ru/maps/?pt=" +
+                            encodeURIComponent(m.longitude + "," + m.latitude) +
+                            "&z=15"
+                          }
+                        >
+                          Открыть на Яндекс Картах
+                        </a>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap break-words">{m.body}</p>
+                    )}
+                    <time className="mt-2 block text-[10px] text-zinc-500">
+                      {datetime(m.created_at)}
+                    </time>
+                  </div>
+                ))}
+              {active?.status === "accepted" && !messages.length && (
+                <p className="text-sm text-zinc-500">Напиши первое сообщение.</p>
+              )}
+              {!active && (
+                <p className="text-sm text-zinc-500">
+                  Выбери собеседника слева или отправь запрос на переписку.
+                </p>
+              )}
+              {active?.status !== "accepted" && active && (
+                <p className="text-sm text-zinc-500">
+                  Нельзя отправлять сообщения до принятия запроса.
+                </p>
+              )}
+            </div>
+            {active?.status === "accepted" && (
+              <div className="space-y-3 border-t border-white/10 p-4">
+                <div className="flex flex-wrap gap-2">
+                  <select
+                    className="field min-w-0 flex-1"
+                    aria-label="Выбрать приватную метку для отправки"
+                    value={selectedMark}
+                    onChange={(e) => setSelectedMark(e.target.value)}
+                  >
+                    <option value="">Поделиться сохранённой точкой…</option>
+                    {marks.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.title}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    className="btn-ghost inline-flex"
+                    type="button"
+                    disabled={!selectedMark || busy}
+                    onClick={() => void sendMark()}
+                  >
+                    <MapPin className="size-4" /> Поделиться точкой
+                  </button>
+                </div>
+                <p className="text-xs text-zinc-500">
+                  Координаты отправляются только после твоего подтверждения. Отправленную копию
+                  нельзя отозвать.
+                </p>
+                <form className="flex gap-2" onSubmit={sendText}>
+                  <input
+                    className="field min-w-0 flex-1"
+                    placeholder="Сообщение…"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    maxLength={2000}
+                  />
+                  <button
+                    type="submit"
+                    className="btn-primary inline-flex"
+                    disabled={!draft.trim() || busy}
+                  >
+                    <Send className="size-4" /> Отправить
+                  </button>
+                </form>
+              </div>
+            )}
+          </section>
         </div>
-        <div className="zapruda-chat-window min-h-64 flex-1 space-y-3 overflow-y-auto p-4">
-          {active?.status === "accepted" && messages.map(m => <div key={m.id} className={"zapruda-chat-bubble max-w-[90%] rounded-2xl border p-3 text-sm " + (m.sender_id === uid ? "zapruda-chat-own-bubble ml-auto border-[#D7FF35]/30 bg-[#D7FF35]/10" : "border-white/10 bg-white/5")}>
-            {m.kind === "location" && m.latitude !== null && m.longitude !== null ? <div><p className="flex items-center gap-2 font-bold text-[#D7FF35]"><MapPin className="size-4"/> {m.location_title}</p><p className="my-2 text-xs text-zinc-300">{m.latitude.toFixed(6)}, {m.longitude.toFixed(6)}</p>
-              <a target="_blank" rel="noopener noreferrer" className="text-xs text-[#D7FF35] underline" href={"https://yandex.ru/maps/?pt=" + encodeURIComponent(m.longitude + "," + m.latitude) + "&z=15"}>Открыть на Яндекс Картах</a></div> : <p className="whitespace-pre-wrap break-words">{m.body}</p>}
-            <time className="mt-2 block text-[10px] text-zinc-500">{datetime(m.created_at)}</time></div>)}
-          {active?.status === "accepted" && !messages.length && <p className="text-sm text-zinc-500">Напиши первое сообщение.</p>}
-          {!active && <p className="text-sm text-zinc-500">Выбери собеседника слева или отправь запрос на переписку.</p>}
-          {active?.status !== "accepted" && active && <p className="text-sm text-zinc-500">Нельзя отправлять сообщения до принятия запроса.</p>}
-        </div>
-        {active?.status === "accepted" && <div className="space-y-3 border-t border-white/10 p-4">
-          <div className="flex flex-wrap gap-2"><select className="field min-w-0 flex-1" aria-label="Выбрать приватную метку для отправки" value={selectedMark} onChange={e => setSelectedMark(e.target.value)}>
-            <option value="">Поделиться сохранённой точкой…</option>
-            {marks.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
-          </select><button className="btn-ghost inline-flex" type="button" disabled={!selectedMark || busy} onClick={() => void sendMark()}><MapPin className="size-4"/> Поделиться точкой</button></div>
-          <p className="text-xs text-zinc-500">Координаты отправляются только после твоего подтверждения. Отправленную копию нельзя отозвать.</p>
-          <form className="flex gap-2" onSubmit={sendText}><input className="field min-w-0 flex-1" placeholder="Сообщение…" value={draft} onChange={e => setDraft(e.target.value)} maxLength={2000}/><button type="submit" className="btn-primary inline-flex" disabled={!draft.trim() || busy}><Send className="size-4"/> Отправить</button></form>
-        </div>}
-      </section>
-    </div>}
-  </Shell>;
+      )}
+    </Shell>
+  );
 }

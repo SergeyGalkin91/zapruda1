@@ -311,14 +311,18 @@ async function claimAdvice() {
     "select public.claim_ai_daily_advice_slot($1,date '2026-11-03','Offline fixture',3) as claim",
     [users.owner],
   );
-  return rows[0].claim;
+  const result = rows[0];
+  if (!result) throw new Error("The quota claim returned no row.");
+  return result.claim;
 }
 async function completeAdvice(claim: Claim, token: string | null = claim.lease_token ?? null) {
   const { rows } = await db.query<{ completion: { ok: boolean; reason?: string } }>(
     `select public.complete_ai_daily_advice_slot($1,$2,true,'Valid offline fixture answer','offline-model','') as completion`,
     [claim.id, token],
   );
-  return rows[0].completion;
+  const result = rows[0];
+  if (!result) throw new Error("The quota completion returned no row.");
+  return result.completion;
 }
 
 describe("AI lease enforcement (isolated PostgreSQL, no JWT)", () => {

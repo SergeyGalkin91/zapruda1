@@ -59,13 +59,18 @@ function CompetitionsPage() {
         </p>
         <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">Командные турниры</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">
-          Регистрация команд с серверным лимитом слотов. Результаты принимает капитан; модерирует организатор.
+          Регистрация команд с серверным лимитом слотов. Результаты принимает капитан; модерирует
+          организатор.
         </p>
       </header>
 
       {!uid && (
         <p className="panel mt-5 p-5 text-sm">
-          Чтобы участвовать, <Link to="/auth" search={{ mode: "in" }} className="text-[#D7FF35] underline">войди в аккаунт</Link>.
+          Чтобы участвовать,{" "}
+          <Link to="/auth" search={{ mode: "in" }} className="text-[#D7FF35] underline">
+            войди в аккаунт
+          </Link>
+          .
         </p>
       )}
       {error && <p className="mt-4 text-sm text-red-300">{error}</p>}
@@ -81,10 +86,16 @@ function CompetitionsPage() {
           <article key={c.id} className="rounded-2xl border border-white/10 bg-[#151915] p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-black text-white">{c.title}</h2>
-              <span className="rounded-lg border border-[#D7FF35]/30 px-2 py-1 text-xs font-bold text-[#D7FF35]">{c.status}</span>
+              <span className="rounded-lg border border-[#D7FF35]/30 px-2 py-1 text-xs font-bold text-[#D7FF35]">
+                {c.status}
+              </span>
             </div>
-            <p className="mt-1 text-xs text-zinc-400">{c.area_label || "Район не указан"} · до {c.max_teams} команд</p>
-            <p className="mt-1 text-xs text-zinc-500">{new Date(c.starts_at).toLocaleString("ru-RU")}</p>
+            <p className="mt-1 text-xs text-zinc-400">
+              {c.area_label || "Район не указан"} · до {c.max_teams} команд
+            </p>
+            <p className="mt-1 text-xs text-zinc-500">
+              {new Date(c.starts_at).toLocaleString("ru-RU")}
+            </p>
           </article>
         ))}
       </div>

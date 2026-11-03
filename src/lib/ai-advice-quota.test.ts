@@ -29,4 +29,8 @@ describe("ai-advice-quota", () => {
   it("sanitizes prompt parts", () => {
     expect(sanitizeAdvicePromptPart("  Волга\x00  ", 10)).toBe("Волга");
   });
+
+  it("preserves multiline text and emoji while removing control bytes", () => {
+    expect(sanitizeAdvicePromptPart("Волга\nЩука\t🎣\r\x00\x0b\x1f", 100)).toBe("Волга\nЩука\t🎣");
+  });
 });

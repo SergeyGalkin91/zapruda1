@@ -58,7 +58,9 @@ Deno.serve(async (req: Request) => {
   const providerPaymentId = String(
     body.provider_payment_id ?? body.payment_id ?? body.id ?? "",
   ).trim();
-  const eventStatus = String(body.status ?? body.event ?? "").toLowerCase().trim();
+  const eventStatus = String(body.status ?? body.event ?? "")
+    .toLowerCase()
+    .trim();
 
   if (!eventStatus) {
     return respond(400, { error: "status required", paid: false });

@@ -1,20 +1,39 @@
 // Fail-closed source-level regression guard, not a substitute for concurrent Postgres E2E.
-import fs from 'node:fs';
-import assert from 'node:assert/strict';
-const schema=fs.readFileSync('supabase/staging/20261102_v071_meetups_DRAFT_REVIEW_BEFORE_APPLY.sql','utf8');
-const hardening=fs.readFileSync('supabase/staging/20261102_v071_meetup_integrity_hardening.sql','utf8');
-const ui=fs.readFileSync('src/components/SocialMeetups.tsx','utf8');
-const must=(text,part,msg)=>assert.ok(text.includes(part),msg);
-must(schema.toLowerCase(),'for update','Meetup capacity trigger must lock post');
-must(schema,"v_count>=3",'Three-person maximum missing');
-must(schema,"new.status='accepted' and old.status='pending'",'Owner approval transition missing');
-must(schema,"auth.uid()<>v_owner",'Owner approval authorization missing');
-must(schema,'public.meetup_is_accepted(post_id)','Private tables must use accepted membership predicate');
-must(schema,'revoke all on public.meetup_posts,public.meetup_members,public.meetup_private_details,public.meetup_messages from anon','Anon privileges not revoked');
-must(hardening,"new.owner_id is distinct from old.owner_id",'Post owner mutation check missing');
-must(hardening,'MEETUP_DETAILS_OWNER_MISMATCH','Private GPS ownership guard missing');
-for(const column of ['country_code','region_code','city_code']) must(ui,'.eq("'+column+'"','Server-side city filter missing '+column);
-must(ui,'meetup_occupancy','Occupancy must be read via server');
-must(ui,'count===undefined?"—":count','Unknown occupancy must never be displayed as zero');
-must(ui,'count!==undefined&&count<3','Join must be disabled until occupancy is known');
-console.log('PASS: static meetup safeguards present. Actual JWT, concurrent race and mobile E2E NOT tested by this check.');
+import fs from "node:fs";
+import assert from "node:assert/strict";
+import { sourceTokens } from "./source-tokens.mjs";
+const schema = fs.readFileSync(
+  "supabase/staging/20261102_v071_meetups_DRAFT_REVIEW_BEFORE_APPLY.sql",
+  "utf8",
+);
+const hardening = fs.readFileSync(
+  "supabase/staging/20261102_v071_meetup_integrity_hardening.sql",
+  "utf8",
+);
+const ui = fs.readFileSync("src/components/SocialMeetups.tsx", "utf8");
+const uiTokens = sourceTokens(ui);
+const must = (text, part, msg) => assert.ok(text.includes(part), msg);
+must(schema.toLowerCase(), "for update", "Meetup capacity trigger must lock post");
+must(schema, "v_count>=3", "Three-person maximum missing");
+must(schema, "new.status='accepted' and old.status='pending'", "Owner approval transition missing");
+must(schema, "auth.uid()<>v_owner", "Owner approval authorization missing");
+must(
+  schema,
+  "public.meetup_is_accepted(post_id)",
+  "Private tables must use accepted membership predicate",
+);
+must(
+  schema,
+  "revoke all on public.meetup_posts,public.meetup_members,public.meetup_private_details,public.meetup_messages from anon",
+  "Anon privileges not revoked",
+);
+must(hardening, "new.owner_id is distinct from old.owner_id", "Post owner mutation check missing");
+must(hardening, "MEETUP_DETAILS_OWNER_MISMATCH", "Private GPS ownership guard missing");
+for (const column of ["country_code", "region_code", "city_code"])
+  must(ui, '.eq("' + column + '"', "Server-side city filter missing " + column);
+must(ui, "meetup_occupancy", "Occupancy must be read via server");
+must(uiTokens, 'count===undefined?"—":count', "Unknown occupancy must never be displayed as zero");
+must(uiTokens, "count!==undefined&&count<3", "Join must be disabled until occupancy is known");
+console.log(
+  "PASS: static meetup safeguards present. Actual JWT, concurrent race and mobile E2E NOT tested by this check.",
+);

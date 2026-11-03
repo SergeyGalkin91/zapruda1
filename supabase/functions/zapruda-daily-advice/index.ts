@@ -27,7 +27,10 @@ function moscowAdviceDay(now = new Date()): string {
 
 function sanitize(value: unknown, max: number): string {
   return String(value ?? "")
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
+    .replace(/./gs, (character) => {
+      const code = character.charCodeAt(0);
+      return code < 32 && code !== 9 && code !== 10 && code !== 13 ? "" : character;
+    })
     .trim()
     .slice(0, max);
 }
@@ -36,7 +39,10 @@ function anonKey(): string {
   const legacy = Deno.env.get("SUPABASE_ANON_KEY");
   if (legacy) return legacy;
   try {
-    return (JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}") as Record<string, string>).default ?? "";
+    return (
+      (JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}") as Record<string, string>)
+        .default ?? ""
+    );
   } catch {
     return "";
   }
@@ -54,7 +60,6 @@ Deno.serve(async (req: Request) => {
   const apiBase = (Deno.env.get("XAI_API_BASE") || "https://api.x.ai/v1").replace(/\/$/, "");
 
   if (!supabaseUrl || !key) return respond(503, { error: "Backend not configured" });
-
 
   const jwt = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
   if (!jwt) return respond(401, { error: "Войди в ZAPRUDA" });
@@ -188,9 +193,12 @@ Deno.serve(async (req: Request) => {
   } catch (err) {
     // Only fixed diagnostics may reach the user-readable journal. Provider bodies
     // and arbitrary exception messages can contain credentials or request details.
-    const errorMessage = err instanceof Error && /^xAI HTTP \d{3}$/.test(err.message)
-      ? err.message
-      : err instanceof Error && err.name === "TimeoutError" ? "XAI_TIMEOUT" : "XAI_UPSTREAM_ERROR";
+    const errorMessage =
+      err instanceof Error && /^xAI HTTP \d{3}$/.test(err.message)
+        ? err.message
+        : err instanceof Error && err.name === "TimeoutError"
+          ? "XAI_TIMEOUT"
+          : "XAI_UPSTREAM_ERROR";
     await admin.rpc("complete_ai_daily_advice_slot", {
       p_id: rowId,
       p_lease_token: leaseToken,

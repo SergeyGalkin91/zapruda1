@@ -12,12 +12,29 @@ export function roundTempC(temp: number): number {
   return Math.round(temp * 10) / 10;
 }
 
-const DEG_TO_CARD = ["С", "ССВ", "СВ", "ВСВ", "В", "ВЮВ", "ЮВ", "ЮЮВ", "Ю", "ЮЮЗ", "ЮЗ", "ЗЮЗ", "З", "ЗСЗ", "СЗ", "ССЗ"];
+const DEG_TO_CARD = [
+  "С",
+  "ССВ",
+  "СВ",
+  "ВСВ",
+  "В",
+  "ВЮВ",
+  "ЮВ",
+  "ЮЮВ",
+  "Ю",
+  "ЮЮЗ",
+  "ЮЗ",
+  "ЗЮЗ",
+  "З",
+  "ЗСЗ",
+  "СЗ",
+  "ССЗ",
+];
 
 export function windCardinal(deg: number | null | undefined): string {
   if (deg == null || !Number.isFinite(deg)) return "";
   const i = Math.round((((deg % 360) + 360) % 360) / 22.5) % 16;
-  return DEG_TO_CARD[i];
+  return DEG_TO_CARD[i] ?? "";
 }
 
 export function buildReportWeatherFields(input: {

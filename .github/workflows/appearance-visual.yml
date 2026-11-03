@@ -1,0 +1,72 @@
+name: ZAPRUDA Electric Blue viewport review
+# Review-only browser smoke: no private keys or production Supabase access.
+on:
+  push:
+    branches:
+      - feature/issue76-electric-blue-background
+  pull_request:
+    branches:
+      - fix/issue61-v071-p0-stages-5-8
+      - release/v0.7.1-integration-20261102
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-appearance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NITRO_PRESET: node-server
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      PORT: "3000"
+      HOST: "127.0.0.1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Build application for isolated browser checks
+        run: |
+          bun run build
+          test -f .output/server/index.mjs
+      - name: Install Chromium and Playwright
+        run: |
+          bun add --dev playwright
+          bunx playwright install --with-deps chromium
+      - name: Check mobile 390px and desktop 1440px, save screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p appearance-evidence
+          node .output/server/index.mjs > appearance-evidence/server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3000/settings -o /dev/null; then READY=1; break; fi
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "Server exited before becoming ready"
+              cat appearance-evidence/server.log
+              exit 1
+            fi
+            sleep 2
+          done
+          if [ "$READY" != "1" ]; then
+            echo "Server readiness timeout"
+            cat appearance-evidence/server.log
+            exit 1
+          fi
+          node scripts/visual-theme-smoke.cjs
+      - name: Upload viewport screenshots and metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: electric-blue-appearance-evidence
+          path: appearance-evidence/
+          if-no-files-found: ignore
+          retention-days: 14

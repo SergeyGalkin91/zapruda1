@@ -29,8 +29,13 @@ describe("v0.7.1 migration dependency and safety contract", () => {
 
   it("prevents client quote writes and direct access to internal trigger RPCs", () => {
     const quote = readFileSync(join(dir, guideLock), "utf8");
-    const grants = readFileSync(join(dir, "20261102173000_revoke_internal_trigger_execute_p0.sql"), "utf8");
-    expect(quote).toMatch(/revoke insert, update, delete on public\.guide_booking_quotes from anon, authenticated/i);
+    const grants = readFileSync(
+      join(dir, "20261102173000_revoke_internal_trigger_execute_p0.sql"),
+      "utf8",
+    );
+    expect(quote).toMatch(
+      /revoke insert, update, delete on public\.guide_booking_quotes from anon, authenticated/i,
+    );
     expect(grants).toContain("public.enforce_competition_team_limit()");
     expect(grants).toContain("public.guard_guide_quote_payment_fields()");
   });
@@ -42,7 +47,10 @@ describe("v0.7.1 migration dependency and safety contract", () => {
   });
 
   it("never contains a webhook path that can write paid", () => {
-    const webhook = readFileSync(join(process.cwd(), "supabase/functions/guide-payment-webhook/index.ts"), "utf8");
+    const webhook = readFileSync(
+      join(process.cwd(), "supabase/functions/guide-payment-webhook/index.ts"),
+      "utf8",
+    );
     expect(webhook).not.toMatch(/\.rpc\(/);
     expect(webhook).not.toMatch(/GUIDE_PAYMENT_PROVIDER_PROOF/);
     expect(webhook).toMatch(/return respond\(501,/);
