@@ -7,6 +7,8 @@
  * Environment credentials belong ONLY to GitHub's staging-e2e environment.
  */
 import assert from "node:assert/strict";
+import { randomBytes, randomUUID } from "node:crypto";
+import { deflateSync } from "node:zlib";
 import { createClient } from "@supabase/supabase-js";
 
 const EXPECTED_URL = "https://yudtbifopfnjtjanaqrd.supabase.co";
@@ -31,6 +33,69 @@ async function invoke(client, action, body = {}) {
     body: { action, ...body },
   });
   return { data, error };
+}
+
+/** Valid synthetic PNG: tests transport only, NEVER accepted as real fish proof. */
+function pngChunk(type, content) {
+  const name = Buffer.from(type, "ascii");
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(content.length);
+  const payload = Buffer.concat([name, content]);
+  let crc = 0xffffffff;
+  for (const byte of payload) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+  }
+  const checksum = Buffer.alloc(4);
+  checksum.writeUInt32BE((crc ^ 0xffffffff) >>> 0);
+  return Buffer.concat([length, payload, checksum]);
+}
+
+function syntheticPng() {
+  const size = 32;
+  const info = Buffer.alloc(13);
+  info.writeUInt32BE(size, 0);
+  info.writeUInt32BE(size, 4);
+  info[8] = 8; // bit depth
+  info[9] = 2; // RGB
+  const rows = Buffer.alloc(size * (1 + size * 3));
+  for (let row = 0; row < size; row += 1) {
+    randomBytes(size * 3).copy(rows, row * (1 + size * 3) + 1);
+  }
+  return Buffer.concat([
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    pngChunk("IHDR", info),
+    pngChunk("IDAT", deflateSync(rows)),
+    pngChunk("IEND", Buffer.alloc(0)),
+  ]);
+}
+
+async function negativeUploadProbe(client) {
+  const before = await invoke(client, "mine");
+  assert.ifError(before.error);
+  const beforeIds = (before.data?.catches ?? []).map((item) => item.catch_id).sort();
+  const form = new FormData();
+  form.set("action", "submit");
+  form.set("photo", new Blob([syntheticPng()], { type: "image/png" }), "qa-not-a-fish.png");
+  form.set("spot_id", randomUUID()); // deliberately unapproved: MUST reject
+  form.set("league", "street");
+  form.set("species", "pike");
+  form.set("weight_g", "1000");
+  form.set("length_mm", "250");
+  form.set("captured_at", new Date().toISOString());
+  const { data, error } = await client.functions.invoke(API, { body: form });
+  assert.ok(error || data?.error, "Unapproved spot received a catch");
+  const rejected = error?.context && typeof error.context.json === "function"
+    ? await error.context.json().catch(() => null)
+    : data;
+  assert.equal(rejected?.error, "Record submission rejected", "Wrong negative-upload rejection");
+  const after = await invoke(client, "mine");
+  assert.ifError(after.error);
+  const afterIds = (after.data?.catches ?? []).map((item) => item.catch_id).sort();
+  assert.deepEqual(afterIds, beforeIds, "Rejected upload persisted a catch");
+  console.log("PASS: signed multipart upload rejected for unapproved spot; no catch stored");
 }
 
 async function main() {
@@ -73,6 +138,10 @@ async function main() {
     assert.ifError(inbox.error);
     assert.ok(Array.isArray(inbox.data?.notifications), "Inbox must return an array");
     console.log("PASS: own catches + own inbox for " + role);
+  }
+
+  if (process.env.ZAPRUDA_SPOT_E2E_UPLOAD_PROBE === "true") {
+    await negativeUploadProbe(users.get("RACER_A"));
   }
 
   const ownerQueue = await invoke(users.get("OWNER"), "queue");
