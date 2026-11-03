@@ -65,6 +65,36 @@ async function variables(page) {
     };
   });
 }
+async function assertNoOliveSurfaces(page, route) {
+  const issues = await page.evaluate(() => {
+    const bannedHex = [
+      "#0D100C", "#171C14", "#080A09", "#0B0D0B", "#121A12",
+      "#141914", "#151915", "#0C100E", "#111511", "#151A14",
+      "#0E120E", "#151812", "#171a15", "#161D13", "#1A1D19",
+      "#1B2718", "#1E251A", "#27321b",
+    ];
+    const rgb = (hex) => {
+      const v = hex.slice(1);
+      return [0, 2, 4].map((i) => parseInt(v.slice(i, i + 2), 16));
+    };
+    const bannedRgb = new Set(bannedHex.map((hex) => {
+      const values = rgb(hex);
+      return "rgb(" + values.join(", ") + ")";
+    }));
+    const failures = [];
+    for (const el of document.querySelectorAll("body *")) {
+      if (failures.length >= 12) break;
+      const rect = el.getBoundingClientRect();
+      if (rect.width < 8 || rect.height < 8) continue;
+      const style = getComputedStyle(el);
+      if (bannedRgb.has(style.backgroundColor)) {
+        failures.push({ tag: el.tagName, className: String(el.className).slice(0, 100), color: style.backgroundColor });
+      }
+    }
+    return failures;
+  });
+  assert.deepEqual(issues, [], route + ": legacy green surface leaked into Electric Blue");
+}
 async function openRoute(page, route) {
   const response = await page.goto(BASE + route, { waitUntil: "domcontentloaded", timeout: 30000 });
   assert(response && response.status() >= 200 && response.status() < 400,
@@ -136,6 +166,7 @@ async function openRoute(page, route) {
         assert.equal(after.primary, COLORS.lime);
         assert.equal(after.undergroundViolet, COLORS.eggplant);
         assert(after.bodyBackground.includes("radial-gradient"), "Electric Blue gradient did not apply");
+        await assertNoOliveSurfaces(page, "/settings");
         const settingsSurfaces = await page.evaluate(() => ({
           panel: getComputedStyle(document.querySelector('section[aria-labelledby="app-background-title"]')).backgroundColor,
           headerGradient: getComputedStyle(document.querySelector("main header")).backgroundImage,
@@ -169,6 +200,7 @@ async function openRoute(page, route) {
           const actual = await openRoute(page, route);
           assert.equal(actual.theme, "electric-blue", route + ": preference lost during navigation");
           assert.equal(actual.background, COLORS.blue, route + ": blue CSS token missing");
+          await assertNoOliveSurfaces(page, route);
           if (route === "/") {
             const feedSurface = await page.evaluate(() => {
               const hero = document.querySelector("main > section");
