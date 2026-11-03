@@ -669,3 +669,43 @@
 :root[data-zapruda-background="electric-blue"][data-zapruda-chat="water"] .zapruda-chat-window {
   background: radial-gradient(circle at 40% 0%, #1458DB 0%, #1239A6 55%, #0B2058 100%);
 }
+
+
+/* Final Electric Blue visual QA corrections: blue panels and gradients,
+   lime remains the interaction highlight; no olive-colored overlay. */
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#141914]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0B]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#121A12]"] {
+  background-color: #152D72;
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="bg-[#D7FF35]/10"],
+  [class~="bg-[#D7FF35]/5"],
+  [class~="bg-[#D7FF35]/15"],
+  [class~="bg-[#D7FF35]/[0.09]"],
+  [class~="bg-lime-300/10"],
+  [class~="bg-lime-300/15"]
+) {
+  background-color: #203C88;
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="from-[#1B2718]"],
+  [class~="from-[#1E251A]"],
+  [class~="from-[#1F1B29]"],
+  [class~="from-[#27321b]"],
+  [class~="via-[#171d13]"]
+) {
+  background-image: linear-gradient(135deg, #194FBB 0%, #183A91 48%, #10245E 100%);
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="bg-[#A78BFA]/10"],
+  [class~="bg-[#A99AD9]/10"],
+  [class~="bg-[#B4A1D7]/10"]
+) {
+  background-color: #614051;
+  color: #F9ECF7;
+}
+:root[data-zapruda-background="electric-blue"] header.sticky,
+:root[data-zapruda-background="electric-blue"] nav[aria-label="Мобильная навигация"] {
+  background-color: rgba(11,32,88,.97);
+}
