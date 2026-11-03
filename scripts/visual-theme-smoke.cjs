@@ -136,6 +136,16 @@ async function openRoute(page, route) {
         assert.equal(after.primary, COLORS.lime);
         assert.equal(after.undergroundViolet, COLORS.eggplant);
         assert(after.bodyBackground.includes("radial-gradient"), "Electric Blue gradient did not apply");
+        const settingsSurfaces = await page.evaluate(() => ({
+          panel: getComputedStyle(document.querySelector('section[aria-labelledby="app-background-title"]')).backgroundColor,
+          headerGradient: getComputedStyle(document.querySelector("main header")).backgroundImage,
+        }));
+        assert.equal(settingsSurfaces.panel, "rgb(21, 45, 114)", "Settings panel kept its old olive fill");
+        assert(
+          settingsSurfaces.headerGradient.includes("25, 79, 187") ||
+            settingsSurfaces.headerGradient.includes("25,79,187"),
+          "Settings hero kept its old olive gradient",
+        );
         assert.equal(await blue.getAttribute("aria-pressed"), "true");
         // Fixed backgrounds render correctly while scrolling; Chromium fullPage
         // screenshots falsely show white after the first viewport. Capture both
@@ -159,6 +169,22 @@ async function openRoute(page, route) {
           const actual = await openRoute(page, route);
           assert.equal(actual.theme, "electric-blue", route + ": preference lost during navigation");
           assert.equal(actual.background, COLORS.blue, route + ": blue CSS token missing");
+          if (route === "/") {
+            const feedSurface = await page.evaluate(() => {
+              const hero = document.querySelector("main > section");
+              const street = document.querySelector('main a[href="/street"]');
+              const helpCard = document.querySelector('main a[href="/assistant"]');
+              if (!hero || !street || !helpCard) throw new Error("Feed structure changed");
+              return {
+                hero: getComputedStyle(hero).backgroundColor,
+                street: getComputedStyle(street).backgroundColor,
+                helpCard: getComputedStyle(helpCard).backgroundColor,
+              };
+            });
+            assert.equal(feedSurface.hero, "rgb(21, 45, 114)", "Feed hero retained matte/olive surface");
+            assert.equal(feedSurface.street, "rgb(21, 45, 114)", "Street card retained dark green");
+            assert.equal(feedSurface.helpCard, "rgb(32, 60, 136)", "Lime-tinted card looked olive");
+          }
           checks.push({ route, background: actual.background, overflow: actual.horizontalOverflow });
           if (route === "/" || route === "/chat") {
             await page.screenshot({
