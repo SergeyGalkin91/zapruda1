@@ -88,9 +88,9 @@ describe("v0.7.5 SPOT — verified BIG FISH engine", () => {
       Number.POSITIVE_INFINITY,
       Number.MAX_SAFE_INTEGER + 1,
     ]) {
-      expect(
-        evaluateCatchForRecord(spot, { ...verified, weightGrams: weight }).eligible,
-      ).toBe(false);
+      expect(evaluateCatchForRecord(spot, { ...verified, weightGrams: weight }).eligible).toBe(
+        false,
+      );
     }
   });
 
