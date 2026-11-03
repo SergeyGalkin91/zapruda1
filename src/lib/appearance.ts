@@ -1,5 +1,5 @@
 /** Local-only appearance settings. Never stores passwords or account information. */
-export type AppBackground = "classic" | "electric-blue" | "forest" | "graphite" | "night";
+export type AppBackground = "classic" | "electric-blue";
 export type ChatBackground = "plain" | "forest" | "slate" | "water";
 export type Appearance = { background: AppBackground; chat: ChatBackground };
 
@@ -26,24 +26,6 @@ export const APP_BACKGROUNDS: ReadonlyArray<{
     description: "Яркий синий · лайм + баклажановый",
     preview: "linear-gradient(145deg,#1760E8,#1239A6 65%,#091D57)",
     secondaryAccent: "#614051",
-  },
-  {
-    value: "forest",
-    title: "Лес",
-    description: "Тёмные зелёные оттенки",
-    preview: "linear-gradient(140deg,#10251A,#07100D)",
-  },
-  {
-    value: "graphite",
-    title: "Графит",
-    description: "Спокойный тёмно-серый",
-    preview: "linear-gradient(140deg,#292D31,#101215)",
-  },
-  {
-    value: "night",
-    title: "Ночная вода",
-    description: "Глубокий сине-зелёный",
-    preview: "linear-gradient(140deg,#132C32,#071216)",
   },
 ];
 
@@ -78,6 +60,33 @@ export const CHAT_BACKGROUNDS: ReadonlyArray<{
     preview: "radial-gradient(circle at 50% 10%,#234750,#0C191E)",
   },
 ];
+
+/** Electric Blue never displays green chat previews, irrespective of saved chat style. */
+export const ELECTRIC_BLUE_CHAT_PREVIEWS: Record<
+  ChatBackground,
+  { title: string; description: string; preview: string }
+> = {
+  plain: {
+    title: "Синий",
+    description: "Сдержанный насыщенный синий",
+    preview: "linear-gradient(135deg,#152D72,#0B2058)",
+  },
+  forest: {
+    title: "Баклажановый",
+    description: "Глубокий баклажановый",
+    preview: "radial-gradient(circle at 25% 20%,#614051,#16285D)",
+  },
+  slate: {
+    title: "Глубокий синий",
+    description: "Тёмно-синие оттенки",
+    preview: "linear-gradient(135deg,#203A86,#0B2058)",
+  },
+  water: {
+    title: "Электрик",
+    description: "Яркий синий без зелёного",
+    preview: "radial-gradient(circle at 40% 10%,#1458DB,#1239A6)",
+  },
+};
 
 const backgroundValues = APP_BACKGROUNDS.map((item) => item.value);
 const chatValues = CHAT_BACKGROUNDS.map((item) => item.value);
