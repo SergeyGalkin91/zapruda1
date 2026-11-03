@@ -216,8 +216,7 @@ Deno.serve(async (req: Request) => {
         !Array.isArray(models) ||
         !models.some(
           (item) =>
-            item?.id === model ||
-            (Array.isArray(item?.aliases) && item.aliases.includes(model)),
+            item?.id === model || (Array.isArray(item?.aliases) && item.aliases.includes(model)),
         )
       ) {
         return respond(503, {
