@@ -189,6 +189,10 @@ Deno.serve(async (req: Request) => {
         : respond({ url: signed.signedUrl, expires_in: 60 }, 200, origin);
     }
     if (action === "subscribe" || action === "unsubscribe") {
+      const league = body["league"];
+      if (league !== "street" && league !== "ultralight") {
+        return respond({ error: "Invalid league" }, 400, origin);
+      }
       const spotId = body["spot_id"];
       if (typeof spotId !== "string" || !/^[0-9a-f-]{36}$/i.test(spotId)) {
         return respond({ error: "Invalid spot ID" }, 400, origin);
@@ -197,8 +201,8 @@ Deno.serve(async (req: Request) => {
         const { error } = await userClient
           .from("zc_spot_subscriptions")
           .upsert(
-            { user_id: user.id, spot_id: spotId },
-            { onConflict: "user_id,spot_id", ignoreDuplicates: true },
+            { user_id: user.id, spot_id: spotId, league },
+            { onConflict: "user_id,spot_id,league", ignoreDuplicates: true },
           );
         return error
           ? respond({ error: "Subscription denied" }, 400, origin)
@@ -208,7 +212,8 @@ Deno.serve(async (req: Request) => {
         .from("zc_spot_subscriptions")
         .delete()
         .eq("user_id", user.id)
-        .eq("spot_id", spotId);
+        .eq("spot_id", spotId)
+        .eq("league", league);
       return error
         ? respond({ error: "Unsubscribe failed" }, 400, origin)
         : respond({ subscribed: false }, 200, origin);
