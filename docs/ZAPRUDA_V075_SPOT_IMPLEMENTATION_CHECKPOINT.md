@@ -36,3 +36,24 @@ GitHub Actions quality results must be evaluated on the **exact current HEAD**. 
 
 ## Scope boundaries
 The existing team competitions and their fish_count/total_weight_g are unchanged and not repurposed. SPOT MARKET, payment entitlements and payouts remain future separate work. Design v0.6.0-admin-rc.1 and Matte Black/Electric Blue theme choices preserved.
+
+---
+## Checkpoint 2026-11-03, 17:20 MSK — STAGING authenticated flow integration
+**This section supersedes the older "no user-facing catch submission" gap above.** The workflow code already existed in this release branch and the STAGING Edge function was active; it has now been audited and strengthened.
+
+**Code:** `SpotCatchFlow.tsx` on `/competitions` includes authenticated STREET/UL catch submission, private photo upload via Edge, status/inbox, restricted moderator queue, short-lived evidence link, approve/reject and subscriptions. The existing mobile bottom nav is unchanged; added a secondary-menu item visible only in STAGING/Netlify preview. MICRO KING remains inside UL: moderator must separately attest to responsible accidental capture; unchecked cases can only compete for KING OF UL.
+
+**STAGING-only Edge:** `zapruda-spot-records` **ACTIVE v4**, `verify_jwt=true`. GitHub source was read back and matched the live function exactly. Subscribe/unsubscribe now always takes a validated `league` and uses composite key `(user_id,spot_id,league)`.
+
+**STAGING schema applied:**
+- `v075_spot_league_scoped_subscriptions_self_review_guard`: subscriptions by spot+league, RLS rejects subscribing to a league not permitted at the approved spot, own-catch approval forbidden for moderators, notification recipients filtered by league.
+- `v075_spot_authoritative_predecessor_notification`: dethroned champion determined from the **serialized title_history** after award, avoiding a stale pre-election winner read when submissions race.
+
+**Real database rollback acceptance (all PASS):**
+- `supabase/tests/security/v075_spot_four_roles_rollback.sql`: four distinct **confirmed STAGING Auth identities** used as session claim simulations, with privileged fixtures inserted inside a transaction; independent moderator verifies, self-review denied, first and improved KING/LENGTH awards, history/outbox, correct previous champion alert, STREET subscriber receives STREET messages while UL-only follower receives none. All fixtures rolled back.
+- `supabase/tests/security/v075_spot_authenticated_rls_rollback.sql`: execution under PostgreSQL `authenticated` role with `request.jwt.claim.sub` shows only own inbox messages and no private-schema USAGE; all fixtures rolled back.
+- Current STAGING read-only Auth check: **6 confirmed accounts**, but **0 explicitly appointed SPOT moderators**, **0 approved public spots**. These are not ready-to-run live functional E2E identities; the actual configured GitHub Environment secrets have not been verified.
+
+**Latest completed CI for source commit `e47d43097fea3c858f85f04fd34fd813f575c302`:** [ZAPRUDA checks — PASS](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41655628837), [Docker — PASS](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41655628424), [Netlify preview isolation — PASS](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41655628600). Browser reviews must be checked on exact SHA before a visual PASS claim.
+
+**Critically NOT proven:** a real signed-JWT multipart image upload/submit/review/inbox E2E with distinct HTTP sessions; moderator assignment and approved pilot spot; verifying actual photo bytes/EXIF cleanup; independent-session concurrency tests; push delivery (currently in-app only); complete legal location/access checks; production GEO #67. No production release/merge.
