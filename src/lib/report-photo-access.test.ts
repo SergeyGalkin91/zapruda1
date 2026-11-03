@@ -16,7 +16,7 @@ const request = (method = "GET", authorization?: string, id = photo) =>
   });
 beforeEach(() => {
   vi.clearAllMocks();
-  deps.resolve.mockResolvedValue({ path, owner: false });
+  deps.resolve.mockResolvedValue({ path, owner: false, ready: true });
   deps.download.mockResolvedValue(jpeg);
   deps.remove.mockResolvedValue(undefined);
 });
@@ -39,19 +39,25 @@ describe("Photo visibility gateway (offline handler regressions, not live JWT E2
     expect(deps.download).not.toHaveBeenCalled();
   });
   it("honors a public-to-private transition while Storage was being read", async () => {
-    deps.resolve.mockResolvedValueOnce({ path, owner: false }).mockResolvedValueOnce(null);
+    deps.resolve
+      .mockResolvedValueOnce({ path, owner: false, ready: true })
+      .mockResolvedValueOnce(null);
     expect((await createReportPhotoAccessHandler(deps)(request())).status).toBe(404);
   });
   it("does not serve stale bytes after the canonical photo path changes", async () => {
     deps.resolve
-      .mockResolvedValueOnce({ path, owner: false })
-      .mockResolvedValueOnce({ path: path.replace("10000000", "30000000"), owner: false });
+      .mockResolvedValueOnce({ path, owner: false, ready: true })
+      .mockResolvedValueOnce({
+        path: path.replace("10000000", "30000000"),
+        owner: false,
+        ready: true,
+      });
     expect((await createReportPhotoAccessHandler(deps)(request())).status).toBe(404);
   });
   it.each(["../original.jpg", `other/${photo}.jpg`, `${path}/extra`])(
     "rejects non-canonical trusted metadata %s",
     async (value) => {
-      deps.resolve.mockResolvedValue({ path: value, owner: true });
+      deps.resolve.mockResolvedValue({ path: value, owner: true, ready: true });
       expect((await createReportPhotoAccessHandler(deps)(request())).status).toBe(404);
       expect(deps.download).not.toHaveBeenCalled();
     },
@@ -69,7 +75,7 @@ describe("Photo visibility gateway (offline handler regressions, not live JWT E2
     expect(deps.remove).not.toHaveBeenCalled();
   });
   it("allows an authorized owner to delete only their resolved photo", async () => {
-    deps.resolve.mockResolvedValue({ path, owner: true });
+    deps.resolve.mockResolvedValue({ path, owner: true, ready: true });
     expect(
       (await createReportPhotoAccessHandler(deps)(request("DELETE", "Bearer offline-fixture")))
         .status,
@@ -82,6 +88,14 @@ describe("Photo visibility gateway (offline handler regressions, not live JWT E2
     const response = await createReportPhotoAccessHandler(deps)(request());
     expect(response.status).toBe(503);
     expect(await response.text()).toBe("");
+  });
+  it("lets the owner clean up a failed private reservation without making it readable", async () => {
+    deps.resolve.mockResolvedValue({ path, owner: true, ready: false });
+    const handler = createReportPhotoAccessHandler(deps);
+    expect((await handler(request("GET", "Bearer offline-fixture"))).status).toBe(404);
+    expect(deps.download).not.toHaveBeenCalled();
+    expect((await handler(request("DELETE", "Bearer offline-fixture"))).status).toBe(204);
+    expect(deps.remove).toHaveBeenCalledWith(photo, path);
   });
   it("rejects an invalid image instead of serving arbitrary bytes", async () => {
     deps.download.mockResolvedValue(new TextEncoder().encode("<script>PRIVATE</script>"));

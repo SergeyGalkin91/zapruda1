@@ -1,4 +1,4 @@
-export type PhotoAccess = { path: string; owner: boolean };
+export type PhotoAccess = { path: string; owner: boolean; ready: boolean };
 type Dependencies = {
   resolve: (photoId: string, jwt: string | null) => Promise<PhotoAccess | null>;
   download: (path: string) => Promise<Uint8Array>;
@@ -44,6 +44,7 @@ export function createReportPhotoAccessHandler(deps: Dependencies) {
         await deps.remove(photoId, photo.path);
         return reply(204);
       }
+      if (!photo.ready) return reply(404);
       const bytes = await deps.download(photo.path);
       if (
         bytes.length < 4 ||
@@ -56,7 +57,7 @@ export function createReportPhotoAccessHandler(deps: Dependencies) {
         return reply(503);
       // Also check a publication change while Storage was being read.
       const current = await deps.resolve(photoId, jwt);
-      if (!current || current.path !== photo.path) return reply(404);
+      if (!current || !current.ready || current.path !== photo.path) return reply(404);
       return new Response(Uint8Array.from(bytes), {
         status: 200,
         headers: {

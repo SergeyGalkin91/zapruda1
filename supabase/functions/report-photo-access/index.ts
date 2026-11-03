@@ -40,10 +40,11 @@ Deno.serve(async (request: Request) => {
       if (!caller) return null;
       const { data: photo, error } = await caller
         .from("report_photos")
-        .select("id,report_id,user_id,sanitized_path,sanitized_at")
+        .select("id,report_id,user_id,storage_path,sanitized_path,sanitized_at")
         .eq("id", photoId)
         .maybeSingle();
-      if (error || !photo?.sanitized_path || !photo.sanitized_at) return null;
+      if (error || !photo) return null;
+      const path = photo.sanitized_path ?? photo.storage_path;
       const { data: report, error: reportError } = await caller
         .from("fishing_reports")
         .select("id,user_id,is_public")
@@ -54,10 +55,14 @@ Deno.serve(async (request: Request) => {
         !report ||
         report.user_id !== photo.user_id ||
         (!report.is_public && report.user_id !== callerId) ||
-        photo.sanitized_path !== `${photo.user_id}/${photo.report_id}/${photo.id}.jpg`
+        path !== `${photo.user_id}/${photo.report_id}/${photo.id}.jpg`
       )
         return null;
-      return { path: photo.sanitized_path, owner: report.user_id === callerId };
+      return {
+        path,
+        owner: report.user_id === callerId,
+        ready: Boolean(photo.sanitized_path && photo.sanitized_at),
+      };
     },
     download: async (path) => {
       const { data, error } = await server().storage.from(bucket).download(path);
