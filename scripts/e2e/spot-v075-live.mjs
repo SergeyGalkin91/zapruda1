@@ -100,7 +100,10 @@ async function negativeUploadProbe(client) {
 
 async function main() {
   assert.equal(URL, EXPECTED_URL, "STAGING project mismatch — refusing to run");
-  assert.ok(KEY?.startsWith("sb_publishable_") || KEY?.startsWith("eyJ"), "Use a STAGING publishable/anon key");
+  assert.ok(
+    KEY?.startsWith("sb_publishable_") || KEY?.startsWith("eyJ"),
+    "Use a STAGING publishable/anon key",
+  );
 
   const roles = ["OWNER", "SEATED", "RACER_A", "RACER_B"];
   const users = new Map();
@@ -112,7 +115,10 @@ async function main() {
     const client = newClient();
     const { data, error } = await client.auth.signInWithPassword({ email, password });
     assert.ifError(error);
-    assert.ok(data?.user?.id && data?.session?.access_token, "Missing signed user session for " + role);
+    assert.ok(
+      data?.user?.id && data?.session?.access_token,
+      "Missing signed user session for " + role,
+    );
     const { data: detail, error: userError } = await client.auth.getUser();
     assert.ifError(userError);
     assert.ok(detail.user?.email_confirmed_at, "Email confirmation missing for " + role);
@@ -168,7 +174,9 @@ async function main() {
     assert.ok(Array.isArray(ownerQueue.data?.queue), "OWNER must be appointed as SPOT moderator");
     console.log("PASS: owner is appointed SPOT moderator");
   } else {
-    console.log("INFO: moderator appointment not asserted; set ZAPRUDA_SPOT_E2E_REQUIRE_MODERATOR=true after authorization");
+    console.log(
+      "INFO: moderator appointment not asserted; set ZAPRUDA_SPOT_E2E_REQUIRE_MODERATOR=true after authorization",
+    );
   }
 
   for (const client of users.values()) {
@@ -179,6 +187,9 @@ async function main() {
 
 main().catch((error) => {
   // Errors are deliberately terse: never print token, email or response payload.
-  console.error("SPOT JWT preflight FAIL:", error instanceof Error ? error.message : "unknown error");
+  console.error(
+    "SPOT JWT preflight FAIL:",
+    error instanceof Error ? error.message : "unknown error",
+  );
   process.exitCode = 1;
 });
