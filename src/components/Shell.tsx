@@ -138,7 +138,7 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen overflow-x-clip pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-0">
       <ActivityTracker />
-      <header className="sticky top-0 z-50 border-b border-white/[0.09] bg-[#0D100C]/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-white/[0.09] z-electric-shell-header bg-[#0D100C]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0">
             <Wordmark />
@@ -200,7 +200,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <nav
                 id="zapruda-extra-nav"
                 aria-label="Остальные разделы"
-                className="absolute right-0 top-[calc(100%+8px)] z-50 w-[min(320px,calc(100vw-2rem))] space-y-1 rounded-2xl border border-white/15 bg-[#171C14] p-2 shadow-2xl shadow-black/70"
+                className="absolute right-0 top-[calc(100%+8px)] z-50 w-[min(320px,calc(100vw-2rem))] space-y-1 rounded-2xl border border-white/15 bg-[#171C14] z-electric-shell-menu p-2 shadow-2xl shadow-black/70"
               >
                 <div className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.19em] text-[#D7FF35]">
                   ZAPRUDA / Разделы
@@ -282,7 +282,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
       <nav
         aria-label="Мобильная навигация"
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080A09]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 z-electric-mobile-nav bg-[#080A09]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden"
       >
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
           {mobileNav.map(({ to, label, Icon }) => {
