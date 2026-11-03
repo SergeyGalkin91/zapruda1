@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 # Production ZAPRUDA (TanStack Start / Nitro Node server)
-FROM oven/bun:1.3.3 AS build
+FROM oven/bun:1.4.4 AS build
 WORKDIR /app
 COPY package.json bun.lock ./
-RUN bun install --no-frozen-lockfile
+RUN bun install --frozen-lockfile
 COPY . .
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_PUBLISHABLE_KEY
