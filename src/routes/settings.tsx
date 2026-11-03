@@ -62,7 +62,7 @@ function SettingsPage() {
         <h2 id="app-background-title" className="flex items-center gap-2 text-lg font-black text-white">
           <Monitor className="size-5 text-[#D7FF35]" /> Фон приложения
         </h2>
-        <p className="mt-2 text-sm text-zinc-400">Задаёт основу оформления страниц. Фирменные цвета кнопок сохраняются для читаемости.</p>
+        <p className="mt-2 text-sm text-zinc-400">Matte Black остаётся основным. Electric Blue — яркий синий фон с лаймовыми и баклажановыми акцентами. Выбор сохраняется в этом браузере, в том числе после повторного входа.</p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {APP_BACKGROUNDS.map(item => {
             const selected = appearance.background === item.value;
@@ -71,6 +71,10 @@ function SettingsPage() {
               className={"rounded-2xl border p-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35] " +
                 (selected ? "border-[#D7FF35] bg-[#D7FF35]/10" : "border-white/10 bg-black/15 hover:border-[#D7FF35]/45")}>
               <span className="relative block h-20 rounded-xl border border-white/10" style={{ background: item.preview }}>
+                {item.secondaryAccent && <span aria-hidden="true" className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-lg bg-black/35 px-2 py-1.5">
+                  <span className="size-4 rounded-full border border-white/25" style={{ backgroundColor: "#D7FF35" }} />
+                  <span className="size-4 rounded-full border border-white/25" style={{ backgroundColor: item.secondaryAccent }} />
+                </span>}
                 {selected && <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-[#D7FF35] text-black"><Check className="size-4" /></span>}
               </span>
               <span className="mt-3 block text-sm font-bold text-white">{item.title}</span>
