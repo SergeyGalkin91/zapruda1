@@ -8,7 +8,7 @@ import {
 } from "./yandex-provider.ts";
 
 /**
- * Daily fishing advice via Yandex AI Studio: DeepSeek V4.1 Flash with Alice AI fallback.
+ * Daily fishing advice via Yandex AI Studio: DeepSeek V4.1 Flash with YandexGPT Pro 5.1 fallback.
  * Secrets: YANDEX_AI_API_KEY, YANDEX_AI_FOLDER_ID, optional YANDEX_AI_WEB_SEARCH_ENABLED.
  * Quota claim is atomic via claim_ai_daily_advice_slot / complete_ai_daily_advice_slot.
  */
