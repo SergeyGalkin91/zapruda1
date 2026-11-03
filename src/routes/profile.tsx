@@ -476,6 +476,13 @@ function Profile() {
             </a>}
           </div>
         </div>
+        <div className="relative mt-5 flex justify-end">
+          <Link to="/settings"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#D7FF35]/30 bg-black/25 px-4 py-2 text-sm font-bold text-[#D7FF35] transition hover:border-[#D7FF35]/60 hover:bg-[#D7FF35]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]">
+            <Settings2 className="size-4" aria-hidden="true" />
+            Настройки → Оформление
+          </Link>
+        </div>
       </section>
 
       {loading && <div className="panel p-6 text-zinc-400">Загружаем рыболовный профиль и достижения…</div>}
