@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier -- Existing browser smoke fixture; checked by executed cross-browser workflow. */
 /**
  * Browser-level, read-only appearance acceptance for #76.
  * Uses a CI Supabase placeholder: never logs in, writes data or calls production endpoints.
