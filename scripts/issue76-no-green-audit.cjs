@@ -11,11 +11,32 @@ const artifactDir = process.env.VISUAL_OUTPUT_DIR || "appearance-evidence";
 fs.mkdirSync(artifactDir, { recursive: true });
 
 const forbidden = [
-  "#0D100C", "#171C14", "#080A09", "#0B0D0B", "#121A12", "#141914",
-  "#151812", "#171a15", "#0E120F", "#0C100E", "#1A1D19", "#111511",
-  "#1A2016", "#151915", "#0E120E", "#151A14", "#161D13", "#111610",
-  "#1B2718", "#1E251A", "#27321b", "#10150E", "#101310", "#070908",
-  "#171d13", "#151811",
+  "#0D100C",
+  "#171C14",
+  "#080A09",
+  "#0B0D0B",
+  "#121A12",
+  "#141914",
+  "#151812",
+  "#171a15",
+  "#0E120F",
+  "#0C100E",
+  "#1A1D19",
+  "#111511",
+  "#1A2016",
+  "#151915",
+  "#0E120E",
+  "#151A14",
+  "#161D13",
+  "#111610",
+  "#1B2718",
+  "#1E251A",
+  "#27321b",
+  "#10150E",
+  "#101310",
+  "#070908",
+  "#171d13",
+  "#151811",
 ];
 const rgb = (hex) => {
   const raw = hex.slice(1);
@@ -68,14 +89,14 @@ const forbiddenRgb = forbidden.map((hex) => {
             const solid = style.backgroundColor;
             const gradient = style.backgroundImage;
             const hasForbiddenSolid = colors.includes(solid);
-            const hasForbiddenGradient = colors.some(
-              (color) => gradient.includes(color),
-            );
+            const hasForbiddenGradient = colors.some((color) => gradient.includes(color));
             if (hasForbiddenSolid || hasForbiddenGradient) {
               matches.push({
                 tag: element.tagName,
-                className: typeof element.className === "string"
-                  ? element.className.slice(0, 160) : "",
+                className:
+                  typeof element.className === "string"
+                    ? element.className.slice(0, 160)
+                    : "",
                 solid,
                 gradient: gradient.slice(0, 200),
               });
@@ -90,11 +111,21 @@ const forbiddenRgb = forbidden.map((hex) => {
           };
         }, forbiddenRgb);
         if (audit.matchCount) console.error(width, route, JSON.stringify(audit.matches));
-        assert.equal(audit.matchCount, 0, width + " " + route + ": green matte surfaces in Electric Blue");
+        assert.equal(
+          audit.matchCount,
+          0,
+          width + " " + route + ": green matte surfaces in Electric Blue",
+        );
         assert.equal(audit.overflow, false, width + " " + route + ": horizontal overflow");
         if (["/settings", "/"].includes(route)) {
           await page.screenshot({
-            path: artifactDir + "/no-green-" + width + "-" + (route === "/" ? "feed" : "settings") + ".png",
+            path:
+              artifactDir +
+              "/no-green-" +
+              width +
+              "-" +
+              (route === "/" ? "feed" : "settings") +
+              ".png",
             fullPage: false,
           });
         }
