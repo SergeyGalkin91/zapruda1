@@ -146,7 +146,7 @@
   --z-stroke: rgba(216,225,255,.25);
 }
 :root[data-zapruda-background="electric-blue"] body {
-  background: radial-gradient(ellipse 105% 75% at 45% -10%, #1B68EC 0%, #1239A6 57%, #091D57 100%) fixed;
+  background: radial-gradient(ellipse 105% 75% at 45% -10%, #1458DB 0%, #1239A6 57%, #091D57 100%) fixed;
 }
 :root[data-zapruda-background="electric-blue"] .z-underground {
   background: var(--z-surface);
