@@ -1,0 +1,61 @@
+{
+  "sha": "d41f02ff15be64e2bea89f379eabf86546701e96",
+  "run": 41772065215,
+  "overall": "FAIL: browser import before login; API/feedback/SPOT steps passed",
+  "evidence": {
+    "pilot-safe/feedback.json": {
+      "test": "feedback real JWT",
+      "marker": "QA-FEEDBACK-06e85d9e-797a-4c1e-91a1-ff2cd758d8ee",
+      "passed": true,
+      "checks": [
+        "guest-denied-and-invalid-body-rejected",
+        "confirmed-server-submission-saved-without-Telegram",
+        "own-history-foreign-private-data-and-direct-write-boundaries",
+        "actual-frontend-history-query",
+        "six-concurrent-real-requests-limited-to-five-saves"
+      ],
+      "cleanup": "external-exact-QA-UUIDs-required",
+      "savedCount": 5,
+      "responseStatuses": [
+        201,
+        201,
+        201,
+        201,
+        201,
+        429
+      ],
+      "telegramDisabled": true,
+      "uiHistoryWorks": true,
+      "hourlyConcurrencyLimitWorks": true
+    },
+    "pilot-safe/result.json": {
+      "test": "pilot-schema real confirmed JWT",
+      "passed": true,
+      "cleanup": true,
+      "publicCatchFixtures": 0,
+      "checks": [
+        "four-confirmed-distinct-real-JWTs",
+        "real-JWT-read-summary-and-private-boundaries-no-watermark-mutation",
+        "atomic-catch-failure-rollback-retry-and-owner-boundary",
+        "public-to-private-HTTP-revocation-metadata-comments-no-direct-signing",
+        "actual-JWT-Realtime-sanitized-photo-update",
+        "real-chat-send-reaction-sanitized-photo-retry-and-Storage-boundary",
+        "global-message-actual-Realtime-foreign-mutations-guest-and-geography-denied",
+        "private-marks-gear-primary-concurrency-and-own-profile",
+        "partner-trip-REST-column-contract-without-a-public-trip-fixture",
+        "independent-authenticated-OpenWeather-without-AI-quota-use"
+      ],
+      "photoRealtimeEvents": [
+        {
+          "event": "INSERT",
+          "ready": false
+        },
+        {
+          "event": "UPDATE",
+          "ready": true
+        }
+      ],
+      "guestChatPhotoStatus": 404
+    }
+  }
+}

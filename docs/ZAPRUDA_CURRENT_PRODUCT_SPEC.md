@@ -3,17 +3,17 @@
 Контракт сохраняет требования; он не объявляет функции готовыми и не разрешает релиз.
 
 ## Начало каждой Work-задачи
-**Актуальный подробный аудит/блокеры и план 0.7.6:** [ZAPRUDA_KING_FINISH_DEEP_AUDIT_20261104.md](ZAPRUDA_KING_FINISH_DEEP_AUDIT_20261104.md). Перед следующим Work по KING FINISH сверить его с живым HEAD, а не принимать исторические SHA и результаты за текущие.
+**Исторический подробный аудит/план 0.7.6 (срез 8b54b53):** [ZAPRUDA_KING_FINISH_DEEP_AUDIT_20261104.md](ZAPRUDA_KING_FINISH_DEEP_AUDIT_20261104.md). Перед следующим Work по KING FINISH сверить его с живым HEAD, а не принимать исторические SHA и результаты за текущие.
 Прочитать этот файл, [журнал решений](ZAPRUDA_DECISION_LOG.md), [матрицу](ZAPRUDA_FEATURE_MATRIX.md), [release gates](ZAPRUDA_RELEASE_GATES.md), затем проверить актуальный HEAD PR #93, изменения зависимых PR и тематический issue. При UI-работе читать [UI acceptance](ZAPRUDA_UI_ACCEPTANCE.md). Номер старого design lock не равен текущей версии продукта.
 
 ## Источники и границы доказательств
-- Код проверен на HEAD PR #93: `3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd`.
+- Текущий проверяемый код PR #93: `22f19cdff33f14554e58d31e9005da4dce722dcc`. Результаты и ограничения финальной технической приёмки: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
 - [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111) — исходный аудит и единственный документальный PR этой консолидации, не утверждённая реализация.
 - [PR #92](https://github.com/SergeyGalkin91/zapruda1/pull/92) — UX-направление и foundations, не готовый wizard.
 - [PR #109](https://github.com/SergeyGalkin91/zapruda1/pull/109) — новый README о всех направлениях рыбалки; открыт, не слит.
 - [PR #110](https://github.com/SergeyGalkin91/zapruda1/pull/110) — FK ленты: SQL уже применён в STAGING по отчёту PR, не применять повторно. HTTP-проверка после reload остаётся открытой.
 - Последние прямые решения владельца 03–04.11 и мастер-задание `Вставленный текст(20261104-030108).txt` важнее противоречащих им старых текстов.
-- Сверка в этой задаче — чтение кода/документов и CI metadata. Новых браузерных, JWT или SQL PASS здесь нет. Бинарные визуальные референсы ещё нужно сопоставить с текущими скриншотами.
+- Наличие кода, изолированные тесты, настоящий JWT и hosted Browser — разные уровни доказательств. Читать текущую FINAL_ACCEPTANCE; старые PASS относятся только к указанным SHA. Бинарные визуальные референсы ещё нужно сопоставить с текущими скриншотами.
 - Preview: https://deploy-preview-93--zapruda1.netlify.app/ . Единственный разрешённый backend для проверки — STAGING `yudtbifopfnjtjanaqrd`.
 
 ## Продукт и карта модулей

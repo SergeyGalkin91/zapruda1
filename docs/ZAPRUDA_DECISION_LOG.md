@@ -49,3 +49,6 @@ ID / дата / точная формулировка владельца / за�
 
 ## Техническая приёмка продолжения (не новое release GO)
 Запрос владельца исполнен кодом d421980, исправлением browser-discovered submit bug 90f3f54 и reset/empty-chat fix 61b5957. Новый exact-head JWT request 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd ожидает required reviewer staging-e2e. 424 local tests/34 files, typecheck/lint/build PASS; 6 contract regressions PASS. Один QA report без улова, созданный ошибочным переходом, теперь private; удаление не выполнено из-за истекшего подтверждения. Main/production/version не изменены. Новейшее целевое имя из параллельных решений сохранено без переписывания.
+
+## D13 — 04.11.2026: техническая приёмка и release preparation
+Выполнены исправления send-retry/read-summary и пустая защищённая схема Atlas только в STAGING; настоящий JWT и Browser выполняются на exact SHA. Все 56 ID сохраняются. Новые факты в [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md); исторический аудит 8b54b53 сохранён с указателем. Это не owner release GO, не разрешение main/production/version. Устаревшие статусы wizard/unread/timer исправлены без отката дизайна.

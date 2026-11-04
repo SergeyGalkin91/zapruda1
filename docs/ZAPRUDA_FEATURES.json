@@ -1,5 +1,5 @@
 {
-  "source_sha": "3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd",
+  "source_sha": "22f19cdff33f14554e58d31e9005da4dce722dcc",
   "features": [
     {
       "id": "AUTH-01",
@@ -354,12 +354,12 @@
       "feature": "водоёмы/виды/прогресс",
       "module": "FISHING MAP",
       "priority": "FULL",
-      "source": "/atlas; atlas.tsx",
-      "backend": "atlas_waterbodies/fish_species/waterbody_species/my_atlas_progress",
-      "status": "BLOCKED",
+      "source": "/atlas; src/routes/atlas.tsx; supabase/staging/v076_atlas_catalog.sql",
+      "backend": "STAGING v076_atlas_catalog: 4 catalog/claim tables + security_invoker my_atlas_progress; published-only catalog, owner-only evidence claims",
+      "status": "IMPLEMENTED",
       "acceptance": "загрузка/пустое/ошибка, без ложного прогресса",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "BLOCKED — эти отношения отсутствовали в snapshot 01:07 UTC; нужен свежий readback"
+      "evidence": "d41f02f: atlas-acceptance-database.test.ts PASS; STAGING migration 20261104041357 readback: RLS=true, invoker=true, empty real catalog; live JWT reads pending.",
+      "blocker": "Catalog/schema contract implemented; no invented fish/waterbodies. Reviewed real catalog, moderation and full progress E2E still required."
     },
     {
       "id": "MAP-02",

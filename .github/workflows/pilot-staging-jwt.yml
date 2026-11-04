@@ -12,7 +12,7 @@ jobs:
   real-pilot:
     runs-on: ubuntu-24.04
     environment: staging-e2e
-    timeout-minutes: 12
+    timeout-minutes: 40
     env:
       ZAPRUDA_E2E_STAGING_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
       ZAPRUDA_E2E_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
@@ -40,6 +40,29 @@ jobs:
       - name: Independent real SPOT JWT boundaries and rejected upload
         if: ${{ !cancelled() }}
         run: node scripts/e2e/spot-v075-live.mjs
+      - name: Build real-STAGING browser frontend
+        if: ${{ !cancelled() }}
+        env:
+          VITE_SUPABASE_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+          NITRO_PRESET: node-server
+        run: bun run build
+      - name: Install browser test engines
+        if: ${{ !cancelled() }}
+        run: |
+          bun add --dev playwright
+          bunx playwright install --with-deps chromium firefox webkit
+      - name: Real authenticated browser journeys and screenshots
+        if: ${{ !cancelled() }}
+        run: |
+          node .output/server/index.mjs > /tmp/authenticated-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/auth -o /dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/e2e/authenticated-browser-live.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -47,4 +70,5 @@ jobs:
           path: |
             qa/pilot-safe/
             qa/v075-safe/
+            qa/authenticated-browser/
           retention-days: 7

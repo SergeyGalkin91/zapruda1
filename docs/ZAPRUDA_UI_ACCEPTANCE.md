@@ -1,5 +1,5 @@
 # ZAPRUDA — визуальная приёмка
-04.11.2026. **DRAFT; новая визуальная приёмка НЕ выполнена.**
+04.11.2026. **DRAFT; владельческая визуальная приёмка остаётся открытой.** Текущие технические результаты: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
 Последние требования владельца, а не старый номер v0.6.0, определяют цель. Направление сохраняется, старые противоречащие палитры не восстанавливаются.
 
 ## Источники
@@ -21,24 +21,18 @@ CURRENT_PRODUCT_SPEC + DECISION_LOG → последние референсы в
 | /auth | вход, регистрация, recovery, validation | NOT CAPTURED | PENDING |
 | / | populated real feed, empty, error, loading | NOT CAPTURED | PENDING; PGRST200 HTTP reload отдельно |
 | /communities | география, клубы, СХОДКИ | NOT CAPTURED | PENDING |
-| /reports/new | 3 шага, draft, no-catch, privacy, retry | NOT CAPTURED | PENDING; wizard ещё PLANNED |
+| /reports/new | 3 шага, draft, no-catch, privacy, retry | NOT CAPTURED | IMPLEMENTED; signed-in end-to-end проверяется отдельно |
 | /partners, СХОДКИ | каталог, пусто, участие, приватные детали | NOT CAPTURED | PENDING |
-| /chat, /messages | комнаты, сообщение, фото, unread, keyboard | NOT CAPTURED | PENDING; unread disabled |
-| /street | start/running/finished/import | NOT CAPTURED | PENDING; ticking timer gap |
+| /chat, /messages | комнаты, сообщение, фото, unread, keyboard | NOT CAPTURED | IMPLEMENTED mine/unread/read-state; два JWT проверяются отдельно |
+| /street | start/running/finished/import | NOT CAPTURED | IMPLEMENTED ticking timer/reload/import; изоляция проверяется отдельно |
 | /profile, /settings | edit, save feedback, themes, gear | NOT CAPTURED | PENDING |
 | /assistant, /atlas, SPOT | базовый план, error/empty, реальные данные | NOT CAPTURED | PENDING |
 | /admin, /moderation, /finance | guest denied; authorized only if permitted | NOT CAPTURED | PENDING; не выдавать роли тестом |
 
 Каждый набор: deployed SHA/URL, дата, размер, тема, auth role, console/network summary, ссылка before/after и точный референс, наблюдаемые расхождения и исправляющий commit. JWT/PII/доказательства/GPS в артефакты не включать. Снимки рисованных макетов не равны реальному приложению.
 
-## Уже установленное по коду
-1. reports.new.tsx — длинная форма, не wizard.
-2. chat.tsx — disabled «Мои чаты»/«Непрочитанные».
-3. street.tsx — elapsedMinutes вычисляется в render, самостоятельный тик не найден.
-4. street.tsx утверждает отсутствие переноса, reports.new.tsx содержит явный импорт; это источник устаревшего текста в коде, не доказанная проблема кеша.
-5. Исходный аудит PR #111 отмечает просторные блоки Settings относительно компактного chat reference; это историческое наблюдение по материалам, не новая browser QA.
-
-**Результат сейчас: NOT ACCEPTED / требуется реальный браузерный проход.** Этот документ задаёт проверку и не подменяет исправления интерфейса.
+## Исправления подтверждённых дефектов
+На текущем коде reports.new.tsx содержит 3 шага с явным review/publish, chat.tsx — рабочие mine/unread и серверный read-state, street.tsx — ticking timer и account-scoped storage/import. Старые пункты «длинная форма / disabled фильтры / нет тика / импорт недоступен» описывали исходный аудит и больше не являются текущими дефектами. Реализация не подменяет положительный signed-in Browser E2E, клавиатуру физического телефона или визуальное решение владельца.
 
 ## Фактическая проверка 04.11 — продолжение
 Cloud Browser открыл preview #93: реальная пустая лента без ошибки FK; browser console не содержит ошибки приложения, только сообщение расширения о metadata. До: чрезмерно крупный hero, техническая метка CONCEPT 01 и слоган только STREET. Исправления d421980: компактнее заголовок, удалена CONCEPT-метка, перечислены разные направления рыбалки, CTA «Новый отчёт» допускает рыбалку без улова. Скриншот before сохранён. After и mobile acceptance проверять по текущему deployed SHA; не переносить старые результаты автоматически.

@@ -136,6 +136,33 @@ async function open() {
   return { ...view, composer };
 }
 describe("Geographic chat (offline component regressions, not real JWT)", () => {
+  it("recovers the original message after its successful insert loses the response", async () => {
+    const original = mocks.from.getMockImplementation()!;
+    let insertedId = "";
+    let inserts = 0;
+    mocks.from.mockImplementation((table: string) => {
+      const q = original(table);
+      if (table !== "chat_messages") return q;
+      let inserting = false;
+      q.insert = vi.fn((value: { id: string }) => {
+        inserting = true;
+        insertedId = value.id;
+        inserts++;
+        return q;
+      });
+      q.single = async () =>
+        inserting
+          ? { data: null, error: { message: "response lost" } }
+          : { data: { id: insertedId }, error: null };
+      return q;
+    });
+    const { composer } = await open();
+    fireEvent.change(composer, { target: { value: "Lost response QA" } });
+    fireEvent.click(screen.getByRole("button", { name: "Отправить" }));
+    await waitFor(() => expect(composer).toHaveValue(""));
+    expect(inserts).toBe(1);
+    expect(insertedId).toMatch(/^[0-9a-f-]{36}$/i);
+  });
   it("reconciles messages missed before database readiness or during reconnect, keeping the draft", async () => {
     const { composer } = await open();
     fireEvent.change(composer, { target: { value: "Unsent private draft" } });

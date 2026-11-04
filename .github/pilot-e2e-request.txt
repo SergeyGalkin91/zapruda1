@@ -4,3 +4,15 @@ Repeat the now-unblocked protected gate on the final documented candidate to ver
 Validate current chat read-summary/RLS/invalid-marker boundaries alongside existing core JWT acceptance. Positive read-receipt UI acceptance remains separate. No role assignment or fake KING.
 
 Final request: same protected script on current candidate; chat read-state isolation/summary/invalid marker plus core JWT, no public test catches, no moderator assignment. Wizard navigation fix and draft reset must retain separate browser acceptance.
+
+Final authenticated browser acceptance: two actual users, read receipts/retry, report wizard/photo/private fixtures, STREET identity isolation and 3 engines/4 widths/2 themes. No public catch or KING fixtures.
+
+Reconcile unread list at PostgreSQL-ready/rejoin; fix compile regression in new lost-response test.
+
+Include newly aligned empty Atlas catalog/own progress reads and read-only Yandex diagnose; real UI lost report-RPC response must retry without duplicate catch.
+
+2026-11-04 authenticated harness: use official playwright/test expect export; rerun actual JWT Browser acceptance.
+
+2026-11-04 collect independent Browser evidence even if feedback quota precondition blocks; all failures still fail the job.
+
+2026-11-04 fix actual Browser failure: narrow authenticated INSERT(id) under existing chat owner/geography RLS; test collision/spoof/guest denial.
