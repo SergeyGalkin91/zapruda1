@@ -1,45 +1,32 @@
 # Текущее состояние — ZAPRUDA v0.7.5 SPOT, 04.11.2026
 
-**NO-GO публичному запуску.** Основная рабочая версия продолжена в существующем [PR #93](https://github.com/SergeyGalkin91/zapruda1/pull/93) → `release/v0.7.5-spot`; head-ветка `feat/ai-yandex-deepseek-staging` зеркалируется в `work/v075-consolidation-20261104`. Точный актуальный SHA — head этого PR. Main/production/DNS/платежи/публичный релиз не изменялись. Дизайн `v0.6.0-admin-rc.1`, обе темы и пять вкладок сохранены.
+**Защищённый JWT E2E PASS; публичный запуск пока NO-GO.** Канонический [PR #93](https://github.com/SergeyGalkin91/zapruda1/pull/93) → `release/v0.7.5-spot`, head `feat/ai-yandex-deepseek-staging`, work mirror `work/v075-consolidation-20261104`. Определять точный актуальный HEAD из GitHub, а не из старого текста PR. Дизайн v0.6.0-admin-rc.1, обе темы и пять вкладок сохранены.
 
-## DONE: изменения и фактический STAGING
+## DONE
 
-- `35a18f8`: атомарное сохранение отчёта с уловом, повтор запроса без дубликата после потерянного ответа/перезагрузки, привязка к captured JWT; фото чата через обработку и JWT gateway вместо оригинала в Storage/signed URL; приватные зависимости профиля; SQL/QA/workflows.
-- `d58836c`: сохранена последующая уже применённая gear-миграция; исправлена обнаруженная Deno типизация writer. Ничего не пересоздавалось и история не переписывалась.
-- Продолжение в текущем HEAD: обновление сообщений/фото/реакций без потери черновика, освобождение Blob URLs, поздняя отправка после unmount запрещена; Realtime publication только четырёх RLS-таблиц; семь недостающих полей поиска напарников; покрывающие индексы трёх новых FK.
-- STAGING `yudtbifopfnjtjanaqrd`: **45 public tables**, все с RLS. Предыдущий срез 31/22 — исторический. Приняты и не переиграны уже появившиеся миграции 20261104000548, 000608, 001134 и 002109.
-- Применены семь новых точечных дельт. Текст каждой прочитан из migration history и точно совпал с файлом. [Версии, контракты, rollback](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md).
-- `chat-photo-upload` v1 и `chat-photo-access` v1 ACTIVE / JWT=true. Все пять файлов обеих функций точно совпали с исходниками при readback. Private JPEG-only bucket 5 MiB; клиент не может зарегистрировать исходное фото или получить прямой Storage token.
-- `zapruda-daily-advice-yandex` v2 остаётся отдельной canary; оригинал `zapruda-daily-advice` v14 остаётся legacy. SPOT v11, report upload v7/access v2, OpenWeather v11 сохранены.
-- После DDL: 0 публичных отчётов, 0 catches/comments/chat messages/chat photos/private marks, 0 новых fake public records. Существующий приватный отчёт не копировался/не удалялся. Последующий JWT QA обязан отдельно доказать очистку.
+- Снят точный GitHub blocker: в `staging-e2e` добавлена только ветка `feat/ai-yandex-deepseek-staging`; reviewers/остальные защиты и защищённые секреты сохранены.
+- **[41759969230](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41759969230), source 8273912: все 3 шага PASS** — настоящие core JWT/API/Realtime, feedback v2, SPOT negative preflight. Четыре существующих разных confirmed users, без JWT-эмуляции или privileged CI key.
+- Реальные private report/catch/atomic retry/rollback, public→private HTTP фото и EXIF, GPS/Storage denial, оба чата/реакции/фото, Realtime INSERT+UPDATE, foreign mutation denial, own profile/gear/primary kit, отдельная погода. [Точные сценарии, ограничения, очистка](ZAPRUDA_STAGING_JWT_ACCEPTANCE_20261104.md).
+- `abe95b4`: принят fix #101 private bio через own RPC с совместимостью только при отсутствующем RPC; шесть component-регрессий. Пустой guest photo 404 не считается утечкой: статус и отсутствие изображения проверены.
+- `cc44a18`: настоящим JWT воспроизведены и исправлены feedback history 42501 и конкурентный обход лимита 5/час. Восьмая дельта **20261104021404 v075_feedback_atomic_limits**, service-only invoker RPC + собственный user_id read; direct writes/body/contact по-прежнему закрыты.
+- Feedback v2 ACTIVE / JWT=true, exact source readback, STAGING-only URL guard и исходники вне автоматического production пути. Telegram-кода нет. **6 параллельных POST → 5 × 201 + 429**, собственная история/чужая приватность PASS. Только свои 5 QA UUID очищены; ранее очищены ровно 6 из воспроизведения v1.
+- `8273912`: чат ждёт PostgreSQL readiness, обновляет историю при ready/rejoin без потери черновика. Live тест требует настоящего события; polling не заменяет Realtime. Один дополнительный component regression.
+- STAGING: **45 public tables / все RLS**, семь прежних точечных дельт и adopted #98–#107 сохранены, не переиграны. Chat upload/access v1, report upload v7/access v2, SPOT v11, OpenWeather v11 сохранены.
+- После cleanup 02:23 UTC: 0 public reports/catches/messages/chat photos/feedback/QA Storage objects; прежний один private report сохранён. Нет fake public fish/spot/moderator.
+- **421 Vitest / 33 файла** локально; PostgreSQL17 независимые соединения/5 серий feedback races/15/day limit/rollback, Deno actual entrypoints PASS. Все текущие CI/браузеры — в [Checks](https://github.com/SergeyGalkin91/zapruda1/pull/93/checks), проверять точный HEAD.
 
-Отчёт без улова **не зависит от catches/RPC**. Для отчёта с уловом preflight сохранён; report+catch+retry receipt выполняются одной invoker-транзакцией с исходной RLS. Любая ошибка улова откатывает отчёт. Текст черновика остаётся в per-account localStorage, фотографии туда не сохраняются. После сохранения значения формы замораживаются на время повторной загрузки.
-
-## Проверки: различать уровни доказательств
-
-- Локально текущие исходники: **410 тестов / 32 файла**, TypeScript, lint (0 ошибок / 6 прежних предупреждений), build и migration-version audit PASS. Из них 25 изолированных SQL-тестов и 3 новые настоящие component-регрессии чата; это **не JWT**.
-- На точном `d58836c` прошли все шесть запущенных scoped CI: [quality/400](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41747680371), [Docker](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41747680552), [PostgreSQL17 + Deno обеих photo entrypoints](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41747680477), [три браузера/четыре ширины/обе темы](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41747680365), Yandex Deno и advisor resilience.
-- PostgreSQL: отдельные соединения, 5 серий конкурентных retry/place requests, один primary kit, catch failure rollback, empty rollback/reapply и отказ уничтожить заполненные данные. Искусственные SQL-идентичности только в одноразовой БД.
-- Для итогового HEAD общий validation marker запускает все **13 обычных workflows**, включая standalone Node, photo browsers, SPOT PostgreSQL, СХОДКИ и preview isolation. Читать фактические результаты в [Checks PR #93](https://github.com/SergeyGalkin91/zapruda1/pull/93/checks); предыдущий зелёный SHA не выдавать за новый.
-- Новый `pilot-staging-jwt.yml` использует существующие четыре confirmed account secrets в защищённом `staging-e2e`: actual report/catch/API, public→private HTTP, EXIF, чат/Realtime/photos/reactions, приватный профиль, отдельная погода и независимый SPOT negative-upload. Подготовленный/ожидающий workflow не считается PASS.
-- Существующее настоящее hosted evidence: [41729999695](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41729999695) — SPOT границы и private photo HTTP PASS; xAI diagnosis отклонил credential. Это не новый полный UI/модераторский E2E.
+Отчёт без улова по-прежнему не зависит от catches/RPC. Ошибка внесённого улова останавливает публикацию в одной транзакции; per-account draft сохраняется. Чужие приватные данные, координаты и оригиналы не открывались ради тестов.
 
 ## PARTIAL / BLOCKED
 
-1. Полная совместимость приложения не достигнута: **8 таблиц + my_atlas_progress view + 6 клиентских RPC** отсутствуют; сохраняются отдельные guide/paid-schema различия. [Матрица 48 отношений](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md). Не принимать Atlas, guide/payment/admin/feedback submission/spearfishing как проверенные STAGING-сценарии.
-2. Настоящий DeepSeek/YandexGPT/квота/кэш/journal пока BLOCKED: [41736781269](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41736781269) дважды failure до runner, logs нет, pending_deployments пуст. Нужен **только текст двух Annotations**; ключ повторно не менять. [AI acceptance](ZAPRUDA_DEEPSEEK_STAGING_ACCEPTANCE.md).
-3. Полный KING live BLOCKED: необходим разрешённый независимый модератор, законный реальный SPOT и подлинное evidence. Роли, титулы и фиктивные публичные уловы не создавались.
-4. Новые JWT/UI/Realtime сценарии закрываются только фактическим protected PASS. Guest screenshots, SQL-фикстуры и readback не подменяют этот gate.
-5. PROD privacy/schema drift, legacy original и old Storage policy остаются P0: отдельный backup/migration/media plan и разрешение. Точные координаты/оригиналы не переносились. Физический российский мобильный интернет без VPN не измерялся.
+1. **Netlify:** установлен реальный Site ID 3a98edc7-c77f-45f8-9fe0-7a156c72abf5 и старый PR54 preview/deploy/source e1288d4. Реальная страница закрыта Team protection; current v0.7.5 deployed SHA, env/bundle и hosted browser login не подтверждены. OAuth read-only email для Netlify Auth отклонён automatic review до отдельного явного согласия. Не отключать защиту/не создавать новый site.
+2. **Yandex:** branch blocker снят, run 41736781269 attempt 3 реально исполнился. Погода PASS; primary/backup diagnostics **YANDEX_KEY_MISSING**, квота сохранена. Нужен доступный `YANDEX_AI_API_KEY` в STAGING, затем folder/IAM/model/upstream acceptance. Это не новая причина менять XAI key. Canary v2 и original legacy v14 остаются раздельны.
+3. **Схема:** остались 8 клиентских таблиц + my_atlas_progress view + 6 RPC/guide paid differences. #105 просмотрен, без применения: необходимы отдельные evidence/actor/view tests. [Матрица](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md).
+4. **Unconfirmed/live KING:** живой unconfirmed-account тест не выполнен имеющимися четырьмя confirmed secrets. KING требует разрешённого независимого модератора, законного real spot и подлинного evidence. SQL fixtures/guards не заменяют эти JWT gates.
+5. **Публичный запуск:** production privacy/media drift, full hosted UI и российский мобильный замер остаются отдельными gates. Production/read-only migration inventory 62/latest 20261101204210; ничего не изменено.
 
 ## NOT STARTED / отдельные разрешения
 
-STAGING original-route AI cutover — только после настоящих primary/backup PASS и отдельного согласия. XAI secrets сохраняются для rollback. Main/production merge/deploy, DNS, публичный релиз, реальные платежи не запускать автоматически. UX-spec не равен реализации: трёхшаговый wizard, unread receipts, будущие лиги и trophy thresholds не объявляются завершёнными.
+Original-route AI cutover — только после настоящих primary/backup PASS и отдельного согласия; legacy secrets сохраняются. Main/production merge/deploy, DNS, public release, реальные платежи не выполнялись. Не назначать роли и не создавать публичные точки ради тестов. Существующий PR108 → main не объединялся; канонический PR93 остаётся draft. UX-spec не равен реализации wizard/unread/future leagues/trophy thresholds.
 
-Advisors: 11 INFO RLS-no-policy (в том числе intentional deny internal tables), 13 WARN guarded SECURITY DEFINER entrypoints, 1 WARN leaked-password protection. Три новые FK warnings исправлены отдельными индексами; оставшиеся performance findings записаны в alignment report. Предупреждения не скрывались и доступ не ослаблялся ради зелёной панели.
-
-## Последующие изменения, сохранённые при финальном аудите
-
-На срезе 01:07 UTC: 45 public tables/RLS, восемь отсутствующих клиентских таблиц + Atlas view и шесть RPC. Сохранены не наши новые миграции 20261104004040 global chat, 20261104005024 empty admin lookup, 20261104005501 follows и 20261104010044 feedback owner-read. Роли/записи не назначались и миграции не повторялись. Пять дополнительных изолированных регрессий проверяют author/confirmation global-room boundary, запрет self-admin, follows ownership, закрытые contact/body и запрет rollback через последующие изменения. Итого 410 тестов/32 файла.
-
-Protected pilot run [41750476167](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41750476167), source 8dc1e01: failure до runner, steps/logs отсутствуют, pending deployments пуст, две Annotations без доступного текста. Требуется их текст, не пароли/ключи и не повторное подтверждение deployment. API/Realtime/weather/SPOT шаги в этом запуске не исполнялись. Финальное изменение сохраняет тот же live-test script; повторно запускать идентичный блокированный job без причины не нужно.
+Полное доказательство текущего продолжения: [STAGING JWT acceptance](ZAPRUDA_STAGING_JWT_ACCEPTANCE_20261104.md). Исторические записи о недоступных Annotations/31-table срезе не переопределяют это состояние.

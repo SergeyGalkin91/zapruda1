@@ -1,26 +1,27 @@
 # v0.7.5 SPOT — release readiness, 04.11.2026
 
-**NO-GO публичному запуску; кандидат для настоящей STAGING-приёмки.** Канонический PR #93 → SPOT. Main, production, DNS и платежи не изменены.
+**Настоящая core STAGING JWT-приёмка PASS; full app/public launch NO-GO.** Канонический PR93 → release/v0.7.5-spot, дизайн v0.6.0-admin-rc.1 сохранён. Зелёный CI и нижеописанный API PASS не заменяют hosted UI/оставшиеся security gates.
 
-| Gate                                                    | Статус                        | Доказательство / оставшееся ограничение                                                                                  |
-| ------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Core STAGING schema                                     | DONE структурно               | 45 public tables/RLS; 7 новых дельт, exact history/source readback; adopted migrations не повторялись                    |
-| Отчёт/catches/retry                                     | DONE код/SQL                  | atomic invoker RPC, catch failure rollback, captured actor/token, draft; no-catch независим; новый JWT gate отдельно     |
-| Chat safe media / refresh                               | DONE код/deploy               | две JWT v1 функции, exact 5-file readback; no direct Storage signing; lifecycle/component/SQL проверки                   |
-| Own gear/marks/profile/activity                         | DONE структурно               | owner-only RLS/column grants; no self-awarded beta status; primary kit serialized                                        |
-| TypeScript/lint/Vitest/build                            | DONE локально                 | 410 тестов/32 файла; 0 lint errors/6 старых warnings; точный итоговый HEAD в PR Checks                                   |
-| PostgreSQL17/Deno/Docker                                | DONE на d58836c               | runs 41747680477 / 41747680552; последующие SQL/client изменения требуют текущего HEAD                                   |
-| Browser 320/390/768/1440, 2 themes, 3 engines           | DONE guest на d58836c         | run 41747680365; итоговый marker запускает свежую проверку                                                               |
-| Настоящий private-photo/SPOT JWT baseline               | DONE ограниченно              | 41729999695; не полная модерация/KING и не новый public-toggle                                                           |
-| Public→private HTTP / chat Realtime / full core JWT     | PARTIAL                       | защищённый pilot-staging-jwt workflow подготовлен; требуется фактический PASS и cleanup                                  |
-| Полный live KING                                        | BLOCKED                       | нет разрешённого модератора/проверенного реального спота/подлинного evidence                                             |
-| DeepSeek primary/backup/cache/quota                     | BLOCKED                       | canary v2; run 41736781269 не дошёл до runner, нужен текст Annotations                                                   |
-| Остальная frontend/schema совместимость                 | PARTIAL                       | 8 таблиц + Atlas view + 6 RPC, guide/paid columns остаются; не включать в пилот без собственной приёмки                  |
-| Lovable build independence                              | DONE сборка / PARTIAL hosting | зависимость/lockfile исправлены ранее; Node/Docker proof; опубликованный проект не удалён, внешний hosting не переключён |
-| Российский мобильный интернет без VPN                   | BLOCKED                       | нужен физический замер, CI runner его не заменяет                                                                        |
-| PROD privacy/media convergence                          | BLOCKED                       | отдельный план, backup, обработка legacy originals и разрешение                                                          |
-| Original-route Yandex cutover, production, DNS, release | NOT STARTED                   | отдельное разрешение после PASS; XAI secrets сохранены                                                                   |
+| Gate                                                      | Статус                       | Доказательство / ограничение                                                                                                     |
+| --------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GitHub Environment branch blocker                         | DONE                         | Одна точная feature-ветка добавлена; required reviewer/admin-bypass protection сохранены                                         |
+| Core schema                                               | DONE структурно              | 45 public tables/RLS; 8 наших дельт, adopted миграции не повторялись                                                             |
+| Report/catch/retry/privacy                                | DONE JWT/API                 | 41759969230 source8273912; atomic failure/retry, foreign mutations, public→private фото, EXIF, GPS/Storage                       |
+| Geographic/global chat/Realtime                           | DONE JWT/API                 | Настоящие message INSERT и photo INSERT/UPDATE; ready wait/rejoin reconciliation; гостевой и foreign denial                      |
+| Own profile/gear/marks                                    | DONE JWT/API                 | Own RPC, private read/edit boundaries, concurrent one-primary-kit; #101 adopted                                                  |
+| Feedback v2                                               | DONE JWT/API                 | 6 concurrent → 5 saves + 429, UI history/stranger boundaries, no Telegram; exact 5 QA UUID cleanup                               |
+| 15/rolling-day cap                                        | DONE SQL / PARTIAL live      | Изолированный PG/PGlite boundary; не называть настоящим JWT time-window proof                                                    |
+| TypeScript/lint/Vitest/build                              | DONE код                     | 421/33 локально, 0 lint errors; текущие результаты точного HEAD в Checks                                                         |
+| PostgreSQL17/Deno/Docker/Node                             | DONE scoped CI               | Actual entrypoints incl STAGING broker; независимые SQL connections, rollback/reapply; latest HEAD in Checks                     |
+| Browser 320/390/768/1440, 2 themes/3 engines              | PARTIAL hosted               | Guest/visual CI evidence; не авторизованный Netlify app E2E                                                                      |
+| Netlify current deployment/UI                             | BLOCKED                      | Реальный Site ID/старый preview установлен; Team protection и OAuth read-only email consent; current SHA/env/bundle не проверены |
+| DeepSeek primary/backup/cache/quota                       | BLOCKED                      | Реальный run41736781269 attempt3: YANDEX_KEY_MISSING, read-only quota preserved; OpenWeather PASS                                |
+| Unconfirmed account                                       | BLOCKED live                 | Существующие 4 secrets confirmed; серверные/SQL guards не заменяют отрицательный Auth E2E                                        |
+| Full live KING                                            | BLOCKED                      | Разрешённый независимый moderator + законный spot + подлинное evidence                                                           |
+| Остальная schema/frontend совместимость                   | PARTIAL                      | 8 tables + Atlas view + 6 RPC/guide paid differences; #105 не применён                                                           |
+| Lovable independence                                      | DONE build / PARTIAL hosting | Node/Docker source proof; опубликованный Lovable project не удалялся                                                             |
+| Российский мобильный интернет                             | BLOCKED                      | Нужен физический замер без VPN                                                                                                   |
+| Production privacy/media convergence                      | BLOCKED P0                   | Отдельные backup/legacy media/schema plan и разрешение                                                                           |
+| Original AI cutover/main/prod/DNS/public release/payments | NOT STARTED                  | Отдельные разрешения; текущая приёмка ничего из этого не выполняет                                                               |
 
-[Current state](ZAPRUDA_CURRENT_STATE_20261104.md) · [Ordered schema/deploy evidence](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md) · [Dependency matrix](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md) · [PR Checks](https://github.com/SergeyGalkin91/zapruda1/pull/93/checks).
-
-Зелёный CI не означает, что приложение целиком принято. Утверждённый дизайн/темы/навигация сохранены; wizard, unread receipts, новые лиги и неподтверждённые trophy thresholds не считаются реализованными этой консолидацией.
+[Фактическая JWT приёмка](ZAPRUDA_STAGING_JWT_ACCEPTANCE_20261104.md) · [CURRENT_STATE](ZAPRUDA_CURRENT_STATE_20261104.md) · [Checks PR93](https://github.com/SergeyGalkin91/zapruda1/pull/93/checks). Точный актуальный SHA определять из PR; последующие docs/checkpoint commits не превращают старый run в новый PASS.
