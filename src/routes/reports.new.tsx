@@ -272,8 +272,8 @@ export function NewReport() {
           new Date(street.startedAt).toLocaleString("ru-RU") +
           ". Уловов: " +
           items.length +
-          (notes ? "\\nЗаметки: " + notes : "") +
-          items.map((c) => "\\n• " + c.species + (c.note ? " — " + c.note : "")).join("")
+          (notes ? "\nЗаметки: " + notes : "") +
+          items.map((c) => "\n• " + c.species + (c.note ? " — " + c.note : "")).join("")
         ).slice(0, 3000),
       );
       setTackle(typeof street.tackle === "string" ? street.tackle : "");
