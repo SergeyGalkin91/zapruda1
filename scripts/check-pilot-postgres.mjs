@@ -83,6 +83,39 @@ await sql(
 await sql(file("staging/rollback_v075_pilot_schema.sql"));
 await sql(deltas.map((d) => file("staging/" + d)).join("\n"));
 await sql(file("tests/unit/subsequent_dependencies_adopted.sql"));
+await sql(file("staging/v075_feedback_atomic_limits.sql"));
+const feedbackRaces = [];
+const feedbackCall =
+  "select public.submit_community_request_v075(" +
+  q(owner) +
+  ",'bug','','SQL fixture','Disposable technical feedback','')";
+for (let round = 0; round < 5; round++) {
+  // Only this script's disposable localhost database; never a hosted quota reset.
+  await sql("delete from public.community_requests");
+  const attempts = await Promise.allSettled(
+    Array.from({ length: 6 }, () =>
+      sql("begin; set local role service_role; " + feedbackCall + "; commit;"),
+    ),
+  );
+  assert.equal(attempts.filter((r) => r.status === "fulfilled").length, 5);
+  const refused = attempts.filter((r) => r.status === "rejected");
+  assert.equal(refused.length, 1);
+  assert.match(String(refused[0].reason), /FEEDBACK_RATE_LIMITED/);
+  assert.equal(await scalar("select count(*) from public.community_requests"), 5);
+  feedbackRaces.push({ round, attempts: 6, saved: 5, rateLimited: 1 });
+}
+await sql(
+  "delete from public.community_requests; insert into public.community_requests(user_id,request_type,subject,body,created_at) select " +
+    q(owner) +
+    ",'bug','SQL fixture','Disposable technical feedback',now()-interval '2 hours' from generate_series(1,15)",
+);
+await assert.rejects(
+  sql("begin; set local role service_role; " + feedbackCall + "; commit;"),
+  /FEEDBACK_RATE_LIMITED/,
+);
+await sql(file("staging/rollback_v075_feedback_atomic_limits.sql"));
+assert.equal(await scalar("select count(*) from public.community_requests"), 15);
+await sql(file("staging/v075_feedback_atomic_limits.sql"));
 const cases = [];
 for (let round = 0; round < 5; round++) {
   const report = randomUUID();
@@ -181,6 +214,9 @@ writeFileSync(
       populatedRollbackRefused: true,
       subsequentRollbackRefused: true,
       onePrimaryKit: true,
+      feedbackRaces,
+      feedbackDailyLimit: true,
+      feedbackRollbackPreservesRequests: true,
       cases,
     },
     null,

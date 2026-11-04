@@ -25,7 +25,7 @@ jobs:
       ZAPRUDA_E2E_RACER_B_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_B_EMAIL }}
       ZAPRUDA_E2E_RACER_B_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_B_PASSWORD }}
       ZAPRUDA_SPOT_E2E_UPLOAD_PROBE: "true"
-      ZAPRUDA_FEEDBACK_E2E_TELEGRAM_DISABLED: "readback-v1-no-outbound-code"
+      ZAPRUDA_FEEDBACK_E2E_TELEGRAM_DISABLED: "readback-no-outbound-code"
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

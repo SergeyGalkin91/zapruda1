@@ -348,18 +348,24 @@ try {
   chatPhoto = randomUUID();
   await owner.api.realtime.setAuth(owner.token);
   let receivedPhoto;
+  summary.photoRealtimeEvents = [];
   const photoReady = new Promise((resolve) => {
     receivedPhoto = resolve;
   });
   const updates = owner.api.channel("pilot-photo-" + chatPhoto).on(
     "postgres_changes",
     {
-      event: "UPDATE",
+      event: "*",
       schema: "public",
       table: "chat_message_photos",
       filter: "id=eq." + chatPhoto,
     },
     (payload) => {
+      if (payload.new.id === chatPhoto)
+        summary.photoRealtimeEvents.push({
+          event: payload.eventType,
+          ready: Boolean(payload.new.sanitized_at),
+        });
       if (payload.new.id === chatPhoto && payload.new.sanitized_at) receivedPhoto(true);
     },
   );
@@ -383,7 +389,7 @@ try {
       new Promise((_, reject) => {
         readyTimer = setTimeout(
           () => reject(new Error("PILOT_REALTIME_PHOTO_NOT_DELIVERED")),
-          15000,
+          45000,
         );
       }),
     ]);

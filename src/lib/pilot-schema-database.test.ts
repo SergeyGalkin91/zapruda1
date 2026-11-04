@@ -35,6 +35,7 @@ async function baseline(includeSubsequent = true) {
   for (const delta of deltas) await applySqlFile(engine, "staging/" + delta);
   if (includeSubsequent)
     await applySqlFile(engine, "tests/unit/subsequent_dependencies_adopted.sql");
+  if (includeSubsequent) await applySqlFile(engine, "staging/v075_feedback_atomic_limits.sql");
   return engine;
 }
 const publish = (id = report, catches = fish, values = payload) =>
@@ -371,15 +372,16 @@ describe("Schema rollback and replay protection", () => {
       ]),
     );
   });
-  it("keeps feedback body/contact and direct submission closed until its broker is reviewed", async () => {
+  it("keeps feedback body/contact and direct submission closed with working own-history filtering", async () => {
     await db.query(
       "insert into public.community_requests(user_id,request_type,subject,body)values($1,'bug','SQL fixture','SQL fixture technical body')",
       [users.owner],
     );
     await actAsFixture(db, users.owner);
-    expect((await db.query("select id,subject from public.community_requests")).rows).toHaveLength(
-      1,
-    );
+    expect(
+      (await db.query("select id,subject from public.community_requests where user_id=auth.uid()"))
+        .rows,
+    ).toHaveLength(1);
     await denied(() => db.query("select body,contact from public.community_requests"));
     await denied(() =>
       db.query(
@@ -389,6 +391,74 @@ describe("Schema rollback and replay protection", () => {
     );
     await actAsFixture(db, users.outsider);
     expect((await db.query("select id,subject from public.community_requests")).rows).toEqual([]);
+  });
+  it("exposes the atomic feedback RPC only to the server role", async () => {
+    for (const role of ["authenticated", "anon"]) {
+      await actAsFixture(db, users.owner, role);
+      await denied(() =>
+        db.query(
+          "select public.submit_community_request_v075($1,'bug','','SQL fixture','Disposable technical feedback','')",
+          [users.owner],
+        ),
+      );
+    }
+  });
+  it("enforces five/hour and isolates the other user's allowance", async () => {
+    await actAsFixture(db, users.owner, "service_role");
+    const send = (id: string) =>
+      db.query(
+        "select public.submit_community_request_v075($1,'bug','','SQL fixture','Disposable technical feedback','')",
+        [id],
+      );
+    for (let n = 0; n < 5; n++) await send(users.owner);
+    await denied(() => send(users.owner), "P0001");
+    await send(users.outsider);
+    expect(
+      (await db.query("select id from public.community_requests where user_id=$1", [users.owner]))
+        .rows,
+    ).toHaveLength(5);
+    await actAsFixture(db, users.outsider);
+    expect(
+      (await db.query("select id,user_id from public.community_requests where user_id=auth.uid()"))
+        .rows,
+    ).toHaveLength(1);
+  });
+  it("enforces fifteen/rolling-day even when the last hour is empty", async () => {
+    await db.query(
+      "insert into public.community_requests(user_id,request_type,subject,body,created_at) select $1,'bug','SQL fixture','Disposable technical feedback',now()-interval '2 hours' from generate_series(1,15)",
+      [users.owner],
+    );
+    await actAsFixture(db, users.owner, "service_role");
+    await denied(
+      () =>
+        db.query(
+          "select public.submit_community_request_v075($1,'bug','','SQL fixture','Disposable technical feedback','')",
+          [users.owner],
+        ),
+      "P0001",
+    );
+    expect((await db.query("select id from public.community_requests")).rows).toHaveLength(15);
+  });
+  it("rolls feedback metadata back/reapplies without dropping private requests", async () => {
+    await db.query(
+      "insert into public.community_requests(user_id,request_type,subject,body)values($1,'bug','SQL fixture','Disposable technical feedback')",
+      [users.owner],
+    );
+    await applySqlFile(db, "staging/rollback_v075_feedback_atomic_limits.sql");
+    expect((await db.query("select id from public.community_requests")).rows).toHaveLength(1);
+    expect(
+      (
+        await db.query(
+          "select to_regprocedure('public.submit_community_request_v075(uuid,text,text,text,text,text)') as f",
+        )
+      ).rows,
+    ).toEqual([{ f: null }]);
+    await applySqlFile(db, "staging/v075_feedback_atomic_limits.sql");
+    await actAsFixture(db, users.owner);
+    expect(
+      (await db.query("select id from public.community_requests where user_id=auth.uid()")).rows,
+    ).toHaveLength(1);
+    await denied(() => db.query("select body,contact from public.community_requests"));
   });
   it("refuses rollback across subsequent chat changes even on an empty dataset", async () => {
     await db.exec("savepoint subsequent_guard");

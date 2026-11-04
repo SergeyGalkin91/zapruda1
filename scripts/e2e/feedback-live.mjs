@@ -56,7 +56,7 @@ try {
     "FEEDBACK_STAGING_REQUIRED",
   );
   requireThat(
-    process.env.ZAPRUDA_FEEDBACK_E2E_TELEGRAM_DISABLED === "readback-v1-no-outbound-code",
+    process.env.ZAPRUDA_FEEDBACK_E2E_TELEGRAM_DISABLED === "readback-no-outbound-code",
     "FEEDBACK_ISOLATION_NOT_VERIFIED",
   );
   phase = "real_login";
@@ -78,6 +78,7 @@ try {
     "FEEDBACK_INVALID_BODY_ACCEPTED",
   );
   checked("guest-denied-and-invalid-body-rejected");
+  requireThat((await submit(owner.token, null)).status === 400, "FEEDBACK_NULL_JSON_ACCEPTED");
   // Never reset a quota or switch accounts to obtain a free allowance.
   const before = await owner.api
     .from("community_requests")
@@ -127,6 +128,15 @@ try {
     .insert({ user_id: owner.id, request_type: "bug", subject: marker, body: payload.body });
   requireThat(direct.error, "FEEDBACK_DIRECT_CLIENT_WRITE_ALLOWED");
   checked("own-history-foreign-private-data-and-direct-write-boundaries");
+  const privilegedRpc = await owner.api.rpc("submit_community_request_v075", {
+    p_user_id: owner.id,
+    p_request_type: "bug",
+    p_category: "",
+    p_subject: marker,
+    p_body: payload.body,
+    p_contact: "",
+  });
+  requireThat(privilegedRpc.error, "FEEDBACK_PRIVILEGED_RPC_EXPOSED");
   const history = await owner.api
     .from("community_requests")
     .select("id,request_type,subject,created_at,review_status,telegram_status")
