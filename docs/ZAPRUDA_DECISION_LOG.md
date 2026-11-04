@@ -87,3 +87,7 @@ ID / дата / точная формулировка владельца / за�
 
 
 Финальная сохранённая интеграция P0 UI: `e391c578eff6d9eb717e7dfb9e43e36956307630`,13 CI PASS/449 tests,5 actual hosted screens loaded на390×844,STAGING only. Последующие host-boundary изменения сохранены, исторический JWT4eba367 не переименован в новый JWT PASS. [Полные scoped доказательства](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md).
+
+
+## D20 — техническое продолжение 9c7fe6e (05.11.2026, не новое разрешение релиза)
+По тому же прямому поручению внедрены и проверены утверждённые Premium UI/рыба/карбон в отдельном STAGING размещении. Исправлен настоящий ранний тап до hydration; regression проверяет SSR disabled и первый сохраняемый выбор. Код9c7fe6e:13/13 ordinary CI,450tests/38files,40actual hosted layout/readiness комбинаций,8reload-проверок обоев PASS. [Точный отчёт, SHA, фото и границы](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md). Все56ID/статусы/8модулей/7KING сохранены. Исторический JWT41908405475 остаётся SUCCESS только на4eba367. Старый QA-marker0;новые5строк оставлены без удаления. KING/guide/полный hosted/device/production readiness не закрыты. Main/Production/version/release запрещены последним заданием. Это evidence продолжения D19/D20, не владелецкий waiver.

@@ -1,5 +1,5 @@
 {
-  "source_sha": "57c23c294026e0378a13a9c57e5d189394745f09",
+  "source_sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
   "features": [
     {
       "id": "AUTH-01",
@@ -642,12 +642,12 @@
       "feature": "обе темы/сохранение/5 вкладок",
       "module": "Общая платформа",
       "priority": "P0",
-      "source": "src/lib/appearance.ts; src/styles.css; src/components/Shell.tsx",
+      "source": "src/lib/appearance.ts; src/styles.css; src/components/Shell.tsx; src/routes/settings.tsx; src/components/SettingsHydration.test.tsx",
       "backend": "localStorage theme",
       "status": "IMPLEMENTED",
-      "acceptance": "appearance.test.ts; visual-theme-smoke.cjs",
-      "evidence": "Final c216963 / Netlify6aeb7c4c1253f47978473cd0:26 focused single-account hosted layout/readiness cases PASS; feed and chat at320/390/768/1440 in both themes;12 routes at320 Matte Black. Theme persisted through navigation and original Matte Black restored. Historical96 cases remain scoped to e9fd4aa. Independent four-wallpaper persistence implemented with allowlisted pre-paint bootstrap; new-source browser/hosted evidence pending.",
-      "blocker": "Full hosted signup/recovery/two-account transactions, physical keyboard/safe area and final protected JWT regression remain open. Guide backend contract error persists; ordinary CI and layout checks are not release approval."
+      "acceptance": "appearance.test.ts; SettingsHydration.test.tsx; visual-theme-smoke.cjs; premium-ui-browser.cjs; actual hosted four-width/two-theme check",
+      "evidence": "Final c216963 / Netlify6aeb7c4c1253f47978473cd0:26 focused single-account hosted layout/readiness cases PASS; feed and chat at320/390/768/1440 in both themes;12 routes at320 Matte Black. Theme persisted through navigation and original Matte Black restored. Historical96 cases remain scoped to e9fd4aa. Independent four-wallpaper persistence implemented with allowlisted pre-paint bootstrap; new-source browser/hosted evidence pending. Final9c7fe6e: SSR-to-hydration first-tap fix;13/13 ordinary CI,450tests PASS;actual single-account hosted40layout/readiness combinations on five screens,320/390/768/1440,both themes;8wallpaper reload combinations PASS. Artifacts:qa/premium-ui-20261105/hosted-9c7-metrics.json and exact-head-ci-9c7.json. Historical pending sentence above is superseded only for this visual scope.",
+      "blocker": "Full hosted signup/recovery/two-account transactions, physical keyboard/safe area and owner visual acceptance remain OPEN. Historical protected41908405475/4eba367 is PASS; no protected9c7 rerun. Guide contract and production restore gates remain."
     },
     {
       "id": "UI-02",
@@ -658,8 +658,8 @@
       "backend": "реальные loading/empty/error данные",
       "status": "IMPLEMENTED",
       "acceptance": "UI_ACCEPTANCE: 320/390/1440 обе темы",
-      "evidence": "Hosted header correction e9fd4aa fits320px client305 with44px controls. c216963 bounds stalled decorative room photos to5s using the existing icon, with5 component regressions. Final13 CI workflows PASS,446 tests/37 files;26 targeted hosted layout/readiness cases PASS with real error states retained. Before/after context screenshots and metrics saved. Premium five real screens/outlined owner brand/independent four wallpapers implemented818e0d9, refinedf5831f9; current57c23c2 CI/hosted acceptance pending.",
-      "blocker": "Current Premium hosted/phone/owner visual acceptance must be completed; all screens and functional requirements remain mandatory."
+      "evidence": "Hosted header correction e9fd4aa fits320px client305 with44px controls. c216963 bounds stalled decorative room photos to5s using the existing icon, with5 component regressions. Final13 CI workflows PASS,446 tests/37 files;26 targeted hosted layout/readiness cases PASS with real error states retained. Before/after context screenshots and metrics saved. Premium five real screens/outlined owner brand/independent four wallpapers implemented818e0d9, refinedf5831f9; current57c23c2 CI/hosted acceptance pending. Final9c7fe6e: exact-head13ordinary CI and450tests PASS;actual hosted40layout/readiness combinations PASS with guide errors retained;three native safe context screenshots and SHA256 manifest saved;four wallpapers persist in both themes. Prior57c23c2 pending is historical; source report:docs/ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md.",
+      "blocker": "Physical-device/keyboard/safe-area, full accessibility and owner visual acceptance OPEN; hosted functional multi-account and guide contract errors remain. All original modules/functions remain mandatory; visual Preview is not release approval."
     },
     {
       "id": "RELEASE-01",

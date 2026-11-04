@@ -1,0 +1,11 @@
+{
+  "capturedAt": "2026-11-04T22:25:15.029Z",
+  "level": "actual hosted tab console; aggregate categories only, raw messages/URLs omitted",
+  "entriesObserved": 116,
+  "categories": {
+    "browserExtensionMetadataErrors": 116,
+    "other": 0
+  },
+  "limits": "Browser capture window only; aggregate is not a complete network trace or zero-console-error claim",
+  "note": "Observed messages belong to browser extension metadata transport. Separately, rendered Communities guide backend errors remain in hosted metrics; not silently accepted."
+}

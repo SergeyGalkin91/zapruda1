@@ -1,6 +1,6 @@
 # Premium UI — фактическая STAGING-приёмка, 05.11.2026
 
-**Фиксированный передаваемый SHA:** `9c7fe6e1bf1ee386e910769dac8eb611d50bd08e`; финальные CI/hosted доказательства — в последнем разделе.
+**Фиксированный передаваемый и проверенный SHA:** `9c7fe6e1bf1ee386e910769dac8eb611d50bd08e`; финальные CI/hosted доказательства — в последнем разделе. [Отдельный фиксированный STAGING Preview для телефона](https://6aebae0a59ab32e0cc56cdfb--zapruda1.netlify.app/welcome), deploy `6aebae0a59ab32e0cc56cdfb`. Действующая защита Netlify сохранена.
 
 **Результат:** утверждённая айдентика и пять экранов внедрены в настоящее приложение. Доступный [Netlify Preview](https://deploy-preview-93--zapruda1.netlify.app/) / [Welcome](https://deploy-preview-93--zapruda1.netlify.app/welcome). Это визуальный STAGING-кандидат, не RELEASE GO.
 
@@ -109,7 +109,6 @@ Actual hosted gallery вновь проверена на e391c57: все5стр�
 
 [Новый cross-browser artifact13367258225](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921084911/artifacts/13367258225):42,942,638bytes,SHA256 `b2e67fbaa1c10b684d82d776c34d87861c5433702114e5936214631a50824bbd`,expires18.11.2026. Скачан, hash проверен,120 premium PNG/216checks подтверждены3 JSON summaries (по72/40 на Chromium/Firefox/WebKit). Полный архив включён в переданный владельцу QA ZIP. Host-boundary/generation tests теперь4/4 PASS; product contract7/7 PASS.
 
-
 ## Фиксированный результат P0 — 9c7fe6e
 
 **Постоянный [Netlify STAGING Welcome](https://6aebae0a59ab32e0cc56cdfb--zapruda1.netlify.app/welcome)**,SHA `9c7fe6e1bf1ee386e910769dac8eb611d50bd08e`,deploy `6aebae0a59ab32e0cc56cdfb`. Ссылка получена из Netlify Permalink и действительно открыта в браузере; защита Netlify сохранена. Этот кандидат зафиксирован для передачи владельцу, дальнейший HEAD#93 может развиваться независимо. На телефоне требуется существующий разрешённый Netlify-вход и отдельный обычный вход ZAPRUDA для личного профиля; JWT/пароли между origins не копировались.
@@ -137,3 +136,42 @@ Actual hosted gallery вновь проверена на e391c57: все5стр�
 Три движка/четыре ширины/две темы снова PASS,новый UI216checks/120PNG. [Artifact13369515438](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367786/artifacts/13369515438),42,942,618bytes,SHA256 `e18ae0d0f1cc3fc94b6e22b117ce54df7e07594cedad277ed5601cafe759122c`,скачан и проверен,в переданном QA ZIP. Изолированный guest browser не переименовывается в настоящий JWT E2E.
 
 На постоянном9c7fe6e host штатными UI кликами проверены **8/8 тема×обои после reload**,включая первый выбор после ready. [Реальные pinned метрики](../qa/premium-ui-20261105/pinned-9c7fe6e-wallpapers.json); исходный чистый Matte Black на pinned origin восстановлен. Новый native снимок пяти загрузившихся страниц9c7fe6e на PR93 показывает реальный Carbon,0overflow/0foreign backend; [метрики](../qa/premium-ui-20261105/gallery-9c7fe6e-metrics.json) и [hash](../qa/premium-ui-20261105/final-pinned-9c7fe6e.json). Физическое устройство/full functional/KING остаются OPEN.
+
+## Финальная проверка 9c7fe6e — 05.11.2026, Москва
+
+**Код:** `9c7fe6e1bf1ee386e910769dac8eb611d50bd08e`, tree `0fb1617154cd07be92d712601662ee8b09d502e5`. **Deploy:** `6aebae0a59ab32e0cc56cdfb`. [Фиксированный Preview / Welcome](https://6aebae0a59ab32e0cc56cdfb--zapruda1.netlify.app/welcome) открыт и проверен в настоящем браузере: новый бренд, STAGING badge, рабочие ссылки. Это отдельное тестовое размещение существующего PR93 с тем же STAGING backend, не production deployment. На другом origin вход в приложение выполняется штатно; cookie/JWT между origin не переносились. Действующая private-защита Netlify не отключалась.
+
+### Исправленный настоящий дефект
+
+На SSR-странице настроек раннее нажатие Carbon могло произойти до React hydration: кнопка уже нарисована, но выбор не сохранялся. Commit9c7fe6e выводит controls disabled/aria-busy и честное «Загружаем оформление…» до применения существующих локальных предпочтений. Затем первый выбор применяется и сохраняется. Готовность не зависит от Auth или сети. SSR→hydration regression проверяет disabled SSR, восстановление Electric Blue/Carbon и первое переключение Neon Threads. Hosted повторное нажатие после исправления срабатывает с первого раза, Carbon сохраняется после перехода между страницами. Backend, авторизация и пользовательские данные не менялись.
+
+### Итоговые доказательства
+
+| Проверка | Фактический результат |
+|---|---|
+| [Все ordinary CI на9c7fe6e](../qa/premium-ui-20261105/exact-head-ci-9c7.json) | **13/13 SUCCESS**, каждый на указанном SHA |
+| [Quality41923367929](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367929) | TypeScript,ESLint,build,generated routes PASS;450/450tests,38/38files;0lint errors/6 прежних FastRefresh warnings |
+| [Visual41923367786](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367786) | Chromium/Firefox/WebKit;320/390/768/1440;обе темы;premium suite72checks/40PNG на engine,всего216checks/120PNG PASS |
+| [Actual hosted matrix](../qa/premium-ui-20261105/hosted-9c7-metrics.json) | **40/40 layout/readiness**:Welcome,лента,Комьюнити,SPOT/KING,профиль×4ширины×2темы;Carbon;пять страниц действительно загрузились во всех сочетаниях |
+| Границы hosted проверки | Настоящая авторизованная STAGING-сессия,один аккаунт,Chromium,same-origin CSS iframe.0overflow,0clipped essential header controls,0foreign Supabase origins,loading=false,visibleImagesPending=0.Это не полный functional E2E |
+| Сохранение оформления | **8/8**:Matte Black/Carbon/Neon Threads/Topographic после настоящего reload в обеих темах.Ещё11 целевых измерений настроек/Welcome,в JSON51 запись.После теста штатным UI восстановлены classic/matte-black/plain |
+| [Три настоящих снимка](../qa/premium-ui-20261105/hosted-9c7-screenshot-manifest.json) | Welcome Carbon390,пустая настоящая лента Carbon390,Welcome Electric Blue320.Native browser context;CSS viewport640px высотой;SHA256/байты сохранены.Личные снимки профиля не публиковались |
+| [Console](../qa/premium-ui-20261105/hosted-9c7-console-summary.json) / network |116ошибок browser-extension metadata transport,0прочих сообщений в захваченном окне.Ошибки guide API отдельно видны в UI.Origins-only Resource Timing не объявляется полным HTTP/WebSocket trace |
+
+GitHub сообщает [artifact13369515438](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367786/artifacts/13369515438),42,942,618bytes,digest `sha256:e18ae0d0f1cc3fc94b6e22b117ce54df7e07594cedad277ed5601cafe759122c`,expires19.11.2026 01:20:24MSK. Counts выше подтверждены actual job log; в этом продолжении архив повторно не скачивался и локально не хешировался. Отдельные summary/сведения предыдущего параллельного продолжения сохранены выше. Исторические более ранние скачанные архивы не переименованы.
+
+### Остальные release gates — без подмены визуальным PASS
+
+| Gate | Сейчас / оставшийся шаг |
+|---|---|
+|56ID/8модулей/7KING | Сохранены;статусы не повышены массово;JSON/Markdown синхронизированы с9c7fe6e.Общий контракт остаётся DRAFT |
+| Protected JWT | [41908405475](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908405475),job126849136280,whole workflow **SUCCESS** на4eba367;[каноническое доказательство](../qa/product-contract/PROTECTED_4EBA367_41908405475_PASS.json) сохранено.Это actual4JWT/API+localhost frontend/STAGING,не новый9c7 JWT и не hosted multi-user |
+| QA cleanup | [Read-only05.11 00:59:55MSK](../qa/premium-ui-20261105/staging-readonly-20261105.json):предыдущая разрешённая метка0;новая меткаrun41908405475 —5строк/5точныхUUID.Старое разрешение на них не распространяется;удаление и known-dirty повторный JWT не выполнялись |
+| Club/meetup security | В STAGING2точечные security migrations уже applied.Club SELECT/INSERT привязаны к `m.group_id=social_group_messages.group_id`,uid иaccepted;tautology отсутствует.В9c7 обычныеPostgreSQL/meetup/privacy guards SUCCESS;это не новый live negative multi-user JWT scope |
+| RLS/Auth advisories | [Свежий read-only summary](../qa/premium-ui-20261105/security-advisor-summary-20261105.json):11default-deny INFO,13guardedSECURITY DEFINER warnings требуют сохранения per-function review;leaked-password protection disabled.Роли/Auth/RLS этим UI-заданием не менялись |
+| Guides P1 | `/communities` по-прежнему показывает отсутствие `guide_profiles.live_sonar_system` и `public.guide_booking_inquiries`.В8матриц Komьюнити эти2ошибки сохранены;раздел не объявлен полностью работоспособным.Не создавать пустые таблицы/данные ради зелёного экрана |
+| KING P0 | Свежий read-only:0независимыхразрешённыхmoderators,0approved/reviewedSPOT,0catches/titleholders.Положительная цепочка не выполнена.Кроме данных,CARP/WINTER/BOAT требуют оставшейся серверной/UI реализации;7титулов в обязательном плане сохранены.Никакие фиктивные роли/споты/уловы не создавались |
+| Hosted/device | signup/confirm/recovery,полные двухпользовательские hosted transactions,физическая клавиатура/safe area,iOS/Android и итоговая визуальная приёмка владельцем OPEN.ЧетыреCSSширины и WebKit не являются физическим телефоном |
+| Production | [Read-only diff,additive migration/backup/rollback plan](ZAPRUDA_PRODUCTION_READINESS_20261104.md) сохранён с датой исходного snapshot;свежий production diff этим UI-продолжением не выполнялся.Env/OAuth,проверенный backup/Storage restore и production-specific dry run **UNVERIFIED**;SQL/production deploy запрещены |
+
+**Результат: новый Premium UI доступен для первого просмотра на телефоне; полная версия0.7.6 KING FINISH остаётся NO-GO.** Последнее поручение запрещает main/Production независимо от прежнего условного D15. Main,Production,package0.7.5,DNS,платежи,теги и релиз не менялись. PR93/111 остаются существующими draft PR; опубликованная история сохранена нормальным merge.

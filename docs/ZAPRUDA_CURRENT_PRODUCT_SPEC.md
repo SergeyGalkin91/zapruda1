@@ -1,5 +1,5 @@
 # ZAPRUDA COMMUNITY — текущий продуктовый контракт
-Дата сверки: 04.11.2026 (Москва). Статус документа: **DRAFT / на ревью владельцу**.
+Дата сверки: 05.11.2026 (Москва). Статус документа: **DRAFT / на ревью владельцу**.
 Контракт сохраняет требования; он не объявляет функции готовыми и не разрешает релиз.
 
 ## Начало каждой Work-задачи
@@ -7,13 +7,13 @@
 Прочитать этот файл, [журнал решений](ZAPRUDA_DECISION_LOG.md), [матрицу](ZAPRUDA_FEATURE_MATRIX.md), [release gates](ZAPRUDA_RELEASE_GATES.md), затем проверить актуальный HEAD PR #93, изменения зависимых PR и тематический issue. При UI-работе читать [UI acceptance](ZAPRUDA_UI_ACCEPTANCE.md). Номер старого design lock не равен текущей версии продукта.
 
 ## Источники и границы доказательств
-- Текущий зафиксированный Premium UI кандидат PR #93: `9c7fe6e1bf1ee386e910769dac8eb611d50bd08e`. Актуальные результаты и условное разрешение main: [FINAL_RELEASE_INTEGRATION](ZAPRUDA_FINAL_RELEASE_INTEGRATION_20261104.md). Исторические SHA сохраняются в FINAL_ACCEPTANCE.
+- Текущий зафиксированный и проверенный Premium UI кандидат PR #93: `9c7fe6e1bf1ee386e910769dac8eb611d50bd08e`. [Последние CI/hosted/phone-preview доказательства](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md). Историческое условное разрешение main: [FINAL_RELEASE_INTEGRATION](ZAPRUDA_FINAL_RELEASE_INTEGRATION_20261104.md); последнее прямое поручение D18/D19 запрещает main/Production в текущей операции. Исторические SHA сохраняются в FINAL_ACCEPTANCE.
 - [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111) — исходный аудит и единственный документальный PR этой консолидации, не утверждённая реализация.
 - [PR #92](https://github.com/SergeyGalkin91/zapruda1/pull/92) — UX-направление и foundations, не готовый wizard.
 - [PR #109](https://github.com/SergeyGalkin91/zapruda1/pull/109) — новый README о всех направлениях рыбалки; открыт, не слит.
 - [PR #110](https://github.com/SergeyGalkin91/zapruda1/pull/110) — FK ленты: SQL уже применён в STAGING по отчёту PR, не применять повторно. HTTP-проверка после reload остаётся открытой.
 - Последние прямые решения владельца 03–04.11 и мастер-задание `Вставленный текст(20261104-030108).txt` важнее противоречащих им старых текстов.
-- Наличие кода, изолированные тесты, настоящий JWT и hosted Browser — разные уровни доказательств. Читать текущую FINAL_ACCEPTANCE; старые PASS относятся только к указанным SHA. Бинарные визуальные референсы ещё нужно сопоставить с текущими скриншотами.
+- Наличие кода, изолированные тесты, настоящий JWT и hosted Browser — разные уровни доказательств. Читать текущую Premium acceptance и FINAL_ACCEPTANCE; старые PASS относятся только к указанным SHA. Бинарные референсы просмотрены, исходный логотип перенесён в SVG с provenance; приёмка владельцем итоговых экранов на телефоне остаётся открытой.
 - Preview: https://deploy-preview-93--zapruda1.netlify.app/ . Единственный разрешённый backend для проверки — STAGING `yudtbifopfnjtjanaqrd`.
 
 ## Продукт и карта модулей

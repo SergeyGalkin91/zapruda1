@@ -1,0 +1,336 @@
+{
+  "code_sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+  "tree_sha": "0fb1617154cd07be92d712601662ee8b09d502e5",
+  "workflow_count": 13,
+  "all_success": true,
+  "workflows": [
+    {
+      "id": 41923368267,
+      "name": "Advisor availability without an AI provider",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923368267",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:14:22Z"
+    },
+    {
+      "id": 41923367786,
+      "name": "ZAPRUDA Electric Blue cross-browser review",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367786",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:20:29Z"
+    },
+    {
+      "id": 41923367893,
+      "name": "v0.7.1 Meetup security guards",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367893",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:13:45Z"
+    },
+    {
+      "id": 41923368030,
+      "name": "Report photo privacy browser check",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923368030",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:14:24Z"
+    },
+    {
+      "id": 41923367929,
+      "name": "ZAPRUDA checks",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367929",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:14:36Z"
+    },
+    {
+      "id": 41923368006,
+      "name": "Pilot schema PostgreSQL and Deno checks",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923368006",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:14:37Z"
+    },
+    {
+      "id": 41923367783,
+      "name": "Independent Node hosting proof",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367783",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:13:53Z"
+    },
+    {
+      "id": 41923367909,
+      "name": "Yandex canary Deno typecheck",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367909",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:13:53Z"
+    },
+    {
+      "id": 41923367788,
+      "name": "ZAPRUDA Docker image smoke test",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367788",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:14:03Z"
+    },
+    {
+      "id": 41923368081,
+      "name": "SPOT isolated PostgreSQL transaction races",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923368081",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:14:01Z"
+    },
+    {
+      "id": 41923367973,
+      "name": "Netlify preview STAGING isolation guard",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367973",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:13:57Z"
+    },
+    {
+      "id": 41923367869,
+      "name": "v0.7.1 Meetup mobile browser smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367869",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:15:27Z"
+    },
+    {
+      "id": 41923367865,
+      "name": "ZAPRUDA Frontend Build",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41923367865",
+      "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+      "updated_at": "2026-11-04T22:16:13Z"
+    }
+  ],
+  "quality_job": {
+    "id": 126901294323,
+    "name": "quality",
+    "status": "completed",
+    "conclusion": "success",
+    "run_id": 41923367929,
+    "logs_url": null,
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1
+      },
+      {
+        "name": "Checkout",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2
+      },
+      {
+        "name": "Setup Bun",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      },
+      {
+        "name": "Install dependencies",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4
+      },
+      {
+        "name": "Audit migration versions (block new conflicts)",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5
+      },
+      {
+        "name": "TypeScript",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6
+      },
+      {
+        "name": "Lint",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7
+      },
+      {
+        "name": "Build",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8
+      },
+      {
+        "name": "Keep generated route contracts in sync",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9
+      },
+      {
+        "name": "Tests",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10
+      },
+      {
+        "name": "Post Setup Bun",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19
+      },
+      {
+        "name": "Post Checkout",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 20
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 21
+      }
+    ]
+  },
+  "visual_job": {
+    "id": 126901293209,
+    "name": "visual-appearance",
+    "status": "completed",
+    "conclusion": "success",
+    "run_id": 41923367786,
+    "logs_url": null,
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2
+      },
+      {
+        "name": "Run oven-sh/setup-bun@v2",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      },
+      {
+        "name": "Install locked dependencies",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4
+      },
+      {
+        "name": "Build application for isolated browser checks",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5
+      },
+      {
+        "name": "Install Chromium, Firefox, WebKit and Playwright",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6
+      },
+      {
+        "name": "Check both themes at 320/390/768/1440px in three engines; save screenshots",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7
+      },
+      {
+        "name": "Upload viewport screenshots and metrics",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8
+      },
+      {
+        "name": "Post Run oven-sh/setup-bun@v2",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 16
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 17
+      }
+    ]
+  },
+  "visual_artifact": {
+    "id": 13369515438,
+    "name": "electric-blue-cross-browser-evidence",
+    "size_in_bytes": 42942618,
+    "url": "https://api.github.com/repos/SergeyGalkin91/zapruda1/actions/artifacts/13369515438",
+    "archive_download_url": "https://api.github.com/repos/SergeyGalkin91/zapruda1/actions/artifacts/13369515438/zip",
+    "expired": false,
+    "created_at": "2026-11-04T22:20:26Z",
+    "expires_at": "2026-11-18T22:20:24Z",
+    "updated_at": "2026-11-04T22:20:26Z",
+    "digest": "sha256:e18ae0d0f1cc3fc94b6e22b117ce54df7e07594cedad277ed5601cafe759122c",
+    "workflow_run": {
+      "id": 41923367786,
+      "repository_id": 1436439070,
+      "head_repository_id": 1436439070,
+      "head_branch": "feat/ai-yandex-deepseek-staging",
+      "head_sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e"
+    }
+  },
+  "limits": "Ordinary isolated CI, not a protected JWT rerun or full multi-user hosted acceptance; JWT41908405475 applies only to4eba367.",
+  "visual_summaries": [
+    {
+      "engine": "chromium",
+      "passed": true,
+      "checks": 72,
+      "screenshots": 40
+    },
+    {
+      "engine": "webkit",
+      "passed": true,
+      "checks": 72,
+      "screenshots": 40
+    },
+    {
+      "engine": "firefox",
+      "passed": true,
+      "checks": 72,
+      "screenshots": 40
+    }
+  ],
+  "quality_summary": {
+    "tests": 450,
+    "test_files": 38,
+    "typecheck": "success",
+    "eslint": "0 errors / 6 pre-existing warnings",
+    "build": "success"
+  }
+}

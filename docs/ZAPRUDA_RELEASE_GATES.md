@@ -1,5 +1,5 @@
 # ZAPRUDA — условия следующего обновления
-04.11.2026. Контракт DRAFT. Техническая база v0.7.5 SPOT; целевой релиз 0.7.6 KING FINISH. Текущие результаты: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
+05.11.2026 (Москва). Контракт DRAFT. Техническая база v0.7.5 SPOT; целевой релиз 0.7.6 KING FINISH. Последний визуальный кандидат: [Premium STAGING acceptance](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md). Историческая техническая приёмка: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
 **NO-GO. Последние D18/D19 прямо запрещают main и Production в текущей операции. База0.7.5, target0.7.6 KING FINISH; bump/tag/release не разрешены.**
 Актуальный срез: [FINAL_RELEASE_INTEGRATION](ZAPRUDA_FINAL_RELEASE_INTEGRATION_20261104.md). Исторические результаты ниже относятся к указанным SHA.
 
@@ -13,11 +13,11 @@ P0 из FEATURE_MATRIX — обязательные критерии уже за
 | G1 стабильность | вход/confirm/recovery/выход, feed reload без FK ошибки, профиль save/readback, все P0 переходы | OPEN; FK по PR #110 применена, live открыт |
 | G2 chat | два реальных JWT, Realtime/text/photo/reaction/reply, reconnect и unread/read receipts | Scoped actual API + two-user localhost/STAGING Browser41908405475/4eba367 SUCCESS: read/unread/receipts, Realtime/retry/privacy. Full hosted/new-Premium/physical scope OPEN. |
 | G3 report | 3 шага, no-catch, draft/reload, privacy, retry без дубля, atomic catches, фото/GPS/EXIF | Actual signed-in three-step catch/no-catch/draft/photo/privacy/atomic retry41908405475/4eba367 SUCCESS. Hosted/new-Premium/physical review OPEN. |
-| G4 UI | before/after 320/390/1440, обе темы, последние референсы, контраст/focus/keyboard/no overflow | Premium five screens/brand/four wallpapers IMPLEMENTED818e0d9/f5831f9;57c23c2 paint/gallery checks. Exact new-source hosted/phone/owner visual acceptance OPEN; old green CI is not transferred. |
+| G4 UI | before/after 320/390/1440, обе темы, последние референсы, контраст/focus/keyboard/no overflow | 9c7fe6e: actual signed-in hosted layout/readiness 5screens×4widths×2themes PASS; eight theme/wallpaper reload combinations PASS. First-tap hydration defect fixed and regressed. Physical phone/keyboard/safe area, complete accessibility and owner pixel acceptance OPEN; guide errors retained. |
 | G5 безопасность | guest/owner/outsider/разрешённые роли, RLS/ACL/RPC/Storage, закрытые оригиналы, JWT isolation | Four actual JWTs/API/Storage/Realtime/private boundaries41908405475/4eba367 PASS; scoped evidence retained. Full new-source hosted/role and unresolved advisory/production gates OPEN. |
 | G6 STREET/SPOT/KING если в пилоте | сессия → opt-in report; реальный legal SPOT/evidence; независимая модерация, tie/race/revoke/history/notifications | OPEN; нельзя подделывать данные/роли |
-| G7 backend/deploy | свежий read-only STAGING inventory, сверка с нужными контрактами, deployed SHA = tested SHA, только STAGING в preview | OPEN; не повторять applied миграции |
-| G8 CI | typecheck/lint/tests/build + необходимые SQL/browser checks на exact code SHA, изучить skipped/failed jobs | Protected41908405475/4eba367 SUCCESS. All4 spec80b3ff6 workflows SUCCESS. Current Premium57c23c2 CI/hosted must be checked separately; prior UI failures retained in evidence. |
+| G7 backend/deploy | свежий read-only STAGING inventory, сверка с нужными контрактами, deployed SHA = tested SHA, только STAGING в preview | 9c7fe6e Netlify6aebae0a59ab32e0cc56cdfb matches tested code and onlySTAGING origins. Live club membership correlation/applied deltas read back correctly; guide contract, production-specific migration/restore/env/OAuth gates OPEN. No applied migration repeated. |
+| G8 CI | typecheck/lint/tests/build + необходимые SQL/browser checks на exact code SHA, изучить skipped/failed jobs | 9c7fe6e all13 ordinary workflows SUCCESS:450tests/38files,TypeScript/lint/build,PostgreSQL/meetup/SPOT/privacy,three-engine visuals. Historical protected41908405475/4eba367 SUCCESS remains separate; no protected9c7 rerun or blanket release acceptance. |
 | G9 AI если включён | актуальная погода, primary/backup, Web Search OFF, quota/cache/failure/privacy live | OPEN; cutover требует отдельного разрешения |
 | G10 пилот и версия | owner-approved scope + приёмка + явное разрешение конкретной версии | OPEN; автоматический bump/tag/release запрещён |
 
@@ -56,3 +56,7 @@ HEAD 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd: 13 ordinary workflows и protecte
 
 ## D19 — точный успешный JWT и отдельный визуальный Preview
 Protected41908405475 / real-pilot126849136280 SUCCESS on4eba367; four distinct confirmed JWTs, actual API and authenticated localhost/STAGING browser, core/browser cleanup=true. Later Premium UI57c23c2 requires separate hosted acceptance. [JWT PASS](../qa/product-contract/PROTECTED_4EBA367_41908405475_PASS.json). Подготовленный Premium Preview не равен release GO; KING и production backup/restore/env/OAuth по-прежнему блокируют релиз. Новые feedback fixtures не удалены и не использованы для known-dirty rerun. Main/Production запрещены последним заданием.
+
+
+## Сохранённый UI-кандидат 9c7fe6e — 05.11.2026
+Актуальные точные UI/CI/read-only доказательства и оставшиеся gates: [Premium STAGING acceptance](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md).13ordinary CI PASS/450tests и40actual hosted layout/readiness не заменяют protected9c7 JWT,hosted multi-user,physical device,реальныйKING или production restore. Прошлый protected41908405475/4eba367 whole workflow SUCCESS. Новые5feedback fixtures не удалялись;предыдущая разрешённая метка readback0. Все56ID/8модулей/7KING сохранены. NO-GO/main/Production/version/release restrictions unchanged.

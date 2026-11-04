@@ -1,0 +1,26 @@
+{
+  "checked_at": "2026-11-04 21:59:55.972317+00",
+  "previous_approved_marker_remaining": 0,
+  "new_run_feedback_remaining": 5,
+  "new_run_exact_ids_remaining": 5,
+  "king_moderators": 0,
+  "approved_reviewed_spots": 0,
+  "king_catches": 0,
+  "king_title_holders": 0,
+  "security_deltas_applied": 2,
+  "club_message_policies": [
+    {
+      "using": null,
+      "policy": "group_msg_insert",
+      "command": "INSERT",
+      "with_check": "((user_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM social_group_members m\n  WHERE ((m.group_id = social_group_messages.group_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.status = 'accepted'::text)))))"
+    },
+    {
+      "using": "(EXISTS ( SELECT 1\n   FROM social_group_members m\n  WHERE ((m.group_id = social_group_messages.group_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.status = 'accepted'::text))))",
+      "policy": "group_msg_read",
+      "command": "SELECT",
+      "with_check": null
+    }
+  ],
+  "scope": "Read-only STAGING snapshot; no new SQL/Auth/role/data writes. Previous approved feedback marker zero; five newer fixtures retained; positive KING blocked."
+}

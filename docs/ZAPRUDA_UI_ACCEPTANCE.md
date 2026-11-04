@@ -77,3 +77,6 @@ Protected41908405475 SUCCESS относится к4eba367, до нового UI.
 
 
 Фиксированный PHONE VISUAL PREVIEW9c7fe6e:450tests/13CI PASS,8/8 genuine pinned wallpaper reload checks. [Постоянный Preview](https://6aebae0a59ab32e0cc56cdfb--zapruda1.netlify.app/welcome). Early-tap/hydration fix сохранён. Подробные границы/хэши — в актуальном premium отчёте.
+
+## Финальный UI-кандидат 9c7fe6e — 05.11.2026
+[Новые scoped доказательства](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md):13/13 CI,450tests,40hosted layout/readiness сочетаний пяти экранов×четырёх ширин×двух тем,8сохранений обоев после reload. Реальная SSR/hydration потеря раннего тапа устранена; первый выбор Carbon сохраняется. Снимки Welcome/ленты/Blue320 и hashes приложены. Два guide schema errors видны и остаются дефектами. Физический телефон/keyboard/safe area,полный hosted multi-user и owner pixel review OPEN. Это не новый exact-head protected JWT и не release GO;старый4eba367 PASS сохранён отдельно.

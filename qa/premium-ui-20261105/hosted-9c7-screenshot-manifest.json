@@ -1,0 +1,26 @@
+{
+  "code_sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+  "deploy_id": "6aebae0a59ab32e0cc56cdfb",
+  "phone_url": "https://6aebae0a59ab32e0cc56cdfb--zapruda1.netlify.app/welcome",
+  "screenshots": [
+    {
+      "file": "zapruda-premium-9c7-welcome-carbon-390.jpg",
+      "bytes": 93084,
+      "sha256": "646fb1e46352dae67eb702e52e082d8384b8d03ee5eae9fdc9b5fdd496a5474b",
+      "scope": "Native browser context screenshot; CSS viewport inside real hosted QA page; no physical-device claim"
+    },
+    {
+      "file": "zapruda-premium-9c7-feed-carbon-390.jpg",
+      "bytes": 78705,
+      "sha256": "3f1827c12d627a81910ca9efdc673cf6f68fc99db4c29925211c9c6dc7cdeb00",
+      "scope": "Native browser context screenshot; CSS viewport inside real hosted QA page; no physical-device claim"
+    },
+    {
+      "file": "zapruda-premium-9c7-welcome-blue-320.jpg",
+      "bytes": 87002,
+      "sha256": "8a721498bf7b2dd243820cfcd6d561b88280fd8a68ec0db98603894e4c3cbcd2",
+      "scope": "Native browser context screenshot; CSS viewport inside real hosted QA page; no physical-device claim"
+    }
+  ],
+  "private_profile_screenshot_included": false
+}
