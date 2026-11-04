@@ -380,11 +380,10 @@ function Profile() {
     void loadFeaturedGear(auth.user.id);
 
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("username,display_name,bio,avatar_url,chat_city")
-        .eq("id", auth.user.id)
-        .maybeSingle(),
+      // STAGING intentionally hides bio from direct profiles SELECT.
+      // Read the full private profile through owner-scoped my_profile_full(),
+      // which checks auth.uid() on the server. Never broaden public grants.
+      supabase.rpc("my_profile_full").maybeSingle(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
       supabase.rpc("my_fishing_progress"),
       supabase.rpc("my_fishing_specializations_v2"),
