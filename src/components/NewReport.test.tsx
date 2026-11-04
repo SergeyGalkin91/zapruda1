@@ -88,8 +88,14 @@ async function fillReport() {
   });
   const discipline = screen.getByLabelText(/Вид рыбалки для достижений/) as HTMLSelectElement;
   fireEvent.change(discipline, { target: { value: discipline.options[1]!.value } });
-  const submit = screen.getByRole("button", { name: "Опубликовать отчёт" });
+  const submit = screen.getByRole("button", { name: "Далее" });
+  fireEvent.click(submit);
   return { ...view, form: submit.closest("form")! };
+}
+function submitReport(form: HTMLElement) {
+  const next = screen.queryByRole("button", { name: "Далее" });
+  if (next) fireEvent.click(next);
+  fireEvent.submit(form);
 }
 describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
   it("keeps the draft when the atomic catch transaction fails after a successful preflight", async () => {
@@ -103,7 +109,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     fireEvent.change(screen.getByPlaceholderText("Вид (щука, окунь…)"), {
       target: { value: "Окунь" },
     });
-    fireEvent.submit(form);
+    submitReport(form);
     await screen.findByText(
       "Не удалось сохранить отчёт с уловом. Черновик сохранён — попробуй позже.",
     );
@@ -122,7 +128,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     fireEvent.change(screen.getByPlaceholderText("Вид (щука, окунь…)"), {
       target: { value: "Окунь" },
     });
-    fireEvent.submit(view.form);
+    submitReport(view.form);
     await screen.findByText(
       "Не удалось сохранить отчёт с уловом. Черновик сохранён — попробуй позже.",
     );
@@ -133,7 +139,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     await screen.findByText(
       "Черновик восстановлен на этом устройстве. Фотографии нужно добавить снова.",
     );
-    fireEvent.submit(screen.getByRole("button", { name: "Опубликовать отчёт" }).closest("form")!);
+    submitReport(screen.getByRole("button", { name: "Опубликовать отчёт" }).closest("form")!);
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" }));
     expect(mocks.rpc.mock.calls[1]![1].p_report_id).toBe(id);
     expect(mocks.insert).not.toHaveBeenCalled();
@@ -166,7 +172,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     fireEvent.change(screen.getByPlaceholderText("Вид (щука, окунь…)"), {
       target: { value: "Окунь" },
     });
-    fireEvent.submit(form);
+    submitReport(form);
     await screen.findByText("Публикация временно недоступна. Черновик сохранён — попробуй позже.");
     expect(mocks.insert).not.toHaveBeenCalled();
     expect(mocks.from).not.toHaveBeenCalledWith("fishing_reports");
@@ -177,7 +183,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
   });
   it("allows an explicitly empty catch log without accessing the unavailable catch store", async () => {
     const { form } = await fillReport();
-    fireEvent.submit(form);
+    submitReport(form);
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" }));
     expect(mocks.insert).toHaveBeenCalledTimes(1);
     expect(mocks.insert).toHaveBeenCalledWith(
@@ -192,7 +198,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
       data: { user: { ...user, id: "offline-account-b" } },
       error: null,
     });
-    fireEvent.submit(form);
+    submitReport(form);
     await screen.findByText("Сессия изменилась. Открой отчёт из своего аккаунта.");
     expect(mocks.insert).not.toHaveBeenCalled();
     expect(mocks.from).not.toHaveBeenCalledWith("fishing_reports");
@@ -206,7 +212,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
           complete = resolve;
         }),
     );
-    fireEvent.submit(form);
+    submitReport(form);
     unmount();
     await act(async () => complete({ data: { user }, error: null }));
     expect(mocks.insert).not.toHaveBeenCalled();

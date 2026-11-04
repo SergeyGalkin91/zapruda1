@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   ArrowRight,
   Clock3,
@@ -10,6 +10,8 @@ import {
   ShieldCheck,
   Square,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { streetStorageKey } from "@/lib/street-storage";
 import { Shell } from "@/components/Shell";
 
 type StreetCatch = { species: string; note: string; at: string };
@@ -17,10 +19,11 @@ type StreetSession = {
   startedAt: string;
   area: string;
   notes: string;
+  tackle?: string;
+  lures?: string;
   catches: StreetCatch[];
   finishedAt?: string;
 };
-const STORAGE_KEY = "zapruda:street-session:v1";
 
 export const Route = createFileRoute("/street")({
   head: () => ({
@@ -35,10 +38,10 @@ export const Route = createFileRoute("/street")({
   component: StreetPage,
 });
 
-function readSaved(): StreetSession | null {
+function readSaved(key: string): StreetSession | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(key);
     if (!raw) return null;
     const value: unknown = JSON.parse(raw);
     if (
@@ -53,6 +56,8 @@ function readSaved(): StreetSession | null {
     return {
       startedAt: session.startedAt,
       area: typeof session.area === "string" ? session.area : "",
+      tackle: typeof session.tackle === "string" ? session.tackle : "",
+      lures: typeof session.lures === "string" ? session.lures : "",
       notes: typeof session.notes === "string" ? session.notes : "",
       catches: Array.isArray(session.catches)
         ? session.catches
@@ -67,6 +72,9 @@ function readSaved(): StreetSession | null {
 }
 
 function StreetPage() {
+  const storageKey = useRef<string | null>(null);
+  const [now, setNow] = useState(0);
+  const [storageError, setStorageError] = useState("");
   const [session, setSession] = useState<StreetSession | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [area, setArea] = useState("");
@@ -74,20 +82,45 @@ function StreetPage() {
   const [catchNote, setCatchNote] = useState("");
 
   useEffect(() => {
-    const saved = readSaved();
-    if (saved) {
+    let active = true;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (!active) return;
+      storageKey.current = streetStorageKey(data.user?.id);
+      const saved = readSaved(storageKey.current);
       setSession(saved);
-      setArea(saved.area);
-    }
-    setLoaded(true);
+      setArea(saved?.area || "");
+      setNow(Date.now());
+      setLoaded(true);
+    });
+    return () => {
+      active = false;
+      storageKey.current = null;
+    };
   }, []);
+  const sessionStartedAt = session?.startedAt;
+  const sessionFinishedAt = session?.finishedAt;
+  useEffect(() => {
+    if (!sessionStartedAt || sessionFinishedAt) return;
+    const tick = () => setNow(Date.now());
+    const timer = window.setInterval(tick, 1000);
+    window.addEventListener("focus", tick);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", tick);
+    };
+  }, [sessionStartedAt, sessionFinishedAt]);
   function store(next: StreetSession | null) {
+    if (!storageKey.current) return;
     setSession(next);
+    setNow(Date.now());
     try {
-      if (next) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      else window.localStorage.removeItem(STORAGE_KEY);
+      if (next) window.localStorage.setItem(storageKey.current, JSON.stringify(next));
+      else window.localStorage.removeItem(storageKey.current);
+      setStorageError("");
     } catch {
-      /* Storage can be disabled; in-memory state still works. */
+      setStorageError(
+        "Браузер не сохранил сессию. Не закрывай страницу: записи пока только в памяти.",
+      );
     }
   }
   function start() {
@@ -122,7 +155,7 @@ function StreetPage() {
     ? Math.max(
         0,
         Math.floor(
-          ((session.finishedAt ? Date.parse(session.finishedAt) : Date.now()) -
+          ((session.finishedAt ? Date.parse(session.finishedAt) : now) -
             Date.parse(session.startedAt)) /
             60000,
         ),
@@ -148,6 +181,7 @@ function StreetPage() {
           </div>
         </section>
 
+        {storageError && <p role="alert">{storageError}</p>}
         {!loaded ? (
           <p className="text-sm text-zinc-400">Загрузка сохранённой сессии…</p>
         ) : !session ? (
@@ -233,6 +267,26 @@ function StreetPage() {
                 </button>
               </form>
             )}
+            <label className="block text-sm text-zinc-300">
+              Снасти
+              <input
+                className="field mt-2 w-full"
+                value={session.tackle || ""}
+                maxLength={300}
+                disabled={!!session.finishedAt}
+                onChange={(e) => store({ ...session, tackle: e.target.value })}
+              />
+            </label>
+            <label className="block text-sm text-zinc-300">
+              Приманки
+              <input
+                className="field mt-2 w-full"
+                value={session.lures || ""}
+                maxLength={300}
+                disabled={!!session.finishedAt}
+                onChange={(e) => store({ ...session, lures: e.target.value })}
+              />
+            </label>
             <label className="block text-xs font-bold uppercase tracking-wide text-zinc-300">
               Заметки о выходе
               <textarea
@@ -297,9 +351,10 @@ function StreetPage() {
               </div>
             )}
             <p className="text-xs leading-5 text-zinc-500">
-              Запись локальная: после перехода к отчёту данные автоматически не переносятся. Если
-              очистить данные браузера, сессия исчезнет. Для публикации используй существующую форму
-              отчёта.
+              Запись локальная и отделена по аккаунту. После завершения открой отчёт и нажми
+              «Перенести Street-сессию». Старые записи общего браузера не импортируются
+              автоматически. Если очистить данные браузера, сессия исчезнет. Для публикации
+              используй существующую форму отчёта.
             </p>
           </section>
         )}

@@ -404,9 +404,9 @@ function Feed() {
         <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#D7FF35]/[0.09] z-electric-hero-glow blur-3xl" />
         <div className="relative">
           <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D7FF35]">
-            ZAPRUDA COMMUNITY / CONCEPT 01
+            ZAPRUDA COMMUNITY
           </p>
-          <h1 className="mt-4 max-w-[880px] text-[clamp(2.6rem,6vw,5.5rem)] font-black uppercase leading-[0.97] tracking-[-0.06em] text-[#F5F7F5]">
+          <h1 className="mt-4 max-w-[880px] text-[clamp(1.8rem,4vw,3.2rem)] font-black uppercase leading-[0.97] tracking-[-0.06em] text-[#F5F7F5]">
             НЕ ПРОСТО ЛЕНТА.<span className="block text-[#D7FF35]">ТВОЯ ВОДА.</span>
           </h1>
           <p className="mt-5 max-w-2xl text-sm leading-6 text-zinc-300">
@@ -450,9 +450,9 @@ function Feed() {
                 🐟
               </span>
               <span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">
-                Новый трофей
+                Новый отчёт
               </span>
-              <span className="mt-1 block text-xs text-zinc-400">Опубликовать улов</span>
+              <span className="mt-1 block text-xs text-zinc-400">Рассказать о рыбалке</span>
             </Link>
             <Link
               to="/communities"
@@ -468,7 +468,7 @@ function Feed() {
             </Link>
           </div>
           <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-            DARK / ACID / STREET FISHING
+            СПИННИНГ · ФИДЕР · ПОПЛАВОК · ЗИМНЯЯ РЫБАЛКА
           </p>
         </div>
       </section>

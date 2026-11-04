@@ -174,6 +174,30 @@ try {
   const guest = client();
   accounts.push(guest);
   passed("four-confirmed-distinct-real-JWTs");
+  phase = "chat_read_state_boundaries";
+  const readPlace = "00000000-0000-4000-8000-000000000001";
+  const roomSummary = await must(
+    await owner.api.rpc("chat_room_read_summary", { p_place: readPlace }),
+    "READ_SUMMARY_FAILED",
+  );
+  requireThat(
+    roomSummary.length === 6 && roomSummary.every((r) => Number(r.unread) >= 0),
+    "READ_SUMMARY_INVALID",
+  );
+  const foreignReads = await must(
+    await stranger.api.from("chat_read_state").select("user_id").eq("user_id", owner.id),
+    "READ_STATE_RLS_FAILED",
+  );
+  requireThat(foreignReads.length === 0, "READ_STATE_FOREIGN_LEAK");
+  const invalidMark = await owner.api.rpc("mark_chat_read", {
+    p_place: readPlace,
+    p_topic: "general",
+    p_message: randomUUID(),
+  });
+  requireThat(invalidMark.error, "READ_STATE_INVALID_MESSAGE_ACCEPTED");
+  const guestSummary = await guest.rpc("chat_room_read_summary", { p_place: readPlace });
+  requireThat(guestSummary.error, "READ_STATE_GUEST_ALLOWED");
+  passed("real-JWT-read-summary-and-private-boundaries-no-watermark-mutation");
   phase = "atomic_private_report";
   privateReport = randomUUID();
   reports.push(privateReport);

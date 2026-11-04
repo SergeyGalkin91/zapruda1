@@ -33,6 +33,7 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     auth: { getUser: mocks.getUser, getSession: mocks.getSession },
     from: mocks.from,
+    rpc: async () => ({ data: [], error: null }),
     functions: { invoke: mocks.invoke },
     removeChannel: mocks.remove,
     channel: () => {
