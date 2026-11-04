@@ -158,7 +158,7 @@ describe("Geographic chat (offline component regressions, not real JWT)", () => 
     });
     const { composer } = await open();
     fireEvent.change(composer, { target: { value: "Lost response QA" } });
-    fireEvent.click(screen.getByRole("button", { name: "Отправить", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Отправить" }));
     await waitFor(() => expect(composer).toHaveValue(""));
     expect(inserts).toBe(1);
     expect(insertedId).toMatch(/^[0-9a-f-]{36}$/i);

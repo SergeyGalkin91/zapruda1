@@ -248,13 +248,17 @@ export function GeographicChat() {
     };
     void load();
     const channel = supabase
-      .channel("chat-read-summary-" + uid + "-" + placeId)
+      .channel("chat-read-summary-" + uid + "-" + placeId, {
+        config: { postgres_changes_options: { wait: true, timeout: 20000 } },
+      })
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "chat_messages", filter: "place_id=eq." + placeId },
         () => void load(),
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") void load();
+      });
     window.addEventListener("focus", load);
     return () => {
       active = false;

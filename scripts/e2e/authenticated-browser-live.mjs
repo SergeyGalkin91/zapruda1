@@ -133,7 +133,7 @@ try {
     .toBe(1);
   await expect.poll(() => unread(B), { timeout: 20000 }).toBeGreaterThan(before);
   await b.getByRole("button", { name: "Непрочитанные", exact: true }).click();
-  const general = b.getByRole("button", { name: /^Общий Знакомства/ });
+  const general = b.getByRole("button", { name: /^Общий/ });
   await expect(general).toBeVisible({ timeout: 20000 });
   await general.click();
   await expect(b.getByText(tag + " message", { exact: true })).toBeVisible({ timeout: 20000 });
