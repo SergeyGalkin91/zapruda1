@@ -27,6 +27,7 @@ async function baseline() {
   await applySqlFile(engine, "tests/unit/pilot_dependencies_context.sql");
   await applySqlFile(engine, "tests/unit/report_dependencies_adopted.sql");
   await applySqlFile(engine, "tests/unit/chat_dependencies_adopted.sql");
+  await applySqlFile(engine, "tests/unit/gear_dependencies_adopted.sql");
   for (const delta of deltas) await applySqlFile(engine, "staging/" + delta);
   return engine;
 }

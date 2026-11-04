@@ -70,6 +70,7 @@ await sql(
     "tests/unit/pilot_dependencies_context.sql",
     "tests/unit/report_dependencies_adopted.sql",
     "tests/unit/chat_dependencies_adopted.sql",
+    "tests/unit/gear_dependencies_adopted.sql",
     ...deltas.map((d) => "staging/" + d),
   ]
     .map(file)

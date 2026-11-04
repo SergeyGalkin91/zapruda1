@@ -12,7 +12,9 @@ The earlier 31-table audit is historical. Readback during continuation found the
 | 20261104000608 | staging_minimal_report_restrict_inherited_grants_20261104 | column-level access; photo_url not exposed                                               |
 | 20261104001134 | staging_geo_text_chat_rls_20261104                        | geographic catalog, messages/reactions, home geography posting policy, ensure_chat_place |
 
-Actual baseline: 36 public tables, zero catches/comments at inspection. Read-only production comparison covered column types/defaults/nullability, PK/FK/CHECK/UNIQUE, indexes, trigger definitions, policies, grants, function bodies, bucket settings and Storage policies. No production content/private GPS/original images were read or copied. Executable adopted SQL is stored **only** under `supabase/tests/unit/*_adopted.sql` for disposable clones; it is not a deployment recipe.
+Subsequent readback also adopted `20261104002109 staging_profile_gear_dependencies_20261104` (gear/kit tables, owner/type policies, primary uniqueness). Those two tables are not recreated or dropped; the new delta narrows mutation columns and adds confirmation gates.
+
+Actual baseline: 38 public tables, zero catches/comments at inspection. Read-only production comparison covered column types/defaults/nullability, PK/FK/CHECK/UNIQUE, indexes, trigger definitions, policies, grants, function bodies, bucket settings and Storage policies. No production content/private GPS/original images were read or copied. Executable adopted SQL is stored **only** under `supabase/tests/unit/*_adopted.sql` for disposable clones; it is not a deployment recipe.
 
 ## Ordered new deltas
 
@@ -56,3 +58,7 @@ KING live still needs an owner-authorized independent moderator, legally verifie
 ## Deployment evidence
 
 PENDING at preparation: new deltas and chat functions must be checked against the current target, applied only in STAGING, and read back. Exact commit/run results and applied versions are recorded in the completion update below; never infer hosted acceptance from the prepared files above.
+
+### First applied delta
+
+`20261104003202 v075_report_integrity`: applied only in STAGING after the isolated SQL/rollback tests. Readback: invoker RPC, guest EXECUTE denied, authenticated TRUNCATE denied, photo_url and exact latitude SELECT denied, composite author FK present. No catch/comment/public report was created. PostgreSQL17 run 41747207223 passed the independent-session SQL/rollback step; its separate Deno step exposed a client generic type error, corrected in the next source revision before any chat function deployment. Other new hosted deltas remain pending at this checkpoint.

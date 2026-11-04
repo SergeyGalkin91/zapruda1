@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.118.0";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.118.0";
 import { createReportPhotoUploadHandler } from "../report-photo-upload/handler.ts";
 
 // Reuse the audited bounded multipart/JPEG filter and retry reservation protocol.
@@ -9,7 +9,7 @@ const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const bucket = "chat-photos";
 Deno.serve(async (req: Request) => {
-  let writer: ReturnType<typeof createClient> | undefined;
+  let writer: SupabaseClient | undefined;
   const server = () => {
     if (!writer) throw new Error("Writer unavailable");
     return writer;

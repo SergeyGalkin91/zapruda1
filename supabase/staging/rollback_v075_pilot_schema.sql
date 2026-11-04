@@ -17,7 +17,12 @@ drop table public.beta_test_applications;
 drop view public.my_activity_badges;
 drop table public.user_activity_windows;
 drop function public.set_my_primary_gear_set(uuid);
-drop table public.angler_gear_sets,public.angler_gear,public.private_fishing_marks;
+drop table public.private_fishing_marks;
+drop policy pilot_gear_confirmed_insert on public.angler_gear;
+drop policy pilot_gear_confirmed_update on public.angler_gear;
+drop policy pilot_kit_confirmed_insert on public.angler_gear_sets;
+drop policy pilot_kit_confirmed_update on public.angler_gear_sets;
+-- Retain adopted gear/kit tables and narrowed column grants; never reopen type/primary mutation.
 drop policy pilot_chat_no_direct_storage on storage.objects;
 delete from storage.buckets where id='chat-photos';
 drop table public.chat_message_photos;

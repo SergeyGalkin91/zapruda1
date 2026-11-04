@@ -1,33 +1,5 @@
--- STAGING ONLY. Scoped profile dependencies; no copies of users or private GPS.
-create table public.angler_gear(
- id uuid primary key default gen_random_uuid(),
- user_id uuid not null references public.profiles(id) on delete cascade,
- gear_type text not null check(gear_type in('rod','reel','line','lure','other')),
- brand text not null check(char_length(btrim(brand)) between 1 and 80),
- model text not null check(char_length(btrim(model)) between 1 and 150),
- variant text not null default '' check(char_length(variant)<=100),
- notes text not null default '' check(char_length(notes)<=500),
- created_at timestamptz not null default now(),updated_at timestamptz not null default now()
-);
-create index pilot_gear_owner_type on public.angler_gear(user_id,gear_type);
-create table public.angler_gear_sets(
- id uuid primary key default gen_random_uuid(),
- user_id uuid not null references public.profiles(id) on delete cascade,
- title text not null default '' check(char_length(title)<=100),
- fishing_method text not null default '' check(char_length(fishing_method)<=80),
- rod_id uuid not null references public.angler_gear(id) on delete cascade,
- reel_id uuid not null references public.angler_gear(id) on delete cascade,
- line_id uuid references public.angler_gear(id) on delete set null,
- notes text not null default '' check(char_length(notes)<=500),
- is_primary boolean not null default false,
- created_at timestamptz not null default now(),updated_at timestamptz not null default now(),
- check(rod_id<>reel_id and(line_id is null or(line_id<>rod_id and line_id<>reel_id)))
-);
-create unique index pilot_gear_one_primary on public.angler_gear_sets(user_id) where is_primary;
-create index pilot_kit_owner on public.angler_gear_sets(user_id,created_at);
-create index pilot_kit_rod on public.angler_gear_sets(rod_id);
-create index pilot_kit_reel on public.angler_gear_sets(reel_id);
-create index pilot_kit_line on public.angler_gear_sets(line_id) where line_id is not null;
+-- STAGING ONLY. Delta over adopted gear/kit migration 20261104002109.
+-- Preserve existing owner/type RLS, FK, unique primary index, and data.
 create table public.private_fishing_marks(
  id uuid primary key default gen_random_uuid(),
  user_id uuid not null references auth.users(id) on delete cascade,
@@ -39,8 +11,6 @@ create table public.private_fishing_marks(
  created_at timestamptz not null default now()
 );
 create index pilot_private_mark_owner on public.private_fishing_marks(user_id,created_at desc);
-alter table public.angler_gear enable row level security;
-alter table public.angler_gear_sets enable row level security;
 alter table public.private_fishing_marks enable row level security;
 revoke all on public.angler_gear,public.angler_gear_sets,public.private_fishing_marks from public,anon,authenticated;
 grant select,delete on public.angler_gear,public.angler_gear_sets,public.private_fishing_marks to authenticated;
@@ -51,18 +21,18 @@ grant insert(user_id,title,fishing_method,rod_id,reel_id,line_id,notes) on publi
 grant update(title,fishing_method,rod_id,reel_id,line_id,notes) on public.angler_gear_sets to authenticated;
 grant insert(user_id,kind,title,note,latitude,longitude) on public.private_fishing_marks to authenticated;
 grant all on public.angler_gear,public.angler_gear_sets,public.private_fishing_marks to service_role;
-create policy gear_own on public.angler_gear for all to authenticated
- using(user_id=(select auth.uid())) with check(user_id=(select auth.uid())
- and(select zapruda_internal.pilot_confirmed_actor_v075()));
 create policy marks_own on public.private_fishing_marks for all to authenticated
  using(user_id=(select auth.uid())) with check(user_id=(select auth.uid())
  and(select zapruda_internal.pilot_confirmed_actor_v075()));
-create policy kits_own on public.angler_gear_sets for all to authenticated
- using(user_id=(select auth.uid())) with check(user_id=(select auth.uid())
- and(select zapruda_internal.pilot_confirmed_actor_v075())
- and exists(select 1 from public.angler_gear r where r.id=rod_id and r.user_id=(select auth.uid()) and r.gear_type='rod')
- and exists(select 1 from public.angler_gear r where r.id=reel_id and r.user_id=(select auth.uid()) and r.gear_type='reel')
- and(line_id is null or exists(select 1 from public.angler_gear r where r.id=line_id and r.user_id=(select auth.uid()) and r.gear_type='line')));
+
+create policy pilot_gear_confirmed_insert on public.angler_gear as restrictive for insert to authenticated
+ with check((select zapruda_internal.pilot_confirmed_actor_v075()));
+create policy pilot_gear_confirmed_update on public.angler_gear as restrictive for update to authenticated
+ using(true) with check((select zapruda_internal.pilot_confirmed_actor_v075()));
+create policy pilot_kit_confirmed_insert on public.angler_gear_sets as restrictive for insert to authenticated
+ with check((select zapruda_internal.pilot_confirmed_actor_v075()));
+create policy pilot_kit_confirmed_update on public.angler_gear_sets as restrictive for update to authenticated
+ using(true) with check((select zapruda_internal.pilot_confirmed_actor_v075()));
 create function public.set_my_primary_gear_set(p_kit_id uuid) returns void
 language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid();
