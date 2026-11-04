@@ -365,7 +365,9 @@ export function GeographicChat() {
     };
     void fetchMessages();
     const channel = supabase
-      .channel("zapruda-chat-" + placeId + "-" + topic)
+      .channel("zapruda-chat-" + placeId + "-" + topic, {
+        config: { postgres_changes_options: { wait: true, timeout: 20000 } },
+      })
       .on(
         "postgres_changes",
         {
@@ -392,7 +394,11 @@ export function GeographicChat() {
           void fetchMessages();
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        // Reconcile the interval before the database listener became ready,
+        // including reconnects. fetchMessages preserves the unsent draft.
+        if (status === "SUBSCRIBED") void fetchMessages();
+      });
     const onFocus = () => {
       void fetchMessages();
     };

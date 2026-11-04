@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   createURL: vi.fn(),
   revokeURL: vi.fn(),
   callbacks: new Map<string, () => void>(),
+  subscriptions: [] as Array<(status: string) => void>,
   rows: [] as Array<{ id: string; user_id: string; body: string; created_at: string }>,
   photos: [] as Array<{ id: string; message_id: string }>,
   place: "10000000-0000-4000-8000-000000000081",
@@ -40,7 +41,10 @@ vi.mock("@/integrations/supabase/client", () => ({
           mocks.callbacks.set(filter.table, callback);
           return channel;
         },
-        subscribe: () => channel,
+        subscribe: (callback?: (status: string) => void) => {
+          if (callback) mocks.subscriptions.push(callback);
+          return channel;
+        },
       };
       return channel;
     },
@@ -60,6 +64,7 @@ const firstMessage = {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.callbacks.clear();
+  mocks.subscriptions.length = 0;
   mocks.rows = [firstMessage];
   mocks.photos = [];
   mocks.getUser.mockResolvedValue({ data: { user: actor }, error: null });
@@ -130,6 +135,20 @@ async function open() {
   return { ...view, composer };
 }
 describe("Geographic chat (offline component regressions, not real JWT)", () => {
+  it("reconciles messages missed before database readiness or during reconnect, keeping the draft", async () => {
+    const { composer } = await open();
+    fireEvent.change(composer, { target: { value: "Unsent private draft" } });
+    const status = mocks.subscriptions.at(-1)!;
+    mocks.rows = [{ ...firstMessage, body: "Arrived while replication was starting" }];
+    await act(async () => status("SUBSCRIBED"));
+    await screen.findByText("Arrived while replication was starting");
+    expect(composer).toHaveValue("Unsent private draft");
+    await act(async () => status("CHANNEL_ERROR"));
+    mocks.rows = [{ ...firstMessage, body: "Arrived during reconnect" }];
+    await act(async () => status("SUBSCRIBED"));
+    await screen.findByText("Arrived during reconnect");
+    expect(composer).toHaveValue("Unsent private draft");
+  });
   it("refreshes messages/photos/reactions without losing the user's unfinished text", async () => {
     const { composer } = await open();
     fireEvent.change(composer, { target: { value: "Private unfinished text" } });

@@ -80,20 +80,24 @@ async function realtimeInsert(api, placeId, body) {
   const event = new Promise((resolve) => {
     received = resolve;
   });
-  const channel = api.channel("pilot-message-" + randomUUID()).on(
-    "postgres_changes",
-    {
-      event: "INSERT",
-      schema: "public",
-      table: "chat_messages",
-      filter: "place_id=eq." + placeId,
-    },
-    (payload) => {
-      if (payload.new.user_id === owner.id && payload.new.body === body) received(true);
-    },
-  );
+  const channel = api
+    .channel("pilot-message-" + randomUUID(), {
+      config: { postgres_changes_options: { wait: true, timeout: 20000 } },
+    })
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "chat_messages",
+        filter: "place_id=eq." + placeId,
+      },
+      (payload) => {
+        if (payload.new.user_id === owner.id && payload.new.body === body) received(true);
+      },
+    );
   await new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("PILOT_MESSAGE_SUBSCRIBE_TIMEOUT")), 15000);
+    const timer = setTimeout(() => reject(new Error("PILOT_MESSAGE_SUBSCRIBE_TIMEOUT")), 30000);
     channel.subscribe((status) => {
       if (status === "SUBSCRIBED") {
         clearTimeout(timer);
@@ -352,25 +356,29 @@ try {
   const photoReady = new Promise((resolve) => {
     receivedPhoto = resolve;
   });
-  const updates = owner.api.channel("pilot-photo-" + chatPhoto).on(
-    "postgres_changes",
-    {
-      event: "*",
-      schema: "public",
-      table: "chat_message_photos",
-      filter: "id=eq." + chatPhoto,
-    },
-    (payload) => {
-      if (payload.new.id === chatPhoto)
-        summary.photoRealtimeEvents.push({
-          event: payload.eventType,
-          ready: Boolean(payload.new.sanitized_at),
-        });
-      if (payload.new.id === chatPhoto && payload.new.sanitized_at) receivedPhoto(true);
-    },
-  );
+  const updates = owner.api
+    .channel("pilot-photo-" + chatPhoto, {
+      config: { postgres_changes_options: { wait: true, timeout: 20000 } },
+    })
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "chat_message_photos",
+        filter: "id=eq." + chatPhoto,
+      },
+      (payload) => {
+        if (payload.new.id === chatPhoto)
+          summary.photoRealtimeEvents.push({
+            event: payload.eventType,
+            ready: Boolean(payload.new.sanitized_at),
+          });
+        if (payload.new.id === chatPhoto && payload.new.sanitized_at) receivedPhoto(true);
+      },
+    );
   await new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("PILOT_REALTIME_SUBSCRIBE_TIMEOUT")), 15000);
+    const timer = setTimeout(() => reject(new Error("PILOT_REALTIME_SUBSCRIBE_TIMEOUT")), 30000);
     updates.subscribe((status) => {
       if (status === "SUBSCRIBED") {
         clearTimeout(timer);
@@ -389,7 +397,7 @@ try {
       new Promise((_, reject) => {
         readyTimer = setTimeout(
           () => reject(new Error("PILOT_REALTIME_PHOTO_NOT_DELIVERED")),
-          45000,
+          15000,
         );
       }),
     ]);
