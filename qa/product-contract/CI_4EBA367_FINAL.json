@@ -1,0 +1,191 @@
+{
+  "candidate": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+  "ordinary_workflows_pass": true,
+  "ordinary_count": 13,
+  "runs": [
+    {
+      "id": 41908418152,
+      "name": "v0.7.1 Meetup mobile browser smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/v071-mobile-smoke.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908418152"
+    },
+    {
+      "id": 41908417700,
+      "name": "Independent Node hosting proof",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/independent-build.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417700"
+    },
+    {
+      "id": 41908417572,
+      "name": "Yandex canary Deno typecheck",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/yandex-provider-check.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417572"
+    },
+    {
+      "id": 41908417256,
+      "name": "Netlify preview STAGING isolation guard",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/preview-staging-guard.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417256"
+    },
+    {
+      "id": 41908417496,
+      "name": "v0.7.1 Meetup security guards",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/v071-meetup-guard.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417496"
+    },
+    {
+      "id": 41908417372,
+      "name": "ZAPRUDA Docker image smoke test",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/docker-smoke.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417372"
+    },
+    {
+      "id": 41908417925,
+      "name": "SPOT isolated PostgreSQL transaction races",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/spot-postgres.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417925"
+    },
+    {
+      "id": 41908417497,
+      "name": "Report photo privacy browser check",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/report-photo-privacy.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417497"
+    },
+    {
+      "id": 41908417168,
+      "name": "ZAPRUDA Frontend Build",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/ui-build.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417168"
+    },
+    {
+      "id": 41908417859,
+      "name": "Pilot schema PostgreSQL and Deno checks",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/pilot-schema-postgres.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417859"
+    },
+    {
+      "id": 41908417778,
+      "name": "ZAPRUDA checks",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/checks.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417778"
+    },
+    {
+      "id": 41908417084,
+      "name": "Advisor availability without an AI provider",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/advisor-resilience.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417084"
+    },
+    {
+      "id": 41908417419,
+      "name": "ZAPRUDA Electric Blue cross-browser review",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/appearance-visual.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908417419"
+    },
+    {
+      "id": 41908405475,
+      "name": "Pilot reports chat profile real JWT (protected)",
+      "status": "waiting",
+      "conclusion": null,
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+      "path": ".github/workflows/pilot-staging-jwt.yml",
+      "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908405475"
+    }
+  ],
+  "documentation_checkpoint": {
+    "sha": "8cbb8d7cdd03e60ef944d0e2059b0a589d24a00f",
+    "runs": [
+      {
+        "id": 41910021792,
+        "name": "Product contract integrity (not release approval)",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "8cbb8d7cdd03e60ef944d0e2059b0a589d24a00f",
+        "path": ".github/workflows/product-contract.yml",
+        "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41910021792"
+      },
+      {
+        "id": 41910021813,
+        "name": "ZAPRUDA checks",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "8cbb8d7cdd03e60ef944d0e2059b0a589d24a00f",
+        "path": ".github/workflows/checks.yml",
+        "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41910021813"
+      },
+      {
+        "id": 41910021660,
+        "name": "ZAPRUDA Electric Blue cross-browser review",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "8cbb8d7cdd03e60ef944d0e2059b0a589d24a00f",
+        "path": ".github/workflows/appearance-visual.yml",
+        "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41910021660"
+      },
+      {
+        "id": 41910012629,
+        "name": "Product contract integrity (not release approval)",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "8cbb8d7cdd03e60ef944d0e2059b0a589d24a00f",
+        "path": ".github/workflows/product-contract.yml",
+        "html_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41910012629"
+      }
+    ]
+  },
+  "protected": {
+    "candidate": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+    "workflow_run_id": 41908405475,
+    "job_id": 126849136280,
+    "status": "waiting",
+    "conclusion": null,
+    "whole_workflow_pass": false,
+    "tests_started": false,
+    "environment": "staging-e2e",
+    "required_reviewer": "SergeyGalkin91",
+    "environment_review_bypassed": false,
+    "required_owner_action": "Open the existing run -> Review deployments -> select staging-e2e -> Approve and deploy",
+    "run_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908405475",
+    "existing_user_secrets_or_jwt_exposed": false,
+    "no_new_feedback_cleanup_authorized": true,
+    "related_precondition_cleanup": "FEEDBACK_CLEANUP_41850073063_EXECUTED.json"
+  }
+}

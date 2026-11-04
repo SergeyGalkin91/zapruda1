@@ -1,0 +1,17 @@
+{
+  "candidate": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+  "workflow_run_id": 41908405475,
+  "job_id": 126849136280,
+  "status": "waiting",
+  "conclusion": null,
+  "whole_workflow_pass": false,
+  "tests_started": false,
+  "environment": "staging-e2e",
+  "required_reviewer": "SergeyGalkin91",
+  "environment_review_bypassed": false,
+  "required_owner_action": "Open the existing run -> Review deployments -> select staging-e2e -> Approve and deploy",
+  "run_url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908405475",
+  "existing_user_secrets_or_jwt_exposed": false,
+  "no_new_feedback_cleanup_authorized": true,
+  "related_precondition_cleanup": "FEEDBACK_CLEANUP_41850073063_EXECUTED.json"
+}

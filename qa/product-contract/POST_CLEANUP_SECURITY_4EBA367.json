@@ -1,0 +1,23 @@
+{
+  "project_id": "yudtbifopfnjtjanaqrd",
+  "read_only": true,
+  "checked_at": "2026-11-04 20:59:42.762242+00",
+  "approved_marker_remaining": 0,
+  "approved_ids_remaining": 0,
+  "club_message_policies": [
+    {
+      "using": null,
+      "policy": "group_msg_insert",
+      "command": "INSERT",
+      "with_check": "((user_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM social_group_members m\n  WHERE ((m.group_id = social_group_messages.group_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.status = 'accepted'::text)))))"
+    },
+    {
+      "using": "(EXISTS ( SELECT 1\n   FROM social_group_members m\n  WHERE ((m.group_id = social_group_messages.group_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.status = 'accepted'::text))))",
+      "policy": "group_msg_read",
+      "command": "SELECT",
+      "with_check": null
+    }
+  ],
+  "required_security_deltas": 2,
+  "public_definers_without_search_path": 0
+}

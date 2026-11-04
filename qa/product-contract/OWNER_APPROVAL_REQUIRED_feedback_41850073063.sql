@@ -1,4 +1,7 @@
--- REVIEW ONLY. NOT EXECUTED. Requires owner authorization for these NEW five rows.
+-- HISTORICAL INPUT: executed with explicit owner authorization on 2026-11-04 at20:32:18UTC.
+-- Original approved Git blob:76cf8bb2d8a236cf2c407b3ff5a2fe68c32e06a1.
+-- Exactly five deleted; independent marker/UUID readback0. Do not rerun or widen this set.
+-- Evidence:FEEDBACK_CLEANUP_41850073063_EXECUTED.json. Executable SQL/guards below are unchanged.
 -- Run only against STAGING yudtbifopfnjtjanaqrd, never Production.
 -- The earlier six-row cleanup is complete and is not repeated here.
 begin;
