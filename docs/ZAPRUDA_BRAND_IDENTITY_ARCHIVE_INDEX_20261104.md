@@ -72,3 +72,6 @@
 | Выпуск 0.7.6 / Production | **NO-GO сохраняется** |
 
 **Постоянные опорные документы:** [BRAND IDENTITY](ZAPRUDA_BRAND_IDENTITY_APPROVED_20261104.md) + [этот архивный индекс](ZAPRUDA_BRAND_IDENTITY_ARCHIVE_INDEX_20261104.md) + [DECISION LOG](ZAPRUDA_DECISION_LOG.md) + [CURRENT PRODUCT SPEC](ZAPRUDA_CURRENT_PRODUCT_SPEC.md) + [UI ACCEPTANCE](ZAPRUDA_UI_ACCEPTANCE.md).
+
+## Отдельный Docker-бэкап
+[Docker-ready набор, проверка SHA-256 и этапы внедрения](ZAPRUDA_BRAND_DOCKER_BACKUP_20261104.md). Собрать/запустить Docker-образ нужно на рабочей машине с Docker; production runtime приложения не менялся.
