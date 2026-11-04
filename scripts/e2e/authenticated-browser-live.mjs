@@ -9,8 +9,8 @@ const url = process.env.ZAPRUDA_E2E_STAGING_URL,
   key = process.env.ZAPRUDA_E2E_PUBLISHABLE_KEY;
 if (url !== "https://yudtbifopfnjtjanaqrd.supabase.co" || !key)
   throw Error("STAGING_CONFIGURATION_REQUIRED");
-const base = process.env.ZAPRUDA_BROWSER_BASE_URL || "http://127.0.0.1:3000",
-  place = "00000000-0000-4000-8000-000000000001";
+let base = process.env.ZAPRUDA_BROWSER_BASE_URL || "http://127.0.0.1:3000";
+const place = "00000000-0000-4000-8000-000000000001";
 if (!["http://127.0.0.1:3000", "https://deploy-preview-93--zapruda1.netlify.app"].includes(base))
   throw Error("BROWSER_TARGET_NOT_ALLOWED");
 const tag = "QA-ACCEPT-" + randomUUID();
@@ -50,6 +50,8 @@ async function loginApi(role) {
 }
 async function loginUI(page, account) {
   await page.goto(base + "/auth?mode=in");
+  if (new URL(page.url()).origin !== new URL(base).origin)
+    throw Error("LOGIN_ORIGIN_CHANGED_NO_CREDENTIALS_SENT");
   await page
     .getByLabel("Email", { exact: true })
     .fill(process.env[`ZAPRUDA_E2E_${account.role}_EMAIL`]);
@@ -88,6 +90,19 @@ try {
   const a = await ca.newPage(),
     b = await cb.newPage();
   diagnosticPage = a;
+  result.requestedBase = base;
+  if (base.startsWith("https://deploy-preview-93--")) {
+    await a.goto(base + "/auth?mode=in");
+    const redirect = new URL(a.url());
+    if (redirect.origin === "https://app.netlify.com" && redirect.pathname === "/edge-access") {
+      result.hostedStatus = "BLOCKED_NETLIFY_AUTH";
+      result.limitations.push(
+        "Hosted Preview requires independent Netlify authentication; no protection bypass or cookies copied",
+      );
+      base = "http://127.0.0.1:3000";
+      result.environment = base + " + real Supabase STAGING JWT; hosted check separately blocked";
+    } else if (redirect.origin !== new URL(base).origin) throw Error("UNEXPECTED_PREVIEW_ORIGIN");
+  }
   for (const page of [a, b])
     await page.route("**/*", (route) => {
       if (route.request().url().includes("sonvniuwtvzzyuglscah"))
@@ -364,6 +379,9 @@ try {
         ]) {
           await p.goto(base + path);
           await p.locator("main").waitFor();
+          await expect(p.getByRole("link", { name: "Профиль", exact: true })).toBeVisible({
+            timeout: 20000,
+          });
           if (await p.evaluate(() => document.documentElement.scrollWidth > innerWidth))
             throw Error("AUTHENTICATED_HORIZONTAL_OVERFLOW");
           await shot(p, `${name}-${width}-${theme}-${label}`);

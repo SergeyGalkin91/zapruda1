@@ -20,3 +20,5 @@ Include newly aligned empty Atlas catalog/own progress reads and read-only Yande
 2026-11-04 instrument real Browser send boundary: embedded read code, POST status, persisted row count, masked failure screenshot. No test gate relaxed.
 
 2026-11-04 fix report select accessible names; execute actual Netlify preview after matching exact SHA status, actual two-account JWT, private fixtures only.
+
+2026-11-04 preserve Netlify access protection; report blocked hosted origin and finish independent same-SHA local/STAGING QA without sending credentials off-origin. Improve actual Atlas caption contrast.
