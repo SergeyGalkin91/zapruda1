@@ -1,3 +1,5 @@
+> **SUPERSEDED как единственная актуальная точка входа (04.11.2026).** Сначала читать [CURRENT_PRODUCT_SPEC](ZAPRUDA_CURRENT_PRODUCT_SPEC.md), [DECISION_LOG](ZAPRUDA_DECISION_LOG.md) и [UI_ACCEPTANCE](ZAPRUDA_UI_ACCEPTANCE.md). Исторические требования ниже не отменяют поздние прямые решения владельца. Референсы и доказательства сохранены; никакого автоматического отката интерфейса.
+
 # Передача работы — 04.11.2026: актуальная версия
 
 Сначала читать [CURRENT_STATE](ZAPRUDA_CURRENT_STATE_20261104.md), [SCHEMA ALIGNMENT](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md), [48 dependency contracts](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md), [AI acceptance](ZAPRUDA_DEEPSEEK_STAGING_ACCEPTANCE.md), [RELEASE READINESS](ZAPRUDA_V075_SPOT_RELEASE_READINESS.md) и утверждённый UX-spec. PR #93 → SPOT; head определять из GitHub, зеркало work/v075-consolidation-20261104. Не переигрывать уже применённые семь дельт или adopted 000548/000608/001134/002109. STAGING 45 public tables/RLS; новая isolated/component база 410/32.

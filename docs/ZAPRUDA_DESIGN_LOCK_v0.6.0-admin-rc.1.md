@@ -1,3 +1,5 @@
+> **SUPERSEDED как единственная актуальная точка входа (04.11.2026).** Сначала читать [CURRENT_PRODUCT_SPEC](ZAPRUDA_CURRENT_PRODUCT_SPEC.md), [DECISION_LOG](ZAPRUDA_DECISION_LOG.md) и [UI_ACCEPTANCE](ZAPRUDA_UI_ACCEPTANCE.md). Исторические требования ниже не отменяют поздние прямые решения владельца. Референсы и доказательства сохранены; никакого автоматического отката интерфейса.
+
 # ZAPRUDA COMMUNITY — APPROVED DESIGN LOCK
 
 Design version: v0.6.0-admin-rc.1. Owner approval: 2026-10-31.
