@@ -28,6 +28,7 @@ const result = {
     "No production changes",
   ],
   screenshots: [],
+  screenshotMode: "viewport; route matrix waits for auth, data loading and visible images",
 };
 const clients = [],
   browsers = [];
@@ -70,7 +71,7 @@ async function loginUI(page, account) {
 async function shot(page, name) {
   await page.screenshot({
     path: out + "/" + name + ".png",
-    fullPage: true,
+    fullPage: false,
     mask: [
       page.locator("input[type=email], input[type=password]"),
       page.getByText(/[^\s]+@[^\s]+/),
@@ -396,6 +397,26 @@ try {
           await expect(p.getByRole("link", { name: "Профиль", exact: true })).toBeVisible({
             timeout: 20000,
           });
+          await p.evaluate(() => window.scrollTo(0, 0));
+          const loaders = p
+            .locator("main")
+            .getByText(/^(?:Загружаем|Загрузка|Проверяем|Проверка)[\s\S]*(?:…|\.\.\.)$/)
+            .filter({ visible: true });
+          await expect(loaders).toHaveCount(0, { timeout: 20000 });
+          await expect
+            .poll(
+              () =>
+                p.locator("main img").evaluateAll((images) =>
+                  images
+                    .filter((el) => {
+                      const r = el.getBoundingClientRect();
+                      return r.top < innerHeight && r.bottom > 0 && r.width > 0;
+                    })
+                    .every((el) => el.complete),
+                ),
+              { timeout: 15000 },
+            )
+            .toBe(true);
           if (await p.evaluate(() => document.documentElement.scrollWidth > innerWidth))
             throw Error("AUTHENTICATED_HORIZONTAL_OVERFLOW");
           await shot(p, `${name}-${width}-${theme}-${label}`);
