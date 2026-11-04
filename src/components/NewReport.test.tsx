@@ -98,6 +98,19 @@ function submitReport(form: HTMLElement) {
   fireEvent.submit(form);
 }
 describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
+  it("reaches review without publishing and requires a separate submit click", async () => {
+    await fillReport();
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    await screen.findByText("Проверь отчёт");
+    expect(mocks.insert).not.toHaveBeenCalled();
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Опубликовать отчёт" }).getAttribute("type")).toBe(
+      "submit",
+    );
+    expect((screen.getByLabelText("Опубликовать в общей ленте") as HTMLInputElement).checked).toBe(
+      false,
+    );
+  });
   it("keeps the draft when the atomic catch transaction fails after a successful preflight", async () => {
     const { form } = await fillReport();
     const original = mocks.from.getMockImplementation()!;
