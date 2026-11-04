@@ -1,8 +1,10 @@
 # Premium UI — фактическая STAGING-приёмка, 05.11.2026
 
+**Последний размещённый SHA:** `e391c578eff6d9eb717e7dfb9e43e36956307630`; финальные CI/hosted доказательства — в последнем разделе.
+
 **Результат:** утверждённая айдентика и пять экранов внедрены в настоящее приложение. Доступный [Netlify Preview](https://deploy-preview-93--zapruda1.netlify.app/) / [Welcome](https://deploy-preview-93--zapruda1.netlify.app/welcome). Это визуальный STAGING-кандидат, не RELEASE GO.
 
-Код: `4d7d677fac2efbcc23222d7cd363ea26cdfb14a3`, tree `ccb17cec708cb2025762a84fec174efac29a2c15`, [PR #93](https://github.com/SergeyGalkin91/zapruda1/pull/93). Документы и сохранённый контракт: [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111). Обычный merge без force-push, без main/production. Netlify site ID `3a98edc7-c77f-45f8-9fe0-7a156c72abf5`, проверенный deploy ID `6aeba942b22736415513b8b5`. Защита доступа Netlify сохранена: на другом устройстве может потребоваться существующий разрешённый Netlify-вход. Новый публичный доступ не выдавался.
+Первый проверенный UI-кандидат: `4d7d677fac2efbcc23222d7cd363ea26cdfb14a3`, tree `ccb17cec708cb2025762a84fec174efac29a2c15`, [PR #93](https://github.com/SergeyGalkin91/zapruda1/pull/93). Документы и сохранённый контракт: [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111). Обычный merge без force-push, без main/production. Netlify site ID `3a98edc7-c77f-45f8-9fe0-7a156c72abf5`, проверенный deploy ID `6aeba942b22736415513b8b5`. Защита доступа Netlify сохранена: на другом устройстве может потребоваться существующий разрешённый Netlify-вход. Новый публичный доступ не выдавался.
 
 ## DONE — реализация
 
@@ -79,3 +81,30 @@ Netlify preview build pin и runtime browser/server guard используют �
 - **P2, следующий UI этап:** остальные модули, фотографии реальных публикаций/полные populated состояния и дополнительные монохромные/adaptive branding экспорты после первого просмотра. Отсутствующие настоящие уловы/споты не подменять фикстурами ради снимка.
 
 **Готово к первому визуальному мобильному просмотру. Полная готовность пилота/релиза не заявляется.**
+
+
+## Последний сохранённый кандидат — e391c57
+
+`e391c578eff6d9eb717e7dfb9e43e36956307630` добавлен параллельной разрешённой работой и сохранён. Изменение разрешает STAGING-only QA на точном Netlify deployment hostname и маркирует такой build только при compiled STAGING backend; рисунок пяти экранов/палитра/обои не меняются. Исходные4d7d677/57c23c2 снимки и PASS выше остаются отдельными срезами.
+
+**На e391c57 снова13/13 ordinary workflows PASS,449/449 Vitest/37files,TypeScript/lint/build/Docker PASS.** [Exact CI inventory](../qa/premium-ui-20261105/exact-head-ci-e391.json).
+
+| Workflow | Result | Run |
+|---|---|---|
+| v0.7.1 Meetup security guards | PASS | [run 41921085293](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921085293) |
+| SPOT isolated PostgreSQL transaction races | PASS | [run 41921085366](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921085366) |
+| ZAPRUDA Docker image smoke test | PASS | [run 41921085209](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921085209) |
+| Yandex canary Deno typecheck | PASS | [run 41921084836](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921084836) |
+| Independent Node hosting proof | PASS | [run 41921084879](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921084879) |
+| Netlify preview STAGING isolation guard | PASS | [run 41921084557](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921084557) |
+| Advisor availability without an AI provider | PASS | [run 41921084763](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921084763) |
+| Pilot schema PostgreSQL and Deno checks | PASS | [run 41921084737](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921084737) |
+| ZAPRUDA checks | PASS | [run 41921085249](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921085249) |
+| ZAPRUDA Frontend Build | PASS | [run 41921084584](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921084584) |
+| ZAPRUDA Electric Blue cross-browser review | PASS | [run 41921084911](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921084911) |
+| v0.7.1 Meetup mobile browser smoke | PASS | [run 41921085227](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921085227) |
+| Report photo privacy browser check | PASS | [run 41921085273](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921085273) |
+
+Actual hosted gallery вновь проверена на e391c57: все5страниц загрузились,390×844,Matte Black/чистый фон,no overflow,only STAGING origins. Deployed ID `6aebaa9dcba491b547ff1f60`; [метрики](../qa/premium-ui-20261105/gallery-e391c57-metrics.json) и [SHA256 нового native снимка](../qa/premium-ui-20261105/latest-hosted-screenshot-manifest.json). Single-account Chromium CSS frame не объявляется физическим телефоном или multi-account JWT.
+
+[Новый cross-browser artifact13367258225](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41921084911/artifacts/13367258225):42,942,638bytes,SHA256 `b2e67fbaa1c10b684d82d776c34d87861c5433702114e5936214631a50824bbd`,expires18.11.2026. Скачан, hash проверен,120 premium PNG/216checks подтверждены3 JSON summaries (по72/40 на Chromium/Firefox/WebKit). Полный архив включён в переданный владельцу QA ZIP. Host-boundary/generation tests теперь4/4 PASS; product contract7/7 PASS.

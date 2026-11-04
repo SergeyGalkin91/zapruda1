@@ -1,0 +1,512 @@
+{
+  "engine": "chromium",
+  "scope": "isolated guest browser / actual application UI; no JWT claim",
+  "checks": [
+    {
+      "route": "/welcome",
+      "theme": "classic",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "theme": "classic",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "route": "/communities",
+      "theme": "classic",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "route": "/competitions",
+      "theme": "classic",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "route": "/profile",
+      "theme": "classic",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "wallpaper": "matte-black",
+      "theme": "classic",
+      "width": 320,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "carbon",
+      "theme": "classic",
+      "width": 320,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "neon-threads",
+      "theme": "classic",
+      "width": 320,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "topographic",
+      "theme": "classic",
+      "width": 320,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "route": "/welcome",
+      "theme": "electric-blue",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "theme": "electric-blue",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "route": "/communities",
+      "theme": "electric-blue",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "route": "/competitions",
+      "theme": "electric-blue",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "route": "/profile",
+      "theme": "electric-blue",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "wallpaper": "matte-black",
+      "theme": "electric-blue",
+      "width": 320,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "carbon",
+      "theme": "electric-blue",
+      "width": 320,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "neon-threads",
+      "theme": "electric-blue",
+      "width": 320,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "topographic",
+      "theme": "electric-blue",
+      "width": 320,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "route": "/welcome",
+      "theme": "classic",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "theme": "classic",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "/communities",
+      "theme": "classic",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "/competitions",
+      "theme": "classic",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "/profile",
+      "theme": "classic",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "wallpaper": "matte-black",
+      "theme": "classic",
+      "width": 390,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "carbon",
+      "theme": "classic",
+      "width": 390,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "neon-threads",
+      "theme": "classic",
+      "width": 390,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "topographic",
+      "theme": "classic",
+      "width": 390,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "route": "/welcome",
+      "theme": "electric-blue",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "theme": "electric-blue",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "/communities",
+      "theme": "electric-blue",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "/competitions",
+      "theme": "electric-blue",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "route": "/profile",
+      "theme": "electric-blue",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "wallpaper": "matte-black",
+      "theme": "electric-blue",
+      "width": 390,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "carbon",
+      "theme": "electric-blue",
+      "width": 390,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "neon-threads",
+      "theme": "electric-blue",
+      "width": 390,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "topographic",
+      "theme": "electric-blue",
+      "width": 390,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "route": "/welcome",
+      "theme": "classic",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "theme": "classic",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "/communities",
+      "theme": "classic",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "/competitions",
+      "theme": "classic",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "/profile",
+      "theme": "classic",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "wallpaper": "matte-black",
+      "theme": "classic",
+      "width": 768,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "carbon",
+      "theme": "classic",
+      "width": 768,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "neon-threads",
+      "theme": "classic",
+      "width": 768,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "topographic",
+      "theme": "classic",
+      "width": 768,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "route": "/welcome",
+      "theme": "electric-blue",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "theme": "electric-blue",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "/communities",
+      "theme": "electric-blue",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "/competitions",
+      "theme": "electric-blue",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "route": "/profile",
+      "theme": "electric-blue",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "wallpaper": "matte-black",
+      "theme": "electric-blue",
+      "width": 768,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "carbon",
+      "theme": "electric-blue",
+      "width": 768,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "neon-threads",
+      "theme": "electric-blue",
+      "width": 768,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "topographic",
+      "theme": "electric-blue",
+      "width": 768,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "route": "/welcome",
+      "theme": "classic",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "theme": "classic",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "/communities",
+      "theme": "classic",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "/competitions",
+      "theme": "classic",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "/profile",
+      "theme": "classic",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "wallpaper": "matte-black",
+      "theme": "classic",
+      "width": 1440,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "carbon",
+      "theme": "classic",
+      "width": 1440,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "neon-threads",
+      "theme": "classic",
+      "width": 1440,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "topographic",
+      "theme": "classic",
+      "width": 1440,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "route": "/welcome",
+      "theme": "electric-blue",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "theme": "electric-blue",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "/communities",
+      "theme": "electric-blue",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "/competitions",
+      "theme": "electric-blue",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "route": "/profile",
+      "theme": "electric-blue",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "wallpaper": "matte-black",
+      "theme": "electric-blue",
+      "width": 1440,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "carbon",
+      "theme": "electric-blue",
+      "width": 1440,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "neon-threads",
+      "theme": "electric-blue",
+      "width": 1440,
+      "persisted": true,
+      "reducedMotion": true
+    },
+    {
+      "wallpaper": "topographic",
+      "theme": "electric-blue",
+      "width": 1440,
+      "persisted": true,
+      "reducedMotion": true
+    }
+  ],
+  "screenshots": [
+    "chromium-320-classic-welcome.png",
+    "chromium-320-classic-feed.png",
+    "chromium-320-classic-communities.png",
+    "chromium-320-classic-competitions.png",
+    "chromium-320-classic-profile.png",
+    "chromium-320-electric-blue-welcome.png",
+    "chromium-320-electric-blue-feed.png",
+    "chromium-320-electric-blue-communities.png",
+    "chromium-320-electric-blue-competitions.png",
+    "chromium-320-electric-blue-profile.png",
+    "chromium-390-classic-welcome.png",
+    "chromium-390-classic-feed.png",
+    "chromium-390-classic-communities.png",
+    "chromium-390-classic-competitions.png",
+    "chromium-390-classic-profile.png",
+    "chromium-390-electric-blue-welcome.png",
+    "chromium-390-electric-blue-feed.png",
+    "chromium-390-electric-blue-communities.png",
+    "chromium-390-electric-blue-competitions.png",
+    "chromium-390-electric-blue-profile.png",
+    "chromium-768-classic-welcome.png",
+    "chromium-768-classic-feed.png",
+    "chromium-768-classic-communities.png",
+    "chromium-768-classic-competitions.png",
+    "chromium-768-classic-profile.png",
+    "chromium-768-electric-blue-welcome.png",
+    "chromium-768-electric-blue-feed.png",
+    "chromium-768-electric-blue-communities.png",
+    "chromium-768-electric-blue-competitions.png",
+    "chromium-768-electric-blue-profile.png",
+    "chromium-1440-classic-welcome.png",
+    "chromium-1440-classic-feed.png",
+    "chromium-1440-classic-communities.png",
+    "chromium-1440-classic-competitions.png",
+    "chromium-1440-classic-profile.png",
+    "chromium-1440-electric-blue-welcome.png",
+    "chromium-1440-electric-blue-feed.png",
+    "chromium-1440-electric-blue-communities.png",
+    "chromium-1440-electric-blue-competitions.png",
+    "chromium-1440-electric-blue-profile.png"
+  ]
+}

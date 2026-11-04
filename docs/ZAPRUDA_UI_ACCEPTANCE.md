@@ -71,3 +71,6 @@ Protected41908405475 SUCCESS относится к4eba367, до нового UI.
 
 ## 05.11 — новый premium UI, фактический hosted Preview
 Последнее прямое P0 задание разрешило реализацию утверждённой концепции. [Актуальная scoped приёмка](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md): настоящий Netlify, пять экранов, реальные SVG, две темы, четыре обоев; отдельные hosted/CI/JWT/physical-device границы. Исторические NOT IMPLEMENTED/ожидание общей концепции выше не описывают новый код. Это не owner pixel approval и не release GO.
+
+
+Финальная сохранённая интеграция P0 UI: `e391c578eff6d9eb717e7dfb9e43e36956307630`,13 CI PASS/449 tests,5 actual hosted screens loaded на390×844,STAGING only. Последующие host-boundary изменения сохранены, исторический JWT4eba367 не переименован в новый JWT PASS. [Полные scoped доказательства](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md).

@@ -1,0 +1,81 @@
+{
+  "sha": "e391c578eff6d9eb717e7dfb9e43e36956307630",
+  "scope": "actual Netlify STAGING single-account Chromium CSS viewports, not physical phone or complete JWT E2E",
+  "screens": [
+    {
+      "screen": "Welcome",
+      "viewport": [
+        390,
+        844
+      ],
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "overflow": false,
+      "loading": false,
+      "backendOrigins": [
+        "https://yudtbifopfnjtjanaqrd.supabase.co"
+      ],
+      "foreignBackend": false
+    },
+    {
+      "screen": "Лента",
+      "viewport": [
+        390,
+        844
+      ],
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "overflow": false,
+      "loading": false,
+      "backendOrigins": [
+        "https://yudtbifopfnjtjanaqrd.supabase.co"
+      ],
+      "foreignBackend": false
+    },
+    {
+      "screen": "Сообщества",
+      "viewport": [
+        390,
+        844
+      ],
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "overflow": false,
+      "loading": false,
+      "backendOrigins": [
+        "https://yudtbifopfnjtjanaqrd.supabase.co"
+      ],
+      "foreignBackend": false
+    },
+    {
+      "screen": "SPOT",
+      "viewport": [
+        390,
+        844
+      ],
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "overflow": false,
+      "loading": false,
+      "backendOrigins": [
+        "https://yudtbifopfnjtjanaqrd.supabase.co"
+      ],
+      "foreignBackend": false
+    },
+    {
+      "screen": "Профиль",
+      "viewport": [
+        390,
+        844
+      ],
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "overflow": false,
+      "loading": false,
+      "backendOrigins": [
+        "https://yudtbifopfnjtjanaqrd.supabase.co"
+      ],
+      "foreignBackend": false
+    }
+  ]
+}
