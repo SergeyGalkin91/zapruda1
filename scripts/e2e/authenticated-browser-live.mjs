@@ -278,21 +278,33 @@ try {
     await expect(a.getByText("Отчёт будет виден в общей ленте.", { exact: false })).toBeVisible();
     await a.getByLabel("Опубликовать в общей ленте", { exact: true }).uncheck();
     await shot(a, withFish ? "390-review-private-photo" : "390-review-no-catch");
+    let dropped = false;
+    const endpoint = withFish
+      ? "**/rest/v1/rpc/publish_report_with_catches"
+      : "**/rest/v1/fishing_reports*";
+    await a.route(endpoint, async (route) => {
+      if (route.request().method() === "POST" && !dropped) {
+        dropped = true;
+        const committed = await route.fetch();
+        result[withFish ? "fishReportCommitStatus" : "noCatchReportCommitStatus"] =
+          committed.status();
+        await route.abort("failed");
+      } else await route.continue();
+    });
+    await a.getByRole("button", { name: "Опубликовать отчёт", exact: true }).click();
     if (withFish) {
-      let dropped = false;
-      await a.route("**/rest/v1/rpc/publish_report_with_catches", async (route) => {
-        if (!dropped) {
-          dropped = true;
-          await route.fetch();
-          await route.abort("failed");
-        } else await route.continue();
-      });
-      await a.getByRole("button", { name: "Опубликовать отчёт", exact: true }).click();
       await expect(a.getByRole("alert")).toContainText("Не удалось сохранить отчёт с уловом", {
         timeout: 20000,
       });
+      const committed = await must(
+        A.c
+          .from("fishing_reports")
+          .select("id")
+          .eq("title", tag + " fish-private"),
+      );
+      if (committed.length !== 1) throw Error("REPORT_RESPONSE_DROP_NOT_COMMITTED");
+      await a.getByRole("button", { name: "Опубликовать отчёт", exact: true }).click();
     }
-    await a.getByRole("button", { name: "Опубликовать отчёт", exact: true }).click();
     await a.waitForURL(base + "/", { timeout: 30000 });
     const rows = await must(
       A.c
@@ -301,6 +313,11 @@ try {
         .eq("title", tag + (withFish ? " fish-private" : " no-catch-private")),
     );
     if (rows.length !== 1 || rows[0].is_public) throw Error("REPORT_DUPLICATE_OR_PUBLIC");
+    if (
+      result[withFish ? "fishReportCommitStatus" : "noCatchReportCommitStatus"] !==
+      (withFish ? 200 : 201)
+    )
+      throw Error("REPORT_RESPONSE_DROP_NOT_COMMITTED");
     if (withFish) {
       const counts = await must(A.c.from("catches").select("id").eq("report_id", rows[0].id));
       if (counts.length !== 1) throw Error("CATCH_RETRY_DUPLICATE");

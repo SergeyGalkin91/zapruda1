@@ -577,14 +577,36 @@ export function NewReport() {
           reportId = committedId;
         } else {
           // A no-catch outing still has no dependency on catches or the new RPC.
-          const { data: report, error: reportError } = await supabase
+          const requestId = publicationId.current!;
+          let { data: report, error: reportError } = await supabase
             .from("fishing_reports")
-            .insert({ ...values, user_id: user.id })
+            .insert({ ...values, id: requestId, user_id: user.id })
             .setHeader("Authorization", authorization)
             .select("id")
             .single();
+          if (reportError || !report?.id) {
+            const recovered = await supabase
+              .from("fishing_reports")
+              .select(
+                "id,user_id,title,body,location_name,weather_summary,air_temperature_c,pressure_hpa,wind_direction,wind_speed_ms,is_public,fishing_method",
+              )
+              .eq("id", requestId)
+              .eq("user_id", user.id)
+              .single();
+            if (
+              !recovered.error &&
+              recovered.data?.id === requestId &&
+              Object.entries(values).every(
+                ([field, value]) => recovered.data![field as keyof typeof values] === value,
+              )
+            ) {
+              report = recovered.data;
+              reportError = null;
+            }
+          }
           if (!alive.current) return;
-          if (reportError) throw reportError;
+          if (reportError || !report?.id)
+            throw reportError || new Error("Не удалось сохранить отчёт. Черновик сохранён.");
           reportId = report.id;
         }
         setSavedReportId(reportId);

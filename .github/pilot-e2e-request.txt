@@ -24,3 +24,5 @@ Include newly aligned empty Atlas catalog/own progress reads and read-only Yande
 2026-11-04 preserve Netlify access protection; report blocked hosted origin and finish independent same-SHA local/STAGING QA without sending credentials off-origin. Improve actual Atlas caption contrast.
 
 2026-11-04 hosted access blocker confirmed; stop retrying protected Preview, run independent local frontend with real STAGING and explicit hosted BLOCKED status. Validate app submit control before credential entry.
+
+2026-11-04 no-catch report uses persisted UUID and exact own-payload recovery after lost response; real Browser drops only committed POST responses and checks both no-catch/catch paths. Existing STAGING grants suffice; no new DDL.

@@ -98,6 +98,32 @@ function submitReport(form: HTMLElement) {
   fireEvent.submit(form);
 }
 describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
+  it("recovers the exact no-catch report when a committed insert loses its response", async () => {
+    const original = mocks.from.getMockImplementation()!;
+    let committed: Record<string, unknown> | undefined;
+    mocks.from.mockImplementation((table: string) => {
+      const query = original(table);
+      if (table !== "fishing_reports") return query;
+      let inserting = false;
+      const insert = query.insert;
+      query.insert = (values: Record<string, unknown>) => {
+        inserting = true;
+        committed = values;
+        return insert(values);
+      };
+      query.single = async () =>
+        inserting
+          ? { data: null, error: { message: "Committed response lost" } }
+          : { data: committed, error: null };
+      return query;
+    });
+    const { form } = await fillReport();
+    submitReport(form);
+    await waitFor(() => expect(mocks.navigate).toHaveBeenCalled());
+    expect(mocks.insert).toHaveBeenCalledTimes(1);
+    expect(committed?.["id"]).toMatch(/^[0-9a-f-]{36}$/i);
+    expect(mocks.rpc).not.toHaveBeenCalledWith("publish_report_with_catches", expect.anything());
+  });
   it("names selects from their caption without including all options", async () => {
     render(<NewReport />);
     const discipline = await screen.findByRole("combobox", {
