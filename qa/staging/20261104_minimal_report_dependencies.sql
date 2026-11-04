@@ -28,6 +28,11 @@ create index comments_report_created_idx on public.comments(report_id,created_at
 alter table public.catches enable row level security;
 alter table public.comments enable row level security;
 
+-- Supabase default grants can be broad. Strip them BEFORE applying
+-- narrowly scoped column permissions (verified in live STAGING).
+revoke all privileges on public.catches, public.comments
+ from PUBLIC, anon, authenticated;
+
 -- SECURITY: do NOT grant SELECT of catches.photo_url to API users:
 -- the existing photo gateway is the approved way to serve sanitized media.
 -- Column-granular API grants intentionally tighten production's historical broad grants.
