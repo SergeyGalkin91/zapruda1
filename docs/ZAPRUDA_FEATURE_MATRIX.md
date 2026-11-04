@@ -72,3 +72,6 @@ Runtime/feature rows идентичны c216963;4eba367 меняет тольк�
 
 ## D19: новый успешный JWT и текущий Premium source
 Protected41908405475 / real-pilot126849136280 SUCCESS on4eba367; four distinct confirmed JWTs, actual API and authenticated localhost/STAGING browser, core/browser cleanup=true. Later Premium UI57c23c2 requires separate hosted acceptance. [JWT PASS](../qa/product-contract/PROTECTED_4EBA367_41908405475_PASS.json). Статусы не повышены автоматически на поздний UI; все56 исходных ID сохранены.
+
+## Roadmap candidate — ON SPOT / Local Crew (owner-approved idea, 05.11.2026)
+[Концепция и privacy requirements](ZAPRUDA_ON_SPOT_LOCAL_CREW_CONCEPT_20261105.md). Локальный чат района (ориентир ~1 км), полностью добровольное присутствие/уведомления, взаимные запросы знакомства и совместные фото с согласием. **Status: NOT IMPLEMENTED / NOT IN 0.7.6 PILOT GATES / FUTURE SCOPING REQUIRED.** Это отдельная строка backlog без присвоения числового ID: **не меняет исходные 56 feature IDs, 8 модулей и 7 KING**. Если Work обновляет версии, не удалять и не выдавать за выпущенное; включение в релиз потребует отдельной приоритизации, security/privacy review и владельческого GO.
