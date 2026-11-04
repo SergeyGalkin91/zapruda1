@@ -91,6 +91,7 @@
         >Раздел
         <select id="route" aria-label="Маршрут приложения">
           <option value="/">Лента</option>
+          <option value="/welcome">Welcome</option>
           <option value="/communities">Комьюнити</option>
           <option value="/partners">Выезды</option>
           <option value="/chat">Чат</option>
@@ -141,6 +142,31 @@
               new URL(o).hostname.endsWith(".supabase.co") && new URL(o).hostname !== stageHost,
           );
           const nav = doc.querySelector('nav[aria-label="Мобильная навигация"]');
+          const shellBounds = Array.from(
+            doc.querySelectorAll("header.sticky a, header.sticky button, header.sticky summary"),
+          )
+            .filter((el) => !el.closest("details:not([open])") || el.tagName === "SUMMARY")
+            .map((el) => {
+              const r = el.getBoundingClientRect();
+              return {
+                label: el.getAttribute("aria-label") || "navigation",
+                x: r.x,
+                right: r.right,
+                width: r.width,
+                height: r.height,
+                essential:
+                  el.tagName === "SUMMARY" ||
+                  el.getAttribute("href") === "/profile" ||
+                  el.getAttribute("href")?.startsWith("/auth"),
+              };
+            })
+            .filter((r) => r.width > 0 && r.height > 0);
+          const shellBoundsOk = shellBounds.every(
+            (r) =>
+              r.x >= -1 &&
+              r.right <= doc.documentElement.clientWidth + 1 &&
+              (!r.essential || (r.width >= 43.5 && r.height >= 43.5)),
+          );
           const result = {
             deployedSha: "__DEPLOYED_SHA__",
             level: "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
@@ -152,6 +178,9 @@
             overflow: doc.documentElement.scrollWidth > doc.documentElement.clientWidth,
             route: win.location.pathname,
             theme: doc.documentElement.dataset.zaprudaBackground || null,
+            wallpaper: doc.documentElement.dataset.zaprudaWallpaper || "matte-black",
+            shellBoundsOk,
+            shellBounds,
             signedInProfileLink: !!doc.querySelector('header a[href="/profile"]'),
             bottomNavPadding: nav ? win.getComputedStyle(nav).paddingBottom : null,
             activeElement: doc.activeElement?.tagName,
@@ -175,7 +204,9 @@
             ? "FAIL: чужой backend"
             : result.overflow
               ? "FAIL: горизонтальный скролл"
-              : "Показатели обновлены";
+              : !shellBoundsOk
+                ? "FAIL: элемент шапки выходит за границы или меньше 44 px"
+                : "Показатели обновлены";
         } catch {
           state.textContent = "Приложение ещё загружается или требует входа через основную вкладку";
         }

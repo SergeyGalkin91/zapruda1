@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="frame-src 'self' https://app.netlify.com; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>ZAPRUDA — пять живых STAGING экранов</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #0b0d0e;
+        color: #f2f2f2;
+        font:
+          13px/1.5 system-ui,
+          sans-serif;
+      }
+      header,
+      footer {
+        padding: 18px 22px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 6px;
+        font-weight: 650;
+      }
+      p {
+        margin: 5px 0;
+        color: #9ba4ae;
+      }
+      button {
+        font: inherit;
+        border: 1px solid #434a50;
+        border-radius: 9px;
+        min-height: 44px;
+        padding: 8px 15px;
+        background: #1a1d21;
+        color: #f2f2f2;
+      }
+      #sha {
+        font-size: 11px;
+        overflow-wrap: anywhere;
+      }
+      .screens {
+        display: grid;
+        grid-template-columns: repeat(5, 248px);
+        gap: 14px;
+        padding: 10px 22px 0;
+        overflow-x: auto;
+      }
+      .screen h2 {
+        margin: 0 0 10px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .screen a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .device {
+        width: 248px;
+        height: 537px;
+        overflow: hidden;
+        border-radius: 22px;
+        border: 1px solid #3c454b;
+        background: #0b0d0e;
+        box-shadow: 0 14px 40px #0005;
+      }
+      .device iframe {
+        border: 0;
+        display: block;
+        width: 390px;
+        height: 844px;
+        transform: scale(0.6359);
+        transform-origin: top left;
+      }
+      #results {
+        white-space: pre-wrap;
+        font-size: 11px;
+        color: #a3a9b0;
+        max-width: 1300px;
+      }
+      strong {
+        color: #d7ff35;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          scroll-behavior: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>ZAPRUDA COMMUNITY · пять живых экранов</h1>
+      <p>
+        Реальное приложение Netlify STAGING. Каждый экран — отдельный CSS viewport 390 × 844. Это не
+        концепт и не проверка физического телефона.
+      </p>
+      <p id="sha">Deployed SHA: __DEPLOYED_SHA__</p>
+    </header>
+    <main class="screens" id="screens"></main>
+    <footer>
+      <button type="button" id="measure">Проверить экраны</button>
+      <p>
+        Клик по названию открывает обычную страницу приложения. Никаких демонстрационных уловов или
+        счётчиков.
+      </p>
+      <div id="results" role="status">Ожидаем приложение…</div>
+    </footer>
+    <script>
+      const allowed = location.hostname === "deploy-preview-93--zapruda1.netlify.app";
+      const targets = [
+        ["Welcome", "/welcome"],
+        ["Лента", "/"],
+        ["Сообщества", "/communities"],
+        ["SPOT", "/competitions"],
+        ["Профиль", "/profile"],
+      ];
+      function measure() {
+        const rows = [];
+        for (const f of document.querySelectorAll(".device iframe")) {
+          try {
+            const w = f.contentWindow,
+              d = f.contentDocument;
+            if (w.location.origin !== location.origin) throw Error("APP_NOT_READY");
+            const origins = [
+              ...new Set(
+                w.performance
+                  .getEntriesByType("resource")
+                  .map((e) => new URL(e.name, location.origin).origin)
+                  .filter((o) => o.includes(".supabase.co")),
+              ),
+            ];
+            rows.push({
+              screen: f.title,
+              viewport: [w.innerWidth, w.innerHeight],
+              theme: d.documentElement.dataset.zaprudaBackground,
+              wallpaper: d.documentElement.dataset.zaprudaWallpaper || "matte-black",
+              overflow: d.documentElement.scrollWidth > d.documentElement.clientWidth,
+              loading: /Загружаем|Загрузка…/i.test(d.body.innerText),
+              backendOrigins: origins,
+              foreignBackend: origins.some((o) => o !== "https://yudtbifopfnjtjanaqrd.supabase.co"),
+            });
+          } catch {
+            rows.push({ screen: f.title, loading: true });
+          }
+        }
+        document.getElementById("results").textContent = JSON.stringify(rows);
+      }
+      if (allowed) {
+        for (const [label, url] of targets) {
+          const s = document.createElement("section");
+          s.className = "screen";
+          const h = document.createElement("h2"),
+            a = document.createElement("a");
+          a.href = url;
+          a.textContent = label;
+          h.append(a);
+          s.append(h);
+          const box = document.createElement("div");
+          box.className = "device";
+          const f = document.createElement("iframe");
+          f.title = label;
+          f.src = url;
+          f.addEventListener("load", measure);
+          box.append(f);
+          s.append(box);
+          document.getElementById("screens").append(s);
+        }
+      }
+      document.getElementById("measure").addEventListener("click", measure);
+    </script>
+  </body>
+</html>

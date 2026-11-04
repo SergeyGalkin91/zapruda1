@@ -7,8 +7,10 @@ const staging = "https://yudtbifopfnjtjanaqrd.supabase.co";
 
 export async function writePreviewViewport(root, env) {
   const output = resolve(root, "dist/__qa/viewport.html");
+  const galleryOutput = resolve(root, "dist/__qa/premium.html");
   if (env.CONTEXT !== "deploy-preview" || env.REVIEW_ID !== "93") {
     await rm(output, { force: true });
+    await rm(galleryOutput, { force: true });
     return { enabled: false };
   }
   if (env.VITE_SUPABASE_URL !== staging) throw new Error("QA_VIEWPORT_STAGING_REQUIRED");
@@ -17,6 +19,8 @@ export async function writePreviewViewport(root, env) {
   const source = await readFile(resolve(root, "qa/hosted-viewport.html"), "utf8");
   await mkdir(dirname(output), { recursive: true });
   await writeFile(output, source.replaceAll("__DEPLOYED_SHA__", env.COMMIT_REF));
+  const gallery = await readFile(resolve(root, "qa/premium-gallery.html"), "utf8");
+  await writeFile(galleryOutput, gallery.replaceAll("__DEPLOYED_SHA__", env.COMMIT_REF));
   return { enabled: true, sha: env.COMMIT_REF };
 }
 

@@ -21,6 +21,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
+import { BrandWallpaper } from "@/components/BrandWallpaper";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityTracker } from "@/components/ActivityTracker";
 import { applyAppearance, loadAppearance } from "@/lib/appearance";
@@ -52,7 +53,13 @@ const otherNav = [
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
 ] as const;
 
-export function Shell({ children }: { children: ReactNode }) {
+export function Shell({
+  children,
+  screen = "default",
+}: {
+  children: ReactNode;
+  screen?: "default" | "feed" | "communities" | "spot" | "profile" | "welcome" | "settings";
+}) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isNetlifyStagingPreview, setIsNetlifyStagingPreview] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -137,7 +144,11 @@ export function Shell({ children }: { children: ReactNode }) {
   }, [isSignedIn]);
 
   return (
-    <div className="min-h-screen overflow-x-clip pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-0">
+    <div
+      data-z-screen={screen}
+      className="z-app-shell min-h-screen overflow-x-clip pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-0"
+    >
+      <BrandWallpaper />
       <ActivityTracker />
       <header className="sticky top-0 z-50 border-b border-white/[0.09] z-electric-shell-header bg-[#0D100C]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6">
@@ -215,6 +226,12 @@ export function Shell({ children }: { children: ReactNode }) {
                 <div className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.19em] text-[#D7FF35]">
                   ZAPRUDA / Разделы
                 </div>
+                <Link
+                  to="/welcome"
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]"
+                >
+                  <Fish className="size-4 text-[#D7FF35]" aria-hidden="true" /> Добро пожаловать
+                </Link>
                 {(isNetlifyStagingPreview ||
                   import.meta.env["VITE_SUPABASE_URL"] ===
                     "https://yudtbifopfnjtjanaqrd.supabase.co") && (

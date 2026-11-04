@@ -62,6 +62,7 @@ jobs:
           for engine in chromium webkit firefox; do
             echo "Checking appearance in $engine"
             VISUAL_BROWSER="$engine" node scripts/visual-theme-smoke.cjs
+            VISUAL_BROWSER="$engine" node scripts/premium-ui-browser.cjs
           done
           # Verify actual CSS colors; previous screenshots revealed green hardcoded surfaces.
           node scripts/issue76-no-green-audit.cjs

@@ -30,6 +30,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SpearfishingRouteImport } from './routes/spearfishing'
 import { Route as SpecializationsRouteImport } from './routes/specializations'
 import { Route as StreetRouteImport } from './routes/street'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminFeedbackRouteImport } from './routes/admin.feedback'
 import { Route as AdminOperationsRouteImport } from './routes/admin.operations'
@@ -140,6 +141,11 @@ const StreetRoute = StreetRouteImport.update({
   path: '/street',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/spearfishing': typeof SpearfishingRoute
   '/specializations': typeof SpecializationsRoute
   '/street': typeof StreetRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/feedback': typeof AdminFeedbackRoute
   '/admin/operations': typeof AdminOperationsRoute
   '/reports/new': typeof ReportsNewRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/spearfishing': typeof SpearfishingRoute
   '/specializations': typeof SpecializationsRoute
   '/street': typeof StreetRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/feedback': typeof AdminFeedbackRoute
   '/admin/operations': typeof AdminOperationsRoute
   '/reports/new': typeof ReportsNewRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/spearfishing': typeof SpearfishingRoute
   '/specializations': typeof SpecializationsRoute
   '/street': typeof StreetRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/feedback': typeof AdminFeedbackRoute
   '/admin/operations': typeof AdminOperationsRoute
   '/reports/new': typeof ReportsNewRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/spearfishing'
     | '/specializations'
     | '/street'
+    | '/welcome'
     | '/admin/feedback'
     | '/admin/operations'
     | '/reports/new'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/spearfishing'
     | '/specializations'
     | '/street'
+    | '/welcome'
     | '/admin/feedback'
     | '/admin/operations'
     | '/reports/new'
@@ -319,6 +330,7 @@ export interface FileRouteTypes {
     | '/spearfishing'
     | '/specializations'
     | '/street'
+    | '/welcome'
     | '/admin/feedback'
     | '/admin/operations'
     | '/reports/new'
@@ -347,6 +359,7 @@ export interface RootRouteChildren {
   SpearfishingRoute: typeof SpearfishingRoute
   SpecializationsRoute: typeof SpecializationsRoute
   StreetRoute: typeof StreetRoute
+  WelcomeRoute: typeof WelcomeRoute
   ReportsNewRoute: typeof ReportsNewRoute
 }
 
@@ -499,6 +512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StreetRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -566,6 +586,7 @@ const rootRouteChildren: RootRouteChildren = {
   SpearfishingRoute: SpearfishingRoute,
   SpecializationsRoute: SpecializationsRoute,
   StreetRoute: StreetRoute,
+  WelcomeRoute: WelcomeRoute,
   ReportsNewRoute: ReportsNewRoute,
 }
 export const routeTree = rootRouteImport

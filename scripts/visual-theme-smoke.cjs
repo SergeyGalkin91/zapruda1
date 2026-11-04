@@ -18,7 +18,7 @@ const OUT = path.resolve(process.env.VISUAL_OUTPUT_DIR || "appearance-evidence")
 fs.mkdirSync(OUT, { recursive: true });
 
 const COLORS = Object.freeze({
-  matte: "#090b0c",
+  matte: "#0b0d0e",
   blue: "#1239a6",
   blueHighlight: "#1458db",
   lime: "#d7ff35",
@@ -170,6 +170,13 @@ async function openRoute(page, route) {
 
         await blue.click();
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "electric-blue");
+        // The pre-paint attribute can precede the rendered panel's final style.
+        // Wait for the same exact approved color asserted below, not a timeout
+        // or a relaxed color range. A real palette regression still fails.
+        await page.waitForFunction(() => {
+          const panel = document.querySelector('section[aria-labelledby="app-background-title"]');
+          return panel && getComputedStyle(panel).backgroundColor === "rgb(26, 54, 127)";
+        });
         const after = await variables(page);
         assert.equal(after.background, COLORS.blue);
         assert.equal(after.primary, COLORS.lime);
@@ -180,7 +187,7 @@ async function openRoute(page, route) {
           panel: getComputedStyle(document.querySelector('section[aria-labelledby="app-background-title"]')).backgroundColor,
           headerGradient: getComputedStyle(document.querySelector("main header")).backgroundImage,
         }));
-        assert.equal(settingsSurfaces.panel, "rgb(26, 54, 127)", "Settings panel kept its old olive fill");
+        assert.equal(settingsSurfaces.panel, "rgb(26, 54, 127)", "Settings panel must retain the approved Electric Blue fill");
         assert(
           settingsSurfaces.headerGradient.includes("32, 82, 187") ||
             settingsSurfaces.headerGradient.includes("32,82,187"),
@@ -212,7 +219,7 @@ async function openRoute(page, route) {
           await assertNoOliveSurfaces(page, route);
           if (route === "/") {
             const feedSurface = await page.evaluate(() => {
-              const hero = document.querySelector("main > section");
+              const hero = document.querySelector(".z-feed-intro");
               const street = document.querySelector('main a[href="/street"]');
               const helpCard = document.querySelector('main a[href="/assistant"]');
               if (!hero || !street || !helpCard) throw new Error("Feed structure changed");
@@ -222,9 +229,9 @@ async function openRoute(page, route) {
                 helpCard: getComputedStyle(helpCard).backgroundColor,
               };
             });
-            assert.equal(feedSurface.hero, "rgb(21, 45, 114)", "Feed hero retained matte/olive surface");
-            assert.equal(feedSurface.street, "rgb(32, 58, 134)", "Street card retained dark green");
-            assert.equal(feedSurface.helpCard, "rgb(32, 58, 134)", "Lime-tinted card looked olive");
+            assert.equal(feedSurface.hero, "rgba(0, 0, 0, 0)", "Feed heading should not become an oversized filled hero");
+            assert.equal(feedSurface.street, "rgb(20, 45, 107)", "Street card retained dark green");
+            assert.equal(feedSurface.helpCard, "rgb(20, 45, 107)", "Lime-tinted card looked olive");
           }
           if (route === "/street") {
             const hero = await page.locator(".z-electric-street-hero").evaluate((el) => ({

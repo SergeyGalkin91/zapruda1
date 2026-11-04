@@ -1,9 +1,17 @@
 /** Local-only appearance settings. Never stores passwords or account information. */
 export type AppBackground = "classic" | "electric-blue";
 export type ChatBackground = "plain" | "forest" | "slate" | "water";
-export type Appearance = { background: AppBackground; chat: ChatBackground };
+export type AppWallpaper = "matte-black" | "carbon" | "neon-threads" | "topographic";
+// Optional so existing v1 device preferences migrate without losing their theme/chat.
+export type Appearance = {
+  background: AppBackground;
+  chat: ChatBackground;
+  wallpaper?: AppWallpaper;
+};
 
 export const APPEARANCE_STORAGE_KEY = "zapruda.appearance.v1";
+/** Runs before styles/paint. Only allowlisted appearance enums reach HTML attributes. */
+export const APPEARANCE_BOOTSTRAP_SCRIPT = `(function(){try{var a=JSON.parse(localStorage.getItem("zapruda.appearance.v1")||"null")||{},d=document.documentElement;d.dataset.zaprudaBackground=a.background==="electric-blue"?"electric-blue":"classic";d.dataset.zaprudaWallpaper=["matte-black","carbon","neon-threads","topographic"].includes(a.wallpaper)?a.wallpaper:"matte-black";}catch(e){}})();`;
 export const DEFAULT_APPEARANCE: Appearance = { background: "classic", chat: "plain" };
 
 export const APP_BACKGROUNDS: ReadonlyArray<{
@@ -16,9 +24,9 @@ export const APP_BACKGROUNDS: ReadonlyArray<{
   {
     value: "classic",
     title: "Matte Black",
-    description: "Матовый чёрный · лайм + сиреневый (по умолчанию)",
-    preview: "linear-gradient(140deg,#090B0C,#181A21)",
-    secondaryAccent: "#A99AD9",
+    description: "Матовый чёрный · графит + Electric Lime (по умолчанию)",
+    preview: "linear-gradient(140deg,#0B0D0E,#1A1D21)",
+    secondaryAccent: "#1A1D21",
   },
   {
     value: "electric-blue",
@@ -88,6 +96,21 @@ export const ELECTRIC_BLUE_CHAT_PREVIEWS: Record<
   },
 };
 
+export const APP_WALLPAPERS: ReadonlyArray<{
+  value: AppWallpaper;
+  title: string;
+  description: string;
+}> = [
+  { value: "matte-black", title: "Matte Black", description: "Чистый фон. Ничего лишнего." },
+  { value: "carbon", title: "Carbon", description: "Матовое карбоновое переплетение." },
+  {
+    value: "neon-threads",
+    title: "Neon Threads",
+    description: "Тонкие нити, мягкий свет по краям.",
+  },
+  { value: "topographic", title: "Topographic", description: "Спокойные контуры воды и рельефа." },
+];
+
 const backgroundValues = APP_BACKGROUNDS.map((item) => item.value);
 const chatValues = CHAT_BACKGROUNDS.map((item) => item.value);
 
@@ -101,6 +124,9 @@ export function normalizeAppearance(value: unknown): Appearance {
     chat: chatValues.includes(raw.chat as ChatBackground)
       ? (raw.chat as ChatBackground)
       : DEFAULT_APPEARANCE.chat,
+    ...(APP_WALLPAPERS.some((item) => item.value === raw.wallpaper)
+      ? { wallpaper: raw.wallpaper as AppWallpaper }
+      : {}),
   };
 }
 
@@ -119,6 +145,7 @@ export function applyAppearance(appearance: Appearance) {
   if (typeof document === "undefined") return;
   document.documentElement.dataset["zaprudaBackground"] = appearance.background;
   document.documentElement.dataset["zaprudaChat"] = appearance.chat;
+  document.documentElement.dataset["zaprudaWallpaper"] = appearance.wallpaper ?? "matte-black";
 }
 
 export function saveAppearance(appearance: Appearance): boolean {
