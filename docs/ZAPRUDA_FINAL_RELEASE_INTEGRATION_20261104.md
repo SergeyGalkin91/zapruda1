@@ -1,10 +1,10 @@
 # ZAPRUDA 0.7.6 KING FINISH — executed final integration checkpoint
 
-04.11.2026, Moscow. **NO-GO: main has not been updated.** The owner's conditional permission already authorizes a normal main merge after every mandatory gate passes. Production SQL/deploy, version bump, tags, DNS, payments and user-role changes remain outside that permission. Technical application version remains0.7.5.
+04.11.2026, Moscow. **NO-GO: main has not been updated.** The latest specific owner instruction forbids main changes in this cleanup/acceptance operation and takes precedence over historical conditional D15 permission. Production SQL/deploy, version bump, tags, DNS, payments and user-role changes remain outside that permission. Technical application version remains0.7.5.
 
 ## Exact candidates and preserved work
 
-- Code PR #93: **c21696356cd1e9eb211af06e8645ab8872002701**.
+- Code PR #93: **4eba36702a62de0957fb2a0310b0aa6fa8913985**; only the existing protected-E2E request marker differs from runtime source c216963.
 - Spec PR #111: synchronized through normal merge commits in its existing branch. The current documentation SHA/checks are in the PR body; no duplicate PR or published-history rewrite.
 - Main readback: **0d787d8e615dde821ca326fec1eeb6b9ef4ac15d**, unchanged.
 - Read-only main comparison: main is an ancestor;335 changed/added paths, **zero deleted files**. [Readback](../qa/product-contract/LIVE_FINAL_SECURITY_20261104.json).
@@ -74,3 +74,13 @@ Actual positive testing requires an independently authorized moderator, genuine 
 When every mandatory gate actually passes, use normal history-preserving integration of the existing PRs; recheck the full resulting tree/CI/JWT, merge to fresh main through branch protection, read back the resulting SHA and smoke an isolated STAGING deployment. No extra generic main permission is needed then. A main merge is not production deployment permission.
 
 **Current decision: NO-GO.** Final protected JWT/approved exact cleanup, full functional hosted and physical-device acceptance, guide contract, real KING/public-flow completion and verified production migration/restore compatibility remain open. No PR was merged into main and no requirement was removed to obtain a green release.
+
+## D18 executed cleanup and renewed exact-SHA acceptance
+
+The owner explicitly authorized only the five disposable feedback UUIDs in `OWNER_APPROVAL_REQUIRED_feedback_41850073063.sql`, only in STAGING `yudtbifopfnjtjanaqrd`. All original guards passed, SQL was executed unchanged, exactly5 rows were deleted, and an independent post-COMMIT SELECT at2026-11-04T20:34:16Z returned marker0 / exact IDs0 / dedicated feedback-account history0. Original approved SQL blob:76cf8bb2d8a236cf2c407b3ff5a2fe68c32e06a1. [Complete safe evidence](../qa/product-contract/FEEDBACK_CLEANUP_41850073063_EXECUTED.json). The first service confirmation expired without execution; the full preflight was repeated successfully before the confirmed execution. Old six fixtures were not deleted again.
+
+New [protected run41908405475](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908405475), job126849136280, candidate4eba36702a62de0957fb2a0310b0aa6fa8913985, is **WAITING** for the required `staging-e2e` reviewer at this checkpoint. All four genuine JWT users and every feedback/core/SPOT/browser precondition remain enabled. Waiting is not a whole-workflow PASS, and the successful historical f3bbe1b run is not relabelled. New fixtures from this run are outside the five-row deletion permission.
+
+Read-only KING preflight at2026-11-04T20:46:34Z:0 moderators,0 approved/reviewed SPOTs,0 catches,0 title holders. No roles, public proofs or fake title holders were created. All seven titles remain mandatory. The existing STREET/UL submit/review/public leaderboard path does not implement the remaining CARP/WINTER/BOAT end-to-end product flows; genuine test dependencies alone will not close that code gap.
+
+Netlify invited Google sign-in succeeded again without exposing or copying credentials/cookies/JWT. The actual Preview is private and now serves deploy6aeb97993e0be2ef23c56aa8 for the4eba367 request-only candidate (GitHub Netlify statusSUCCESS); application login/complete hosted journey remains separately checked. Latest instruction **forbids main, Production, real user rows, technical version and release** in this operation. No gate is waived. **NO-GO.**

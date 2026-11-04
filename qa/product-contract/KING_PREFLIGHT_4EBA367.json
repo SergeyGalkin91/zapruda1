@@ -1,0 +1,26 @@
+{
+  "project_id": "yudtbifopfnjtjanaqrd",
+  "candidate": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+  "read_only": true,
+  "result": [
+    {
+      "checked_at": "2026-11-04 20:46:34.048781+00",
+      "moderators": 0,
+      "approved_reviewed_spots": 0,
+      "catches": 0,
+      "title_holders": 0
+    }
+  ],
+  "all_seven_titles_preserved": true,
+  "real_positive_e2e": "BLOCKED",
+  "missing_inputs": [
+    "existing independently authorized moderator",
+    "lawful approved/reviewed eligible SPOT",
+    "genuine private catch proof from its actual author",
+    "second eligible genuine catch for replacement/revocation/recalculation"
+  ],
+  "implementation_gaps": [
+    "Public server/UI path still limited to STREET and UL; CARP/WINTER/BOAT are not complete end-to-end flows"
+  ],
+  "no_fake_data_or_privilege_assignment": true
+}

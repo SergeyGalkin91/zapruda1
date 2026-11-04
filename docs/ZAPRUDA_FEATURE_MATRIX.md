@@ -1,6 +1,6 @@
 # ZAPRUDA — матрица 56 постоянных требований
 Машиночитаемый источник: [ZAPRUDA_FEATURES.json](ZAPRUDA_FEATURES.json). Дата: 04.11.2026.
-Код сверки: `c21696356cd1e9eb211af06e8645ab8872002701` (PR #93). Документы — DRAFT, не release approval.
+Код сверки: `4eba36702a62de0957fb2a0310b0aa6fa8913985` (PR #93). Документы — DRAFT, не release approval.
 IMPLEMENTED означает код, STAGING VERIFIED/E2E VERIFIED — только указанный сценарий и доказательство. PLANNED/BLOCKED сохраняются в обязательном плане. DEFERRED требует явного owner decision.
 P0 — обязательный gate; P? — предлагаемый состав; FULL — полный продукт, не автоматический перенос.
 
@@ -66,3 +66,6 @@ P0 — обязательный gate; P? — предлагаемый соста
 <!-- END:FEATURES -->
 
 Текущие результаты: [FINAL_RELEASE_INTEGRATION](ZAPRUDA_FINAL_RELEASE_INTEGRATION_20261104.md). Protected 41850073063 на f3bbe1b SUCCESS; текущий кандидат c216963 имеет13 ordinary CI PASS; финальный protected/полный hosted/KING gates открыты. Все 56 ID сохранены; main NO-GO до обязательных gates.
+ 
+## D18 — финальный protected request после разрешённой очистки
+Runtime/feature rows идентичны c216963;4eba367 меняет только `.github/pilot-e2e-request.txt`. Все56 исходных ID и их обязательства сохранены. Ровно5 разрешённых feedback удалены с неизменными guards; независимый остаток0. [Доказательства](../qa/product-contract/FEEDBACK_CLEANUP_41850073063_EXECUTED.json). [Protected41908405475](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41908405475) WAITING environment review; ни один статус не повышается из-за запуска. Main/Production/version/release запрещены последним указанием владельца.
