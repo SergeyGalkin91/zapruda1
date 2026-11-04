@@ -180,7 +180,7 @@ async function openRoute(page, route) {
           panel: getComputedStyle(document.querySelector('section[aria-labelledby="app-background-title"]')).backgroundColor,
           headerGradient: getComputedStyle(document.querySelector("main header")).backgroundImage,
         }));
-        assert.equal(settingsSurfaces.panel, "rgb(20, 45, 107)", "Settings panel kept its old olive fill");
+        assert.equal(settingsSurfaces.panel, "rgb(26, 54, 127)", "Settings panel must retain the approved Electric Blue fill");
         assert(
           settingsSurfaces.headerGradient.includes("32, 82, 187") ||
             settingsSurfaces.headerGradient.includes("32,82,187"),

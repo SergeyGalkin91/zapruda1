@@ -403,7 +403,6 @@ function Feed() {
   return (
     <Shell screen="feed">
       <PremiumFeedHeader />
-      <DailyFishingBrief />
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && (
         <div
@@ -572,6 +571,7 @@ function Feed() {
           </div>
         </aside>
       </div>
+      <DailyFishingBrief />
     </Shell>
   );
 }

@@ -142,6 +142,27 @@
               new URL(o).hostname.endsWith(".supabase.co") && new URL(o).hostname !== stageHost,
           );
           const nav = doc.querySelector('nav[aria-label="Мобильная навигация"]');
+          const shellBounds = Array.from(
+            doc.querySelectorAll("header.sticky a, header.sticky button, header.sticky summary"),
+          )
+            .map((el) => {
+              const r = el.getBoundingClientRect();
+              return {
+                label: el.getAttribute("aria-label") || "navigation",
+                x: r.x,
+                right: r.right,
+                width: r.width,
+                height: r.height,
+              };
+            })
+            .filter((r) => r.width > 0 && r.height > 0);
+          const shellBoundsOk = shellBounds.every(
+            (r) =>
+              r.x >= -1 &&
+              r.right <= doc.documentElement.clientWidth + 1 &&
+              r.width >= 43 &&
+              r.height >= 43,
+          );
           const result = {
             deployedSha: "__DEPLOYED_SHA__",
             level: "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
@@ -153,6 +174,9 @@
             overflow: doc.documentElement.scrollWidth > doc.documentElement.clientWidth,
             route: win.location.pathname,
             theme: doc.documentElement.dataset.zaprudaBackground || null,
+            wallpaper: doc.documentElement.dataset.zaprudaWallpaper || "matte-black",
+            shellBoundsOk,
+            shellBounds,
             signedInProfileLink: !!doc.querySelector('header a[href="/profile"]'),
             bottomNavPadding: nav ? win.getComputedStyle(nav).paddingBottom : null,
             activeElement: doc.activeElement?.tagName,
@@ -174,7 +198,7 @@
           metrics.textContent = JSON.stringify(result, null, 2);
           state.textContent = foreignBackend.length
             ? "FAIL: чужой backend"
-            : result.overflow
+            : result.overflow || !shellBoundsOk
               ? "FAIL: горизонтальный скролл"
               : "Показатели обновлены";
         } catch {
