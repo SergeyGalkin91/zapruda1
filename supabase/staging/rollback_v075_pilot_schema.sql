@@ -1,6 +1,10 @@
 -- REVIEWED ROLLBACK: execute only on a disposable clone after stopping clients.
 -- This refuses to discard user content or idempotency history. Never CASCADE.
 do $$begin
+ if exists(select 1 from pg_policies where schemaname='public' and tablename='chat_messages'
+   and policyname='staging_geo_messages_global_send')then
+  raise exception 'Rollback refused: subsequent global chat policy depends on confirmed-write hardening; review a forward plan';
+ end if;
  if exists(select 1 from public.chat_messages)
  or exists(select 1 from storage.objects where bucket_id='chat-photos')
  or exists(select 1 from public.angler_gear)
@@ -53,3 +57,6 @@ alter table public.comments drop constraint pilot_comment_size;
 alter table public.fishing_reports drop constraint pilot_report_owner_key;
 drop function zapruda_internal.pilot_confirmed_actor_v075();
 -- Retain the pre-existing catches/comments tables, column grants, and RLS.
+-- The current hosted schema has subsequent migrations: automatic rollback is
+-- intentionally refused, even when no QA content remains. This file is a tested
+-- rollback for the captured pre-subsequent disposable snapshot, not a live undo.

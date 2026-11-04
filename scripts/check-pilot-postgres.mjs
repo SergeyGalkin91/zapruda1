@@ -82,6 +82,7 @@ await sql(
 // Revert/reapply the actual deltas, preserving the pre-existing text chat and ACL.
 await sql(file("staging/rollback_v075_pilot_schema.sql"));
 await sql(deltas.map((d) => file("staging/" + d)).join("\n"));
+await sql(file("tests/unit/subsequent_dependencies_adopted.sql"));
 const cases = [];
 for (let round = 0; round < 5; round++) {
   const report = randomUUID();
@@ -155,7 +156,19 @@ assert.equal(
   ),
   1,
 );
-await assert.rejects(sql(file("staging/rollback_v075_pilot_schema.sql")), /Rollback refused/);
+// Both refusal reasons are independent. The temporary policy DROP is inside
+// an isolated transaction that psql rolls back on the expected error.
+await assert.rejects(
+  sql(
+    "begin; drop policy staging_geo_messages_global_send on public.chat_messages;\n" +
+      file("staging/rollback_v075_pilot_schema.sql"),
+  ),
+  /Rollback refused: preserve content/,
+);
+await assert.rejects(
+  sql(file("staging/rollback_v075_pilot_schema.sql")),
+  /subsequent global chat policy/,
+);
 mkdirSync("qa", { recursive: true });
 writeFileSync(
   "qa/pilot-postgres.json",
@@ -166,6 +179,7 @@ writeFileSync(
       signedJWT: false,
       emptyRollbackReapply: true,
       populatedRollbackRefused: true,
+      subsequentRollbackRefused: true,
       onePrimaryKit: true,
       cases,
     },

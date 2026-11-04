@@ -1,1 +1,1 @@
-PR93 final v0.7.5 core STAGING schema/media/Realtime acceptance. All 13 ordinary workflows on this exact HEAD. No production release.
+PR93 final acceptance including preserved subsequent STAGING migrations and rollback drift guard. 410 offline tests; all 13 ordinary workflows on this exact HEAD. Protected live script unchanged; no automatic retry of its pre-run blocker.

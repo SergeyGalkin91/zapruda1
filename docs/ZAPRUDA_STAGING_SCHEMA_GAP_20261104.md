@@ -1,4 +1,4 @@
-> **Актуализация:** старый срез 31/22 ниже — исторический. Сейчас STAGING: 42 public tables, семь новых проверенных дельт и принятые subsequent migrations. Core report/chat/profile dependencies восстановлены; остаются 11 таблиц, Atlas view, 6 RPC и отдельные guide/paid columns. См. [актуальный alignment](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md) и [полную metadata matrix](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md). Настоящие JWT gates не заменяются этим структурным результатом.
+> **Актуализация:** старый срез 31/22 ниже — исторический. Сейчас STAGING: 45 public tables, семь новых проверенных дельт и принятые subsequent migrations. Core report/chat/profile dependencies восстановлены; остаются 8 таблиц, Atlas view, 6 RPC и отдельные guide/paid columns. См. [актуальный alignment](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md) и [полную metadata matrix](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md). Настоящие JWT gates не заменяются этим структурным результатом.
 
 # STAGING schema gap — 04.11.2026 (Москва)
 
