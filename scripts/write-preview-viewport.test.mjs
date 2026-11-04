@@ -17,6 +17,7 @@ async function fixture(t) {
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(join(root, "qa"));
   await writeFile(join(root, "qa/hosted-viewport.html"), await readFile("qa/hosted-viewport.html"));
+  await writeFile(join(root, "qa/premium-gallery.html"), await readFile("qa/premium-gallery.html"));
   return root;
 }
 
@@ -29,6 +30,13 @@ test("only PR93 STAGING gets the hosted page and exact build SHA", async (t) => 
   assert.ok(html.includes("deploy-preview-93--zapruda1.netlify.app"));
   assert.ok(!html.includes("sonvniuwtvzzyuglscah"));
   assert.ok(!/localStorage|sessionStorage|document\.cookie|access_token|Authorization/.test(html));
+  const gallery = await readFile(join(root, "dist/__qa/premium.html"), "utf8");
+  assert.ok(gallery.includes(env.COMMIT_REF));
+  assert.ok(gallery.includes("390 × 844"));
+  assert.ok(!gallery.includes("__DEPLOYED_SHA__"));
+  assert.ok(
+    !/localStorage|sessionStorage|document\.cookie|access_token|Authorization/.test(gallery),
+  );
 });
 
 test("production, branch deploys and other PRs remove stale QA output", async (t) => {
@@ -44,6 +52,7 @@ test("production, branch deploys and other PRs remove stale QA output", async (t
       enabled: false,
     });
     await assert.rejects(readFile(join(root, "dist/__qa/viewport.html")), { code: "ENOENT" });
+    await assert.rejects(readFile(join(root, "dist/__qa/premium.html")), { code: "ENOENT" });
   }
 });
 

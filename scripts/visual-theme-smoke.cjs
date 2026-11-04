@@ -170,6 +170,13 @@ async function openRoute(page, route) {
 
         await blue.click();
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "electric-blue");
+        // The pre-paint attribute can precede the rendered panel's final style.
+        // Wait for the same exact approved color asserted below, not a timeout
+        // or a relaxed color range. A real palette regression still fails.
+        await page.waitForFunction(() => {
+          const panel = document.querySelector('section[aria-labelledby="app-background-title"]');
+          return panel && getComputedStyle(panel).backgroundColor === "rgb(26, 54, 127)";
+        });
         const after = await variables(page);
         assert.equal(after.background, COLORS.blue);
         assert.equal(after.primary, COLORS.lime);

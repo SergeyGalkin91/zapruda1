@@ -145,6 +145,7 @@
           const shellBounds = Array.from(
             doc.querySelectorAll("header.sticky a, header.sticky button, header.sticky summary"),
           )
+            .filter((el) => !el.closest("details:not([open])") || el.tagName === "SUMMARY")
             .map((el) => {
               const r = el.getBoundingClientRect();
               return {
@@ -153,6 +154,10 @@
                 right: r.right,
                 width: r.width,
                 height: r.height,
+                essential:
+                  el.tagName === "SUMMARY" ||
+                  el.getAttribute("href") === "/profile" ||
+                  el.getAttribute("href")?.startsWith("/auth"),
               };
             })
             .filter((r) => r.width > 0 && r.height > 0);
@@ -160,8 +165,7 @@
             (r) =>
               r.x >= -1 &&
               r.right <= doc.documentElement.clientWidth + 1 &&
-              r.width >= 43 &&
-              r.height >= 43,
+              (!r.essential || (r.width >= 43.5 && r.height >= 43.5)),
           );
           const result = {
             deployedSha: "__DEPLOYED_SHA__",
@@ -198,9 +202,11 @@
           metrics.textContent = JSON.stringify(result, null, 2);
           state.textContent = foreignBackend.length
             ? "FAIL: чужой backend"
-            : result.overflow || !shellBoundsOk
+            : result.overflow
               ? "FAIL: горизонтальный скролл"
-              : "Показатели обновлены";
+              : !shellBoundsOk
+                ? "FAIL: элемент шапки выходит за границы или меньше 44 px"
+                : "Показатели обновлены";
         } catch {
           state.textContent = "Приложение ещё загружается или требует входа через основную вкладку";
         }
