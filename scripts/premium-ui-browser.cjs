@@ -24,6 +24,7 @@ fs.mkdirSync(out, { recursive: true });
       page.on("pageerror", e => errors.push(e.message));
       for (const theme of ["classic","electric-blue"]) {
         await page.goto(base+"/settings", {waitUntil:"domcontentloaded"});
+        await page.locator('[data-appearance-ready="true"]').waitFor({state:"visible"});
         await page.getByRole("button",{name:theme==="classic"?/^Matte Black/:/^Electric Blue/}).first().click();
         await page.waitForFunction(t => document.documentElement.dataset.zaprudaBackground===t, theme);
         for (const route of ["/welcome","/","/communities","/competitions","/profile"]) {
@@ -41,6 +42,7 @@ fs.mkdirSync(out, { recursive: true });
           shots.push(filename);checks.push({route,theme,width,overflow:false});
         }
         await page.goto(base+"/settings",{waitUntil:"domcontentloaded"});
+        await page.locator('[data-appearance-ready="true"]').waitFor({state:"visible"});
         for (const wallpaper of ["Matte Black","Carbon","Neon Threads","Topographic"]) {
           const value={"Matte Black":"matte-black",Carbon:"carbon","Neon Threads":"neon-threads",Topographic:"topographic"}[wallpaper];
           const option=page.locator('section[aria-labelledby="wallpaper-title"]').getByRole("button",{name:new RegExp("^"+wallpaper)});

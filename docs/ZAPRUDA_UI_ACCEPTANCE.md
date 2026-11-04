@@ -74,3 +74,6 @@ Protected41908405475 SUCCESS относится к4eba367, до нового UI.
 
 
 Финальная сохранённая интеграция P0 UI: `e391c578eff6d9eb717e7dfb9e43e36956307630`,13 CI PASS/449 tests,5 actual hosted screens loaded на390×844,STAGING only. Последующие host-boundary изменения сохранены, исторический JWT4eba367 не переименован в новый JWT PASS. [Полные scoped доказательства](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md).
+
+
+Фиксированный PHONE VISUAL PREVIEW9c7fe6e:450tests/13CI PASS,8/8 genuine pinned wallpaper reload checks. [Постоянный Preview](https://6aebae0a59ab32e0cc56cdfb--zapruda1.netlify.app/welcome). Early-tap/hydration fix сохранён. Подробные границы/хэши — в актуальном premium отчёте.
