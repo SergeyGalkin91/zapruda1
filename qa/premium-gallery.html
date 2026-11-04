@@ -115,7 +115,9 @@
       <div id="results" role="status">Ожидаем приложение…</div>
     </footer>
     <script>
-      const allowed = location.hostname === "deploy-preview-93--zapruda1.netlify.app";
+      const allowed =
+        location.hostname === "deploy-preview-93--zapruda1.netlify.app" ||
+        /^[a-f0-9]{24}--zapruda1\.netlify\.app$/.test(location.hostname);
       const targets = [
         ["Welcome", "/welcome"],
         ["Лента", "/"],

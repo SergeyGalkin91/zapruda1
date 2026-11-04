@@ -120,7 +120,9 @@
       const state = document.getElementById("state");
       const metrics = document.getElementById("metrics");
       const stageHost = "yudtbifopfnjtjanaqrd.supabase.co";
-      const allowed = location.hostname === "deploy-preview-93--zapruda1.netlify.app";
+      const allowed =
+        location.hostname === "deploy-preview-93--zapruda1.netlify.app" ||
+        /^[a-f0-9]{24}--zapruda1\.netlify\.app$/.test(location.hostname);
       const widths = new Set(["320", "390", "768", "1440"]);
       const heights = new Set(["568", "640", "844", "936"]);
       const routes = new Set(Array.from(route.options, (o) => o.value));

@@ -3,6 +3,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { runInNewContext } from "node:vm";
 import { writePreviewViewport } from "./write-preview-viewport.mjs";
 
 const env = {
@@ -65,5 +66,30 @@ test("wrong backend and unverified or injected SHA fail before publication", asy
   ]) {
     await assert.rejects(writePreviewViewport(root, { ...env, ...overrides }), /QA_VIEWPORT_/);
     await assert.rejects(readFile(join(root, "dist/__qa/viewport.html")), { code: "ENOENT" });
+  }
+});
+
+test("hosted QA permits the isolated immutable preview and rejects unrelated hosts", async (t) => {
+  const root = await fixture(t);
+  await writePreviewViewport(root, env);
+  for (const page of ["viewport.html", "premium.html"]) {
+    const html = await readFile(join(root, "dist/__qa", page), "utf8");
+    const declaration = html.match(/const allowed =[^;]+;/)?.[0];
+    assert.ok(declaration, "Missing host boundary");
+    for (const [hostname, expected] of [
+      ["deploy-preview-93--zapruda1.netlify.app", true],
+      ["6aeba60ab32502a76dd53e60--zapruda1.netlify.app", true],
+      ["deploy-preview-111--zapruda1.netlify.app", false],
+      ["premium--zapruda1.netlify.app", false],
+      ["zapruda1.netlify.app", false],
+      ["6aeba60ab32502a76dd53e60--other.netlify.app", false],
+      ["6aeba60ab32502a76dd53e60--zapruda1.netlify.app.evil.test", false],
+    ]) {
+      assert.equal(
+        runInNewContext(declaration + " allowed;", { location: { hostname } }),
+        expected,
+        hostname,
+      );
+    }
   }
 });

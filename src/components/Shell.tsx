@@ -70,7 +70,9 @@ export function Shell({
   }, []);
   useEffect(() => {
     setIsNetlifyStagingPreview(
-      /^deploy-preview-[0-9]+--zapruda1[.]netlify[.]app$/.test(window.location.hostname),
+      /^deploy-preview-[0-9]+--zapruda1[.]netlify[.]app$/.test(window.location.hostname) ||
+        (/^[a-f0-9]{24}--zapruda1[.]netlify[.]app$/.test(window.location.hostname) &&
+          import.meta.env["VITE_SUPABASE_URL"] === "https://yudtbifopfnjtjanaqrd.supabase.co"),
     );
   }, []);
 
