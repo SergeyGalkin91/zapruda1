@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
+import { checkCommunityBoundaries } from "./check-community-postgres.mjs";
 const connection = process.env.PILOT_SQL_TEST_DATABASE_URL ?? "";
 const parsed = new URL(connection);
 assert.equal(parsed.hostname, "127.0.0.1");
@@ -203,6 +204,7 @@ await assert.rejects(
   /subsequent global chat policy/,
 );
 mkdirSync("qa", { recursive: true });
+const community = await checkCommunityBoundaries({ sql, scalar, asUser, q, file, owner, outsider });
 writeFileSync(
   "qa/pilot-postgres.json",
   JSON.stringify(
@@ -218,6 +220,7 @@ writeFileSync(
       feedbackDailyLimit: true,
       feedbackRollbackPreservesRequests: true,
       cases,
+      community,
     },
     null,
     2,
