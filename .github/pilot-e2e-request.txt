@@ -16,3 +16,5 @@ Include newly aligned empty Atlas catalog/own progress reads and read-only Yande
 2026-11-04 collect independent Browser evidence even if feedback quota precondition blocks; all failures still fail the job.
 
 2026-11-04 fix actual Browser failure: narrow authenticated INSERT(id) under existing chat owner/geography RLS; test collision/spoof/guest denial.
+
+2026-11-04 instrument real Browser send boundary: embedded read code, POST status, persisted row count, masked failure screenshot. No test gate relaxed.

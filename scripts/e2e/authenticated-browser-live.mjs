@@ -30,6 +30,7 @@ const result = {
 const clients = [],
   browsers = [];
 let phase = "setup";
+let diagnosticPage;
 async function must(q) {
   const r = await q;
   if (r.error) throw Error("API_ASSERTION_FAILED");
@@ -84,6 +85,7 @@ try {
     cb = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const a = await ca.newPage(),
     b = await cb.newPage();
+  diagnosticPage = a;
   for (const page of [a, b])
     await page.route("**/*", (route) => {
       if (route.request().url().includes("sonvniuwtvzzyuglscah"))
@@ -111,6 +113,12 @@ try {
   await loginUI(b, B);
   result.checks.push("two distinct actual UI password logins");
   phase = "chat-read-realtime";
+  const embedded = await A.c
+    .from("chat_messages")
+    .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url,chat_city)")
+    .limit(1);
+  result.chatEmbeddedRead = embedded.error?.code || "OK";
+  if (embedded.error) throw Error("CHAT_EMBED_QUERY_FAILED");
   await b.goto(base + "/chat");
   await expect(b.getByRole("button", { name: "Все", exact: true })).toBeEnabled();
   const before = await unread(B);
@@ -123,11 +131,26 @@ try {
   await a.route("**/rest/v1/chat_messages*", async (route) => {
     if (route.request().method() === "POST" && !lost) {
       lost = true;
-      await route.fetch();
+      const committed = await route.fetch();
+      result.chatPostStatus = committed.status();
+      if (!committed.ok()) {
+        const payload = await committed.json().catch(() => ({}));
+        result.chatPostCode = payload.code || "UNEXPECTED_STATUS";
+      }
       await route.abort("failed");
     } else await route.continue();
   });
   await a.getByRole("button", { name: "Отправить", exact: true }).click();
+  await expect.poll(() => composer.isEnabled(), { timeout: 20000 }).toBe(true);
+  const afterSend = await must(
+    A.c
+      .from("chat_messages")
+      .select("id")
+      .eq("user_id", A.id)
+      .eq("body", tag + " message"),
+  );
+  result.chatAfterSendCount = afterSend.length;
+  result.chatAlerts = await a.getByRole("alert").allTextContents();
   await expect(a.getByText(tag + " message", { exact: true })).toBeVisible({ timeout: 20000 });
   // If recovery also failed, a user retry must reuse the original UUID.
   if (await composer.inputValue())
@@ -149,6 +172,7 @@ try {
     .toBe(1);
   await expect.poll(() => unread(B), { timeout: 20000 }).toBeGreaterThan(before);
   await b.getByRole("button", { name: "Непрочитанные", exact: true }).click();
+  diagnosticPage = b;
   const general = b.getByRole("button", { name: /^Общий/ });
   await expect(general).toBeVisible({ timeout: 20000 });
   await general.click();
@@ -181,6 +205,7 @@ try {
   result.checks.push(
     "UI send lost-response recovery: one persisted message; B unread via Realtime; open/read/reload; foreign marker denied; real Realtime preserves draft",
   );
+  diagnosticPage = a;
   phase = "wizard-private-publication";
   for (const withFish of [false, true]) {
     await a.goto(base + "/reports/new");
@@ -313,6 +338,7 @@ try {
     browsers.push(br);
     const ctx = await br.newContext();
     const p = await ctx.newPage();
+    diagnosticPage = p;
     await loginUI(p, A);
     for (const width of [320, 390, 768, 1440])
       for (const theme of ["matte", "electric-blue"]) {
@@ -358,6 +384,7 @@ try {
     .replace(/[^\s]+@[^\s]+/g, "[EMAIL]")
     .replace(/eyJ[A-Za-z0-9_.-]+/g, "[JWT]")
     .slice(0, 1400);
+  if (diagnosticPage) await shot(diagnosticPage, "failure-" + phase).catch(() => {});
   process.exitCode = 1;
 } finally {
   try {
