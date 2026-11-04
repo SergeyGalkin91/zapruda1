@@ -1,6 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { MessageCircle, Send, ShieldCheck } from "lucide-react";
+import {
+  ArrowUpRight,
+  Globe2,
+  MessageCircle,
+  Search,
+  Send,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { SocialGroups } from "@/components/SocialGroups";
 import { SocialMeetups } from "@/components/SocialMeetups";
@@ -11,12 +19,8 @@ export const Route = createFileRoute("/communities")({
   head: () => ({
     meta: [
       { title: "Сообщества — ZAPRUDA" },
-      { name: "description", content: "Чаты рыболовов по странам, регионам, городам и интересам." },
+      { name: "description", content: "Свои люди на своей воде. Чаты, клубы и СХОДКИ рыболовов." },
       { property: "og:title", content: "Сообщества — ZAPRUDA" },
-      {
-        property: "og:description",
-        content: "Чаты рыболовов по странам, регионам, городам и интересам.",
-      },
     ],
   }),
   component: Communities,
@@ -24,129 +28,172 @@ export const Route = createFileRoute("/communities")({
 
 function Communities() {
   const [country, setCountry] = useState<string | null>(null);
-  const cis = countries.filter((c) => c.group === "cis");
-  const Chip = ({ c }: { c: (typeof countries)[number] }) => (
-    <button
-      type="button"
-      onClick={() => setCountry((current) => (current === c.code ? null : c.code))}
-      aria-pressed={country === c.code}
-      aria-controls="zapruda-selected-country"
-      className={`panel flex min-h-11 items-center gap-2 px-4 py-3 text-left text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35] ${country === c.code ? "border-primary" : ""}`}
-    >
-      <span className="text-lg">{c.flag}</span>
-      {c.name}
-    </button>
+  const [search, setSearch] = useState("");
+  const visible = countries.filter(
+    (c) =>
+      c.group === "cis" && c.name.toLocaleLowerCase("ru").includes(search.toLocaleLowerCase("ru")),
   );
-  const sel = countries.find((c) => c.code === country);
-
+  const selected = countries.find((c) => c.code === country);
   return (
-    <Shell>
-      <h1 className="z-underground-title break-words text-[clamp(1.8rem,8vw,3.75rem)] text-white [overflow-wrap:anywhere]">
-        КОМЬЮНИТИ
-      </h1>
-      <section className="z-underground mt-6 overflow-hidden bg-gradient-to-br from-[#1F1B29] via-[#101314] to-[#0B0D0E] p-5 sm:p-7">
-        <div className="flex flex-wrap items-center gap-4">
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 text-[#D7FF35]">
-            <Send className="size-7" aria-hidden="true" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#D7FF35]">
-              Официальное Telegram-сообщество
-            </p>
-            <h2 className="mt-1 text-xl font-black text-white">ZAPRUDA COMMUNITY</h2>
-            <p className="mt-1 text-sm text-zinc-300">
-              Новости приложения, обсуждения рыбалки и общение участников.
-            </p>
-          </div>
+    <Shell screen="communities">
+      <header className="z-screen-heading">
+        <div>
+          <p className="z-eyebrow">СВОИ ЛЮДИ. СВОЯ ВОДА.</p>
+          <h1>Сообщества</h1>
         </div>
-        <div className="mt-5 flex flex-wrap gap-3">
+        <Link
+          to="/chat"
+          search={{ country: "", place: "", topic: "general" }}
+          className="z-round-action"
+          aria-label="Общий чат ZAPRUDA"
+        >
+          <MessageCircle className="size-5" />
+        </Link>
+      </header>
+      <p className="z-screen-description">
+        Выбирай свою географию. Находи напарников, клубы и новые истории.
+      </p>
+      <nav className="z-segments" aria-label="Каталог сообществ">
+        <a href="#community-geography" aria-current="page">
+          География
+        </a>
+        <a href="#community-clubs">Клубы</a>
+        <a href="#community-meetups">СХОДКИ</a>
+      </nav>
+      <section
+        id="community-geography"
+        className="z-communities-geo"
+        aria-labelledby="geography-title"
+      >
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 id="geography-title" className="text-base font-bold">
+            Страны и регионы
+          </h2>
+          <Globe2 className="size-4 text-muted-foreground" aria-hidden="true" />
+        </div>
+        <label className="z-country-search mb-4 flex min-h-12 items-center gap-3 rounded-xl border border-white/15 bg-[var(--premium-panel)] px-4">
+          <Search className="size-4 text-muted-foreground" aria-hidden="true" />
+          <span className="sr-only">Поиск страны</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Найти страну"
+            className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none"
+          />
+        </label>
+        <div className="z-country-grid">
+          {visible.map((c) => (
+            <button
+              type="button"
+              key={c.code}
+              onClick={() => setCountry((v) => (v === c.code ? null : c.code))}
+              aria-pressed={country === c.code}
+              aria-controls="zapruda-selected-country"
+              className="z-country-card flex min-w-0 items-center px-4 py-3 text-left text-sm font-semibold"
+            >
+              <span aria-hidden="true">{c.flag}</span>
+              <span className="min-w-0 flex-1 break-words">{c.name}</span>
+              <ArrowUpRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+        {!visible.length && (
+          <p role="status" className="z-premium-card p-5 text-sm text-muted-foreground">
+            Такой страны пока нет в каталоге. Попробуй другое название.
+          </p>
+        )}
+        <div id="zapruda-selected-country" aria-live="polite">
+          {selected && (
+            <section aria-label="Выбранная страна" className="z-premium-card mt-4 p-5">
+              <p className="font-bold">
+                {selected.flag} {selected.name}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Выбери регион, город и тему в чате страны. Участники и сообщения — настоящие.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link
+                  to="/chat"
+                  search={{ country: selected.code, place: "", topic: "general" }}
+                  className="btn-primary"
+                >
+                  Открыть чаты страны <ArrowUpRight className="size-4" />
+                </Link>
+                <Link to="/atlas" search={{ country: selected.code }} className="btn-ghost">
+                  Атлас водоёмов
+                </Link>
+              </div>
+            </section>
+          )}
+        </div>
+      </section>
+      <Link
+        to="/chat"
+        search={{ place: "", topic: "general", country: "" }}
+        className="z-premium-card flex items-center gap-4 p-5"
+      >
+        <span className="z-round-action">
+          <Users className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <strong className="block text-sm">Весь ZAPRUDA</strong>
+          <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+            Общий чат, истории с воды и знакомство со своими.
+          </span>
+        </span>
+        <ArrowUpRight className="size-4 text-[#D7FF35]" />
+      </Link>
+      <div id="community-meetups" className="z-community-section">
+        <SocialMeetups />
+      </div>
+      <div id="community-clubs" className="z-community-section">
+        <SocialGroups />
+      </div>
+      <VerifiedGuideDirectory />
+      <Link
+        to="/atlas"
+        search={{ country: "" }}
+        className="z-premium-card mt-6 flex items-center gap-4 p-5"
+      >
+        <Globe2 className="size-6 text-[#D7FF35]" />
+        <span className="min-w-0 flex-1">
+          <strong className="block">Атлас рыболова</strong>
+          <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+            Водоёмы России и СНГ, виды рыб и коллекции трофеев.
+          </span>
+        </span>
+        <ArrowUpRight className="size-4" />
+      </Link>
+      <section className="z-community-telegram">
+        <p className="z-eyebrow">НА СВЯЗИ</p>
+        <h2 className="mt-2 flex items-center gap-2 font-bold">
+          <Send className="size-4 text-[#D7FF35]" />
+          ZAPRUDA в Telegram
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Новости приложения, обсуждения рыбалки и общение участников.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
           <a
             href="https://t.me/ZAPRUDACOMMUNITY"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary inline-flex"
+            className="btn-ghost"
           >
-            <MessageCircle className="size-4" /> Открыть Telegram
+            <MessageCircle className="size-4" />
+            Открыть Telegram
           </a>
-          <Link to="/feedback" className="btn-ghost inline-flex">
-            <ShieldCheck className="size-4" /> Предложить улучшение
+          <Link to="/feedback" className="btn-ghost">
+            <ShieldCheck className="size-4" />
+            Предложить улучшение
           </Link>
         </div>
-        <p className="mt-4 text-xs leading-5 text-zinc-400">
-          Предложения и обращения к администрации отправляй через защищённую форму ZAPRUDA. Личные
-          контакты, заявки и жалобы не публикуются в публичной Telegram-группе. Для них предусмотрен
-          закрытый чат администрации.
+        <p className="mt-4 leading-5 text-muted-foreground">
+          Личные контакты, заявки и жалобы не публикуются в Telegram-группе. Обращения команде
+          отправляй через защищённую форму ZAPRUDA.
         </p>
       </section>
-      <Link
-        search={{ place: "", topic: "general", country: "" }}
-        to="/chat"
-        className="z-underground mt-6 flex min-w-0 items-center justify-between gap-3 p-5 transition hover:border-[#A78BFA]/50"
-      >
-        <div className="min-w-0">
-          <p className="font-display font-bold">Весь ZAPRUDA</p>
-          <p className="text-sm text-muted-foreground">
-            Общий чат и переход к странам, областям, городам и тематическим веткам
-          </p>
-        </div>
-        <span className="text-primary">→</span>
-      </Link>
-
-      <SocialMeetups />
-      <SocialGroups />
-      <VerifiedGuideDirectory />
-
-      <h2 className="mt-8 mb-3 text-sm uppercase tracking-widest text-muted-foreground">
-        Страны СНГ
-      </h2>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        {cis.map((c) => (
-          <Chip key={c.code} c={c} />
-        ))}
-      </div>
-      {sel && (
-        <section
-          id="zapruda-selected-country"
-          aria-label="Выбранная страна"
-          className="mt-5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/5 p-4 text-sm"
-        >
-          <p className="font-semibold text-[#D7FF35]">
-            {sel.flag} {sel.name}
-          </p>
-          <p className="mt-1 text-zinc-300">
-            Общайся с рыболовами этой страны, выбери регион и город, затем тематическую ветку.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-4">
-            <Link
-              to="/chat"
-              search={{ country: sel.code, place: "", topic: "general" }}
-              className="inline-flex font-bold text-[#D7FF35] underline"
-            >
-              Открыть чаты страны →
-            </Link>
-            <Link
-              to="/atlas"
-              search={{ country: sel.code }}
-              className="inline-flex font-semibold text-zinc-300 underline"
-            >
-              Атлас водоёмов →
-            </Link>
-          </div>
-        </section>
-      )}
-      <Link
-        to="/atlas"
-        search={{ country: "" }}
-        className="mt-6 flex items-center justify-between rounded-[22px] border border-[#A78BFA]/30 bg-[#A78BFA]/10 p-5 transition hover:border-[#D7FF35]"
-      >
-        <span>
-          <strong className="block text-lg text-[#D7FF35]">Атлас рыболова</strong>
-          <span className="mt-1 block text-sm text-zinc-300">
-            Водоёмы России и СНГ, карточки рыб и коллекции трофеев
-          </span>
-        </span>
-        <span className="text-[#D7FF35]">Открыть →</span>
-      </Link>
     </Shell>
   );
 }

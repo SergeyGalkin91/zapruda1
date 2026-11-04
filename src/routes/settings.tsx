@@ -13,6 +13,7 @@ import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import {
   APP_BACKGROUNDS,
+  APP_WALLPAPERS,
   CHAT_BACKGROUNDS,
   DEFAULT_APPEARANCE,
   loadAppearance,
@@ -71,7 +72,7 @@ function SettingsPage() {
   }
 
   return (
-    <Shell>
+    <Shell screen="settings">
       <div className="mx-auto max-w-4xl space-y-6">
         <Link
           to="/"
@@ -94,13 +95,13 @@ function SettingsPage() {
 
         <section
           aria-labelledby="app-background-title"
-          className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7"
+          className="rounded-3xl border border-white/10 bg-[var(--premium-panel)] z-electric-settings-panel p-5 sm:p-7"
         >
           <h2
             id="app-background-title"
             className="flex items-center gap-2 text-lg font-black text-white"
           >
-            <Monitor className="size-5 text-[#D7FF35]" /> Фон приложения
+            <Monitor className="size-5 text-[#D7FF35]" /> Цветовая тема
           </h2>
           <p className="mt-2 text-sm text-zinc-400">
             Matte Black остаётся основным. Electric Blue — яркий синий фон с лаймовыми и
@@ -156,9 +157,43 @@ function SettingsPage() {
           </div>
         </section>
 
+        <section aria-labelledby="wallpaper-title" className="z-premium-card p-5 sm:p-7">
+          <p className="z-eyebrow">ТВОЁ ПРОСТРАНСТВО</p>
+          <h2 id="wallpaper-title" className="mt-2 text-lg font-bold">
+            Фон приложения
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Четыре фактуры для обеих тем. Без анимации и лишней нагрузки. Выбор сохранится на этом
+            устройстве.
+          </p>
+          <div className="z-wallpaper-options">
+            {APP_WALLPAPERS.map((item) => {
+              const selected = (appearance.wallpaper ?? "matte-black") === item.value;
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  aria-pressed={selected}
+                  className="z-wallpaper-option"
+                  onClick={() => change({ ...appearance, wallpaper: item.value })}
+                >
+                  <span
+                    className={"z-wallpaper-swatch z-wallpaper-swatch-" + item.value}
+                    aria-hidden="true"
+                  >
+                    {selected && <Check className="size-5" />}
+                  </span>
+                  <strong>{item.title}</strong>
+                  <span>{item.description}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
         <section
           aria-labelledby="chat-background-title"
-          className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7"
+          className="rounded-3xl border border-white/10 bg-[var(--premium-panel)] z-electric-settings-panel p-5 sm:p-7"
         >
           <h2
             id="chat-background-title"
@@ -241,7 +276,7 @@ function SettingsPage() {
         </section>
 
         {developer && (
-          <section className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7">
+          <section className="rounded-3xl border border-white/10 bg-[var(--premium-panel)] z-electric-settings-panel p-5 sm:p-7">
             <h2 className="text-lg font-black text-white">Яндекс Карты · API для тестирования</h2>
             <p className="mt-2 text-xs leading-5 text-zinc-400">
               Сейчас в ZAPRUDA работает виджет Яндекс Карт. Чтобы выбирать личные точки кликом,

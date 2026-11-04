@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { PremiumFeedHeader } from "@/components/PremiumFeedHeader";
+import { BrandFish } from "@/components/Wordmark";
 import { ReactionBar } from "@/components/ReactionBar";
 import { DailyFishingBrief } from "@/components/DailyFishingBrief";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,11 +13,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "ZAPRUDA — лента рыболовных отчётов" },
-      { name: "description", content: "Отчёты спиннингистов: водоёмы, приманки, погода и улов." },
+      { name: "description", content: "Отчёты рыбаков: водоёмы, снасти, погода и истории с воды." },
       { property: "og:title", content: "ZAPRUDA — лента рыболовных отчётов" },
       {
         property: "og:description",
-        content: "Отчёты спиннингистов: водоёмы, приманки, погода и улов.",
+        content: "Отчёты рыбаков: водоёмы, снасти, погода и истории с воды.",
       },
     ],
   }),
@@ -399,89 +401,28 @@ function Feed() {
   }, [loadPage]);
 
   return (
-    <Shell>
-      <section className="relative mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0B0D0B] z-electric-feed-hero px-5 py-7 sm:px-8 sm:py-9">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#D7FF35]/[0.09] z-electric-hero-glow blur-3xl" />
-        <div className="relative">
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D7FF35]">
-            ZAPRUDA COMMUNITY
-          </p>
-          <h1 className="mt-4 max-w-[880px] text-[clamp(1.8rem,4vw,3.2rem)] font-black uppercase leading-[0.97] tracking-[-0.06em] text-[#F5F7F5]">
-            НЕ ПРОСТО ЛЕНТА.<span className="block text-[#D7FF35]">ТВОЯ ВОДА.</span>
-          </h1>
-          <p className="mt-5 max-w-2xl text-sm leading-6 text-zinc-300">
-            Живые отчёты, трофеи друзей, местные сообщества и свои люди на воде. Рыбалка начинается
-            здесь.
-          </p>
-          <Link
-            to="/street"
-            className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-[#D7FF35]/40 bg-[#121A12] z-electric-street-cta px-5 py-4 transition hover:border-[#D7FF35]"
-          >
-            <span>
-              <strong className="block text-lg font-black uppercase tracking-tight text-[#D7FF35]">
-                ZAPRUDA STREET · Город — твоя акватория
-              </strong>
-              <span className="mt-1 block text-xs text-zinc-300">
-                Street Fishing: начать городскую сессию и записывать уловы
-              </span>
-            </span>
-            <span className="shrink-0 rounded-xl bg-[#D7FF35] px-3 py-2 font-black text-black">
-              STREET
-            </span>
-          </Link>
-          <div className="mt-7 grid gap-3 md:grid-cols-3">
-            <Link
-              to="/assistant"
-              className="group rounded-2xl border border-[#D7FF35]/35 bg-[#D7FF35]/10 z-electric-feed-action p-5 transition hover:border-[#D7FF35] hover:bg-[#D7FF35]/15"
-            >
-              <span className="text-2xl" aria-hidden="true">
-                🎣
-              </span>
-              <span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">
-                Выйти на воду
-              </span>
-              <span className="mt-1 block text-xs text-zinc-400">Подбор места и тактики</span>
-            </Link>
-            <Link
-              to="/reports/new"
-              className="group rounded-2xl border border-white/15 bg-[#141D20] z-electric-feed-action p-5 transition hover:border-[#D7FF35]"
-            >
-              <span className="text-2xl" aria-hidden="true">
-                🐟
-              </span>
-              <span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">
-                Новый отчёт
-              </span>
-              <span className="mt-1 block text-xs text-zinc-400">Рассказать о рыбалке</span>
-            </Link>
-            <Link
-              to="/communities"
-              className="group rounded-2xl border border-[#A78BFA]/35 bg-[#141D20] z-electric-feed-eggplant p-5 transition hover:border-[#A78BFA]"
-            >
-              <span className="text-2xl" aria-hidden="true">
-                ⚡
-              </span>
-              <span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">
-                Рядом с тобой
-              </span>
-              <span className="mt-1 block text-xs text-zinc-400">Люди, клубы и события</span>
-            </Link>
-          </div>
-          <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-            СПИННИНГ · ФИДЕР · ПОПЛАВОК · ЗИМНЯЯ РЫБАЛКА
-          </p>
-        </div>
-      </section>
+    <Shell screen="feed">
+      <PremiumFeedHeader />
       <DailyFishingBrief />
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && (
-        <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">
-          {error}
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive"
+        >
+          <p>{error}</p>
+          <button
+            type="button"
+            className="btn-ghost mt-3 text-white"
+            onClick={() => void loadPage(true)}
+          >
+            Попробовать снова
+          </button>
         </div>
       )}
       {!loading && !error && reports.length === 0 && (
-        <div className="panel p-8 text-center">
-          <div className="text-3xl">🎣</div>
+        <div className="panel z-feed-empty text-center">
+          <BrandFish className="z-empty-fish" />
           <h2 className="mt-3 font-semibold">Пока тихо, как на бесклёвье</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Будь первым — опубликуй отчёт о рыбалке.
@@ -498,7 +439,7 @@ function Feed() {
             return (
               <article
                 key={report.id}
-                className="z-underground mb-5 space-y-4 overflow-hidden p-4 shadow-[0_18px_45px_rgba(0,0,0,0.14)] sm:p-5"
+                className="z-underground z-feed-card mb-5 space-y-4 overflow-hidden p-4 shadow-[0_18px_45px_rgba(0,0,0,0.14)] sm:p-5"
               >
                 <div className="flex items-start gap-3">
                   {report.profiles?.avatar_url ? (

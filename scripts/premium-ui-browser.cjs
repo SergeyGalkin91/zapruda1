@@ -1,0 +1,69 @@
+/* eslint-disable prettier/prettier -- Executable browser QA. */
+/** Real rendered application, isolated guest data. NOT JWT/hosted acceptance. */
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const engines = require("playwright");
+const { assertShellBounds } = require("./browser-shell-bounds.cjs");
+const engine = process.env.VISUAL_BROWSER || "chromium";
+const base = process.env.VISUAL_BASE_URL || "http://127.0.0.1:3000";
+const out = path.resolve(process.env.VISUAL_OUTPUT_DIR || "appearance-evidence", "premium");
+const shots = [], checks = [];
+fs.mkdirSync(out, { recursive: true });
+
+(async () => {
+  assert(["chromium", "firefox", "webkit"].includes(engine));
+  const browser = await engines[engine].launch({ headless: true });
+  try {
+    for (const width of [320,390,768,1440]) {
+      const context = await browser.newContext({ viewport:{width,height:844}, locale:"ru-RU", reducedMotion:"reduce" });
+      const badRequests = [], errors = [];
+      context.on("request", (request) => { if (request.url().includes("sonvniuwtvzzyuglscah.supabase.co")) badRequests.push("production request"); });
+      await context.route("https://ci-placeholder.supabase.co/**", route => route.fulfill({status:route.request().url().includes("/auth/")?401:200,contentType:"application/json",headers:{"access-control-allow-origin":"*"},body:route.request().url().includes("/auth/")?'{"message":"No test session"}':"[]"}));
+      const page = await context.newPage();
+      page.on("pageerror", e => errors.push(e.message));
+      for (const theme of ["classic","electric-blue"]) {
+        await page.goto(base+"/settings", {waitUntil:"domcontentloaded"});
+        await page.getByRole("button",{name:theme==="classic"?/^Matte Black/:/^Electric Blue/}).first().click();
+        await page.waitForFunction(t => document.documentElement.dataset.zaprudaBackground===t, theme);
+        for (const route of ["/welcome","/","/communities","/competitions","/profile"]) {
+          await page.goto(base+route, {waitUntil:"domcontentloaded"});
+          await page.locator("main h1").first().waitFor();
+          await page.waitForFunction(t => document.documentElement.dataset.zaprudaBackground===t,theme);
+          await assertShellBounds(page);
+          const metrics = await page.evaluate(() => ({width:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,theme:document.documentElement.dataset.zaprudaBackground,heading:document.querySelector("main h1")?.textContent,brand:!!document.querySelector('.z-brand-word path'),nav:[...document.querySelectorAll('nav[aria-label="Мобильная навигация"] a')].map(a=>a.getAttribute("href"))}));
+          assert(metrics.scrollWidth<=metrics.width+1, route+" overflow");
+          assert(metrics.brand, route+" outlined approved brand missing");
+          assert.deepEqual(metrics.nav,["/","/communities","/reports/new","/partners","/chat"]);
+          assert(!await page.getByText("This page didn't load",{exact:false}).count(),route+" runtime error");
+          const filename=engine+"-"+width+"-"+theme+"-"+(route==="/"?"feed":route.slice(1))+".png";
+          await page.screenshot({path:path.join(out,filename),fullPage:false});
+          shots.push(filename);checks.push({route,theme,width,overflow:false});
+        }
+        await page.goto(base+"/settings",{waitUntil:"domcontentloaded"});
+        for (const wallpaper of ["Matte Black","Carbon","Neon Threads","Topographic"]) {
+          const value={"Matte Black":"matte-black",Carbon:"carbon","Neon Threads":"neon-threads",Topographic:"topographic"}[wallpaper];
+          const option=page.locator('section[aria-labelledby="wallpaper-title"]').getByRole("button",{name:new RegExp("^"+wallpaper)});
+          await option.click();
+          await page.waitForFunction(v=>document.documentElement.dataset.zaprudaWallpaper===v,value);
+          await page.reload({waitUntil:"domcontentloaded"});
+          await page.waitForFunction(v=>document.documentElement.dataset.zaprudaWallpaper===v,value);
+          assert.equal(await option.getAttribute("aria-pressed"),"true");
+          assert.equal(await page.evaluate(()=>document.documentElement.dataset.zaprudaBackground),theme);
+          const frame = await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+1,animation:[...document.querySelectorAll('.z-wallpaper *')].some(e=>getComputedStyle(e).animationName!=="none")}));
+          assert(!frame.overflow&&!frame.animation,"Wallpaper overflow or animation");
+          checks.push({wallpaper:value,theme,width,persisted:true,reducedMotion:true});
+        }
+        // Exercise real geography filtering and menu targets; never create fixture data.
+        await page.goto(base+"/communities",{waitUntil:"domcontentloaded"});
+        await page.getByRole("searchbox",{name:"Поиск страны"}).fill("Россия");
+        await page.getByRole("button",{name:/Россия/}).click();
+        assert(await page.getByRole("link",{name:/Открыть чаты страны/}).count());
+      }
+      assert.deepEqual(badRequests,[]);assert.deepEqual(errors,[]);
+      await context.close();
+    }
+  } finally { await browser.close(); }
+  fs.writeFileSync(path.join(out,engine+"-summary.json"),JSON.stringify({engine,scope:"isolated guest browser / actual application UI; no JWT claim",checks,screenshots:shots},null,2));
+  console.log(JSON.stringify({engine,passed:true,checks:checks.length,screenshots:shots.length}));
+})().catch(e=>{console.error(e);process.exitCode=1;});
