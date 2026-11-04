@@ -1,0 +1,2765 @@
+{
+  "candidate": "57c23c294026e0378a13a9c57e5d189394745f09",
+  "scope": "actual hosted single-account Chromium CSS viewports; layout/readiness snapshots; initial loading retained, not functional E2E",
+  "checks": [
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "innerHeight": 844,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "overflow": false,
+      "route": "/welcome",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 197,
+          "right": 241,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 249,
+          "right": 293,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 4
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "innerHeight": 844,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "overflow": false,
+      "route": "/",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 197,
+          "right": 241,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 249,
+          "right": 293,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 4,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 2
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "innerHeight": 844,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "overflow": false,
+      "route": "/communities",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 197,
+          "right": 241,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 249,
+          "right": 293,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 17,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 4,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 14
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "innerHeight": 844,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "overflow": false,
+      "route": "/competitions",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 197,
+          "right": 241,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 249,
+          "right": 293,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yandex.ru": 1,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 9
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "innerHeight": 844,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "overflow": false,
+      "route": "/profile",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 197,
+          "right": 241,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 249,
+          "right": 293,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 8,
+        "https://fonts.googleapis.com": 1,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 16,
+        "https://fonts.gstatic.com": 5
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": false,
+      "route": "/welcome",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 267,
+          "right": 311,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 319,
+          "right": 363,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": false,
+      "route": "/",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 267,
+          "right": 311,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 319,
+          "right": 363,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": false,
+      "route": "/communities",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 267,
+          "right": 311,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 319,
+          "right": 363,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 16,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 13
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": false,
+      "route": "/competitions",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 267,
+          "right": 311,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 319,
+          "right": 363,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yandex.ru": 1,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 9
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": false,
+      "route": "/profile",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 267,
+          "right": 311,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 319,
+          "right": 363,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 8,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 16
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 768,
+      "innerWidth": 768,
+      "innerHeight": 844,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "overflow": false,
+      "route": "/welcome",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 24,
+          "right": 176,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 565.109375,
+          "right": 677,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 685,
+          "right": 729,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 768,
+      "innerWidth": 768,
+      "innerHeight": 844,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "overflow": false,
+      "route": "/",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 24,
+          "right": 176,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 565.109375,
+          "right": 677,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 685,
+          "right": 729,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 768,
+      "innerWidth": 768,
+      "innerHeight": 844,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "overflow": false,
+      "route": "/communities",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 24,
+          "right": 176,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 565.109375,
+          "right": 677,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 685,
+          "right": 729,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 16,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 13
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 768,
+      "innerWidth": 768,
+      "innerHeight": 844,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "overflow": false,
+      "route": "/competitions",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 24,
+          "right": 176,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 565.109375,
+          "right": 677,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 685,
+          "right": 729,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yandex.ru": 1,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 9
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 768,
+      "innerWidth": 768,
+      "innerHeight": 844,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "overflow": false,
+      "route": "/profile",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 24,
+          "right": 176,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 565.109375,
+          "right": 677,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 685,
+          "right": 729,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 8,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 16
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 844,
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "overflow": false,
+      "route": "/welcome",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 96.5,
+          "right": 248.5,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 388.6875,
+          "right": 469.703125,
+          "width": 81.015625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 473.703125,
+          "right": 595.984375,
+          "width": 122.28125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 599.984375,
+          "right": 691.015625,
+          "width": 91.03125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 695.015625,
+          "right": 809.96875,
+          "width": 114.953125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 813.96875,
+          "right": 878.84375,
+          "width": 64.875,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 882.84375,
+          "right": 974.234375,
+          "width": 91.390625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 978.234375,
+          "right": 1099.75,
+          "width": 121.515625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 1164.609375,
+          "right": 1276.5,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 1284.5,
+          "right": 1328.5,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 844,
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "overflow": false,
+      "route": "/",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 96.5,
+          "right": 248.5,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 388.6875,
+          "right": 469.703125,
+          "width": 81.015625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 473.703125,
+          "right": 595.984375,
+          "width": 122.28125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 599.984375,
+          "right": 691.015625,
+          "width": 91.03125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 695.015625,
+          "right": 809.96875,
+          "width": 114.953125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 813.96875,
+          "right": 878.84375,
+          "width": 64.875,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 882.84375,
+          "right": 974.234375,
+          "width": 91.390625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 978.234375,
+          "right": 1099.75,
+          "width": 121.515625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 1164.609375,
+          "right": 1276.5,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 1284.5,
+          "right": 1328.5,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 844,
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "overflow": false,
+      "route": "/communities",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 96.5,
+          "right": 248.5,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 388.6875,
+          "right": 469.703125,
+          "width": 81.015625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 473.703125,
+          "right": 595.984375,
+          "width": 122.28125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 599.984375,
+          "right": 691.015625,
+          "width": 91.03125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 695.015625,
+          "right": 809.96875,
+          "width": 114.953125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 813.96875,
+          "right": 878.84375,
+          "width": 64.875,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 882.84375,
+          "right": 974.234375,
+          "width": 91.390625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 978.234375,
+          "right": 1099.75,
+          "width": 121.515625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 1164.609375,
+          "right": 1276.5,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 1284.5,
+          "right": 1328.5,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 16,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 14
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 844,
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "overflow": false,
+      "route": "/competitions",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 96.5,
+          "right": 248.5,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 388.6875,
+          "right": 469.703125,
+          "width": 81.015625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 473.703125,
+          "right": 595.984375,
+          "width": 122.28125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 599.984375,
+          "right": 691.015625,
+          "width": 91.03125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 695.015625,
+          "right": 809.96875,
+          "width": 114.953125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 813.96875,
+          "right": 878.84375,
+          "width": 64.875,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 882.84375,
+          "right": 974.234375,
+          "width": 91.390625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 978.234375,
+          "right": 1099.75,
+          "width": 121.515625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 1164.609375,
+          "right": 1276.5,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 1284.5,
+          "right": 1328.5,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yandex.ru": 1,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 9
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 844,
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "overflow": false,
+      "route": "/profile",
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 96.5,
+          "right": 248.5,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 388.6875,
+          "right": 469.703125,
+          "width": 81.015625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 473.703125,
+          "right": 595.984375,
+          "width": 122.28125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 599.984375,
+          "right": 691.015625,
+          "width": 91.03125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 695.015625,
+          "right": 809.96875,
+          "width": 114.953125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 813.96875,
+          "right": 878.84375,
+          "width": 64.875,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 882.84375,
+          "right": 974.234375,
+          "width": 91.390625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 978.234375,
+          "right": 1099.75,
+          "width": 121.515625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 1164.609375,
+          "right": 1276.5,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 1284.5,
+          "right": 1328.5,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 8,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 16
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "innerHeight": 844,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "overflow": false,
+      "route": "/welcome",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 197,
+          "right": 241,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 249,
+          "right": 293,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 1
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "innerHeight": 844,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "overflow": false,
+      "route": "/",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 197,
+          "right": 241,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 249,
+          "right": 293,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "innerHeight": 844,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "overflow": false,
+      "route": "/communities",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 197,
+          "right": 241,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 249,
+          "right": 293,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 16,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 13
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "innerHeight": 844,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "overflow": false,
+      "route": "/competitions",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 197,
+          "right": 241,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 249,
+          "right": 293,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yandex.ru": 1,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 9
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "innerHeight": 844,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "overflow": false,
+      "route": "/profile",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 197,
+          "right": 241,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 249,
+          "right": 293,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 8,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 16
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": false,
+      "route": "/welcome",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 267,
+          "right": 311,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 319,
+          "right": 363,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": false,
+      "route": "/",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 267,
+          "right": 311,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 319,
+          "right": 363,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": false,
+      "route": "/communities",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 267,
+          "right": 311,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 319,
+          "right": 363,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 16,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 13
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": false,
+      "route": "/competitions",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 267,
+          "right": 311,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 319,
+          "right": 363,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yandex.ru": 1,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 9
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "innerHeight": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflow": false,
+      "route": "/profile",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 12,
+          "right": 164,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 267,
+          "right": 311,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 319,
+          "right": 363,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 8,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 16
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 768,
+      "innerWidth": 768,
+      "innerHeight": 844,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "overflow": false,
+      "route": "/welcome",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 24,
+          "right": 176,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 565.109375,
+          "right": 677,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 685,
+          "right": 729,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 2
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 768,
+      "innerWidth": 768,
+      "innerHeight": 844,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "overflow": false,
+      "route": "/",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 24,
+          "right": 176,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 565.109375,
+          "right": 677,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 685,
+          "right": 729,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 768,
+      "innerWidth": 768,
+      "innerHeight": 844,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "overflow": false,
+      "route": "/communities",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 24,
+          "right": 176,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 565.109375,
+          "right": 677,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 685,
+          "right": 729,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 16,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 2
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 768,
+      "innerWidth": 768,
+      "innerHeight": 844,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "overflow": false,
+      "route": "/competitions",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 24,
+          "right": 176,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 565.109375,
+          "right": 677,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 685,
+          "right": 729,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 5
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 768,
+      "innerWidth": 768,
+      "innerHeight": 844,
+      "clientWidth": 768,
+      "scrollWidth": 768,
+      "overflow": false,
+      "route": "/profile",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 24,
+          "right": 176,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 580.109375,
+          "right": 692,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 700,
+          "right": 744,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 8,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 1
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 844,
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "overflow": false,
+      "route": "/welcome",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 96.5,
+          "right": 248.5,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 388.6875,
+          "right": 469.703125,
+          "width": 81.015625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 473.703125,
+          "right": 595.984375,
+          "width": 122.28125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 599.984375,
+          "right": 691.015625,
+          "width": 91.03125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 695.015625,
+          "right": 809.96875,
+          "width": 114.953125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 813.96875,
+          "right": 878.84375,
+          "width": 64.875,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 882.84375,
+          "right": 974.234375,
+          "width": 91.390625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 978.234375,
+          "right": 1099.75,
+          "width": 121.515625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 1164.609375,
+          "right": 1276.5,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 1284.5,
+          "right": 1328.5,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": false,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 1
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 844,
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "overflow": false,
+      "route": "/",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 96.5,
+          "right": 248.5,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 388.6875,
+          "right": 469.703125,
+          "width": 81.015625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 473.703125,
+          "right": 595.984375,
+          "width": 122.28125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 599.984375,
+          "right": 691.015625,
+          "width": 91.03125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 695.015625,
+          "right": 809.96875,
+          "width": 114.953125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 813.96875,
+          "right": 878.84375,
+          "width": 64.875,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 882.84375,
+          "right": 974.234375,
+          "width": 91.390625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 978.234375,
+          "right": 1099.75,
+          "width": 121.515625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 1164.609375,
+          "right": 1276.5,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 1284.5,
+          "right": 1328.5,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 3
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 844,
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "overflow": false,
+      "route": "/communities",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 96.5,
+          "right": 248.5,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 388.6875,
+          "right": 469.703125,
+          "width": 81.015625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 473.703125,
+          "right": 595.984375,
+          "width": 122.28125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 599.984375,
+          "right": 691.015625,
+          "width": 91.03125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 695.015625,
+          "right": 809.96875,
+          "width": 114.953125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 813.96875,
+          "right": 878.84375,
+          "width": 64.875,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 882.84375,
+          "right": 974.234375,
+          "width": 91.390625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 978.234375,
+          "right": 1099.75,
+          "width": 121.515625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 1164.609375,
+          "right": 1276.5,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 1284.5,
+          "right": 1328.5,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 16,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 2
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 844,
+      "clientWidth": 1425,
+      "scrollWidth": 1425,
+      "overflow": false,
+      "route": "/competitions",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 96.5,
+          "right": 248.5,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 388.6875,
+          "right": 469.703125,
+          "width": 81.015625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 473.703125,
+          "right": 595.984375,
+          "width": 122.28125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 599.984375,
+          "right": 691.015625,
+          "width": 91.03125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 695.015625,
+          "right": 809.96875,
+          "width": 114.953125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 813.96875,
+          "right": 878.84375,
+          "width": 64.875,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 882.84375,
+          "right": 974.234375,
+          "width": 91.390625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 978.234375,
+          "right": 1099.75,
+          "width": 121.515625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 1164.609375,
+          "right": 1276.5,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 1284.5,
+          "right": 1328.5,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 10,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 5
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    },
+    {
+      "deployedSha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+      "requestedWidth": 1440,
+      "innerWidth": 1440,
+      "innerHeight": 844,
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "overflow": false,
+      "route": "/profile",
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "shellBoundsOk": true,
+      "shellBounds": [
+        {
+          "label": "ZAPRUDA — на главную",
+          "x": 104,
+          "right": 256,
+          "width": 152,
+          "height": 44,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 396.1875,
+          "right": 477.203125,
+          "width": 81.015625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 481.203125,
+          "right": 603.484375,
+          "width": 122.28125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 607.484375,
+          "right": 698.515625,
+          "width": 91.03125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 702.515625,
+          "right": 817.46875,
+          "width": 114.953125,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 821.46875,
+          "right": 886.34375,
+          "width": 64.875,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 890.34375,
+          "right": 981.734375,
+          "width": 91.390625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "navigation",
+          "x": 985.734375,
+          "right": 1107.25,
+          "width": 121.515625,
+          "height": 35.5,
+          "essential": false
+        },
+        {
+          "label": "Профиль",
+          "x": 1172.109375,
+          "right": 1284,
+          "width": 111.890625,
+          "height": 44,
+          "essential": true
+        },
+        {
+          "label": "Открыть список разделов",
+          "x": 1292,
+          "right": 1336,
+          "width": 44,
+          "height": 44,
+          "essential": true
+        }
+      ],
+      "signedInProfileLink": true,
+      "bottomNavPadding": "0px",
+      "activeElement": "BODY",
+      "loading": true,
+      "visibleImagesPending": 0,
+      "resourceOrigins": {
+        "https://deploy-preview-93--zapruda1.netlify.app": 8,
+        "https://fonts.googleapis.com": 1,
+        "https://fonts.gstatic.com": 5,
+        "https://yudtbifopfnjtjanaqrd.supabase.co": 1
+      },
+      "foreignBackend": [],
+      "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace"
+    }
+  ],
+  "wallpapers": [
+    {
+      "sha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "theme": "classic",
+      "expected": "matte-black",
+      "actual": "matte-black",
+      "reloaded": true,
+      "overflow": false,
+      "foreignBackend": []
+    },
+    {
+      "sha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "theme": "classic",
+      "expected": "carbon",
+      "actual": "carbon",
+      "reloaded": true,
+      "overflow": false,
+      "foreignBackend": []
+    },
+    {
+      "sha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "theme": "classic",
+      "expected": "neon-threads",
+      "actual": "neon-threads",
+      "reloaded": true,
+      "overflow": false,
+      "foreignBackend": []
+    },
+    {
+      "sha": "57c23c294026e0378a13a9c57e5d189394745f09",
+      "theme": "classic",
+      "expected": "topographic",
+      "actual": "topographic",
+      "reloaded": true,
+      "overflow": false,
+      "foreignBackend": []
+    },
+    {
+      "sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "theme": "electric-blue",
+      "expected": "matte-black",
+      "actual": "matte-black",
+      "reloaded": true,
+      "overflow": false,
+      "foreignBackend": []
+    },
+    {
+      "sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "theme": "electric-blue",
+      "expected": "carbon",
+      "actual": "carbon",
+      "reloaded": true,
+      "overflow": false,
+      "foreignBackend": []
+    },
+    {
+      "sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "theme": "electric-blue",
+      "expected": "neon-threads",
+      "actual": "neon-threads",
+      "reloaded": true,
+      "overflow": false,
+      "foreignBackend": []
+    },
+    {
+      "sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "theme": "electric-blue",
+      "expected": "topographic",
+      "actual": "topographic",
+      "reloaded": true,
+      "overflow": false,
+      "foreignBackend": []
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+  "url": "https://deploy-preview-93--zapruda1.netlify.app/",
+  "gallery": "https://deploy-preview-93--zapruda1.netlify.app/__qa/premium.html",
+  "scope": "native hosted Chromium context screenshots; five actual 390 CSS viewports; no physical-device or full JWT E2E claim",
+  "screenshots": [
+    {
+      "file": "01-welcome-4d7d677-hosted-390-context.jpg",
+      "bytes": 74223,
+      "sha256": "6e07c550d41466b8542d422ff815348586ee0b7ffe5b2ae81e328e788493b6af"
+    },
+    {
+      "file": "02-feed-ready-4d7d677-hosted-390-context.jpg",
+      "bytes": 75002,
+      "sha256": "03adff0c58bb7fd6fdf0c45a640ffba508201c6bdc02c59ea6366a2ca00d107c"
+    },
+    {
+      "file": "03-communities-ready-4d7d677-hosted-390-context.jpg",
+      "bytes": 73853,
+      "sha256": "d7088306fba40e1f1d60bd515ab521aaaaa3cda5911dbda5a29f6a5050219588"
+    },
+    {
+      "file": "04-spot-ready-4d7d677-hosted-390-context.jpg",
+      "bytes": 77356,
+      "sha256": "a94cc100833d7860ca036fc936e9c19806424a4b3159915952a58bf528f5c202"
+    },
+    {
+      "file": "05-profile-ready-4d7d677-hosted-390-context.jpg",
+      "bytes": 78430,
+      "sha256": "fdcbd54a2e89be6acef69957475316b6ee50b1a5eb88469095f91dd185aa9c6c"
+    },
+    {
+      "file": "five-live-screens-4d7d677-390.jpg",
+      "bytes": 169850,
+      "sha256": "f8f0d090a6174b25e50e1ae824debce275fcf87644a6bd1807d1d7fdcd168292"
+    }
+  ]
+}

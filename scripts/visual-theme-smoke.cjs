@@ -206,6 +206,10 @@ async function openRoute(page, route) {
 
         await page.reload({ waitUntil: "domcontentloaded" });
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "electric-blue");
+        // Pre-paint preferences deliberately precede React hydration. Also wait
+        // for the actual control to restore its persisted selected state.
+        await page.locator('section[aria-labelledby="app-background-title"] button[aria-pressed="true"]')
+          .filter({ hasText: "Electric Blue" }).waitFor({ state: "visible" });
         const persisted = await variables(page);
         assert.equal(persisted.background, COLORS.blue, "Blue preference lost after reload");
         assert.equal(await page.getByRole("button", {name:/Electric Blue/}).first().getAttribute("aria-pressed"), "true");

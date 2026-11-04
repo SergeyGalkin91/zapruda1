@@ -48,6 +48,8 @@ fs.mkdirSync(out, { recursive: true });
           await page.waitForFunction(v=>document.documentElement.dataset.zaprudaWallpaper===v,value);
           await page.reload({waitUntil:"domcontentloaded"});
           await page.waitForFunction(v=>document.documentElement.dataset.zaprudaWallpaper===v,value);
+          await page.locator('section[aria-labelledby="wallpaper-title"] button[aria-pressed="true"]')
+            .filter({hasText:wallpaper}).waitFor({state:"visible"});
           assert.equal(await option.getAttribute("aria-pressed"),"true");
           assert.equal(await page.evaluate(()=>document.documentElement.dataset.zaprudaBackground),theme);
           const frame = await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+1,animation:[...document.querySelectorAll('.z-wallpaper *')].some(e=>getComputedStyle(e).animationName!=="none")}));

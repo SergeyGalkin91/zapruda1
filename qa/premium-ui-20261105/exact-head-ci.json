@@ -1,0 +1,109 @@
+{
+  "head": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+  "runs": [
+    {
+      "id": 41920215876,
+      "name": "Netlify preview STAGING isolation guard",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920215876"
+    },
+    {
+      "id": 41920215877,
+      "name": "v0.7.1 Meetup security guards",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920215877"
+    },
+    {
+      "id": 41920216154,
+      "name": "Independent Node hosting proof",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920216154"
+    },
+    {
+      "id": 41920215910,
+      "name": "SPOT isolated PostgreSQL transaction races",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920215910"
+    },
+    {
+      "id": 41920215811,
+      "name": "ZAPRUDA Docker image smoke test",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920215811"
+    },
+    {
+      "id": 41920215978,
+      "name": "Yandex canary Deno typecheck",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920215978"
+    },
+    {
+      "id": 41920215917,
+      "name": "Pilot schema PostgreSQL and Deno checks",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920215917"
+    },
+    {
+      "id": 41920215999,
+      "name": "ZAPRUDA checks",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920215999"
+    },
+    {
+      "id": 41920216061,
+      "name": "Advisor availability without an AI provider",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920216061"
+    },
+    {
+      "id": 41920215801,
+      "name": "ZAPRUDA Frontend Build",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920215801"
+    },
+    {
+      "id": 41920216078,
+      "name": "v0.7.1 Meetup mobile browser smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920216078"
+    },
+    {
+      "id": 41920216129,
+      "name": "Report photo privacy browser check",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920216129"
+    },
+    {
+      "id": 41920215935,
+      "name": "ZAPRUDA Electric Blue cross-browser review",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4d7d677fac2efbcc23222d7cd363ea26cdfb14a3",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41920215935"
+    }
+  ]
+}

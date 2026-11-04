@@ -7,7 +7,7 @@
 Прочитать этот файл, [журнал решений](ZAPRUDA_DECISION_LOG.md), [матрицу](ZAPRUDA_FEATURE_MATRIX.md), [release gates](ZAPRUDA_RELEASE_GATES.md), затем проверить актуальный HEAD PR #93, изменения зависимых PR и тематический issue. При UI-работе читать [UI acceptance](ZAPRUDA_UI_ACCEPTANCE.md). Номер старого design lock не равен текущей версии продукта.
 
 ## Источники и границы доказательств
-- Текущий проверяемый Premium UI код PR #93: `57c23c294026e0378a13a9c57e5d189394745f09`. Актуальные результаты и условное разрешение main: [FINAL_RELEASE_INTEGRATION](ZAPRUDA_FINAL_RELEASE_INTEGRATION_20261104.md). Исторические SHA сохраняются в FINAL_ACCEPTANCE.
+- Текущий проверяемый Premium UI код PR #93: `4d7d677fac2efbcc23222d7cd363ea26cdfb14a3`. Актуальные результаты и условное разрешение main: [FINAL_RELEASE_INTEGRATION](ZAPRUDA_FINAL_RELEASE_INTEGRATION_20261104.md). Исторические SHA сохраняются в FINAL_ACCEPTANCE.
 - [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111) — исходный аудит и единственный документальный PR этой консолидации, не утверждённая реализация.
 - [PR #92](https://github.com/SergeyGalkin91/zapruda1/pull/92) — UX-направление и foundations, не готовый wizard.
 - [PR #109](https://github.com/SergeyGalkin91/zapruda1/pull/109) — новый README о всех направлениях рыбалки; открыт, не слит.
@@ -110,3 +110,7 @@ Matte Black по умолчанию, Electric Blue альтернативная 
 
 ## D19 — JWT PASS и утверждённый Premium UI (05.11.2026, Москва)
 Protected41908405475 / real-pilot126849136280 SUCCESS on4eba367; four distinct confirmed JWTs, actual API and authenticated localhost/STAGING browser, core/browser cleanup=true. Later Premium UI57c23c2 requires separate hosted acceptance. [JWT PASS](../qa/product-contract/PROTECTED_4EBA367_41908405475_PASS.json). Все56 ID/8модулей/7KING сохранены. Владелец прямо поручил продолжить уже утверждённый новый дизайн с рыбкой, карбоном и современными экранами в отдельном STAGING Preview; повторное утверждение общей концепции не требуется. Реальные SVG и пять экранов внедрены818e0d9; f5831f9 дорабатывает ленту,57c23c2 — проверку paint/gallery. Реальная hosted/phone приёмка нового UI остаётся отдельным критерием; нет выдуманного контента или KING. Main/Production/version/tag/release не менять.
+
+
+## Актуальное продолжение — premium UI, 05.11.2026
+D19 разрешает внедрение утверждённой айдентики в пять реальных STAGING-экранов без повторного согласования общей концепции. [Размещённый кандидат и доказательства](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md). Целевое имя `0.7.6 KING FINISH`, техническая версия `0.7.5`, все56 IDs/8 модулей/7 KING сохраняются. Остальная визуальная/функциональная/релизная приёмка не считается автоматически закрытой.

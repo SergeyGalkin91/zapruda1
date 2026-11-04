@@ -67,3 +67,7 @@ Actual Browser 41777927568 PASS: Chromium/Firefox/WebKit × 320/390/768/1440 × 
 ## D19 — выполнение уже утверждённого Premium UI,05.11.2026
 Прямое поручение владельца разрешает внедрение утверждённого дизайна без нового согласования общей концепции. Просмотрены реальные бинарные исходники: «ОБНОВЛЕННОЕ ПРИЛОЖЕНИЕ5.11.26 УТВЕРДИЛ.png», «ОХУЕННЫЙ ЛОГОТИП!.png», «БАЗА!!!!!ЗАПРУДКА.png». SVG provenance соответствует исходному логоSHA2566bd016ebbc0176bfb33ea313c99a5078f0283b8285eff01c5e610ab4ec70fcc4. Реализация пяти экранов и четырёх обоев: [implementation](ZAPRUDA_PREMIUM_UI_IMPLEMENTATION_20261105.md).
 Protected41908405475 SUCCESS относится к4eba367, до нового UI. На Premium57c23c2 требуется отдельно проверить paint/hydration, обе темы/четыре обоев,320/390/768/1440, реальные данные/empty/error, меню и STAGING-only network. Не выдавать коллаж за screenshot, unit/local guest за hosted/JWT, визуальный Preview за готовый KING или релиз. Предыдущие формулировки «обои не реализованы» являются историческим baseline, новая source implementation присутствует; acceptance ещё проверяется.
+
+
+## 05.11 — новый premium UI, фактический hosted Preview
+Последнее прямое P0 задание разрешило реализацию утверждённой концепции. [Актуальная scoped приёмка](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md): настоящий Netlify, пять экранов, реальные SVG, две темы, четыре обоев; отдельные hosted/CI/JWT/physical-device границы. Исторические NOT IMPLEMENTED/ожидание общей концепции выше не описывают новый код. Это не owner pixel approval и не release GO.
