@@ -1,0 +1,75 @@
+name: ZAPRUDA Electric Blue cross-browser review
+# Review-only browser smoke: no private keys or production Supabase access.
+on:
+  push:
+    branches:
+      - feature/issue76-electric-blue-background
+      - fix/issue61-v071-p0-stages-5-8
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-appearance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NITRO_PRESET: node-server
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      PORT: "3000"
+      HOST: "127.0.0.1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.3
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Build application for isolated browser checks
+        run: |
+          bun run build
+          test -f .output/server/index.mjs
+      - name: Install Chromium, Firefox, WebKit and Playwright
+        run: |
+          bun add --dev playwright
+          bunx playwright install --with-deps chromium firefox webkit
+      - name: Check mobile 390px and desktop 1440px in three engines; save screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p appearance-evidence
+          node .output/server/index.mjs > appearance-evidence/server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3000/settings -o /dev/null; then READY=1; break; fi
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "Server exited before becoming ready"
+              cat appearance-evidence/server.log
+              exit 1
+            fi
+            sleep 2
+          done
+          if [ "$READY" != "1" ]; then
+            echo "Server readiness timeout"
+            cat appearance-evidence/server.log
+            exit 1
+          fi
+          for engine in chromium webkit firefox; do
+            echo "Checking appearance in $engine"
+            VISUAL_BROWSER="$engine" node scripts/visual-theme-smoke.cjs
+          done
+          # Verify actual CSS colors; previous screenshots revealed green hardcoded surfaces.
+          node scripts/issue76-no-green-audit.cjs
+      - name: Upload viewport screenshots and metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: electric-blue-cross-browser-evidence
+          path: appearance-evidence/
+          if-no-files-found: ignore
+          retention-days: 14

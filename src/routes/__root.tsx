@@ -41,13 +41,14 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   const [showDetails, setShowDetails] = useState(false);
   // Do not expose diagnostics by default in production. Users can choose to
   // reveal a short error message during troubleshooting, without any stack.
-  const diagnostic = error instanceof Error
-    ? `${error.name}: ${error.message}`
-    : error instanceof Response
-      ? `HTTP ${error.status}`
-      : typeof error === "string"
-        ? error
-        : "Неизвестная ошибка при загрузке страницы.";
+  const diagnostic =
+    error instanceof Error
+      ? `${error.name}: ${error.message}`
+      : error instanceof Response
+        ? `HTTP ${error.status}`
+        : typeof error === "string"
+          ? error
+          : "Неизвестная ошибка при загрузке страницы.";
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -70,7 +71,10 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
           {showDetails ? "Скрыть причину ошибки" : "Показать причину ошибки"}
         </button>
         {showDetails && (
-          <pre role="status" className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-amber-400/30 bg-amber-950/30 p-3 text-left text-xs text-amber-100">
+          <pre
+            role="status"
+            className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-amber-400/30 bg-amber-950/30 p-3 text-left text-xs text-amber-100"
+          >
             {diagnostic.slice(0, 500)}
           </pre>
         )}
@@ -109,7 +113,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Unbounded:wght@600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Unbounded:wght@600;700&display=swap",
+      },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { CHAT_PHOTO_LIMIT, chatPhotoError, chatPhotoPath, shouldCreateChatMessage } from "./chat-media";
+import {
+  CHAT_PHOTO_LIMIT,
+  chatPhotoError,
+  chatPhotoPath,
+  shouldCreateChatMessage,
+} from "./chat-media";
 
 describe("ZAPRUDA chat media", () => {
   it("accepts supported formats and limit", () => {
@@ -12,8 +17,12 @@ describe("ZAPRUDA chat media", () => {
     expect(chatPhotoError({ type: "image/svg+xml", size: 1024 })).toBeTruthy();
   });
   it("keeps paths under the author and message", () => {
-    expect(chatPhotoPath("user-id", "message-id", "image/webp", "random")).toBe("user-id/message-id/random.webp");
-    expect(chatPhotoPath("user-id", "message-id", "image/png", "random")).toBe("user-id/message-id/random.png");
+    expect(chatPhotoPath("user-id", "message-id", "image/webp", "random")).toBe(
+      "user-id/message-id/random.webp",
+    );
+    expect(chatPhotoPath("user-id", "message-id", "image/png", "random")).toBe(
+      "user-id/message-id/random.png",
+    );
   });
   it("never creates a duplicate message when an upload is pending", () => {
     expect(shouldCreateChatMessage("message-id")).toBe(false);

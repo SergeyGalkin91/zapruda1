@@ -31,22 +31,22 @@
 
 :root {
   --radius: 0.75rem;
-  --background: oklch(0.13 0 0);
+  --background: #090B0C;
   --foreground: oklch(0.97 0 0);
-  --card: oklch(0.17 0 0);
+  --card: #141A1E;
   --card-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.897 0.196 126.665);
-  --primary-foreground: oklch(0.13 0 0);
-  --secondary: oklch(0.22 0 0);
+  --primary: #D7FF35;
+  --primary-foreground: #090B0C;
+  --secondary: #22212B;
   --secondary-foreground: oklch(0.95 0 0);
-  --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.66 0 0);
+  --muted: #1B2024;
+  --muted-foreground: #B8AACB;
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.13 0 0);
   --destructive: oklch(0.65 0.2 25);
-  --border: oklch(0.27 0 0);
-  --input: oklch(0.27 0 0);
-  --ring: oklch(0.897 0.196 126.665);
+  --border: #343640;
+  --input: #343640;
+  --ring: #D7FF35;
 }
 
 @layer base {
@@ -94,7 +94,6 @@
   background: var(--color-card);
 }
 
-
 /* Local appearance preferences. These apply only to appearance, never data or permissions. */
 :root[data-zapruda-background="forest"] {
   --background: #0A1710;
@@ -129,6 +128,35 @@
 :root[data-zapruda-background="night"] body {
   background: radial-gradient(ellipse 85% 60% at 50% -15%,#17404A 0%,#09161A 72%,#070D13 100%) fixed;
 }
+/* Optional Electric Blue: the default matte-black theme above is unchanged.
+   Eggplant is used on filled surfaces with light text, not as text on blue,
+   where its contrast would be insufficient. */
+:root[data-zapruda-background="electric-blue"] {
+  --background: #1239A6;
+  --card: #1B2D71;
+  --secondary: #22387E;
+  --muted: #1D3274;
+  --muted-foreground: #DEE4FF;
+  --border: #536AB1;
+  --input: #536AB1;
+  --z-surface: #12255E;
+  --z-card: #1B2D71;
+  --z-card-elevated: #243B83;
+  --z-violet: #614051;
+  --z-stroke: rgba(216,225,255,.25);
+}
+:root[data-zapruda-background="electric-blue"] body {
+  background: radial-gradient(ellipse 105% 75% at 45% -10%, #1458DB 0%, #1239A6 57%, #091D57 100%) fixed;
+}
+:root[data-zapruda-background="electric-blue"] .z-underground {
+  background: var(--z-surface);
+}
+:root[data-zapruda-background="electric-blue"] .z-underground-chip {
+  background: #614051;
+  border-color: #976F86;
+  color: #F9ECF7;
+}
+
 :root[data-zapruda-background="classic"] body { background: #090B09; }
 
 /* Chat backgrounds are scoped to message timelines: message readability is preserved. */
@@ -167,10 +195,14 @@
 /* ZAPRUDA Underground design system — shared presentation only. */
 :root {
   --z-surface: #0B0D0E;
-  --z-card: #141D20;
+  --z-card: #12161A;
+  --z-card-elevated: #171C22;
+  --z-radius-card: 1rem;
+  --z-radius-hero: 1.5rem;
+  --z-gap-section: 1.5rem;
   --z-lime: #D7FF35;
-  --z-violet: #A78BFA;
-  --z-stroke: rgba(255,255,255,.11);
+  --z-violet: #B4A1D7;
+  --z-stroke: rgba(255,255,255,.10);
 }
 .z-underground {
   color: #F5F7F5;
@@ -235,10 +267,654 @@
 
 /* Explicit message direction overrides background preferences without altering chat data. */
 .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-incoming-bubble {
-  background-color: #211B2D;
-  border-color: rgba(167,139,250,.32);
+  background-color: #292140;
+  border-color: #493765;
+  color: #F5F2FF;
 }
 .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-own-bubble {
-  background-color: #283419;
-  border-color: rgba(215,255,53,.38);
+  background-color: #D7FF35;
+  border-color: #D7FF35;
+  color: #11170A;
 }
+.zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-own-bubble a {
+  color: inherit;
+}
+
+/* v0.7.0 shared mobile geometry — approved brand colors unchanged. */
+.z-card {
+  border: 1px solid var(--z-stroke);
+  background: var(--z-card);
+  border-radius: var(--z-radius-card);
+}
+.z-card-hero {
+  border: 1px solid var(--z-stroke);
+  background: var(--z-card-elevated);
+  border-radius: var(--z-radius-hero);
+}
+.z-room-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 88px;
+  width: 100%;
+  text-align: left;
+}
+@media (max-width: 639px) {
+  .z-room-row { min-height: 80px; gap: 0.75rem; }
+}
+
+
+/* ZAPRUDA v0.7.1: Electric Blue is a FULL background palette, not
+   a blue body behind the original green/black hard-coded panels.
+   All overrides are scoped; Matte Black remains exactly as before. */
+:root[data-zapruda-background="electric-blue"] {
+  --background: #1239A6;
+  --card: #19357F;
+  --secondary: #223D91;
+  --muted: #1D337A;
+  --muted-foreground: #E2E8FF;
+  --border: #5B75C0;
+  --input: #5B75C0;
+  /* Must follow the global :root design-token declaration above. */
+  --z-surface: #102A78;
+  --z-card: #1A367F;
+  --z-card-elevated: #23438D;
+  --z-violet: #614051;
+  --z-stroke: rgba(220,229,255,.28);
+}
+:root[data-zapruda-background="electric-blue"] :is(.z-card, .z-card-hero, .panel, .z-underground) {
+  background-color: var(--z-card);
+  border-color: var(--z-stroke);
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0B]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]/95]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#080A09]/95]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#070B10]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#060B10]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B1019]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0A0C16]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0E120F]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#10140F]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#101210]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0A0D09]/90]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#111610]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0F130F]"] {
+  background-color: #102A78;
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#141914]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151915]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151914]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151A14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151D14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171B16]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171C17]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171C14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171a15]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151812]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#161D13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#121A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151A1E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#141D20]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0C100E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#111511]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A2016]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A1D19]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151925]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171c17]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#17151E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#17151D]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#161B15]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151B14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171528]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151825]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D121C]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A2115]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#132117]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0B]"] {
+  background-color: #1A367F;
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#191522]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#211B2D]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#292140]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171527]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1B1B2A]"] {
+  background-color: #614051;
+}
+/* Tailwind arbitrary opacity classes in sticky navigation and modal cards. */
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]/95"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#080A09]/95"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0A0D09]/90"] {
+  background-color: rgba(15,38,105,.97);
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151915]/95"] {
+  background-color: rgba(26,54,127,.95);
+}
+/* Legacy green/grey-green gradients across headings, gear, trips and profiles. */
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1E251A]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1E251A]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1E251A]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#27321b]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#27321b]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#27321b]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1D2717]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1D2717]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1D2717]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#131A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#131A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#131A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#202C15]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#202C15]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#202C15]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#141B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#141B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#141B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#0F130F]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#0F130F]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#0F130F]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#243019]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#243019]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#243019]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#243219]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#243219]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#243219]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#10140F]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#10140F]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#10140F]"] {
+  background-image: linear-gradient(133deg, #2257C5 0%, #183B92 55%, #614051 135%);
+}
+/* Application shell, chat timelines and activity surfaces follow selected theme. */
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window {
+  background: linear-gradient(160deg, #1A3C91 0%, #102A78 100%);
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble:not(.zapruda-chat-own-bubble):not(.zapruda-chat-incoming-bubble) {
+  background: #1A367F;
+  border-color: #667DC5;
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-incoming-bubble {
+  background: #614051;
+  border-color: #98768C;
+  color: #F9ECF7;
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-own-bubble {
+  background: #D7FF35;
+  border-color: #D7FF35;
+  color: #11170A;
+}
+/* Grey-green navigation labels become blue neutral, lime remains unchanged. */
+:root[data-zapruda-background="electric-blue"] [class~="text-[#949D90]"],
+:root[data-zapruda-background="electric-blue"] [class~="text-[#A5ADA1]"],
+:root[data-zapruda-background="electric-blue"] [class~="text-[#A6B1A0]"],
+:root[data-zapruda-background="electric-blue"] [class~="text-[#B6BFB1]"] {
+  color: #DDE6FF;
+}
+
+/* Electric Blue surface coherence — never applies to Matte Black or other saved themes. */
+:root[data-zapruda-background="electric-blue"] {
+  --z-electric-deep: #0B2058;
+  --z-electric-surface: #152D72;
+  --z-electric-raised: #203A86;
+  --z-electric-eggplant: #614051;
+  --z-electric-eggplant-outline: #B48BA1;
+}
+/* Hardcoded dark-green/olive fills predating theme support must not remain green. */
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="bg-[#060B10]"],
+  [class~="bg-[#070B10]"],
+  [class~="bg-[#080A09]/95"],
+  [class~="bg-[#0B0D0B]"],
+  [class~="bg-[#0C100E]"],
+  [class~="bg-[#0D100C]"],
+  [class~="bg-[#0D100C]/95"],
+  [class~="bg-[#0E120E]"],
+  [class~="bg-[#0E120F]"],
+  [class~="bg-[#101314]"],
+  [class~="bg-[#10131A]"],
+  [class~="bg-[#11131B]"],
+  [class~="bg-[#111511]"],
+  [class~="bg-[#121A12]"],
+  [class~="bg-[#141914]"],
+  [class~="bg-[#151812]"],
+  [class~="bg-[#151915]"],
+  [class~="bg-[#151A14]"],
+  [class~="bg-[#161D13]"],
+  [class~="bg-[#171a15]"],
+  [class~="bg-[#171C14]"],
+  [class~="bg-[#1A1D19]"],
+  [class~="bg-[#0B1019]"],
+  [class~="bg-[#0D121C]"],
+  [class~="bg-[#0A0C16]"]
+) { background-color: var(--z-electric-surface); }
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="bg-[#141D20]"],
+  [class~="bg-[#151925]"],
+  [class~="bg-[#17151D]"],
+  [class~="bg-[#171527]"],
+  [class~="bg-[#171528]"],
+  [class~="bg-[#1B1B2A]"],
+  [class~="bg-[#191522]"],
+  [class~="bg-[#211B2D]"],
+  [class~="bg-[#292140]"],
+  [class~="bg-[#10131A]"]
+) { background-color: var(--z-electric-raised); }
+/* Historic purple fills become eggplant. Text remains high-contrast pale neutral. */
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="bg-[#A78BFA]/10"],
+  [class~="bg-[#A99AD9]/10"],
+  [class~="bg-[#B4A1D7]/10"],
+  [class~="bg-[#211B2D]"],
+  [class~="bg-[#292140]"]
+) { background-color: var(--z-electric-eggplant); color: #F9F1F5; }
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="border-[#A78BFA]/35"],
+  [class~="border-[#A78BFA]/30"],
+  [class~="border-[#A78BFA]/25"],
+  [class~="border-[#A78BFA]/20"],
+  [class~="border-[#A99AD9]/40"],
+  [class~="border-[#A78BFA]"],
+  [class~="border-[#3E345B]"],
+  [class~="border-[#34304D]"],
+  [class~="border-[#383048]"]
+) { border-color: var(--z-electric-eggplant-outline); }
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="text-[#A78BFA]"],
+  [class~="text-[#A99AD9]"],
+  [class~="text-[#C4B5FD]"],
+  [class~="text-[#DDD6FE]"],
+  [class~="text-[#B4A1D7]"],
+  [class~="text-[#F5F2FF]"]
+) { color: #F9F1F5; }
+/* Transparent lime on dark surfaces can look olive; retain lime lettering and
+   borders, but keep the highlighted surface unmistakably blue. */
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="bg-[#D7FF35]/10"],
+  [class~="bg-[#D7FF35]/5"],
+  [class~="bg-[#D7FF35]/15"],
+  [class~="bg-[#D7FF35]/[0.09]"],
+  [class~="bg-lime-300/10"],
+  [class~="bg-lime-300/15"]
+) { background-color: #203C88; }
+/* Existing standalone page gradient heroes had olive and green stops. */
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="from-[#1B2718]"],
+  [class~="from-[#1E251A]"],
+  [class~="from-[#1F1B29]"],
+  [class~="from-[#27321b]"],
+  [class~="via-[#171d13]"]
+) {
+  background-image: linear-gradient(135deg, #194FBB 0%, #183A91 48%, #10245E 100%);
+}
+/* The shared header and mobile navigation must follow the optional theme. */
+:root[data-zapruda-background="electric-blue"] header.sticky,
+:root[data-zapruda-background="electric-blue"] nav[aria-label="Мобильная навигация"] {
+  background-color: rgba(11,32,88,.96);
+}
+/* The secondary menu and site-wide cards stay blue, never dark olive. */
+:root[data-zapruda-background="electric-blue"] [id="zapruda-extra-nav"] {
+  background-color: var(--z-electric-surface);
+}
+
+/* ZAPRUDA v0.7.1: Electric Blue is a FULL background palette, not
+   a blue body behind the original green/black hard-coded panels.
+   All overrides are scoped; Matte Black remains exactly as before. */
+:root[data-zapruda-background="electric-blue"] {
+  --background: #1239A6;
+  --card: #19357F;
+  --secondary: #223D91;
+  --muted: #1D337A;
+  --muted-foreground: #E2E8FF;
+  --border: #5B75C0;
+  --input: #5B75C0;
+  /* Must follow the global :root design-token declaration above. */
+  --z-surface: #102A78;
+  --z-card: #1A367F;
+  --z-card-elevated: #23438D;
+  --z-violet: #614051;
+  --z-stroke: rgba(220,229,255,.28);
+}
+:root[data-zapruda-background="electric-blue"] :is(.z-card, .z-card-hero, .panel, .z-underground) {
+  background-color: var(--z-card);
+  border-color: var(--z-stroke);
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0B]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]/95]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#080A09]/95]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#070B10]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#060B10]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B1019]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0A0C16]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0E120F]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#10140F]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#101210]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0A0D09]/90]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#111610]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0F130F]"] {
+  background-color: #102A78;
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#141914]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151915]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151914]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151A14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151D14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171B16]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171C17]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171C14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171a15]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151812]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#161D13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#121A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151A1E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#141D20]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0C100E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#111511]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A2016]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A1D19]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151925]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171c17]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#17151E]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#17151D]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#161B15]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151B14]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171528]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151825]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D121C]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1A2115]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#132117]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0B]"] {
+  background-color: #1A367F;
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#191522]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#211B2D]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#292140]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#171527]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#1B1B2A]"] {
+  background-color: #614051;
+}
+/* Tailwind arbitrary opacity classes in sticky navigation and modal cards. */
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0D100C]/95"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#080A09]/95"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0A0D09]/90"] {
+  background-color: rgba(15,38,105,.97);
+}
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#151915]/95"] {
+  background-color: rgba(26,54,127,.95);
+}
+/* Legacy green/grey-green gradients across headings, gear, trips and profiles. */
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1B2718]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#10150E]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1E251A]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1E251A]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1E251A]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#101310]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#070908]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#27321b]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#27321b]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#27321b]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#171d13]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#151811]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1F1B29]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#101314]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#0B0D0E]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#1D2717]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#1D2717]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#1D2717]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#131A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#131A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#131A12]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#0D100C]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#202C15]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#202C15]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#202C15]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#141B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#141B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#141B11]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#0F130F]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#0F130F]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#0F130F]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#243019]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#243019]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#243019]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#243219]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#243219]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#243219]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#171F13]"],
+:root[data-zapruda-background="electric-blue"] [class~="from-[#10140F]"],
+:root[data-zapruda-background="electric-blue"] [class~="via-[#10140F]"],
+:root[data-zapruda-background="electric-blue"] [class~="to-[#10140F]"] {
+  background-image: linear-gradient(133deg, #2257C5 0%, #183B92 55%, #614051 135%);
+}
+/* Application shell, chat timelines and activity surfaces follow selected theme. */
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window {
+  background: linear-gradient(160deg, #1A3C91 0%, #102A78 100%);
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble:not(.zapruda-chat-own-bubble):not(.zapruda-chat-incoming-bubble) {
+  background: #1A367F;
+  border-color: #667DC5;
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-incoming-bubble {
+  background: #614051;
+  border-color: #98768C;
+  color: #F9ECF7;
+}
+:root[data-zapruda-background="electric-blue"] .zapruda-chat-window .zapruda-chat-bubble.zapruda-chat-own-bubble {
+  background: #D7FF35;
+  border-color: #D7FF35;
+  color: #11170A;
+}
+/* Grey-green navigation labels become blue neutral, lime remains unchanged. */
+:root[data-zapruda-background="electric-blue"] [class~="text-[#949D90]"],
+:root[data-zapruda-background="electric-blue"] [class~="text-[#A5ADA1]"],
+:root[data-zapruda-background="electric-blue"] [class~="text-[#A6B1A0]"],
+:root[data-zapruda-background="electric-blue"] [class~="text-[#B6BFB1]"] {
+  color: #DDE6FF;
+}
+
+/* Electric Blue chat timeline mirrors palette-aware chat preview choices. */
+:root[data-zapruda-background="electric-blue"][data-zapruda-chat="plain"] .zapruda-chat-window {
+  background: linear-gradient(140deg, #152D72 0%, #0B2058 100%);
+}
+:root[data-zapruda-background="electric-blue"][data-zapruda-chat="forest"] .zapruda-chat-window {
+  background: radial-gradient(circle at 25% 20%, #614051 0%, #16285D 75%, #0B2058 100%);
+}
+:root[data-zapruda-background="electric-blue"][data-zapruda-chat="slate"] .zapruda-chat-window {
+  background: linear-gradient(140deg, #203A86 0%, #0B2058 100%);
+}
+:root[data-zapruda-background="electric-blue"][data-zapruda-chat="water"] .zapruda-chat-window {
+  background: radial-gradient(circle at 40% 0%, #1458DB 0%, #1239A6 55%, #0B2058 100%);
+}
+
+
+/* Final Electric Blue visual QA corrections: blue panels and gradients,
+   lime remains the interaction highlight; no olive-colored overlay. */
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#141914]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#0B0D0B]"],
+:root[data-zapruda-background="electric-blue"] [class~="bg-[#121A12]"] {
+  background-color: #152D72;
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="bg-[#D7FF35]/10"],
+  [class~="bg-[#D7FF35]/5"],
+  [class~="bg-[#D7FF35]/15"],
+  [class~="bg-[#D7FF35]/[0.09]"],
+  [class~="bg-lime-300/10"],
+  [class~="bg-lime-300/15"]
+) {
+  background-color: #203C88;
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="from-[#1B2718]"],
+  [class~="from-[#1E251A]"],
+  [class~="from-[#1F1B29]"],
+  [class~="from-[#27321b]"],
+  [class~="via-[#171d13]"]
+) {
+  background-image: linear-gradient(135deg, #194FBB 0%, #183A91 48%, #10245E 100%);
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class~="bg-[#A78BFA]/10"],
+  [class~="bg-[#A99AD9]/10"],
+  [class~="bg-[#B4A1D7]/10"]
+) {
+  background-color: #614051;
+  color: #F9ECF7;
+}
+:root[data-zapruda-background="electric-blue"] header.sticky,
+:root[data-zapruda-background="electric-blue"] nav[aria-label="Мобильная навигация"] {
+  background-color: rgba(11,32,88,.97);
+}
+
+/* Eggplant replaces legacy lavender/purple graphics only in Electric Blue.
+   Keep light text on deep eggplant for readable labels. */
+:root[data-zapruda-background="electric-blue"] :is(
+  [class*="bg-[#A78BFA]"],
+  [class*="bg-[#A99AD9]"],
+  [class*="bg-[#B4A1D7]"],
+  [class*="bg-[#292140]"]
+) {
+  background-color: #614051;
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class*="text-[#A78BFA]"],
+  [class*="text-[#A99AD9]"],
+  [class*="text-[#C4B5FD]"],
+  [class*="text-[#DDD6FE]"],
+  [class*="text-[#B4A1D7]"]
+) {
+  color: #F9ECF7;
+}
+:root[data-zapruda-background="electric-blue"] :is(
+  [class*="border-[#A78BFA]"],
+  [class*="border-[#A99AD9]"],
+  [class*="border-[#B4A1D7]"]
+) {
+  border-color: #956C88;
+}
+/* Header and navigation must also follow the selected Electric Blue palette. */
+:root[data-zapruda-background="electric-blue"] header.sticky,
+:root[data-zapruda-background="electric-blue"] nav[aria-label="Мобильная навигация"] {
+  background-color: rgb(18 37 94 / 96%);
+}
+:root[data-zapruda-background="electric-blue"] nav[aria-label="Остальные разделы"] {
+  background-color: #243B83;
+}
+
+/* #76 Electric Blue explicit surface fixes. Generated arbitrary-color classes
+   remain for Matte Black, but must not paint any olive/forest surface in blue mode.
+   Use semantic classes for guaranteed, inspectable theme boundaries. */
+:root[data-zapruda-background="electric-blue"] .z-electric-feed-hero {
+  background-color: #152D72 !important;
+  background-image: linear-gradient(135deg, #1C4EAD 0%, #152D72 62%, #614051 160%) !important;
+}
+:root[data-zapruda-background="electric-blue"] .z-electric-street-cta {
+  background-color: #203A86 !important;
+  background-image: none !important;
+}
+:root[data-zapruda-background="electric-blue"] .z-electric-feed-action {
+  background-color: #203A86 !important;
+  background-image: none !important;
+}
+:root[data-zapruda-background="electric-blue"] .z-electric-settings-hero {
+  background-color: #193E96 !important;
+  background-image: linear-gradient(135deg, #2052BB 0%, #183B92 64%, #614051 170%) !important;
+}
+:root[data-zapruda-background="electric-blue"] .z-electric-settings-panel {
+  background-color: #1A367F !important;
+  background-image: none !important;
+}
+:root[data-zapruda-background="electric-blue"] .z-electric-shell-header,
+:root[data-zapruda-background="electric-blue"] .z-electric-mobile-nav {
+  background-color: rgb(13 33 91 / 97%) !important;
+  background-image: none !important;
+}
+:root[data-zapruda-background="electric-blue"] .z-electric-shell-menu {
+  background-color: #203A86 !important;
+  background-image: none !important;
+}
+:root[data-zapruda-background="electric-blue"] .z-electric-feed-eggplant {
+  background-color: #614051 !important;
+  background-image: none !important;
+  border-color: #A983A0 !important;
+}
+:root[data-zapruda-background="electric-blue"] .z-electric-hero-glow {
+  background-color: rgb(97 64 81 / 24%) !important;
+}
+

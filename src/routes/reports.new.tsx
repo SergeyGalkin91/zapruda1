@@ -25,7 +25,9 @@ type CatalogMapping = { waterbody_id: string; species_id: string };
 function Label({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t}</span>
+      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {t}
+      </span>
       {children}
     </label>
   );
@@ -65,98 +67,236 @@ function NewReport() {
   const [draftRestored, setDraftRestored] = useState(false);
   useEffect(() => {
     let active = true;
-    void supabase.auth.getUser().then(({ data }) => {
-      if (!active) return;
-      if (data.user) {
-        const key = "zapruda-report-draft-v1-" + data.user.id;
-        draftKey.current = key;
-        try {
-          const raw = localStorage.getItem(key);
-          if (raw) {
-            const saved = JSON.parse(raw) as Record<string, unknown>;
-            const val = (k: string) => typeof saved[k] === "string" ? saved[k] as string : "";
-            setTitle(val("title")); setLocation(val("location")); setWeather(val("weather"));
-            setTemperature(val("temperature")); setPressure(val("pressure"));
-            setWindDirection(val("windDirection")); setWindSpeed(val("windSpeed"));
-            setTechnique(val("technique")); setFishingMethod(val("fishingMethod"));
-            setLures(val("lures")); setStory(val("story")); setSelectedWaterbody(val("selectedWaterbody"));
-            if (Array.isArray(saved["catches"])) setCatches(saved["catches"].filter((c): c is Catch =>
-              !!c && typeof c === "object" && typeof c.species === "string" &&
-              typeof c.weight === "string" && typeof c.length === "string").slice(0, 20));
-            if (typeof saved["isPublic"] === "boolean") setIsPublic(saved["isPublic"]);
-            setDraftRestored(true);
+    void supabase.auth
+      .getUser()
+      .then(({ data }) => {
+        if (!active) return;
+        if (data.user) {
+          const key = "zapruda-report-draft-v1-" + data.user.id;
+          draftKey.current = key;
+          try {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+              const saved = JSON.parse(raw) as Record<string, unknown>;
+              const val = (k: string) => (typeof saved[k] === "string" ? (saved[k] as string) : "");
+              setTitle(val("title"));
+              setLocation(val("location"));
+              setWeather(val("weather"));
+              setTemperature(val("temperature"));
+              setPressure(val("pressure"));
+              setWindDirection(val("windDirection"));
+              setWindSpeed(val("windSpeed"));
+              setTechnique(val("technique"));
+              setFishingMethod(val("fishingMethod"));
+              setLures(val("lures"));
+              setStory(val("story"));
+              setSelectedWaterbody(val("selectedWaterbody"));
+              if (Array.isArray(saved["catches"]))
+                setCatches(
+                  saved["catches"]
+                    .filter(
+                      (c): c is Catch =>
+                        !!c &&
+                        typeof c === "object" &&
+                        typeof c.species === "string" &&
+                        typeof c.weight === "string" &&
+                        typeof c.length === "string",
+                    )
+                    .slice(0, 20),
+                );
+              if (typeof saved["isPublic"] === "boolean") setIsPublic(saved["isPublic"]);
+              setDraftRestored(true);
+            }
+          } catch {
+            /* Invalid drafts never block reporting. */
           }
-        } catch { /* Invalid drafts never block reporting. */ }
-      }
-      setDraftReady(true);
-    }).catch(() => { if (active) setDraftReady(true); });
-    return () => { active = false; };
+        }
+        setDraftReady(true);
+      })
+      .catch(() => {
+        if (active) setDraftReady(true);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
   useEffect(() => {
     if (!draftReady || !draftKey.current || savedReportId) return;
     try {
-      localStorage.setItem(draftKey.current, JSON.stringify({
-        title, location, weather, temperature, pressure, windDirection, windSpeed,
-        technique, fishingMethod, lures, story, selectedWaterbody, catches, isPublic,
-      }));
-    } catch { /* Storage may be unavailable. */ }
-  }, [draftReady, savedReportId, title, location, weather, temperature, pressure,
-      windDirection, windSpeed, technique, fishingMethod, lures, story, selectedWaterbody, catches, isPublic]);
+      localStorage.setItem(
+        draftKey.current,
+        JSON.stringify({
+          title,
+          location,
+          weather,
+          temperature,
+          pressure,
+          windDirection,
+          windSpeed,
+          technique,
+          fishingMethod,
+          lures,
+          story,
+          selectedWaterbody,
+          catches,
+          isPublic,
+        }),
+      );
+    } catch {
+      /* Storage may be unavailable. */
+    }
+  }, [
+    draftReady,
+    savedReportId,
+    title,
+    location,
+    weather,
+    temperature,
+    pressure,
+    windDirection,
+    windSpeed,
+    technique,
+    fishingMethod,
+    lures,
+    story,
+    selectedWaterbody,
+    catches,
+    isPublic,
+  ]);
 
   function importStreetSession() {
     if (savedReportId || saving) return;
     try {
       const raw = localStorage.getItem("zapruda:street-session:v1");
-      if (!raw) { setError("Street-сессия не найдена в этом браузере."); return; }
-      const value: unknown = JSON.parse(raw);
-      if (!value || typeof value !== "object" || !("finishedAt" in value) || typeof value.finishedAt !== "string") {
-        setError("Сначала заверши Street-сессию, затем перенеси данные."); return;
+      if (!raw) {
+        setError("Street-сессия не найдена в этом браузере.");
+        return;
       }
-      const street = value as { startedAt?: unknown; area?: unknown; notes?: unknown; catches?: unknown; finishedAt: string; importedAt?: unknown };
-      if (typeof street.startedAt !== "string" || !Number.isFinite(Date.parse(street.startedAt))) { setError("Данные Street-сессии повреждены."); return; }
-      if (typeof street.importedAt === "string" && !window.confirm("Эта Street-сессия уже переносилась. Импортировать повторно?")) return;
-      if ((title.trim() || location.trim() || story.trim() || catches.some(c => c.species.trim())) &&
-          !window.confirm("В форме уже есть данные. Заменить название, место и уловы данными Street-сессии?")) return;
+      const value: unknown = JSON.parse(raw);
+      if (
+        !value ||
+        typeof value !== "object" ||
+        !("finishedAt" in value) ||
+        typeof value.finishedAt !== "string"
+      ) {
+        setError("Сначала заверши Street-сессию, затем перенеси данные.");
+        return;
+      }
+      const street = value as {
+        startedAt?: unknown;
+        area?: unknown;
+        notes?: unknown;
+        catches?: unknown;
+        finishedAt: string;
+        importedAt?: unknown;
+      };
+      if (typeof street.startedAt !== "string" || !Number.isFinite(Date.parse(street.startedAt))) {
+        setError("Данные Street-сессии повреждены.");
+        return;
+      }
+      if (
+        typeof street.importedAt === "string" &&
+        !window.confirm("Эта Street-сессия уже переносилась. Импортировать повторно?")
+      )
+        return;
+      if (
+        (title.trim() ||
+          location.trim() ||
+          story.trim() ||
+          catches.some((c) => c.species.trim())) &&
+        !window.confirm(
+          "В форме уже есть данные. Заменить название, место и уловы данными Street-сессии?",
+        )
+      )
+        return;
       const area = typeof street.area === "string" ? street.area.slice(0, 100) : "";
-      const items = Array.isArray(street.catches) ? street.catches.filter((c): c is {species:string;note?:string} =>
-        !!c && typeof c === "object" && typeof c.species === "string").slice(0, 20) : [];
+      const items = Array.isArray(street.catches)
+        ? street.catches
+            .filter(
+              (c): c is { species: string; note?: string } =>
+                !!c && typeof c === "object" && typeof c.species === "string",
+            )
+            .slice(0, 20)
+        : [];
       setTitle(("Street Fishing · " + (area || "городской выход")).slice(0, 120));
       setLocation(area);
-      setCatches(items.length ? items.map(c => ({ species: c.species.slice(0, 80), weight: "", length: "" })) : [{ species: "", weight: "", length: "" }]);
+      setCatches(
+        items.length
+          ? items.map((c) => ({ species: c.species.slice(0, 80), weight: "", length: "" }))
+          : [{ species: "", weight: "", length: "" }],
+      );
       const notes = typeof street.notes === "string" ? street.notes.slice(0, 1000) : "";
-      setStory(("Street-сессия от " + new Date(street.startedAt).toLocaleString("ru-RU") +
-        ". Уловов: " + items.length + (notes ? "\\nЗаметки: " + notes : "") +
-        items.map(c => "\\n• " + c.species + (c.note ? " — " + c.note : "")).join("")).slice(0, 3000));
+      setStory(
+        (
+          "Street-сессия от " +
+          new Date(street.startedAt).toLocaleString("ru-RU") +
+          ". Уловов: " +
+          items.length +
+          (notes ? "\\nЗаметки: " + notes : "") +
+          items.map((c) => "\\n• " + c.species + (c.note ? " — " + c.note : "")).join("")
+        ).slice(0, 3000),
+      );
       setIsPublic(false);
       setError("");
-      try { localStorage.setItem("zapruda:street-session:v1", JSON.stringify({ ...street, importedAt: new Date().toISOString() })); }
-      catch { /* Warning is best effort; source session remains intact. */ }
-    } catch { setError("Не удалось прочитать Street-сессию. Исходные данные сохранены."); }
+      try {
+        localStorage.setItem(
+          "zapruda:street-session:v1",
+          JSON.stringify({ ...street, importedAt: new Date().toISOString() }),
+        );
+      } catch {
+        /* Warning is best effort; source session remains intact. */
+      }
+    } catch {
+      setError("Не удалось прочитать Street-сессию. Исходные данные сохранены.");
+    }
   }
 
   function clearLocalDraft() {
-    if (draftKey.current) { try { localStorage.removeItem(draftKey.current); } catch {} }
+    if (draftKey.current) {
+      try {
+        localStorage.removeItem(draftKey.current);
+      } catch {
+        // A blocked browser store must not prevent completing the report.
+      }
+    }
     setDraftRestored(false);
-    setTitle(""); setLocation(""); setWeather(""); setTemperature(""); setPressure("");
-    setWindDirection(""); setWindSpeed(""); setTechnique(""); setFishingMethod("");
-    setLures(""); setStory(""); setSelectedWaterbody("");
-    setCatches([{ species: "", weight: "", length: "" }]); setIsPublic(true);
+    setTitle("");
+    setLocation("");
+    setWeather("");
+    setTemperature("");
+    setPressure("");
+    setWindDirection("");
+    setWindSpeed("");
+    setTechnique("");
+    setFishingMethod("");
+    setLures("");
+    setStory("");
+    setSelectedWaterbody("");
+    setCatches([{ species: "", weight: "", length: "" }]);
+    setIsPublic(true);
   }
-
 
   useEffect(() => {
     let live = true;
     void Promise.all([
-      (supabase as any).from("atlas_waterbodies").select("id,name,region,country_code").order("name").limit(500),
-      (supabase as any).from("atlas_fish_species").select("id,name").limit(200),
-      (supabase as any).from("atlas_waterbody_species").select("waterbody_id,species_id").limit(2500)
-    ]).then(([w, f, m]) => {
-      if (!live) return;
-      if (!w.error) setCatalogWaters(w.data ?? []);
-      if (!f.error) setCatalogFishes(f.data ?? []);
-      if (!m.error) setCatalogMappings(m.data ?? []);
-    }).catch(() => {});
-    return () => { live = false; };
+      supabase
+        .from("atlas_waterbodies")
+        .select("id,name,region,country_code")
+        .order("name")
+        .limit(500),
+      supabase.from("atlas_fish_species").select("id,name").limit(200),
+      supabase.from("atlas_waterbody_species").select("waterbody_id,species_id").limit(2500),
+    ])
+      .then(([w, f, m]) => {
+        if (!live) return;
+        if (!w.error) setCatalogWaters(w.data ?? []);
+        if (!f.error) setCatalogFishes(f.data ?? []);
+        if (!m.error) setCatalogMappings(m.data ?? []);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -172,7 +312,11 @@ function NewReport() {
       setError("Можно добавить не больше 6 фотографий к отчёту.");
       return;
     }
-    const invalid = selected.find((photo) => !["image/jpeg", "image/png", "image/webp"].includes(photo.type) || photo.size > 8 * 1024 * 1024);
+    const invalid = selected.find(
+      (photo) =>
+        !["image/jpeg", "image/png", "image/webp"].includes(photo.type) ||
+        photo.size > 8 * 1024 * 1024,
+    );
     if (invalid) {
       setError("Каждое фото должно быть JPG, PNG или WebP размером до 8 МБ.");
       return;
@@ -182,12 +326,13 @@ function NewReport() {
   }
 
   async function identifyFish() {
-    if (!photos.length || aiWorking) return;
+    const photo = photos[0];
+    if (!photo || aiWorking) return;
     setAiWorking(true);
     setAiMessage("");
     try {
       // Compress locally; do not transmit an oversized original image.
-      const bitmap = await createImageBitmap(photos[0]);
+      const bitmap = await createImageBitmap(photo);
       const scale = Math.min(1, 960 / Math.max(bitmap.width, bitmap.height));
       const canvas = document.createElement("canvas");
       canvas.width = Math.max(1, Math.round(bitmap.width * scale));
@@ -202,22 +347,34 @@ function NewReport() {
       });
       if (resultError) throw new Error(data?.error || resultError.message);
       if (data?.error) throw new Error(data.error);
-      const found = typeof data?.species_common_name === "string" ? data.species_common_name.trim() : "";
+      const found =
+        typeof data?.species_common_name === "string" ? data.species_common_name.trim() : "";
       if (found && data?.fish_detected && data?.confidence !== "low") {
-        setCatches(current => current.map((row, i) => i === 0 ? { ...row, species: found } : row));
-        setAiMessage("ИИ предполагает: " + found + " (уверенность: " +
-          (data.confidence === "high" ? "высокая" : "средняя") + "). Проверь название перед публикацией. Это не подтверждение ачивки.");
+        setCatches((current) =>
+          current.map((row, i) => (i === 0 ? { ...row, species: found } : row)),
+        );
+        setAiMessage(
+          "ИИ предполагает: " +
+            found +
+            " (уверенность: " +
+            (data.confidence === "high" ? "высокая" : "средняя") +
+            "). Проверь название перед публикацией. Это не подтверждение ачивки.",
+        );
       } else {
-        setAiMessage("ИИ не смог надёжно определить рыбу. Впиши вид вручную — отчёт можно публиковать.");
+        setAiMessage(
+          "ИИ не смог надёжно определить рыбу. Впиши вид вручную — отчёт можно публиковать.",
+        );
       }
     } catch (cause) {
-      setAiMessage(cause instanceof Error ? cause.message : "ИИ-подсказка пока недоступна. Впиши вид вручную.");
+      setAiMessage(
+        cause instanceof Error ? cause.message : "ИИ-подсказка пока недоступна. Впиши вид вручную.",
+      );
     } finally {
       setAiWorking(false);
     }
   }
 
-    const upd = (i: number, k: keyof Catch, v: string) =>
+  const upd = (i: number, k: keyof Catch, v: string) =>
     setCatches((c) => c.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
 
   async function publish(e: React.FormEvent<HTMLFormElement>) {
@@ -243,8 +400,11 @@ function NewReport() {
         { label: "Длина рыбы №" + (index + 1), value: c.length, min: 0, max: 1000 },
       ]),
     ];
-    const invalidNumber = numbers.find(({ value, min, max }) =>
-      value.trim() !== "" && (!Number.isFinite(Number(value)) || Number(value) < min || Number(value) > max));
+    const invalidNumber = numbers.find(
+      ({ value, min, max }) =>
+        value.trim() !== "" &&
+        (!Number.isFinite(Number(value)) || Number(value) < min || Number(value) > max),
+    );
     if (invalidNumber) {
       setError("Проверь поле «" + invalidNumber.label + "»: число вне допустимого диапазона.");
       return;
@@ -258,9 +418,15 @@ function NewReport() {
 
       // Don't create a report with photos until the optional database migration exists.
       if (!savedReportId && photos.length) {
-        const { error: photosTableError } = await supabase.from("report_photos").select("id").limit(1);
+        const { error: photosTableError } = await supabase
+          .from("report_photos")
+          .select("id")
+          .limit(1);
         if (photosTableError) {
-          throw new Error("Фотографии пока не подключены в Supabase. Потребуется миграция report_photos. " + photosTableError.message);
+          throw new Error(
+            "Фотографии пока не подключены в Supabase. Потребуется миграция report_photos. " +
+              photosTableError.message,
+          );
         }
       }
 
@@ -272,7 +438,14 @@ function NewReport() {
           .insert({
             user_id: user.id,
             title: cleanTitle,
-            body: [story.trim(), technique.trim() ? "Техника: " + technique.trim() : "", lures.trim() ? "Приманки: " + lures.trim() : ""].filter(Boolean).join("\n\n") || null,
+            body:
+              [
+                story.trim(),
+                technique.trim() ? "Техника: " + technique.trim() : "",
+                lures.trim() ? "Приманки: " + lures.trim() : "",
+              ]
+                .filter(Boolean)
+                .join("\n\n") || null,
             location_name: location.trim() || null,
             weather_summary: weather.trim() || null,
             air_temperature_c: temperature.trim() ? Number(temperature) : null,
@@ -292,19 +465,27 @@ function NewReport() {
       if (!savedCatches) {
         // If the previous insert succeeded but its response was lost, do not insert the same catch twice.
         // The batch insert is atomic, so an existing catch means this report already has its saved batch.
-        const { data: existingCatches, error: existingError } = await supabase.from("catches")
-          .select("id").eq("report_id", reportId).limit(1);
-        if (existingError) throw new Error("Не удалось проверить сохранённый улов: " + existingError.message);
+        const { data: existingCatches, error: existingError } = await supabase
+          .from("catches")
+          .select("id")
+          .eq("report_id", reportId)
+          .limit(1);
+        if (existingError)
+          throw new Error("Не удалось проверить сохранённый улов: " + existingError.message);
         const alreadyStored = Boolean(existingCatches?.length);
-        const validCatches = alreadyStored ? [] : catches.filter((c) => c.species.trim()).map((c) => ({
-          report_id: reportId,
-          user_id: user.id,
-          species: c.species.trim(),
-          weight_kg: c.weight.trim() ? Number(c.weight) : null,
-          length_cm: c.length.trim() ? Number(c.length) : null,
-          technique: technique.trim() || null,
-          lure: lures.trim() || null,
-        }));
+        const validCatches = alreadyStored
+          ? []
+          : catches
+              .filter((c) => c.species.trim())
+              .map((c) => ({
+                report_id: reportId,
+                user_id: user.id,
+                species: c.species.trim(),
+                weight_kg: c.weight.trim() ? Number(c.weight) : null,
+                length_cm: c.length.trim() ? Number(c.length) : null,
+                technique: technique.trim() || null,
+                lure: lures.trim() || null,
+              }));
         if (validCatches.length) {
           const { error: catchesError } = await supabase.from("catches").insert(validCatches);
           if (catchesError) throw new Error("Не удалось сохранить улов: " + catchesError.message);
@@ -312,9 +493,10 @@ function NewReport() {
         setSavedCatches(true);
       }
 
-      for (let i = uploadedCount; i < photos.length; i++) {
-        const photo = photos[i];
-        const extension = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
+      for (const [i, photo] of photos.entries()) {
+        if (i < uploadedCount) continue;
+        const extension =
+          photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
         const path = `${user.id}/${reportId}/${crypto.randomUUID()}.${extension}`;
         setProgress(`Загружаем фото ${i + 1} из ${photos.length}…`);
         const { error: uploadError } = await supabase.storage
@@ -330,7 +512,9 @@ function NewReport() {
         });
         if (photoRecordError) {
           await supabase.storage.from("report-photos").remove([path]);
-          throw new Error("Фото загружено, но не удалось привязать к отчёту: " + photoRecordError.message);
+          throw new Error(
+            "Фото загружено, но не удалось привязать к отчёту: " + photoRecordError.message,
+          );
         }
         setUploadedCount(i + 1);
       }
@@ -346,11 +530,22 @@ function NewReport() {
           const photoId = savedPhotos.data?.[0]?.id;
           if (photoId && savedFish.data?.length) {
             for (const caught of savedFish.data) {
-              const species = catalogFishes.find(x => x.name.toLowerCase() === caught.species.trim().toLowerCase());
-              if (!species || !catalogMappings.some(x => x.waterbody_id === selectedWaterbody && x.species_id === species.id)) continue;
-              await (supabase as any).from("atlas_catch_claims").insert({
-                user_id: user.id, waterbody_id: selectedWaterbody, species_id: species.id,
-                catch_id: caught.id, evidence_photo_id: photoId,
+              const species = catalogFishes.find(
+                (x) => x.name.toLowerCase() === caught.species.trim().toLowerCase(),
+              );
+              if (
+                !species ||
+                !catalogMappings.some(
+                  (x) => x.waterbody_id === selectedWaterbody && x.species_id === species.id,
+                )
+              )
+                continue;
+              await supabase.from("atlas_catch_claims").insert({
+                user_id: user.id,
+                waterbody_id: selectedWaterbody,
+                species_id: species.id,
+                catch_id: caught.id,
+                evidence_photo_id: photoId,
               });
             }
           }
@@ -359,12 +554,20 @@ function NewReport() {
         }
       }
       setProgress("");
-      if (draftKey.current) { try { localStorage.removeItem(draftKey.current); } catch {} }
+      if (draftKey.current) {
+        try {
+          localStorage.removeItem(draftKey.current);
+        } catch {
+          // A blocked browser store must not prevent completing the report.
+        }
+      }
       await navigate({ to: "/" });
     } catch (caught) {
       setProgress("");
       const message = caught instanceof Error ? caught.message : "Не удалось опубликовать отчёт.";
-      setError(savedReportId ? "Отчёт уже сохранён. " + message + " Можно повторить загрузку." : message);
+      setError(
+        savedReportId ? "Отчёт уже сохранён. " + message + " Можно повторить загрузку." : message,
+      );
     } finally {
       setSaving(false);
     }
@@ -373,49 +576,193 @@ function NewReport() {
   return (
     <Shell>
       <h1 className="mb-6 text-2xl font-bold">Новый отчёт</h1>
-      {!savedReportId && <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D7FF35]/30 bg-[#161D13] p-4">
-        <div><p className="text-sm font-black text-[#D7FF35]">ZAPRUDA STREET</p><p className="mt-1 text-xs text-zinc-300">Перенести завершённую городскую сессию. Отчёт останется приватным до твоего решения.</p></div>
-        <button type="button" onClick={importStreetSession} disabled={!draftReady || saving} className="rounded-xl border border-[#D7FF35]/60 px-4 py-2 text-xs font-black text-[#D7FF35] disabled:opacity-40">Перенести Street-сессию</button>
-      </div>}
-      {savedReportId && <div role="status" className="mb-4 rounded-xl border border-[#A78BFA]/40 bg-[#A78BFA]/10 p-4 text-sm text-zinc-100">
-        <p className="font-bold text-[#D7FF35]">Отчёт сохранён</p>
-        <p className="mt-1">Загружено фотографий: {uploadedCount} из {photos.length}. Если загрузка прервалась, повтори её — второй отчёт не создаётся.</p>
-      </div>}
+      {!savedReportId && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D7FF35]/30 bg-[#161D13] p-4">
+          <div>
+            <p className="text-sm font-black text-[#D7FF35]">ZAPRUDA STREET</p>
+            <p className="mt-1 text-xs text-zinc-300">
+              Перенести завершённую городскую сессию. Отчёт останется приватным до твоего решения.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={importStreetSession}
+            disabled={!draftReady || saving}
+            className="rounded-xl border border-[#D7FF35]/60 px-4 py-2 text-xs font-black text-[#D7FF35] disabled:opacity-40"
+          >
+            Перенести Street-сессию
+          </button>
+        </div>
+      )}
+      {savedReportId && (
+        <div
+          role="status"
+          className="mb-4 rounded-xl border border-[#A78BFA]/40 bg-[#A78BFA]/10 p-4 text-sm text-zinc-100"
+        >
+          <p className="font-bold text-[#D7FF35]">Отчёт сохранён</p>
+          <p className="mt-1">
+            Загружено фотографий: {uploadedCount} из {photos.length}. Если загрузка прервалась,
+            повтори её — второй отчёт не создаётся.
+          </p>
+        </div>
+      )}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 px-4 py-3 text-xs text-zinc-300">
-        <span>{draftRestored ? "Черновик восстановлен на этом устройстве. Фотографии нужно добавить снова." : "Текст отчёта автоматически сохраняется на этом устройстве после входа. Фото не сохраняются."}</span>
-        {draftRestored && !savedReportId && <button type="button" onClick={clearLocalDraft} className="font-bold text-[#D7FF35] hover:underline">Очистить черновик</button>}
+        <span>
+          {draftRestored
+            ? "Черновик восстановлен на этом устройстве. Фотографии нужно добавить снова."
+            : "Текст отчёта автоматически сохраняется на этом устройстве после входа. Фото не сохраняются."}
+        </span>
+        {draftRestored && !savedReportId && (
+          <button
+            type="button"
+            onClick={clearLocalDraft}
+            className="font-bold text-[#D7FF35] hover:underline"
+          >
+            Очистить черновик
+          </button>
+        )}
       </div>
       <form className="space-y-6" onSubmit={publish}>
         <section className="panel grid gap-4 p-5 md:grid-cols-2">
           <div className="md:col-span-2">
-            <Label t="Название отчёта *"><input className="field" placeholder="Например, утро на Кудьме" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} required /></Label>
+            <Label t="Название отчёта *">
+              <input
+                className="field"
+                placeholder="Например, утро на Кудьме"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={120}
+                required
+              />
+            </Label>
           </div>
-          <Label t="Вид рыбалки для достижений *"><select className="field" value={fishingMethod} required onChange={(e) => setFishingMethod(e.target.value)}><option value="" disabled>Выбери дисциплину…</option>{FISHING_DISCIPLINES.map((d) => <option key={d.code} value={d.code}>{d.title}</option>)}</select></Label>
-          <Label t="Водоём из Атласа (по желанию)">
-            <select className="field" value={selectedWaterbody} onChange={(e) => {
-              const id = e.target.value;
-              setSelectedWaterbody(id);
-              const water = catalogWaters.find(w => w.id === id);
-              if (water) setLocation(water.name + (water.region ? " · " + water.region : ""));
-            }}>
-              <option value="">Не выбирать — обычный отчёт</option>
-              {catalogWaters.map(w => <option key={w.id} value={w.id}>{w.name} · {w.region || w.country_code}</option>)}
+          <Label t="Вид рыбалки для достижений *">
+            <select
+              className="field"
+              value={fishingMethod}
+              required
+              onChange={(e) => setFishingMethod(e.target.value)}
+            >
+              <option value="" disabled>
+                Выбери дисциплину…
+              </option>
+              {FISHING_DISCIPLINES.map((d) => (
+                <option key={d.code} value={d.code}>
+                  {d.title}
+                </option>
+              ))}
             </select>
           </Label>
-          <Label t="Место (без точных координат)"><input className="field" placeholder="Например, Волга у Нижнего" value={location} onChange={(e) => setLocation(e.target.value)} /></Label>
-          <p className="md:col-span-2 text-xs leading-5 text-zinc-400">Для ачивки выбери водоём, укажи пойманный вид и приложи фото ниже. Заявка отправится автоматически после публикации. GPS и отдельные анкеты не нужны.</p>
-          <Label t="Погода"><input className="field" placeholder="Пасмурно, небольшой дождь" value={weather} onChange={(e) => setWeather(e.target.value)} /></Label>
-          <Label t="Температура, °C"><input className="field" type="number" step="0.1" placeholder="+12" value={temperature} onChange={(e) => setTemperature(e.target.value)} /></Label>
-          <Label t="Давление, мм рт. ст."><input className="field" type="number" step="0.1" placeholder="752" value={pressure} onChange={(e) => setPressure(e.target.value)} /></Label>
-          <Label t="Направление ветра"><input className="field" placeholder="СЗ" value={windDirection} onChange={(e) => setWindDirection(e.target.value)} /></Label>
-          <Label t="Ветер, м/с"><input className="field" type="number" min="0" step="0.1" placeholder="4" value={windSpeed} onChange={(e) => setWindSpeed(e.target.value)} /></Label>
-          <Label t="Техника ловли"><input className="field" placeholder="Джиг, ступенька" value={technique} onChange={(e) => setTechnique(e.target.value)} /></Label>
-          <Label t="Приманки"><input className="field" placeholder="Виброхвост 3”, колебалка 10 г" value={lures} onChange={(e) => setLures(e.target.value)} /></Label>
+          <Label t="Водоём из Атласа (по желанию)">
+            <select
+              className="field"
+              value={selectedWaterbody}
+              onChange={(e) => {
+                const id = e.target.value;
+                setSelectedWaterbody(id);
+                const water = catalogWaters.find((w) => w.id === id);
+                if (water) setLocation(water.name + (water.region ? " · " + water.region : ""));
+              }}
+            >
+              <option value="">Не выбирать — обычный отчёт</option>
+              {catalogWaters.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name} · {w.region || w.country_code}
+                </option>
+              ))}
+            </select>
+          </Label>
+          <Label t="Место (без точных координат)">
+            <input
+              className="field"
+              placeholder="Например, Волга у Нижнего"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+          </Label>
+          <p className="md:col-span-2 text-xs leading-5 text-zinc-400">
+            Для ачивки выбери водоём, укажи пойманный вид и приложи фото ниже. Заявка отправится
+            автоматически после публикации. GPS и отдельные анкеты не нужны.
+          </p>
+          <Label t="Погода">
+            <input
+              className="field"
+              placeholder="Пасмурно, небольшой дождь"
+              value={weather}
+              onChange={(e) => setWeather(e.target.value)}
+            />
+          </Label>
+          <Label t="Температура, °C">
+            <input
+              className="field"
+              type="number"
+              step="0.1"
+              placeholder="+12"
+              value={temperature}
+              onChange={(e) => setTemperature(e.target.value)}
+            />
+          </Label>
+          <Label t="Давление, мм рт. ст.">
+            <input
+              className="field"
+              type="number"
+              step="0.1"
+              placeholder="752"
+              value={pressure}
+              onChange={(e) => setPressure(e.target.value)}
+            />
+          </Label>
+          <Label t="Направление ветра">
+            <input
+              className="field"
+              placeholder="СЗ"
+              value={windDirection}
+              onChange={(e) => setWindDirection(e.target.value)}
+            />
+          </Label>
+          <Label t="Ветер, м/с">
+            <input
+              className="field"
+              type="number"
+              min="0"
+              step="0.1"
+              placeholder="4"
+              value={windSpeed}
+              onChange={(e) => setWindSpeed(e.target.value)}
+            />
+          </Label>
+          <Label t="Техника ловли">
+            <input
+              className="field"
+              placeholder="Джиг, ступенька"
+              value={technique}
+              onChange={(e) => setTechnique(e.target.value)}
+            />
+          </Label>
+          <Label t="Приманки">
+            <input
+              className="field"
+              placeholder="Виброхвост 3”, колебалка 10 г"
+              value={lures}
+              onChange={(e) => setLures(e.target.value)}
+            />
+          </Label>
           <div className="md:col-span-2">
-            <Label t="Рассказ"><textarea className="field min-h-28" placeholder="Как прошла рыбалка? Где стоял, что пробовал, были ли поклёвки?" value={story} onChange={(e) => setStory(e.target.value)} /></Label>
+            <Label t="Рассказ">
+              <textarea
+                className="field min-h-28"
+                placeholder="Как прошла рыбалка? Где стоял, что пробовал, были ли поклёвки?"
+                value={story}
+                onChange={(e) => setStory(e.target.value)}
+              />
+            </Label>
           </div>
           <label className="flex items-center gap-2 text-sm md:col-span-2">
-            <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+            />
             Опубликовать в общей ленте
           </label>
         </section>
@@ -427,10 +774,14 @@ function NewReport() {
             </div>
             <div>
               <h2 className="text-base font-semibold">Фотографии с рыбалки</h2>
-              <p className="text-xs text-muted-foreground">До 6 фотографий · JPG, PNG, WebP · до 8 МБ каждая</p>
+              <p className="text-xs text-muted-foreground">
+                До 6 фотографий · JPG, PNG, WebP · до 8 МБ каждая
+              </p>
             </div>
           </div>
-          <label className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-lime-300/35 bg-lime-300/[0.035] px-4 py-5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10 ${savedReportId ? "pointer-events-none opacity-50" : ""}`}>
+          <label
+            className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-lime-300/35 bg-lime-300/[0.035] px-4 py-5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10 ${savedReportId ? "pointer-events-none opacity-50" : ""}`}
+          >
             <ImagePlus className="size-5" aria-hidden="true" />
             {photos.length ? "Заменить выбранные фотографии" : "Выбрать фотографии"}
             <input
@@ -446,8 +797,15 @@ function NewReport() {
           {previews.length > 0 && (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {previews.map((src, index) => (
-                <div key={src} className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10">
-                  <img src={src} alt={`Фото к отчёту ${index + 1}`} className="size-full object-cover" />
+                <div
+                  key={src}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10"
+                >
+                  <img
+                    src={src}
+                    alt={`Фото к отчёту ${index + 1}`}
+                    className="size-full object-cover"
+                  />
                   {!savedReportId && (
                     <button
                       type="button"
@@ -462,40 +820,113 @@ function NewReport() {
               ))}
             </div>
           )}
-          {photos.length > 0 && <div className="rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-3">
-            <button className="btn-ghost inline-flex items-center gap-2" type="button" disabled={aiWorking}
-              onClick={() => void identifyFish()}>
-              <Sparkles className="size-4 text-[#D7FF35]" />{aiWorking ? "Рассматриваем фото…" : "Подсказать вид рыбы по фото (ИИ)"}
-            </button>
-            <p className="mt-2 text-xs text-zinc-400">Опционально: изображение отправляется ИИ только после твоего нажатия. Результат можно исправить.</p>
-            {aiMessage && <p className="mt-2 text-xs text-[#D7FF35]" role="status">{aiMessage}</p>}
-          </div>}
+          {photos.length > 0 && (
+            <div className="rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-3">
+              <button
+                className="btn-ghost inline-flex items-center gap-2"
+                type="button"
+                disabled={aiWorking}
+                onClick={() => void identifyFish()}
+              >
+                <Sparkles className="size-4 text-[#D7FF35]" />
+                {aiWorking ? "Рассматриваем фото…" : "Подсказать вид рыбы по фото (ИИ)"}
+              </button>
+              <p className="mt-2 text-xs text-zinc-400">
+                Опционально: изображение отправляется ИИ только после твоего нажатия. Результат
+                можно исправить.
+              </p>
+              {aiMessage && (
+                <p className="mt-2 text-xs text-[#D7FF35]" role="status">
+                  {aiMessage}
+                </p>
+              )}
+            </div>
+          )}
           <p className="text-xs leading-5 text-muted-foreground">
-            Файлы сохраняются в защищённом хранилище. Фотографии общедоступных отчётов будут видны в ленте;
-            фото закрытых отчётов останутся доступны только владельцу.
+            Файлы сохраняются в защищённом хранилище. Фотографии общедоступных отчётов будут видны в
+            ленте; фото закрытых отчётов останутся доступны только владельцу.
           </p>
         </section>
 
         <section className="panel space-y-3 p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">Улов</h2>
-            <button type="button" className="btn-ghost" onClick={() => setCatches((c) => [...c, { species: "", weight: "", length: "" }])}>+ Рыба</button>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => setCatches((c) => [...c, { species: "", weight: "", length: "" }])}
+            >
+              + Рыба
+            </button>
           </div>
-          <datalist id="zapruda-atlas-species">{catalogFishes.map(f => <option key={f.id} value={f.name} />)}</datalist>
+          <datalist id="zapruda-atlas-species">
+            {catalogFishes.map((f) => (
+              <option key={f.id} value={f.name} />
+            ))}
+          </datalist>
           {catches.map((c, i) => (
-            <div key={i} className="grid grid-cols-[1fr_auto] gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
-              <input className="field col-span-2 sm:col-span-1" list="zapruda-atlas-species" placeholder="Вид (щука, окунь…)" value={c.species} onChange={(e) => upd(i, "species", e.target.value)} />
-              <input className="field" type="number" min="0" step="0.01" placeholder="Вес, кг" value={c.weight} onChange={(e) => upd(i, "weight", e.target.value)} />
-              <input className="field" type="number" min="0" step="0.1" placeholder="Длина, см" value={c.length} onChange={(e) => upd(i, "length", e.target.value)} />
-              <button type="button" className="btn-ghost" aria-label="Удалить" onClick={() => setCatches((x) => x.filter((_, j) => j !== i))}>✕</button>
+            <div
+              key={i}
+              className="grid grid-cols-[1fr_auto] gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-[2fr_1fr_1fr_auto]"
+            >
+              <input
+                className="field col-span-2 sm:col-span-1"
+                list="zapruda-atlas-species"
+                placeholder="Вид (щука, окунь…)"
+                value={c.species}
+                onChange={(e) => upd(i, "species", e.target.value)}
+              />
+              <input
+                className="field"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Вес, кг"
+                value={c.weight}
+                onChange={(e) => upd(i, "weight", e.target.value)}
+              />
+              <input
+                className="field"
+                type="number"
+                min="0"
+                step="0.1"
+                placeholder="Длина, см"
+                value={c.length}
+                onChange={(e) => upd(i, "length", e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn-ghost"
+                aria-label="Удалить"
+                onClick={() => setCatches((x) => x.filter((_, j) => j !== i))}
+              >
+                ✕
+              </button>
             </div>
           ))}
         </section>
 
-        {error && <p className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive" role="alert">{error}</p>}
+        {error && (
+          <p
+            className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive"
+            role="alert"
+          >
+            {error}
+          </p>
+        )}
         <div className="flex items-center gap-3">
-          <button className="btn-primary" disabled={saving}>{saving ? "Сохраняем…" : savedReportId ? "Повторить загрузку / завершить" : "Опубликовать отчёт"}</button>
-          {progress && <span className="text-xs text-lime-300" role="status">{progress}</span>}
+          <button className="btn-primary" disabled={saving}>
+            {saving
+              ? "Сохраняем…"
+              : savedReportId
+                ? "Повторить загрузку / завершить"
+                : "Опубликовать отчёт"}
+          </button>
+          {progress && (
+            <span className="text-xs text-lime-300" role="status">
+              {progress}
+            </span>
+          )}
         </div>
       </form>
     </Shell>
