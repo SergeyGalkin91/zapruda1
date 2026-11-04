@@ -200,6 +200,7 @@ export function GeographicChat() {
     map.get(GLOBAL_ID);
   const placeId = selectedPlace?.id || GLOBAL_ID;
   const topic = search.topic;
+  const canCompose = Boolean(uid && selectedPlace && threadOpen && !loading && !chatLoading);
   const crumbs = useMemo(() => {
     const result: Place[] = [];
     const seen = new Set<string>();
@@ -577,7 +578,7 @@ export function GeographicChat() {
   async function send(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const body = draft.trim();
-    if ((!body && !photo) || !uid || busy || !selectedPlace) return;
+    if ((!body && !photo) || !canCompose || busy || !selectedPlace) return;
     const author = replyTo?.profiles?.display_name || replyTo?.profiles?.username || "Рыболов";
     const quoted = replyTo ? replyTo.body.slice(0, 180).replace(/\s+/g, " ").trim() : "";
     const outgoing = replyTo ? "↪ " + author.slice(0, 40) + ": " + quoted + "\n" + body : body;
@@ -1356,7 +1357,7 @@ export function GeographicChat() {
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         className="sr-only"
-                        disabled={!uid || busy || !!pendingPhotoMessageId}
+                        disabled={!canCompose || busy || !!pendingPhotoMessageId}
                         onChange={(e) => {
                           const file = e.target.files?.[0] || null;
                           e.target.value = "";
@@ -1397,13 +1398,13 @@ export function GeographicChat() {
                       placeholder={"Написать в «" + currentTopic.label + "»…"}
                       value={draft}
                       onChange={(e) => setDraft(e.target.value)}
-                      disabled={!uid || busy || chatLoading || !!pendingPhotoMessageId}
+                      disabled={!canCompose || busy || !!pendingPhotoMessageId}
                       maxLength={2000}
                     />
                     <button
                       type="submit"
                       className="btn-primary inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#D7FF35] px-4 font-black text-[#11170A]"
-                      disabled={(!draft.trim() && !photo) || !uid || busy || chatLoading}
+                      disabled={(!draft.trim() && !photo) || !canCompose || busy}
                     >
                       <Send className="size-4" /> {busy ? "Отправляем…" : "Отправить"}
                     </button>

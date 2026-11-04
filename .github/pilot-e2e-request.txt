@@ -28,3 +28,5 @@ Include newly aligned empty Atlas catalog/own progress reads and read-only Yande
 2026-11-04 no-catch report uses persisted UUID and exact own-payload recovery after lost response; real Browser drops only committed POST responses and checks both no-catch/catch paths. Existing STAGING grants suffice; no new DDL.
 
 2026-11-04 final visual proof: wait for authenticated route loaders and visible images, scroll to top, capture actual viewport instead of distorted full-page fixed backgrounds. Superseded 397 run canceled during engine installation after core cleanup, before UI writes.
+
+2026-11-04 fix real Browser race: canCompose requires loaded geography/selected room, not just uid; delayed global-room regression. Keep lost-response report and settled viewport acceptance.
