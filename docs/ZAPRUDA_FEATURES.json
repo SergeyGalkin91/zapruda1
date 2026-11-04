@@ -131,7 +131,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "GeographicChat.test.tsx; два JWT",
       "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
-      "blocker": "IMPLEMENTED — live открыт"
+      "blocker": "Указанные API/JWT проверки пройдены. Полный авторизованный UI, physical-mobile и расширенные пользовательские сценарии остаются отдельной приёмкой."
     },
     {
       "id": "CHAT-02",
@@ -143,7 +143,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "GeographicChat.test.tsx; chat-media.test.ts; outsider denial",
       "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
-      "blocker": "IMPLEMENTED — серверная и UI приёмка открыты"
+      "blocker": "Указанные API/JWT проверки пройдены. Полный авторизованный UI, physical-mobile и расширенные пользовательские сценарии остаются отдельной приёмкой."
     },
     {
       "id": "CHAT-03",
@@ -155,7 +155,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "reconnect, два клиента, ввод во время обновления",
       "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
-      "blocker": "IMPLEMENTED — live открыт"
+      "blocker": "Указанные API/JWT проверки пройдены. Полный авторизованный UI, physical-mobile и расширенные пользовательские сценарии остаются отдельной приёмкой."
     },
     {
       "id": "CHAT-04",
@@ -227,7 +227,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "ProfilePrivateRead.test.tsx; profile-save-feedback.test.ts",
       "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
-      "blocker": "IMPLEMENTED — запись/повторное чтение с JWT открыты"
+      "blocker": "Указанные API/JWT проверки пройдены. Полный авторизованный UI, physical-mobile и расширенные пользовательские сценарии остаются отдельной приёмкой."
     },
     {
       "id": "PROFILE-02",
@@ -287,7 +287,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "pilot-schema-database.test.ts; NewReport.test.tsx; lost response/retry",
       "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
-      "blocker": "IMPLEMENTED — live приёмка открыта"
+      "blocker": "Указанные API/JWT проверки пройдены. Полный авторизованный UI, physical-mobile и расширенные пользовательские сценарии остаются отдельной приёмкой."
     },
     {
       "id": "REPORT-04",
@@ -299,7 +299,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "report-photo-security.test.ts; report-privacy-database.test.ts; check-report-photo-browser.mjs",
       "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
-      "blocker": "IMPLEMENTED — не означает безопасность production legacy media"
+      "blocker": "Указанные API/JWT проверки пройдены. Полный авторизованный UI, physical-mobile и расширенные пользовательские сценарии остаются отдельной приёмкой."
     },
     {
       "id": "STREET-01",
