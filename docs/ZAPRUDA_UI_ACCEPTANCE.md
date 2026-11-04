@@ -47,3 +47,6 @@ Run 41768499027, SHA 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd: PASS. 320/390/768
 
 ## Актуальный технический результат 2051567
 Actual Browser 41777927568 PASS: Chromium/Firefox/WebKit × 320/390/768/1440 × Matte Black/Electric Blue × 10 маршрутов, 243 viewport-снимка после завершения загрузки данных и видимых изображений, no horizontal overflow. Тесты авторизованы настоящими STAGING JWT; admin — только denial, роли не назначались. Полный архив artifact 13298351128, expires 11.11.2026 05:20 UTC. Это localhost frontend, не hosted Netlify: hosted gate BLOCKED_NETLIFY_AUTH. Физическая клавиатура/сеть и owner pixel review открыты. После завершения CI среда стала недоступна, перенос полного архива не выполнен; оригинал остаётся в Actions.
+
+## Actual hosted P0 continuation 04.11
+[P0 evidence and exact deployed SHA](ZAPRUDA_P0_CLOSURE_20261104.md): genuine invited Netlify login plus ZAPRUDA login; desktop both themes, private report draft/reload and STREET timer/import checked. Hosted olive STREET gradient and literal backslash-n import defect fixed and captured before/after. Isolated three-engine 320/390 checks PASS. Authenticated hosted 320/390, complete network and two-user transaction checks remain open; desktop screenshots are not mobile evidence.

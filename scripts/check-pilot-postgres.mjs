@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
+import { checkCommunityBoundaries } from "./check-community-postgres.mjs";
 const connection = process.env.PILOT_SQL_TEST_DATABASE_URL ?? "";
 const parsed = new URL(connection);
 assert.equal(parsed.hostname, "127.0.0.1");
@@ -46,7 +47,11 @@ const asUser = (uid, text) =>
   ",true); set local role authenticated; " +
   text +
   "; commit;";
-const scalar = async (source) => JSON.parse((await sql(source)).split("\n").at(-1));
+const scalar = async (source) => {
+  const value = (await sql(source)).split("\n").at(-1);
+  // psql's unaligned booleans are t/f; numeric and JSON results remain JSON.
+  return value === "t" ? true : value === "f" ? false : JSON.parse(value);
+};
 const deltas = [
   "v075_report_integrity.sql",
   "v075_public_chat.sql",
@@ -203,6 +208,7 @@ await assert.rejects(
   /subsequent global chat policy/,
 );
 mkdirSync("qa", { recursive: true });
+const community = await checkCommunityBoundaries({ sql, scalar, asUser, q, file, owner, outsider });
 writeFileSync(
   "qa/pilot-postgres.json",
   JSON.stringify(
@@ -218,6 +224,7 @@ writeFileSync(
       feedbackDailyLimit: true,
       feedbackRollbackPreservesRequests: true,
       cases,
+      community,
     },
     null,
     2,

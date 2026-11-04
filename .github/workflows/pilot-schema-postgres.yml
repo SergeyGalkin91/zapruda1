@@ -4,10 +4,14 @@ on:
     paths:
       - ".github/v075-validation-request.txt"
       - "supabase/staging/v075_*"
+      - "supabase/staging/v076_club_message_membership_scope.sql"
+      - "supabase/staging/v076_meetup_leave_cancel.sql"
+      - "supabase/tests/unit/club_message_context.sql"
       - "supabase/staging/rollback_v075_pilot_schema.sql"
       - "supabase/tests/unit/*dependencies*"
       - "supabase/functions/chat-photo-*/**"
       - "scripts/check-pilot-postgres.mjs"
+      - "scripts/check-community-postgres.mjs"
       - "scripts/e2e/pilot-schema-live.mjs"
       - ".github/workflows/pilot-schema-postgres.yml"
 permissions:

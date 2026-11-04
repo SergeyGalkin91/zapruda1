@@ -1,5 +1,5 @@
 {
-  "source_sha": "2051567279592071ecad053014a6467e71805353",
+  "source_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
   "features": [
     {
       "id": "AUTH-01",
@@ -197,25 +197,25 @@
       "id": "SOC-05",
       "feature": "бесплатные СХОДКИ",
       "module": "COMMUNITY",
-      "priority": "P?",
-      "source": "/communities; src/components/SocialMeetups.tsx",
+      "priority": "P0",
+      "source": "/communities; src/components/SocialMeetups.tsx; supabase/staging/v076_meetup_leave_cancel.sql",
       "backend": "meetup_posts/members/messages/private_details",
       "status": "IMPLEMENTED",
-      "acceptance": "SocialMeetups.test.tsx; e2e-meetups-two-real-jwt.mjs",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "IMPLEMENTED — occupancy/race проверять отдельно, не платный выезд"
+      "acceptance": "Выход/повторная заявка, освобождение и гонка последнего места, отмена и private denial; scripts/check-community-postgres.mjs; src/lib/community-boundaries-database.test.ts",
+      "evidence": "f3bbe1b: quality 41850086290 PASS, 441 tests/36 files; PostgreSQL 17 five race rounds 41850086325 PASS. STAGING rollback roles/claims PASS, 0 fixtures. Signed JWT run 41850073063 WAITING.",
+      "blocker": "Full acceptance BLOCKED: actual JWT/hosted mobile gates; СХОДКИ остаются бесплатными и отдельными от платных выездов."
     },
     {
       "id": "SOC-06",
       "feature": "клубы/создание и модерация",
       "module": "COMMUNITY",
-      "priority": "P?",
-      "source": "src/components/SocialGroups.tsx; /moderation",
+      "priority": "P0",
+      "source": "src/components/SocialGroups.tsx; /moderation; supabase/staging/v076_club_message_membership_scope.sql",
       "backend": "social_groups, club_creation_requests",
       "status": "BLOCKED",
-      "acceptance": "e2e-club-two-real-jwt.mjs; реальные права",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "BLOCKED для полного контракта — snapshot: нет confirm_club_creation_payment; бесплатные группы не объявлять отсутствующими"
+      "acceptance": "Accepted membership конкретной группы; чужой клуб/pending/declined/removed/anon denied; независимые JWT и подтверждённое создание/модерация",
+      "evidence": "20261104133211 applied STAGING: correlated SELECT/INSERT, no other permissive policy. PostgreSQL/RLS regressions incl removed member PASS; live STAGING rollback PASS. Actual four-account JWT gate WAITING, не выдан за PASS.",
+      "blocker": "Full club contract BLOCKED: confirm_club_creation_payment absent in STAGING and real invitation/payment/moderation JWT gates. Message RLS flaw fixed; no payment or role fabrication."
     },
     {
       "id": "PROFILE-01",

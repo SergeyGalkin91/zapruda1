@@ -72,7 +72,7 @@ async function assertNoOliveSurfaces(page, route) {
       "#0D100C", "#171C14", "#080A09", "#0B0D0B", "#121A12",
       "#141914", "#151915", "#0C100E", "#111511", "#151A14",
       "#0E120E", "#151812", "#171a15", "#161D13", "#1A1D19",
-      "#1B2718", "#1E251A", "#27321b",
+      "#1B2718", "#1E251A", "#27321b", "#283721", "#101713",
     ];
     const rgb = (hex) => {
       const v = hex.slice(1);
@@ -90,6 +90,10 @@ async function assertNoOliveSurfaces(page, route) {
       const style = getComputedStyle(el);
       if (bannedRgb.has(style.backgroundColor)) {
         failures.push({ tag: el.tagName, className: String(el.className).slice(0, 100), color: style.backgroundColor });
+      }
+      const gradientColors = style.backgroundImage.match(/rgb\(\d+,\s*\d+,\s*\d+\)/g) || [];
+      if (gradientColors.some((color) => bannedRgb.has(color.replace(/,\s*/g, ", ")))) {
+        failures.push({ tag: el.tagName, className: String(el.className).slice(0, 100), gradient: style.backgroundImage });
       }
     }
     return failures;
@@ -219,6 +223,14 @@ async function openRoute(page, route) {
             assert.equal(feedSurface.hero, "rgb(21, 45, 114)", "Feed hero retained matte/olive surface");
             assert.equal(feedSurface.street, "rgb(32, 58, 134)", "Street card retained dark green");
             assert.equal(feedSurface.helpCard, "rgb(32, 58, 134)", "Lime-tinted card looked olive");
+          }
+          if (route === "/street") {
+            const hero = await page.locator(".z-electric-street-hero").evaluate((el) => ({
+              color: getComputedStyle(el).backgroundColor,
+              image: getComputedStyle(el).backgroundImage,
+            }));
+            assert.equal(hero.color, "rgb(25, 62, 150)", "STREET hero retained a matte/olive surface");
+            assert(hero.image.replaceAll(" ", "").includes("32,82,187"), "STREET blue gradient missing");
           }
           checks.push({ route, background: actual.background, overflow: actual.horizontalOverflow });
           if (["/assistant", "/reports/new", "/street", "/competitions"].includes(route)) {

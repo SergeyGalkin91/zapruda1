@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, afterEach, describe, it, expect, vi } from "vitest";
 import { NewReport } from "@/routes/reports.new";
+import { streetStorageKey } from "@/lib/street-storage";
 const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
   getSession: vi.fn(),
@@ -98,6 +99,36 @@ function submitReport(form: HTMLElement) {
   fireEvent.submit(form);
 }
 describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
+  it("imports STREET notes and catches with real line breaks into a private unpublished draft", async () => {
+    localStorage.setItem(
+      streetStorageKey(user.id),
+      JSON.stringify({
+        startedAt: "2026-11-04T10:00:00Z",
+        finishedAt: "2026-11-04T10:10:00Z",
+        notes: "Offline fixture notes",
+        catches: [{ species: "Offline fixture fish", note: "Offline fixture lure" }],
+      }),
+    );
+    render(<NewReport />);
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Перенести Street-сессию" })).not.toBeDisabled(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Перенести Street-сессию" }));
+    const discipline = screen.getByLabelText(/Вид рыбалки для достижений/) as HTMLSelectElement;
+    fireEvent.change(discipline, { target: { value: discipline.options[1]!.value } });
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    const story = screen.getByRole("textbox", { name: "Рассказ" }) as HTMLTextAreaElement;
+    expect(story.value).toContain(
+      "\nЗаметки: Offline fixture notes\n• Offline fixture fish — Offline fixture lure",
+    );
+    expect(story.value).not.toContain("\\n");
+    expect(mocks.insert).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(JSON.parse(localStorage.getItem("zapruda-report-draft-v1-" + user.id)!).isPublic).toBe(
+        false,
+      ),
+    );
+  });
   it("recovers the exact no-catch report when a committed insert loses its response", async () => {
     const original = mocks.from.getMockImplementation()!;
     let committed: Record<string, unknown> | undefined;

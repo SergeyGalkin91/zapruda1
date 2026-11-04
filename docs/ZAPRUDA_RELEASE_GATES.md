@@ -25,7 +25,7 @@ P0 из FEATURE_MATRIX — обязательные критерии уже за
 Формат evidence: ID → SHA → окружение/project ref → дата → сценарий/роль → ожидаемое/полученное → артефакт → ограничения. Секреты и личные доказательства не публикуются.
 
 ## Контроль без ложного обещания автоматизации
-В этом PR добавлен GitHub Actions product-contract: проверяет 56 исходных ID по неизменяемому коммиту 1fa7684, дубли, поля/статусы, согласованность JSON/Markdown, source paths и локальные ссылки документов. 6 отрицательных/положительных regression tests. CI не даёт release GO и не меняет branch protection. Пока PR #111 не принят, workflow не присутствует в интеграционной ветке #93. Ручное ревью и решение владельца остаются обязательными.
+В этом PR добавлен GitHub Actions product-contract: проверяет 56 исходных ID по неизменяемому коммиту 1fa7684, дубли, поля/статусы, согласованность JSON/Markdown, source paths и локальные ссылки документов. 7 отрицательных/положительных regression tests. CI не даёт release GO и не меняет branch protection. Пока PR #111 не принят, workflow не присутствует в интеграционной ветке #93. Ручное ревью и решение владельца остаются обязательными.
 
 ## Порядок следующей работы
 1. Утвердить матрицу и границы пилота; сохранить полный backlog.
@@ -39,3 +39,6 @@ Main/production/DNS/реальные платежи/Render не затрагив
 
 ## Итог фактических checks (не release GO)
 HEAD 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd: 13 ordinary workflows и protected JWT 41768491411 PASS. Contract run 41768599499 PASS на docs 3df7fb1. Это закрывает перечисленные API/CI-проверки, но не все G0–G10: остаются full positive receipts/UI, visual owner review, полный KING, daily brief/Atlas и прочие зависимости. Не bump/tag/merge автоматически.
+
+## P0 continuation f3bbe1b (04.11.2026)
+Текущий [P0 результат](ZAPRUDA_P0_CLOSURE_20261104.md): security deltas/SQL regressions и 13 ordinary workflows PASS; protected **41850073063 WAITING**. Это не PASS и не разрешение обновить main. [Read-only production diff/порядок/backup/rollback](ZAPRUDA_PRODUCTION_READINESS_20261104.md). Нужны actual JWT, полный hosted mobile scope, реальные KING dependencies и отдельный owner release GO.

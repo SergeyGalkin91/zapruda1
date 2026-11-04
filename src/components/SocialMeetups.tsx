@@ -40,8 +40,8 @@ export function SocialMeetups() {
   const chatRequest = useRef(0);
   const messageRequest = useRef(0);
   const activeRef = useRef("");
-  const accessRef = useRef({ userId, members });
-  accessRef.current = { userId, members };
+  const accessRef = useRef({ userId, members, posts });
+  accessRef.current = { userId, members, posts };
   useEffect(
     () => () => {
       latestRequest.current++;
@@ -105,9 +105,12 @@ export function SocialMeetups() {
     void refresh();
   }, [refresh]);
   const membership = (id: string) => members.find((m) => m.post_id === id && m.user_id === userId);
-  const accepted = (id: string) => membership(id)?.status === "accepted";
+  const accepted = (id: string) =>
+    membership(id)?.status === "accepted" &&
+    posts.some((p) => p.id === id && p.status !== "cancelled");
   const hasChatAccess = useCallback(
     (id: string) =>
+      accessRef.current.posts.some((p) => p.id === id && p.status !== "cancelled") &&
       accessRef.current.members.some(
         (m) =>
           m.post_id === id && m.user_id === accessRef.current.userId && m.status === "accepted",
@@ -125,6 +128,20 @@ export function SocialMeetups() {
     setDetailsReady(false);
     setDraft("");
   }, []);
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      if ((session?.user.id ?? "") === accessRef.current.userId) return;
+      latestRequest.current++;
+      clearChat();
+      setUserId(session?.user.id ?? "");
+      setMembers([]);
+      setPosts([]);
+      setOccupancy({});
+      // Keep Auth callbacks synchronous; refresh after the auth lock is released.
+      queueMicrotask(() => void refresh());
+    });
+    return () => data.subscription.unsubscribe();
+  }, [clearChat, refresh]);
   const activeAccepted = active && accepted(active) ? active : "";
   useEffect(() => {
     if (active && !activeAccepted) clearChat();
@@ -133,13 +150,14 @@ export function SocialMeetups() {
     async (id: string) => {
       const request = ++messageRequest.current;
       const currentUser = accessRef.current.userId;
-      const [member, result] = await Promise.all([
+      const [member, post, result] = await Promise.all([
         db
           .from("meetup_members")
           .select("status")
           .eq("post_id", id)
           .eq("user_id", currentUser)
           .maybeSingle(),
+        db.from("meetup_posts").select("status").eq("id", id).maybeSingle(),
         db
           .from("meetup_messages")
           .select("id,sender_id,body,created_at")
@@ -150,7 +168,13 @@ export function SocialMeetups() {
       ]);
       if (request !== messageRequest.current || activeRef.current !== id || !hasChatAccess(id))
         return;
-      if (member.error || member.data?.status !== "accepted") {
+      if (
+        member.error ||
+        member.data?.status !== "accepted" ||
+        post.error ||
+        !post.data ||
+        post.data.status === "cancelled"
+      ) {
         clearChat();
         setError("Доступ к чату сходки больше не подтверждён. Обновите объявления.");
         return;
@@ -206,9 +230,17 @@ export function SocialMeetups() {
     if (!userId || busy) return;
     setBusy(true);
     setError("");
-    const { error: err } = await db
-      .from("meetup_members")
-      .insert({ post_id: id, user_id: userId, role: "participant", status: "pending" });
+    const previous = membership(id);
+    const { error: err } =
+      previous?.status === "declined"
+        ? await db
+            .from("meetup_members")
+            .update({ status: "pending" })
+            .eq("post_id", id)
+            .eq("user_id", userId)
+        : await db
+            .from("meetup_members")
+            .insert({ post_id: id, user_id: userId, role: "participant", status: "pending" });
     setBusy(false);
     if (err) setError(err.message);
     else {
@@ -217,6 +249,7 @@ export function SocialMeetups() {
     }
   }
   async function decide(id: string, user: string, status: "accepted" | "declined") {
+    if (!userId || busy) return;
     setBusy(true);
     setError("");
     const { error: err } = await db
@@ -226,7 +259,27 @@ export function SocialMeetups() {
       .eq("user_id", user);
     setBusy(false);
     if (err) setError(err.message);
-    else await refresh();
+    else {
+      if (user === userId && status === "declined" && activeRef.current === id) clearChat();
+      await refresh();
+    }
+  }
+  async function cancel(id: string) {
+    if (!userId || busy || posts.find((p) => p.id === id)?.owner_id !== userId) return;
+    setBusy(true);
+    setError("");
+    const { error: err } = await db
+      .from("meetup_posts")
+      .update({ status: "cancelled" })
+      .eq("id", id)
+      .eq("owner_id", userId);
+    setBusy(false);
+    if (err) setError(err.message);
+    else {
+      if (activeRef.current === id) clearChat();
+      setNotice("Сходка отменена");
+      await refresh();
+    }
   }
   async function saveDetails(e: FormEvent) {
     e.preventDefault();
@@ -423,9 +476,12 @@ export function SocialMeetups() {
                 {p.country_code} · {p.region_code} · {p.city_code}
               </p>
               <p className="mt-2 text-sm text-zinc-300">{p.description}</p>
+              {p.status === "cancelled" && (
+                <p className="mt-2 text-sm text-zinc-400">Сходка отменена</p>
+              )}
               <div className="mt-3 flex flex-wrap gap-2">
                 {!owner &&
-                  !mine &&
+                  (!mine || mine.status === "declined") &&
                   userId &&
                   p.status === "open" &&
                   count !== undefined &&
@@ -436,6 +492,20 @@ export function SocialMeetups() {
                   )}
                 {mine?.status === "pending" && (
                   <span className="text-xs text-zinc-400">Отклик ожидает решения</span>
+                )}
+                {!owner && mine && (mine.status === "pending" || mine.status === "accepted") && (
+                  <button
+                    disabled={busy}
+                    onClick={() => void decide(p.id, userId, "declined")}
+                    className="btn-ghost"
+                  >
+                    {mine.status === "accepted" ? "Выйти из сходки" : "Отозвать отклик"}
+                  </button>
+                )}
+                {owner && p.status !== "cancelled" && (
+                  <button disabled={busy} onClick={() => void cancel(p.id)} className="btn-ghost">
+                    Отменить сходку
+                  </button>
                 )}
                 {accepted(p.id) && (
                   <button
@@ -456,7 +526,7 @@ export function SocialMeetups() {
                     >
                       <span>Заявка: {m.user_id.slice(0, 8)}…</span>
                       <button
-                        disabled={busy || count === undefined || count >= 3}
+                        disabled={busy || p.status !== "open" || count === undefined || count >= 3}
                         onClick={() => void decide(p.id, m.user_id, "accepted")}
                         className="text-[#D7FF35]"
                       >

@@ -7,7 +7,7 @@
 Прочитать этот файл, [журнал решений](ZAPRUDA_DECISION_LOG.md), [матрицу](ZAPRUDA_FEATURE_MATRIX.md), [release gates](ZAPRUDA_RELEASE_GATES.md), затем проверить актуальный HEAD PR #93, изменения зависимых PR и тематический issue. При UI-работе читать [UI acceptance](ZAPRUDA_UI_ACCEPTANCE.md). Номер старого design lock не равен текущей версии продукта.
 
 ## Источники и границы доказательств
-- Текущий проверяемый код PR #93: `2051567279592071ecad053014a6467e71805353`. Результаты и ограничения финальной технической приёмки: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
+- Текущий проверяемый код PR #93: `f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec`. Результаты и ограничения финальной технической приёмки: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
 - [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111) — исходный аудит и единственный документальный PR этой консолидации, не утверждённая реализация.
 - [PR #92](https://github.com/SergeyGalkin91/zapruda1/pull/92) — UX-направление и foundations, не готовый wizard.
 - [PR #109](https://github.com/SergeyGalkin91/zapruda1/pull/109) — новый README о всех направлениях рыбалки; открыт, не слит.
@@ -95,3 +95,6 @@ Matte Black по умолчанию, Electric Blue альтернативная 
 
 ## История: scoped приёмка 3fbaa2c
 13 ordinary CI и protected real-JWT run 41768491411 PASS. Core cleanup true; обратная проверка: 5 QA feedback UUID уже отсутствуют, 1 отдельный QA no-catch report остаётся private. Полный KING/двухпользовательский positive receipt browser/мобильная owner approval не закрыты. Исторические строки «JWT ждёт» выше не переопределяют этот фактический результат. Версия 0.7.5 не изменена, owner target из журнала сохранён.
+
+## P0 continuation 04.11.2026
+[Актуальная техническая приёмка](ZAPRUDA_P0_CLOSURE_20261104.md) фиксирует исправленные клубные RLS и выход/отмену СХОДОК, PostgreSQL regressions, новый protected run и настоящий hosted доступ. [Production readiness](ZAPRUDA_PRODUCTION_READINESS_20261104.md) — только read-only diff и будущая последовательность. Все 56 ID/8 модулей/7 титулов сохранены; GO не выдан.
