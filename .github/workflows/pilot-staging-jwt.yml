@@ -41,16 +41,19 @@ jobs:
         if: ${{ !cancelled() }}
         run: node scripts/e2e/spot-v075-live.mjs
       - name: Build real-STAGING browser frontend
+        if: ${{ !cancelled() }}
         env:
           VITE_SUPABASE_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
           NITRO_PRESET: node-server
         run: bun run build
       - name: Install browser test engines
+        if: ${{ !cancelled() }}
         run: |
           bun add --dev playwright
           bunx playwright install --with-deps chromium firefox webkit
       - name: Real authenticated browser journeys and screenshots
+        if: ${{ !cancelled() }}
         run: |
           node .output/server/index.mjs > /tmp/authenticated-server.log 2>&1 &
           SERVER_PID=$!

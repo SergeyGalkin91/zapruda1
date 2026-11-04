@@ -349,6 +349,13 @@ try {
 } catch (e) {
   result.phase = phase;
   result.error = /^[A-Z_]+$/.test(String(e?.message)) ? e.message : "BROWSER_ASSERTION_FAILED";
+  // Keep actionable assertions, stripping credentials/tokens/contact values.
+  let detail = String(e?.message || "");
+  for (const [k, v] of Object.entries(process.env))
+    if (/ZAPRUDA_E2E_.*(?:KEY|EMAIL|PASSWORD)/.test(k) && v)
+      detail = detail.split(v).join("[REDACTED]");
+  result.detail = detail.replace(/[^\s]+@[^\s]+/g, "[EMAIL]")
+    .replace(/eyJ[A-Za-z0-9_.-]+/g, "[JWT]").slice(0, 1400);
   process.exitCode = 1;
 } finally {
   try {
