@@ -36,3 +36,6 @@ Main/production/DNS/реальные платежи/Render не затрагив
 
 ## Целевая версия по прямому решению владельца 04.11.2026
 **Утверждённая целевая версия следующего обновления — `0.7.6 KING FINISH`.** Она заменяет предыдущий целевой номер `0.7.1` и следует после технической базы `v0.7.5 SPOT`. Название версии не означает, что KING уже реализован или прошёл E2E. До выпуска сопоставить актуальные решения с 56 feature IDs, утвердить состав пилота и исключения, выполнить G0–G10, реальную проверку KING в утверждённом scope и получить отдельный owner GO. Этим документальным PR **не выполнять** package version bump, git tag, переименование ветки, merge в main, production deploy или release.
+
+## Итог фактических checks (не release GO)
+HEAD 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd: 13 ordinary workflows и protected JWT 41768491411 PASS. Contract run 41768599499 PASS на docs 3df7fb1. Это закрывает перечисленные API/CI-проверки, но не все G0–G10: остаются full positive receipts/UI, visual owner review, полный KING, daily brief/Atlas и прочие зависимости. Не bump/tag/merge автоматически.

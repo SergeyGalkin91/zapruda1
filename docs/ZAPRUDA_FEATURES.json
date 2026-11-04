@@ -128,9 +128,9 @@
       "priority": "P0",
       "source": "/chat; chat.tsx",
       "backend": "chat_places/chat_messages, ensure_chat_place",
-      "status": "IMPLEMENTED",
+      "status": "STAGING VERIFIED",
       "acceptance": "GeographicChat.test.tsx; два JWT",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
+      "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
       "blocker": "IMPLEMENTED — live открыт"
     },
     {
@@ -140,9 +140,9 @@
       "priority": "P0",
       "source": "chat.tsx; chat-media.ts",
       "backend": "chat_message_reactions/photos; chat-photo-upload/access",
-      "status": "IMPLEMENTED",
+      "status": "STAGING VERIFIED",
       "acceptance": "GeographicChat.test.tsx; chat-media.test.ts; outsider denial",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
+      "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
       "blocker": "IMPLEMENTED — серверная и UI приёмка открыты"
     },
     {
@@ -152,9 +152,9 @@
       "priority": "P0",
       "source": "chat.tsx:397; /messages",
       "backend": "subscriptions сообщения/реакции/фото",
-      "status": "IMPLEMENTED",
+      "status": "STAGING VERIFIED",
       "acceptance": "reconnect, два клиента, ввод во время обновления",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
+      "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
       "blocker": "IMPLEMENTED — live открыт"
     },
     {
@@ -166,7 +166,7 @@
       "backend": "модель посещений/read receipts не подтверждена",
       "status": "IMPLEMENTED",
       "acceptance": "доставка → unread → прочитано → другой клиент",
-      "evidence": "src/lib/chat-read-state.test.ts: isolation/new arrival PASS локально; real-JWT summary/denial в protected run.",
+      "evidence": "Live browser: visited empty room appears in Mine and survives reload; real-JWT summary/foreign/guest/invalid-marker checks PASS 41768491411. Two-user positive new-message receipt browser scenario still open.",
       "blocker": "Серверные личные watermarks, mine/unread filters. Положительный UI/JWT receipt сценарий ещё не принят."
     },
     {
@@ -224,9 +224,9 @@
       "priority": "P0",
       "source": "/profile; profile.tsx; AnglerGearSets.tsx, AnglerTackleCabinet.tsx",
       "backend": "profiles, angler_preferences/gear/gear_sets",
-      "status": "IMPLEMENTED",
+      "status": "STAGING VERIFIED",
       "acceptance": "ProfilePrivateRead.test.tsx; profile-save-feedback.test.ts",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
+      "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
       "blocker": "IMPLEMENTED — запись/повторное чтение с JWT открыты"
     },
     {
@@ -284,9 +284,9 @@
       "priority": "P0",
       "source": "reports.new.tsx:516; publish_report_with_catches",
       "backend": "invoker RPC, private retry receipt",
-      "status": "IMPLEMENTED",
+      "status": "STAGING VERIFIED",
       "acceptance": "pilot-schema-database.test.ts; NewReport.test.tsx; lost response/retry",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
+      "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
       "blocker": "IMPLEMENTED — live приёмка открыта"
     },
     {
@@ -296,9 +296,9 @@
       "priority": "P0",
       "source": "report-photo.ts; report-photo-upload/access",
       "backend": "report_photos, private media gateway",
-      "status": "IMPLEMENTED",
+      "status": "STAGING VERIFIED",
       "acceptance": "report-photo-security.test.ts; report-privacy-database.test.ts; check-report-photo-browser.mjs",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
+      "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
       "blocker": "IMPLEMENTED — не означает безопасность production legacy media"
     },
     {

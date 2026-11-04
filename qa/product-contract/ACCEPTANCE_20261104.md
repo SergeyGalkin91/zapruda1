@@ -25,3 +25,6 @@ No claim of physical-phone QA, full 320/390/1440 owner visual approval, all-user
 - [After Matte Black](zapruda-after-20261104.jpg)
 - [After Electric Blue](zapruda-after-blue-20261104.jpg)
 - [Report review restored after reload](zapruda-report-review-20261104.jpg)
+
+## Финальный readback
+На exact HEAD 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd завершились все 13 ordinary workflows и protected 41768491411: success. Core API cleanup=true. Feedback 5 UUID remaining=0 при SQL readback; отдельный browser QA report remaining=1/is_public=false, удаление не выполнено из-за expired confirmation. Положительный Mine/visit persistence в реальном browser подтверждён без отправки сообщений. CI screenshots guest 320/390/768/1440/3 engines; ссылки: [390 Blue](zapruda-mobile-390-blue-ci.png), [320 report](zapruda-mobile-320-report-ci.png). Полные authenticated multi-user UI и owner visual approval остаются открыты.

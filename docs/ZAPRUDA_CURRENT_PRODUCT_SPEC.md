@@ -6,7 +6,7 @@
 Прочитать этот файл, [журнал решений](ZAPRUDA_DECISION_LOG.md), [матрицу](ZAPRUDA_FEATURE_MATRIX.md), [release gates](ZAPRUDA_RELEASE_GATES.md), затем проверить актуальный HEAD PR #93, изменения зависимых PR и тематический issue. При UI-работе читать [UI acceptance](ZAPRUDA_UI_ACCEPTANCE.md). Номер старого design lock не равен текущей версии продукта.
 
 ## Источники и границы доказательств
-- Код проверен на HEAD PR #93: `90f3f54da86d5bf977611402b755bf69c037ae2c`.
+- Код проверен на HEAD PR #93: `3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd`.
 - [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111) — исходный аудит и единственный документальный PR этой консолидации, не утверждённая реализация.
 - [PR #92](https://github.com/SergeyGalkin91/zapruda1/pull/92) — UX-направление и foundations, не готовый wizard.
 - [PR #109](https://github.com/SergeyGalkin91/zapruda1/pull/109) — новый README о всех направлениях рыбалки; открыт, не слит.
@@ -91,3 +91,6 @@ Matte Black по умолчанию, Electric Blue альтернативная 
 
 ## Уточнение браузерной QA 04.11
 В d421980 выявлена отправка формы при переходе 2→3 из-за смены типа той же DOM-кнопки. Исправлено в 90f3f54: key next/publish + preventDefault, default privacy=false. Одна созданная при QA запись без улова снята с публичной ленты (is_public=false), удаление не выполнено: инструмент запросил подтверждение и оно истекло. Положительный endpoint публикации таким образом прошёл в браузере, но весь wizard до повторной проверки не считать принятым. Локально 423/34 PASS, lint 0 ошибок/6 warnings, typecheck/build PASS.
+
+## Итоговая scoped приёмка текущего SHA
+13 ordinary CI и protected real-JWT run 41768491411 PASS. Core cleanup true; обратная проверка: 5 QA feedback UUID уже отсутствуют, 1 отдельный QA no-catch report остаётся private. Полный KING/двухпользовательский positive receipt browser/мобильная owner approval не закрыты. Исторические строки «JWT ждёт» выше не переопределяют этот фактический результат. Версия 0.7.5 не изменена, owner target из журнала сохранён.

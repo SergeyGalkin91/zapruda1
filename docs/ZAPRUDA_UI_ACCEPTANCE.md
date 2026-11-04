@@ -45,3 +45,6 @@ Cloud Browser открыл preview #93: реальная пустая лента
 
 ## Реальный браузерный результат и артефакты
 См. [QA evidence](../qa/product-contract/ACCEPTANCE_20261104.md). Cloud Browser 1363px: обе темы, no horizontal overflow, реальная лента без PGRST200, STREET reload+tackle/lures→opt-in report, review after refresh. Это не полный mobile/auth/receipt E2E. Снимки before/after в qa/product-contract. Исторические NOT CAPTURED строки выше отражают первоначальную инвентаризацию; актуальные scoped результаты — в QA evidence.
+
+## Итог visual CI
+Run 41768499027, SHA 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd: PASS. 320/390/768/1440, Chromium/WebKit/Firefox, обе темы, no horizontal overflow, theme persistence, computed-color audit. Палитра: lime/bright-blue 5.29:1, lime/blue 8.44:1, light/eggplant 7.78:1; это отдельные пары, не общий WCAG аудит. Guest/local isolated build, не авторизованный Netlify mobile E2E. Добавлены CI PNG 390 и 320 в qa/product-contract, просмотрены визуально.
