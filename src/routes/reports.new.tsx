@@ -1,6 +1,6 @@
 import { streetStorageKey } from "@/lib/street-storage";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { cloneElement, isValidElement, useEffect, useId, useRef, useState } from "react";
 import { Camera, ImagePlus, Trash2, Sparkles } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,12 +25,20 @@ type CatalogFish = { id: string; name: string };
 type CatalogMapping = { waterbody_id: string; species_id: string };
 
 function Label({ t, children }: { t: string; children: React.ReactNode }) {
+  const captionId = useId();
   return (
     <label className="block space-y-1.5">
-      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <span
+        id={captionId}
+        className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+      >
         {t}
       </span>
-      {children}
+      {isValidElement(children)
+        ? cloneElement(children as React.ReactElement<{ "aria-labelledby"?: string }>, {
+            "aria-labelledby": captionId,
+          })
+        : children}
     </label>
   );
 }

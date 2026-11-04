@@ -9,14 +9,16 @@ const url = process.env.ZAPRUDA_E2E_STAGING_URL,
   key = process.env.ZAPRUDA_E2E_PUBLISHABLE_KEY;
 if (url !== "https://yudtbifopfnjtjanaqrd.supabase.co" || !key)
   throw Error("STAGING_CONFIGURATION_REQUIRED");
-const base = "http://127.0.0.1:3000",
-  place = "00000000-0000-4000-8000-000000000001";
+let base = process.env.ZAPRUDA_BROWSER_BASE_URL || "http://127.0.0.1:3000";
+const place = "00000000-0000-4000-8000-000000000001";
+if (!["http://127.0.0.1:3000", "https://deploy-preview-93--zapruda1.netlify.app"].includes(base))
+  throw Error("BROWSER_TARGET_NOT_ALLOWED");
 const tag = "QA-ACCEPT-" + randomUUID();
 const out = "qa/authenticated-browser";
 mkdirSync(out, { recursive: true });
 const result = {
   sha: process.env.GITHUB_SHA,
-  environment: "local frontend + real Supabase STAGING JWT",
+  environment: base + " + real Supabase STAGING JWT",
   passed: false,
   cleanup: false,
   checks: [],
@@ -30,6 +32,7 @@ const result = {
 const clients = [],
   browsers = [];
 let phase = "setup";
+let diagnosticPage;
 async function must(q) {
   const r = await q;
   if (r.error) throw Error("API_ASSERTION_FAILED");
@@ -47,6 +50,11 @@ async function loginApi(role) {
 }
 async function loginUI(page, account) {
   await page.goto(base + "/auth?mode=in");
+  await expect(page.getByRole("button", { name: "Войти в ZAPRUDA →", exact: true })).toBeVisible({
+    timeout: 20000,
+  });
+  if (new URL(page.url()).origin !== new URL(base).origin)
+    throw Error("LOGIN_ORIGIN_CHANGED_NO_CREDENTIALS_SENT");
   await page
     .getByLabel("Email", { exact: true })
     .fill(process.env[`ZAPRUDA_E2E_${account.role}_EMAIL`]);
@@ -84,6 +92,14 @@ try {
     cb = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const a = await ca.newPage(),
     b = await cb.newPage();
+  diagnosticPage = a;
+  result.requestedBase = base;
+  if (process.env.ZAPRUDA_HOSTED_PREVIEW_STATUS === "BLOCKED_NETLIFY_AUTH") {
+    result.hostedStatus = "BLOCKED_NETLIFY_AUTH";
+    result.limitations.push(
+      "Known hosted Netlify access wall on f8fdb54/82082ae; not retried, protection retained; local proof only",
+    );
+  }
   for (const page of [a, b])
     await page.route("**/*", (route) => {
       if (route.request().url().includes("sonvniuwtvzzyuglscah"))
@@ -111,6 +127,12 @@ try {
   await loginUI(b, B);
   result.checks.push("two distinct actual UI password logins");
   phase = "chat-read-realtime";
+  const embedded = await A.c
+    .from("chat_messages")
+    .select("id,user_id,body,created_at,profiles(username,display_name,avatar_url,chat_city)")
+    .limit(1);
+  result.chatEmbeddedRead = embedded.error?.code || "OK";
+  if (embedded.error) throw Error("CHAT_EMBED_QUERY_FAILED");
   await b.goto(base + "/chat");
   await expect(b.getByRole("button", { name: "Все", exact: true })).toBeEnabled();
   const before = await unread(B);
@@ -123,11 +145,26 @@ try {
   await a.route("**/rest/v1/chat_messages*", async (route) => {
     if (route.request().method() === "POST" && !lost) {
       lost = true;
-      await route.fetch();
+      const committed = await route.fetch();
+      result.chatPostStatus = committed.status();
+      if (!committed.ok()) {
+        const payload = await committed.json().catch(() => ({}));
+        result.chatPostCode = payload.code || "UNEXPECTED_STATUS";
+      }
       await route.abort("failed");
     } else await route.continue();
   });
   await a.getByRole("button", { name: "Отправить", exact: true }).click();
+  await expect.poll(() => composer.isEnabled(), { timeout: 20000 }).toBe(true);
+  const afterSend = await must(
+    A.c
+      .from("chat_messages")
+      .select("id")
+      .eq("user_id", A.id)
+      .eq("body", tag + " message"),
+  );
+  result.chatAfterSendCount = afterSend.length;
+  result.chatAlerts = await a.getByRole("alert").allTextContents();
   await expect(a.getByText(tag + " message", { exact: true })).toBeVisible({ timeout: 20000 });
   // If recovery also failed, a user retry must reuse the original UUID.
   if (await composer.inputValue())
@@ -149,6 +186,7 @@ try {
     .toBe(1);
   await expect.poll(() => unread(B), { timeout: 20000 }).toBeGreaterThan(before);
   await b.getByRole("button", { name: "Непрочитанные", exact: true }).click();
+  diagnosticPage = b;
   const general = b.getByRole("button", { name: /^Общий/ });
   await expect(general).toBeVisible({ timeout: 20000 });
   await general.click();
@@ -181,6 +219,7 @@ try {
   result.checks.push(
     "UI send lost-response recovery: one persisted message; B unread via Realtime; open/read/reload; foreign marker denied; real Realtime preserves draft",
   );
+  diagnosticPage = a;
   phase = "wizard-private-publication";
   for (const withFish of [false, true]) {
     await a.goto(base + "/reports/new");
@@ -192,6 +231,7 @@ try {
     await a
       .getByLabel("Название отчёта *", { exact: true })
       .fill(tag + (withFish ? " fish-private" : " no-catch-private"));
+    await a.getByLabel("Дата рыбалки", { exact: true }).fill(new Date().toISOString().slice(0, 10));
     await a
       .getByLabel("Вид рыбалки для достижений *", { exact: true })
       .selectOption({ label: "Фидер" });
@@ -313,6 +353,7 @@ try {
     browsers.push(br);
     const ctx = await br.newContext();
     const p = await ctx.newPage();
+    diagnosticPage = p;
     await loginUI(p, A);
     for (const width of [320, 390, 768, 1440])
       for (const theme of ["matte", "electric-blue"]) {
@@ -335,6 +376,9 @@ try {
         ]) {
           await p.goto(base + path);
           await p.locator("main").waitFor();
+          await expect(p.getByRole("link", { name: "Профиль", exact: true })).toBeVisible({
+            timeout: 20000,
+          });
           if (await p.evaluate(() => document.documentElement.scrollWidth > innerWidth))
             throw Error("AUTHENTICATED_HORIZONTAL_OVERFLOW");
           await shot(p, `${name}-${width}-${theme}-${label}`);
@@ -358,6 +402,7 @@ try {
     .replace(/[^\s]+@[^\s]+/g, "[EMAIL]")
     .replace(/eyJ[A-Za-z0-9_.-]+/g, "[JWT]")
     .slice(0, 1400);
+  if (diagnosticPage) await shot(diagnosticPage, "failure-" + phase).catch(() => {});
   process.exitCode = 1;
 } finally {
   try {

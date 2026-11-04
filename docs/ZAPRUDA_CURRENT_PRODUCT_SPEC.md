@@ -7,7 +7,7 @@
 Прочитать этот файл, [журнал решений](ZAPRUDA_DECISION_LOG.md), [матрицу](ZAPRUDA_FEATURE_MATRIX.md), [release gates](ZAPRUDA_RELEASE_GATES.md), затем проверить актуальный HEAD PR #93, изменения зависимых PR и тематический issue. При UI-работе читать [UI acceptance](ZAPRUDA_UI_ACCEPTANCE.md). Номер старого design lock не равен текущей версии продукта.
 
 ## Источники и границы доказательств
-- Текущий проверяемый код PR #93: `22f19cdff33f14554e58d31e9005da4dce722dcc`. Результаты и ограничения финальной технической приёмки: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
+- Текущий проверяемый код PR #93: `5c9ce64fb5fde4eacbcabf955237d9b72b715559`. Результаты и ограничения финальной технической приёмки: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
 - [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111) — исходный аудит и единственный документальный PR этой консолидации, не утверждённая реализация.
 - [PR #92](https://github.com/SergeyGalkin91/zapruda1/pull/92) — UX-направление и foundations, не готовый wizard.
 - [PR #109](https://github.com/SergeyGalkin91/zapruda1/pull/109) — новый README о всех направлениях рыбалки; открыт, не слит.

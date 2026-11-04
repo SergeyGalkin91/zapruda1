@@ -98,6 +98,14 @@ function submitReport(form: HTMLElement) {
   fireEvent.submit(form);
 }
 describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
+  it("names selects from their caption without including all options", async () => {
+    render(<NewReport />);
+    const discipline = await screen.findByRole("combobox", {
+      name: "Вид рыбалки для достижений *",
+    });
+    expect(discipline).toHaveAccessibleName("Вид рыбалки для достижений *");
+    expect(screen.getByLabelText("Вид рыбалки для достижений *")).toBe(discipline);
+  });
   it("clears restored review fields and returns to private step one", async () => {
     localStorage.setItem(
       "zapruda-report-draft-v1-offline-account-a",

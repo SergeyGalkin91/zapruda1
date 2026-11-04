@@ -16,3 +16,11 @@ Include newly aligned empty Atlas catalog/own progress reads and read-only Yande
 2026-11-04 collect independent Browser evidence even if feedback quota precondition blocks; all failures still fail the job.
 
 2026-11-04 fix actual Browser failure: narrow authenticated INSERT(id) under existing chat owner/geography RLS; test collision/spoof/guest denial.
+
+2026-11-04 instrument real Browser send boundary: embedded read code, POST status, persisted row count, masked failure screenshot. No test gate relaxed.
+
+2026-11-04 fix report select accessible names; execute actual Netlify preview after matching exact SHA status, actual two-account JWT, private fixtures only.
+
+2026-11-04 preserve Netlify access protection; report blocked hosted origin and finish independent same-SHA local/STAGING QA without sending credentials off-origin. Improve actual Atlas caption contrast.
+
+2026-11-04 hosted access blocker confirmed; stop retrying protected Preview, run independent local frontend with real STAGING and explicit hosted BLOCKED status. Validate app submit control before credential entry.

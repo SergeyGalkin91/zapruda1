@@ -1,5 +1,5 @@
 {
-  "source_sha": "22f19cdff33f14554e58d31e9005da4dce722dcc",
+  "source_sha": "5c9ce64fb5fde4eacbcabf955237d9b72b715559",
   "features": [
     {
       "id": "AUTH-01",
@@ -154,7 +154,7 @@
       "backend": "subscriptions сообщения/реакции/фото",
       "status": "STAGING VERIFIED",
       "acceptance": "reconnect, два клиента, ввод во время обновления",
-      "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
+      "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance. Actual two-user Browser 6fd2464/run41774159540: B inserts real message, A sees Realtime while retaining unsent draft.",
       "blocker": "Указанные API/JWT проверки пройдены. Полный авторизованный UI, physical-mobile и расширенные пользовательские сценарии остаются отдельной приёмкой."
     },
     {
@@ -164,10 +164,10 @@
       "priority": "P0",
       "source": "src/routes/chat.tsx; supabase/staging/v075_chat_read_state.sql",
       "backend": "модель посещений/read receipts не подтверждена",
-      "status": "IMPLEMENTED",
+      "status": "STAGING VERIFIED",
       "acceptance": "доставка → unread → прочитано → другой клиент",
-      "evidence": "Live browser: visited empty room appears in Mine and survives reload; real-JWT summary/foreign/guest/invalid-marker checks PASS 41768491411. Two-user positive new-message receipt browser scenario still open.",
-      "blocker": "Серверные личные watermarks, mine/unread filters. Положительный UI/JWT receipt сценарий ещё не принят."
+      "evidence": "Actual Browser + 2 confirmed STAGING JWTs on 6fd2464, run 41774159540: A lost-response send leaves one row; B unread/read/reload, foreign watermark denied; cleanup=true. Earlier hosted empty-room mine/reload in qa/product-contract/ACCEPTANCE_20261104.md.",
+      "blocker": "Scoped positive Browser flow accepted on 6fd2464; full reconnect/multi-device/physical keyboard and latest hosted rerun remain separate."
     },
     {
       "id": "SOC-03",
@@ -358,7 +358,7 @@
       "backend": "STAGING v076_atlas_catalog: 4 catalog/claim tables + security_invoker my_atlas_progress; published-only catalog, owner-only evidence claims",
       "status": "IMPLEMENTED",
       "acceptance": "загрузка/пустое/ошибка, без ложного прогресса",
-      "evidence": "d41f02f: atlas-acceptance-database.test.ts PASS; STAGING migration 20261104041357 readback: RLS=true, invoker=true, empty real catalog; live JWT reads pending.",
+      "evidence": "d41f02f: atlas-acceptance-database.test.ts PASS; STAGING migration 20261104041357 readback: RLS=true, invoker=true, empty real catalog; Actual JWT 6fd2464/run41774159540 read all 3 catalog relations and own invoker progress view successfully; catalog not seeded.",
       "blocker": "Catalog/schema contract implemented; no invented fish/waterbodies. Reviewed real catalog, moderation and full progress E2E still required."
     },
     {

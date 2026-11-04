@@ -54,6 +54,9 @@ jobs:
           bunx playwright install --with-deps chromium firefox webkit
       - name: Real authenticated browser journeys and screenshots
         if: ${{ !cancelled() }}
+        env:
+          ZAPRUDA_BROWSER_BASE_URL: http://127.0.0.1:3000
+          ZAPRUDA_HOSTED_PREVIEW_STATUS: BLOCKED_NETLIFY_AUTH
         run: |
           node .output/server/index.mjs > /tmp/authenticated-server.log 2>&1 &
           SERVER_PID=$!

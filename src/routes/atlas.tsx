@@ -160,7 +160,7 @@ function Atlas() {
         <label className="text-xs font-semibold text-zinc-300">
           Название водоёма или регион
           <span className="relative mt-1 block">
-            <Search className="pointer-events-none absolute left-3 top-3.5 size-4 text-zinc-500" />
+            <Search className="pointer-events-none absolute left-3 top-3.5 size-4 text-zinc-300" />
             <input
               className="field w-full pl-9"
               value={filter}
@@ -180,7 +180,7 @@ function Atlas() {
       )}
       {loading && <p className="text-sm text-zinc-400">Загружаем справочник…</p>}
       {!loading && (
-        <p className="mb-3 text-xs text-zinc-500">
+        <p className="mb-3 text-xs text-zinc-300">
           Показано водоёмов: {filtered.length} · список будет расширяться и проверяться по
           региональным источникам
         </p>
@@ -234,7 +234,7 @@ function Atlas() {
                       <div key={m.species_id} className="rounded-lg bg-black/10 p-3">
                         <p className="text-sm font-bold text-zinc-100">
                           {fish.name}{" "}
-                          <span className="ml-1 text-xs font-normal text-zinc-500">
+                          <span className="ml-1 text-xs font-normal text-zinc-300">
                             · {m.evidence_status === "reviewed" ? "проверен" : "предварительно"}
                           </span>
                         </p>
@@ -243,11 +243,11 @@ function Atlas() {
                     );
                   })}
                   {!items.length && (
-                    <p className="text-sm text-zinc-500">
+                    <p className="text-sm text-zinc-300">
                       Здесь пока нет проверенного перечня видов. Справочник дополняется.
                     </p>
                   )}
-                  <p className="text-xs text-zinc-500">{w.source_note}</p>
+                  <p className="text-xs text-zinc-300">{w.source_note}</p>
                   {stats && (
                     <p className="text-xs text-[#D7FF35]">
                       Коллекция: {stats.caught_species || 0} подтверждённых видов из{" "}
