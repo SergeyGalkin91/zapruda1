@@ -1,0 +1,21 @@
+name: Yandex canary Deno typecheck
+on:
+  pull_request:
+    paths:
+      - ".github/v075-validation-request.txt"
+      - "supabase/functions/zapruda-daily-advice-yandex/**"
+      - ".github/workflows/yandex-provider-check.yml"
+      - "scripts/e2e/yandex-canary-live.mjs"
+permissions:
+  contents: read
+jobs:
+  deno-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check --node-modules-dir=auto supabase/functions/zapruda-daily-advice-yandex/index.ts
+      - run: node --check scripts/e2e/yandex-canary-live.mjs

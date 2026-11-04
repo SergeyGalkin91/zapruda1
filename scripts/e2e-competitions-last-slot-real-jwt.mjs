@@ -1,0 +1,189 @@
+// STAGING-only true JWT competition last-slot concurrency test.
+// 4 disposable verified users: OWNER, SEATED, RACER_A, RACER_B.
+// Leaves fixture for cleanup. Do not use production credentials.
+import assert from "node:assert/strict";
+import { createClient } from "@supabase/supabase-js";
+const required = (name) => {
+  const v = process.env[name];
+  if (!v) throw Error("Missing " + name);
+  return v;
+};
+const url = required("ZAPRUDA_E2E_STAGING_URL");
+assert.equal(new URL(url).origin, "https://yudtbifopfnjtjanaqrd.supabase.co");
+const key = required("ZAPRUDA_E2E_PUBLISHABLE_KEY");
+assert.ok(key.startsWith("sb_publishable_"));
+const roles = ["OWNER", "SEATED", "RACER_A", "RACER_B"];
+const clients = await Promise.all(
+  roles.map(async (role) => {
+    const client = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await client.auth.signInWithPassword({
+      email: required("ZAPRUDA_E2E_" + role + "_EMAIL"),
+      password: required("ZAPRUDA_E2E_" + role + "_PASSWORD"),
+    });
+    if (error) throw error;
+    assert.ok(data.session?.access_token, role + " missing JWT");
+    assert.ok(data.user?.email_confirmed_at, role + " email is not verified");
+    return { role, client, id: data.user.id };
+  }),
+);
+assert.equal(new Set(clients.map((x) => x.id)).size, 4, "Distinct users required");
+const [organizer, seated, a, b] = clients;
+const label = "QA_COMP_RACE_" + Date.now();
+const start = new Date(Date.now() + 86400_000).toISOString();
+const end = new Date(Date.now() + 2 * 86400_000).toISOString();
+const { data: comp, error: createError } = await organizer.client
+  .from("competitions")
+  .insert({
+    organizer_id: organizer.id,
+    title: label,
+    starts_at: start,
+    ends_at: end,
+    status: "open",
+    max_teams: 2,
+  })
+  .select("id")
+  .single();
+if (createError) throw createError;
+console.log("STAGING competition QA fixture:", comp.id, "cleanup required");
+const registered = (user, name) =>
+  user.client
+    .from("competition_teams")
+    .insert({
+      competition_id: comp.id,
+      captain_id: user.id,
+      name,
+      status: "registered",
+    })
+    .select("id,status")
+    .single();
+const first = await registered(seated, label + "_seated");
+if (first.error) throw first.error;
+// A captain must not register a team on behalf of a different account.
+const { error: spoofError } = await a.client.from("competition_teams").insert({
+  competition_id: comp.id,
+  captain_id: b.id,
+  name: label + "_spoofed",
+  status: "registered",
+});
+assert.ok(spoofError, "Captain identity spoofed through team INSERT");
+const { data: spurious, error: spuriousError } = await organizer.client
+  .from("competition_teams")
+  .select("id")
+  .eq("competition_id", comp.id)
+  .eq("name", label + "_spoofed");
+if (spuriousError) throw spuriousError;
+assert.equal(spurious.length, 0, "Spoofed captain row persisted");
+// Captain and competition ID are immutable even when a row is otherwise updateable.
+const { data: tampered, error: tamperError } = await seated.client
+  .from("competition_teams")
+  .update({ captain_id: a.id })
+  .eq("id", first.data.id)
+  .select("captain_id");
+assert.ok(tamperError || (tampered ?? []).length === 0, "Captain ID unexpectedly changed");
+const { data: unchanged, error: verifyError } = await seated.client
+  .from("competition_teams")
+  .select("captain_id")
+  .eq("id", first.data.id)
+  .single();
+if (verifyError) throw verifyError;
+assert.equal(unchanged.captain_id, seated.id, "Captain identity changed");
+const results = await Promise.all([registered(a, label + "_a"), registered(b, label + "_b")]);
+const success = results.filter((x) => !x.error),
+  failed = results.filter((x) => x.error);
+assert.equal(success.length, 1, "Exactly one last-seat registration required");
+assert.equal(failed.length, 1, "Other registration must fail");
+assert.match(failed[0].error.message, /COMPETITION_FULL/, "Expected COMPETITION_FULL");
+const { data: teams, error: readError } = await organizer.client
+  .from("competition_teams")
+  .select("captain_id,status")
+  .eq("competition_id", comp.id);
+if (readError) throw readError;
+const accepted = teams.filter((x) => x.status === "registered");
+assert.equal(accepted.length, 2, "Competition capacity exceeded");
+assert.ok(accepted.some((x) => x.captain_id === seated.id));
+// State and moderation regressions: every write remains scoped to this QA fixture.
+for (const status of ["accepted", "rejected"]) {
+  const { error } = await seated.client.from("competition_results").insert({
+    competition_id: comp.id,
+    team_id: first.data.id,
+    submitted_by: seated.id,
+    status,
+  });
+  assert.ok(error, "Captain self-moderated a result INSERT as " + status);
+}
+const { data: submitted, error: submitError } = await seated.client
+  .from("competition_results")
+  .insert({
+    competition_id: comp.id,
+    team_id: first.data.id,
+    submitted_by: seated.id,
+    status: "submitted",
+  })
+  .select("id")
+  .single();
+if (submitError) throw submitError;
+const { data: moderated, error: moderateError } = await organizer.client
+  .from("competition_results")
+  .update({ status: "accepted" })
+  .eq("id", submitted.id)
+  .select("status")
+  .single();
+if (moderateError) throw moderateError;
+assert.equal(moderated.status, "accepted", "Organizer moderation failed");
+const { error: resultIdentityError } = await organizer.client
+  .from("competition_results")
+  .update({ submitted_by: a.id })
+  .eq("id", submitted.id);
+assert.ok(resultIdentityError, "Result submitter identity changed");
+const { error: shrinkError } = await organizer.client
+  .from("competitions")
+  .update({ max_teams: 1 })
+  .eq("id", comp.id);
+assert.ok(shrinkError, "Capacity shrank below registered team count");
+const { data: disqualified, error: disqualifyError } = await organizer.client
+  .from("competition_teams")
+  .update({ status: "disqualified" })
+  .eq("id", first.data.id)
+  .select("status")
+  .single();
+if (disqualifyError) throw disqualifyError;
+assert.equal(disqualified.status, "disqualified", "Organizer disqualification failed");
+const { error: undoError } = await seated.client
+  .from("competition_teams")
+  .update({ status: "registered" })
+  .eq("id", first.data.id);
+assert.ok(undoError, "Captain undid organizer disqualification");
+const { data: reinstated, error: reinstateError } = await organizer.client
+  .from("competition_teams")
+  .update({ status: "registered" })
+  .eq("id", first.data.id)
+  .select("status")
+  .single();
+if (reinstateError) throw reinstateError;
+assert.equal(reinstated.status, "registered", "Organizer reinstatement failed");
+const { data: withdrawn, error: withdrawError } = await seated.client
+  .from("competition_teams")
+  .update({ status: "withdrawn" })
+  .eq("id", first.data.id)
+  .select("status")
+  .single();
+if (withdrawError) throw withdrawError;
+assert.equal(withdrawn.status, "withdrawn");
+const { data: finished, error: finishError } = await organizer.client
+  .from("competitions")
+  .update({ status: "finished" })
+  .eq("id", comp.id)
+  .select("status")
+  .single();
+if (finishError) throw finishError;
+assert.equal(finished.status, "finished");
+const { error: rejoinError } = await seated.client
+  .from("competition_teams")
+  .update({ status: "registered" })
+  .eq("id", first.data.id);
+assert.ok(rejoinError, "Captain rejoined a finished competition");
+assert.match(rejoinError.message, /REGISTRATION_CLOSED/);
+console.log("PASS: 4 real JWT, simultaneous last-seat inserts, moderation and state guards.");
+for (const u of clients) await u.client.auth.signOut();

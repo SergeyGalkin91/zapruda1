@@ -31,7 +31,10 @@ async function patchTree(directory) {
       let output = source;
       for (const [from, to] of placeholders) {
         if (!output.includes(from)) continue;
-        if (!to) throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY at container startup");
+        if (!to)
+          throw new Error(
+            "Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY at container startup",
+          );
         output = output.replaceAll(from, to);
       }
       if (output !== source) {
