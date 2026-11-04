@@ -8,3 +8,5 @@ Final request: same protected script on current candidate; chat read-state isola
 Final authenticated browser acceptance: two actual users, read receipts/retry, report wizard/photo/private fixtures, STREET identity isolation and 3 engines/4 widths/2 themes. No public catch or KING fixtures.
 
 Reconcile unread list at PostgreSQL-ready/rejoin; fix compile regression in new lost-response test.
+
+Include newly aligned empty Atlas catalog/own progress reads and read-only Yandex diagnose; real UI lost report-RPC response must retry without duplicate catch.

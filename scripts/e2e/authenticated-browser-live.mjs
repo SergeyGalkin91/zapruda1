@@ -90,6 +90,22 @@ try {
         throw Error("PRODUCTION_REQUEST_DENIED");
       return route.continue();
     });
+  const atlasReads = await Promise.all(
+    ["atlas_fish_species", "atlas_waterbodies", "atlas_waterbody_species", "my_atlas_progress"].map(
+      (table) => must(A.c.from(table).select("*").limit(1)),
+    ),
+  );
+  result.checks.push(
+    "real JWT Atlas catalog and own invoker progress read; no catalog fixtures inserted",
+  );
+  const diagnostic = await A.c.functions.invoke("zapruda-daily-advice-yandex", {
+    body: { action: "diagnose" },
+  });
+  result.ai = {
+    diagnosticOnly: diagnostic.data?.diagnostic_only === true,
+    configuration: diagnostic.data?.configuration || "DIAGNOSE_BLOCKED",
+    webSearchEnabled: diagnostic.data?.web_search_enabled,
+  };
   phase = "real-ui-login";
   await loginUI(a, A);
   await loginUI(b, B);
@@ -222,6 +238,20 @@ try {
     await expect(a.getByText("Отчёт будет виден в общей ленте.", { exact: false })).toBeVisible();
     await a.getByLabel("Опубликовать в общей ленте", { exact: true }).uncheck();
     await shot(a, withFish ? "390-review-private-photo" : "390-review-no-catch");
+    if (withFish) {
+      let dropped = false;
+      await a.route("**/rest/v1/rpc/publish_report_with_catches", async (route) => {
+        if (!dropped) {
+          dropped = true;
+          await route.fetch();
+          await route.abort("failed");
+        } else await route.continue();
+      });
+      await a.getByRole("button", { name: "Опубликовать отчёт", exact: true }).click();
+      await expect(a.getByRole("alert")).toContainText("Не удалось сохранить отчёт с уловом", {
+        timeout: 20000,
+      });
+    }
     await a.getByRole("button", { name: "Опубликовать отчёт", exact: true }).click();
     await a.waitForURL(base + "/", { timeout: 30000 });
     const rows = await must(
@@ -231,6 +261,10 @@ try {
         .eq("title", tag + (withFish ? " fish-private" : " no-catch-private")),
     );
     if (rows.length !== 1 || rows[0].is_public) throw Error("REPORT_DUPLICATE_OR_PUBLIC");
+    if (withFish) {
+      const counts = await must(A.c.from("catches").select("id").eq("report_id", rows[0].id));
+      if (counts.length !== 1) throw Error("CATCH_RETRY_DUPLICATE");
+    }
     const outsider = await must(B.c.from("fishing_reports").select("id").eq("id", rows[0].id));
     if (outsider.length) throw Error("REPORT_PRIVATE_LEAK");
   }
