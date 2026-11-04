@@ -8,10 +8,18 @@ do $$begin
  or exists(select 1 from public.private_fishing_marks)
  or exists(select 1 from public.user_activity_windows)
  or exists(select 1 from public.beta_test_applications)
+ or exists(select 1 from public.partner_trips where boat_trip or duration_hours is not null
+   or meeting_area<>'' or gear_requirements<>'' or safety_notes<>''
+   or experience_needed<>'Любой уровень' or social_style<>'Не важно')
  or exists(select 1 from zapruda_internal.pilot_report_publications_v075)then
  raise exception 'Rollback refused: preserve content and use a reviewed forward migration';
  end if;
 end$$;
+drop index public.pilot_catch_report_author_idx;
+-- Other two access indexes are removed with their new owning tables below.
+alter table public.partner_trips drop column experience_needed,drop column social_style,
+ drop column duration_hours,drop column meeting_area,drop column gear_requirements,
+ drop column safety_notes,drop column boat_trip;
 drop function public.my_fishing_progress(),public.my_fishing_specializations_v2();
 drop table public.beta_test_applications;
 drop view public.my_activity_badges;

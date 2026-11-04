@@ -2,12 +2,13 @@ name: v0.7.1 Meetup mobile browser smoke
 on:
   pull_request:
     paths:
-      - 'src/components/SocialMeetups.tsx'
-      - 'src/routes/communities.tsx'
-      - 'src/routes/admin*.tsx'
-      - 'src/routes/competitions.tsx'
-      - 'src/routeTree.gen.ts'
-      - '.github/workflows/v071-mobile-smoke.yml'
+      - ".github/v075-validation-request.txt"
+      - "src/components/SocialMeetups.tsx"
+      - "src/routes/communities.tsx"
+      - "src/routes/admin*.tsx"
+      - "src/routes/competitions.tsx"
+      - "src/routeTree.gen.ts"
+      - ".github/workflows/v071-mobile-smoke.yml"
   workflow_dispatch:
 permissions:
   contents: read

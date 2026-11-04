@@ -3,13 +3,14 @@ name: ZAPRUDA Docker image smoke test
 on:
   pull_request:
     paths:
-      - 'Dockerfile'
-      - 'compose.staging.yaml'
-      - '.dockerignore'
-      - 'bun.lock'
-      - 'package.json'
-      - 'src/**'
-      - '.github/workflows/docker-smoke.yml'
+      - ".github/v075-validation-request.txt"
+      - "Dockerfile"
+      - "compose.staging.yaml"
+      - ".dockerignore"
+      - "bun.lock"
+      - "package.json"
+      - "src/**"
+      - ".github/workflows/docker-smoke.yml"
   workflow_dispatch:
 
 permissions:

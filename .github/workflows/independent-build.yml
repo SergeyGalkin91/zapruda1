@@ -2,11 +2,12 @@ name: Independent Node hosting proof
 on:
   pull_request:
     paths:
-      - 'vite.config.ts'
-      - 'package.json'
-      - 'bun.lock'
-      - 'Dockerfile'
-      - '.github/workflows/independent-build.yml'
+      - ".github/v075-validation-request.txt"
+      - "vite.config.ts"
+      - "package.json"
+      - "bun.lock"
+      - "Dockerfile"
+      - ".github/workflows/independent-build.yml"
 permissions:
   contents: read
 jobs:

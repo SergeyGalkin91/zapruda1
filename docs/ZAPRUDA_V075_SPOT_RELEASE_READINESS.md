@@ -1,32 +1,26 @@
-# v0.7.5 SPOT — release readiness
+# v0.7.5 SPOT — release readiness, 04.11.2026
 
-Дата: 04.11.2026 (Москва). Решение: **NO-GO публичному запуску; кандидат для STAGING-приёмки**.
+**NO-GO публичному запуску; кандидат для настоящей STAGING-приёмки.** Канонический PR #93 → SPOT. Main, production, DNS и платежи не изменены.
 
-| Gate | Состояние | Evidence / ограничение |
-|---|---|---|
-| База SPOT: TypeScript/lint/unit/build | DONE | 3a43ed6, 329 тестов; GitHub run 41733556438 |
-| Docker/независимый Node | DONE | runs 41733556464 / 41733556481; внешний hosting не переключён |
-| Браузеры 390/1440 | DONE на базе | run 41733556506; не доказательство полного authenticated UX |
-| Фото transport/EXIF/GPS ACL/чужой доступ | DONE в STAGING | protected run 41729999695, отдельный шаг PASS; только private QA fixture |
-| Public→private немедленный запрет gateway | PARTIAL | unit/SQL доказательства и no-store gateway; действительный public-toggle HTTP сценарий не заявлен |
-| KING revoke/races/retry | PARTIAL | 7 SQL unit и 5 real PostgreSQL multi-session rounds; hosted source/ACL readback; не live moderator JWT |
-| Полный live KING | BLOCKED | нет разрешённого модератора и законного проверенного спота/реального evidence |
-| DeepSeek primary/backup | BLOCKED | canary v2 + Deno/contracts готовы; run 41736781269 остановлен до runner, нужен текст двух Annotations |
-| Legacy cleanup | PARTIAL | нейтральный клиент, изолированная canary; XAI runtime до отдельного cutover |
-| UX wizard, chat receipts, 320/768 | NOT STARTED на этом срезе | approved spec не равен реализованной функции |
-| PROD privacy/schema convergence | BLOCKED | отдельное разрешение, backup и обработка legacy фото |
-| Россия мобильная сеть без VPN | BLOCKED | нужен физический сетевой замер всей цепочки |
+| Gate                                                    | Статус                        | Доказательство / оставшееся ограничение                                                                                  |
+| ------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Core STAGING schema                                     | DONE структурно               | 42 public tables/RLS; 7 новых дельт, exact history/source readback; adopted migrations не повторялись                    |
+| Отчёт/catches/retry                                     | DONE код/SQL                  | atomic invoker RPC, catch failure rollback, captured actor/token, draft; no-catch независим; новый JWT gate отдельно     |
+| Chat safe media / refresh                               | DONE код/deploy               | две JWT v1 функции, exact 5-file readback; no direct Storage signing; lifecycle/component/SQL проверки                   |
+| Own gear/marks/profile/activity                         | DONE структурно               | owner-only RLS/column grants; no self-awarded beta status; primary kit serialized                                        |
+| TypeScript/lint/Vitest/build                            | DONE локально                 | 405 тестов/32 файла; 0 lint errors/6 старых warnings; точный итоговый HEAD в PR Checks                                   |
+| PostgreSQL17/Deno/Docker                                | DONE на d58836c               | runs 41747680477 / 41747680552; последующие SQL/client изменения требуют текущего HEAD                                   |
+| Browser 320/390/768/1440, 2 themes, 3 engines           | DONE guest на d58836c         | run 41747680365; итоговый marker запускает свежую проверку                                                               |
+| Настоящий private-photo/SPOT JWT baseline               | DONE ограниченно              | 41729999695; не полная модерация/KING и не новый public-toggle                                                           |
+| Public→private HTTP / chat Realtime / full core JWT     | PARTIAL                       | защищённый pilot-staging-jwt workflow подготовлен; требуется фактический PASS и cleanup                                  |
+| Полный live KING                                        | BLOCKED                       | нет разрешённого модератора/проверенного реального спота/подлинного evidence                                             |
+| DeepSeek primary/backup/cache/quota                     | BLOCKED                       | canary v2; run 41736781269 не дошёл до runner, нужен текст Annotations                                                   |
+| Остальная frontend/schema совместимость                 | PARTIAL                       | 11 таблиц + Atlas view + 6 RPC, guide/paid columns остаются; не включать в пилот без собственной приёмки                 |
+| Lovable build independence                              | DONE сборка / PARTIAL hosting | зависимость/lockfile исправлены ранее; Node/Docker proof; опубликованный проект не удалён, внешний hosting не переключён |
+| Российский мобильный интернет без VPN                   | BLOCKED                       | нужен физический замер, CI runner его не заменяет                                                                        |
+| PROD privacy/media convergence                          | BLOCKED                       | отдельный план, backup, обработка legacy originals и разрешение                                                          |
+| Original-route Yandex cutover, production, DNS, release | NOT STARTED                   | отдельное разрешение после PASS; XAI secrets сохранены                                                                   |
 
-Никакого merge PR, публичного релиза, main/production deployment, покупки кредитов, платежей или самоназначения модератора данным документом не разрешается. Статусы обновляются только по фактическому Actions/source/hosted evidence.
+[Current state](ZAPRUDA_CURRENT_STATE_20261104.md) · [Ordered schema/deploy evidence](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md) · [Dependency matrix](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md) · [PR Checks](https://github.com/SergeyGalkin91/zapruda1/pull/93/checks).
 
-## Дополнение к кандидату
-
-Последний published базовый SHA 3bcade1: все 12 обычных workflow PASS. Дополнительная root-session безопасность и 4 размера visual smoke публикуются следующей ревизией существующего #93. Локальная проверка этой ревизии: 375/375, 29 файлов, TypeScript/lint/build PASS (6 прежних lint warnings). Итоговый статус CI — только по head этого PR.
-
-Профиль/аналитика после смены пользователя очищаются AuthSessionBoundary; same-user token refresh сохраняет черновик. Сам wizard в три шага, server unread receipts и активные CARP/WINTER/BOAT не реализованы этой ревизией и остаются NOT STARTED/PARTIAL согласно spec. В STAGING нет private_fishing_marks: существующий UI личных меток не считается работающей hosted-функцией. Нужны отдельные schema/dependency/real-JWT gates.
-
-**P0 BLOCKED:** [22 frontend-referenced таблицы отсутствуют в isolated STAGING](ZAPRUDA_STAGING_SCHEMA_GAP_20261104.md), включая catches/comments/public-chat. Required-store preflight предотвращает создание частичного отчёта и сохраняет draft; он не заменяет недостающую схему. Полный staging pilot этого UI не готов.
-
-## Продолжение выравнивания схемы — 04.11.2026
-
-Последующая сверка обнаружила уже применённые дельты catches/comments (20261104000548/000608) и geographic text chat (20261104001134): прежние 31/22 — исторический срез. Эти дельты приняты как baseline и повторно не накладываются. Подготовлены атомарное report+catch сохранение с retry receipt, защищённые chat photos без прямого Storage signing, private gear/marks и необходимые profile aggregates/activity. [План, контракты, rollback и фактические gates](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md). Состояние новых hosted deploy и точный CI смотреть в evidence этого документа; подготовленные SQL/скрипты сами по себе не являются PASS.
+Зелёный CI не означает, что приложение целиком принято. Утверждённый дизайн/темы/навигация сохранены; wizard, unread receipts, новые лиги и неподтверждённые trophy thresholds не считаются реализованными этой консолидацией.

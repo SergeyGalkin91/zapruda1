@@ -276,7 +276,51 @@ try {
   });
   requireThat(raw.error, "PILOT_RAW_PHOTO_REGISTRATION_ALLOWED");
   chatPhoto = randomUUID();
+  await owner.api.realtime.setAuth(owner.token);
+  let receivedPhoto;
+  const photoReady = new Promise((resolve) => {
+    receivedPhoto = resolve;
+  });
+  const updates = owner.api.channel("pilot-photo-" + chatPhoto).on(
+    "postgres_changes",
+    {
+      event: "UPDATE",
+      schema: "public",
+      table: "chat_message_photos",
+      filter: "id=eq." + chatPhoto,
+    },
+    (payload) => {
+      if (payload.new.id === chatPhoto && payload.new.sanitized_at) receivedPhoto(true);
+    },
+  );
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("PILOT_REALTIME_SUBSCRIBE_TIMEOUT")), 15000);
+    updates.subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        clearTimeout(timer);
+        resolve(true);
+      } else if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(status)) {
+        clearTimeout(timer);
+        reject(new Error("PILOT_REALTIME_SUBSCRIBE_FAILED"));
+      }
+    });
+  });
   await upload("chat-photo-upload", message, chatPhoto);
+  let readyTimer;
+  try {
+    await Promise.race([
+      photoReady,
+      new Promise((_, reject) => {
+        readyTimer = setTimeout(
+          () => reject(new Error("PILOT_REALTIME_PHOTO_NOT_DELIVERED")),
+          15000,
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(readyTimer);
+  }
+  passed("actual-JWT-Realtime-sanitized-photo-update");
   await upload("chat-photo-upload", message, chatPhoto);
   await safeImage(await photoStatus("chat-photo-access", chatPhoto, owner.token));
   // This is a public signed-in chat: another confirmed participant CAN view it.
@@ -374,6 +418,25 @@ try {
   const profile = await must(await owner.api.rpc("my_profile_full"), "PILOT_PROFILE_READ_FAILED");
   requireThat(profile.length === 1 && profile[0].id === owner.id, "PILOT_PROFILE_OWNER_MISMATCH");
   passed("private-marks-gear-primary-concurrency-and-own-profile");
+  await must(
+    await owner.api
+      .from("partner_trips")
+      .select(
+        "id,experience_needed,social_style,duration_hours,meeting_area,gear_requirements,safety_notes,boat_trip",
+      )
+      .limit(1),
+    "PILOT_TRIP_COLUMN_CONTRACT_FAILED",
+  );
+  passed("partner-trip-REST-column-contract-without-a-public-trip-fixture");
+  phase = "independent_openweather";
+  const weather = await owner.api.functions.invoke("openweather-current", {
+    body: { city: "Нижний Новгород" },
+  });
+  requireThat(
+    !weather.error && typeof weather.data?.temp === "number",
+    "PILOT_WEATHER_UPSTREAM_FAILED",
+  );
+  passed("independent-authenticated-OpenWeather-without-AI-quota-use");
   summary.passed = true;
 } catch (error) {
   summary.failedPhase = phase;
@@ -449,7 +512,9 @@ try {
     summary.cleanup = false;
     process.exitCode = 1;
   }
+  await Promise.allSettled(accounts.map((api) => api.removeAllChannels()));
   await Promise.allSettled(accounts.map((api) => api.auth.signOut({ scope: "local" })));
+  for (const api of accounts) api.realtime.disconnect();
   mkdirSync("qa/pilot-safe", { recursive: true });
   writeFileSync("qa/pilot-safe/result.json", JSON.stringify(summary, null, 2));
   console.log(JSON.stringify(summary));

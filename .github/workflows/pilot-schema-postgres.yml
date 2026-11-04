@@ -2,6 +2,7 @@ name: Pilot schema PostgreSQL and Deno checks
 on:
   pull_request:
     paths:
+      - ".github/v075-validation-request.txt"
       - "supabase/staging/v075_*"
       - "supabase/staging/rollback_v075_pilot_schema.sql"
       - "supabase/tests/unit/*dependencies*"

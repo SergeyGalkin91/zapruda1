@@ -20,10 +20,14 @@ const deltas = [
   "v075_public_chat.sql",
   "v075_private_gear_marks.sql",
   "v075_profile_progress.sql",
+  "v075_pilot_realtime.sql",
+  "v075_trip_matching_fields.sql",
+  "v075_pilot_access_indexes.sql",
 ];
 let db: PGlite;
 async function baseline() {
   const engine = await createIsolatedPostgres();
+  await engine.exec("create publication supabase_realtime");
   await applySqlFile(engine, "tests/unit/pilot_dependencies_context.sql");
   await applySqlFile(engine, "tests/unit/report_dependencies_adopted.sql");
   await applySqlFile(engine, "tests/unit/chat_dependencies_adopted.sql");
@@ -325,6 +329,34 @@ describe("Private profile gear and marks (isolated SQL)", () => {
 });
 
 describe("Schema rollback and replay protection", () => {
+  it("accepts the existing trip matching contract and bounds duration/text", async () => {
+    await db.query(
+      "insert into public.partner_trips(id,organizer_id,duration_hours,experience_needed,boat_trip)values($1,$2,2,'Помогу новичку',false)",
+      [report, users.owner],
+    );
+    await denied(
+      () => db.query("update public.partner_trips set duration_hours=73 where id=$1", [report]),
+      "23514",
+    );
+    await denied(
+      () =>
+        db.query("update public.partner_trips set meeting_area=repeat('x',181) where id=$1", [
+          report,
+        ]),
+      "23514",
+    );
+  });
+  it("publishes only the four intended chat/comment tables for RLS-filtered changes", async () => {
+    const names = await db.query<{ tablename: string }>(
+      "select tablename from pg_publication_tables where pubname='supabase_realtime' order by tablename",
+    );
+    expect(names.rows.map((r) => r.tablename)).toEqual([
+      "chat_message_photos",
+      "chat_message_reactions",
+      "chat_messages",
+      "comments",
+    ]);
+  });
   it("derives only the caller's progress and does not fabricate earned activity badges", async () => {
     await actAsFixture(db, users.owner);
     await publish();

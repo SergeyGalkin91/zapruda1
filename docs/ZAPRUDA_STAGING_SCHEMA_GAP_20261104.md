@@ -1,33 +1,35 @@
+> **Актуализация:** старый срез 31/22 ниже — исторический. Сейчас STAGING: 42 public tables, семь новых проверенных дельт и принятые subsequent migrations. Core report/chat/profile dependencies восстановлены; остаются 11 таблиц, Atlas view, 6 RPC и отдельные guide/paid columns. См. [актуальный alignment](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md) и [полную metadata matrix](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md). Настоящие JWT gates не заменяются этим структурным результатом.
+
 # STAGING schema gap — 04.11.2026 (Москва)
 
 Read-only инвентаризация через Supabase и фактические `.from(...)` обращения frontend-кода. Данные пользователей/координаты не читались и не копировались. STAGING: **31** public base table; production: **61**. Найдены **22** используемые в `src` таблицы, имеющиеся в PROD и отсутствующие в STAGING. Отдельно через `to_regclass` и pg_class подтверждено: chat_places, chat_messages, catches, comments и private_fishing_marks отсутствуют и не замещены public views. Клиент не переименовывает эти обращения при подключении к STAGING.
 
 Это структурная проверка совместимости. Она не является signed-JWT функциональным тестом. Динамические таблицы, все RPC и колоночные различия этим списком не исчерпываются.
 
-| Отсутствующая таблица | Обращения frontend |
-|---|---|
-| `ai_memberships` | `src/routes/analytics.tsx` |
-| `angler_gear` | `src/components/AnglerTackleCabinet.tsx`, `src/routes/analytics.tsx`, `src/routes/profile.tsx` |
-| `angler_gear_sets` | `src/components/AnglerGearSets.tsx`, `src/routes/analytics.tsx`, `src/routes/profile.tsx` |
-| `atlas_catch_claims` | `src/routes/reports.new.tsx` |
-| `atlas_fish_species` | `src/routes/atlas.tsx`, `src/routes/reports.new.tsx` |
-| `atlas_waterbodies` | `src/routes/atlas.tsx`, `src/routes/reports.new.tsx` |
-| `atlas_waterbody_species` | `src/routes/atlas.tsx`, `src/routes/reports.new.tsx` |
-| `beta_test_applications` | `src/components/ActivityAchievements.tsx` |
-| `catches` | `src/routes/reports.new.tsx` |
-| `chat_message_photos` | `src/routes/chat.tsx` |
-| `chat_message_reactions` | `src/routes/chat.tsx` |
-| `chat_messages` | `src/routes/chat.tsx` |
-| `chat_places` | `src/routes/chat.tsx` |
-| `comments` | `src/routes/index.tsx` |
-| `community_requests` | `src/routes/admin.feedback.tsx`, `src/routes/admin.index.tsx`, `src/routes/admin.operations.tsx`, `src/routes/feedback.tsx` |
-| `follows` | `src/routes/messages.tsx` |
-| `guide_booking_inquiries` | `src/components/GuideBookings.tsx`, `src/routes/admin.operations.tsx` |
-| `guide_verification_applications` | `src/components/GuideVerification.tsx`, `src/routes/admin.index.tsx`, `src/routes/moderation.tsx` |
-| `private_fishing_marks` | `src/components/PrivateFishingMarks.tsx`, `src/routes/analytics.tsx`, `src/routes/messages.tsx` |
-| `spearfishing_profiles` | `src/routes/spearfishing.tsx` |
-| `user_activity_windows` | `src/components/ActivityTracker.tsx` |
-| `zapruda_admins` | `src/components/Shell.tsx`, `src/routes/admin.feedback.tsx`, `src/routes/admin.index.tsx`, `src/routes/admin.operations.tsx`, `src/routes/analytics.tsx`, `src/routes/finance.tsx`, `src/routes/moderation.tsx`, `src/routes/settings.tsx` |
+| Отсутствующая таблица             | Обращения frontend                                                                                                                                                                                                                         |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ai_memberships`                  | `src/routes/analytics.tsx`                                                                                                                                                                                                                 |
+| `angler_gear`                     | `src/components/AnglerTackleCabinet.tsx`, `src/routes/analytics.tsx`, `src/routes/profile.tsx`                                                                                                                                             |
+| `angler_gear_sets`                | `src/components/AnglerGearSets.tsx`, `src/routes/analytics.tsx`, `src/routes/profile.tsx`                                                                                                                                                  |
+| `atlas_catch_claims`              | `src/routes/reports.new.tsx`                                                                                                                                                                                                               |
+| `atlas_fish_species`              | `src/routes/atlas.tsx`, `src/routes/reports.new.tsx`                                                                                                                                                                                       |
+| `atlas_waterbodies`               | `src/routes/atlas.tsx`, `src/routes/reports.new.tsx`                                                                                                                                                                                       |
+| `atlas_waterbody_species`         | `src/routes/atlas.tsx`, `src/routes/reports.new.tsx`                                                                                                                                                                                       |
+| `beta_test_applications`          | `src/components/ActivityAchievements.tsx`                                                                                                                                                                                                  |
+| `catches`                         | `src/routes/reports.new.tsx`                                                                                                                                                                                                               |
+| `chat_message_photos`             | `src/routes/chat.tsx`                                                                                                                                                                                                                      |
+| `chat_message_reactions`          | `src/routes/chat.tsx`                                                                                                                                                                                                                      |
+| `chat_messages`                   | `src/routes/chat.tsx`                                                                                                                                                                                                                      |
+| `chat_places`                     | `src/routes/chat.tsx`                                                                                                                                                                                                                      |
+| `comments`                        | `src/routes/index.tsx`                                                                                                                                                                                                                     |
+| `community_requests`              | `src/routes/admin.feedback.tsx`, `src/routes/admin.index.tsx`, `src/routes/admin.operations.tsx`, `src/routes/feedback.tsx`                                                                                                                |
+| `follows`                         | `src/routes/messages.tsx`                                                                                                                                                                                                                  |
+| `guide_booking_inquiries`         | `src/components/GuideBookings.tsx`, `src/routes/admin.operations.tsx`                                                                                                                                                                      |
+| `guide_verification_applications` | `src/components/GuideVerification.tsx`, `src/routes/admin.index.tsx`, `src/routes/moderation.tsx`                                                                                                                                          |
+| `private_fishing_marks`           | `src/components/PrivateFishingMarks.tsx`, `src/routes/analytics.tsx`, `src/routes/messages.tsx`                                                                                                                                            |
+| `spearfishing_profiles`           | `src/routes/spearfishing.tsx`                                                                                                                                                                                                              |
+| `user_activity_windows`           | `src/components/ActivityTracker.tsx`                                                                                                                                                                                                       |
+| `zapruda_admins`                  | `src/components/Shell.tsx`, `src/routes/admin.feedback.tsx`, `src/routes/admin.index.tsx`, `src/routes/admin.operations.tsx`, `src/routes/analytics.tsx`, `src/routes/finance.tsx`, `src/routes/moderation.tsx`, `src/routes/settings.tsx` |
 
 ## Последствия и внесённое исправление
 

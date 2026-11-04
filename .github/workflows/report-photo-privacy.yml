@@ -2,10 +2,11 @@ name: Report photo privacy browser check
 on:
   pull_request:
     paths:
-      - 'src/lib/report-photo*'
-      - 'src/test/fixtures/report-photo*'
-      - 'scripts/check-report-photo-browser.mjs'
-      - '.github/workflows/report-photo-privacy.yml'
+      - ".github/v075-validation-request.txt"
+      - "src/lib/report-photo*"
+      - "src/test/fixtures/report-photo*"
+      - "scripts/check-report-photo-browser.mjs"
+      - ".github/workflows/report-photo-privacy.yml"
 permissions:
   contents: read
 jobs:

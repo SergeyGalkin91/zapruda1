@@ -52,6 +52,9 @@ const deltas = [
   "v075_public_chat.sql",
   "v075_private_gear_marks.sql",
   "v075_profile_progress.sql",
+  "v075_pilot_realtime.sql",
+  "v075_trip_matching_fields.sql",
+  "v075_pilot_access_indexes.sql",
 ];
 await sql(`
  create role anon; create role authenticated; create role service_role bypassrls;

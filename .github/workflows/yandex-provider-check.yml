@@ -2,6 +2,7 @@ name: Yandex canary Deno typecheck
 on:
   pull_request:
     paths:
+      - ".github/v075-validation-request.txt"
       - "supabase/functions/zapruda-daily-advice-yandex/**"
       - ".github/workflows/yandex-provider-check.yml"
       - "scripts/e2e/yandex-canary-live.mjs"

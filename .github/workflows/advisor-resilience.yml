@@ -2,6 +2,7 @@ name: Advisor availability without an AI provider
 on:
   pull_request:
     paths:
+      - ".github/v075-validation-request.txt"
       - "src/routes/assistant.tsx"
       - "src/components/FishingAdvisor*"
       - "src/lib/fishing-plan*"

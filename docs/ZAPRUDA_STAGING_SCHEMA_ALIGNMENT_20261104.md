@@ -62,3 +62,25 @@ PENDING at preparation: new deltas and chat functions must be checked against th
 ### First applied delta
 
 `20261104003202 v075_report_integrity`: applied only in STAGING after the isolated SQL/rollback tests. Readback: invoker RPC, guest EXECUTE denied, authenticated TRUNCATE denied, photo_url and exact latitude SELECT denied, composite author FK present. No catch/comment/public report was created. PostgreSQL17 run 41747207223 passed the independent-session SQL/rollback step; its separate Deno step exposed a client generic type error, corrected in the next source revision before any chat function deployment. Other new hosted deltas remain pending at this checkpoint.
+
+## Completion update: seven deltas applied, core 42-table schema
+
+| Applied version | Delta                     |
+| --------------- | ------------------------- |
+| 20261104003202  | v075_report_integrity     |
+| 20261104003345  | v075_public_chat          |
+| 20261104003346  | v075_private_gear_marks   |
+| 20261104003348  | v075_profile_progress     |
+| 20261104004811  | v075_pilot_realtime       |
+| 20261104004812  | v075_trip_matching_fields |
+| 20261104005149  | v075_pilot_access_indexes |
+
+All seven exact file texts were compared with the actual migration history. New chat photo v1 entrypoints and three shared dependencies were read back equal. Four publication tables: comments/chat_messages/chat_message_reactions/chat_message_photos, with their existing RLS and column ACL. All 42 public tables have RLS; private activity view is security_invoker/security_barrier. Guest marks/atomic RPC, client photo registration, primary/type mutation and exact report GPS/original URL reads remain denied. No public report/catch/chat/media/mark fixture was inserted through SQL.
+
+Trip matching delta adds only seven verified client columns with approved defaults/CHECKs. It does not replay the original migration's block/report policies, copy private guide meeting coordinates or enable payments. The separate block/report/guide/admin/Atlas surfaces still need their own acceptance. [Full dependency matrix](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md). Missing view my_atlas_progress and six missing client RPCs were added to the gap assessment.
+
+Final local code: **405 tests / 32 files**, TypeScript/lint/build PASS (0 lint errors/6 old warnings). Empty rollback/reapply and populated rollback refusal are tested; publication DDL executes in the isolated engine. Rollback keeps adopted tables, narrower mutation ACL and safe publication on retained tables; it refuses meaningful trip matching data, new activity, objects or publication receipts. Do not run it on an active pilot without a new readback/plan.
+
+Advisors after fixing the three introduced FK findings: 37 existing unindexed-FK INFO, 9 auth-RLS-initplan WARN, 3 multiple-policy WARN, 21 unused-index INFO (new empty tables are expected to have unused indexes). Security: 11 deny-by-default RLS-no-policy INFO, 13 guarded public SECURITY DEFINER WARN, 1 leaked-password-protection WARN. The warnings are not suppressed. [FK advice](https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys), [function review](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable), [Auth protection](https://supabase.com/docs/guides/auth/password-security). No permissive policy or arbitrary role grant was added to silence a warning.
+
+Exact final HEAD validation uses a shared marker for all 13 ordinary workflows; frontend build also targets PRs into release/v0.7.5-spot. New protected pilot marker runs genuine confirmed JWT/API/Realtime tests, independent SPOT negative proof and weather. Pending/failed-before-run jobs remain BLOCKED; final links/results belong in the PR Checks and completion technical report. Yandex original-route cutover still needs real upstream PASS plus separate owner permission.

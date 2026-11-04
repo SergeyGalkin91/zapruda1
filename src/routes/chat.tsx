@@ -118,7 +118,7 @@ export const Route = createFileRoute("/chat")({
   component: GeographicChat,
 });
 
-function GeographicChat() {
+export function GeographicChat() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const alive = useRef(true);
@@ -369,11 +369,25 @@ function GeographicChat() {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "chat_messages",
           filter: "place_id=eq." + placeId,
         },
+        () => {
+          void fetchMessages();
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chat_message_photos" },
+        () => {
+          void fetchMessages();
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chat_message_reactions" },
         () => {
           void fetchMessages();
         },

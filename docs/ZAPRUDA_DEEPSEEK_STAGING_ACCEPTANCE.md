@@ -27,3 +27,7 @@ Workflow `yandex-canary-staging.yml` → защищённый environment `stagi
 **BLOCKED:** protected run 41736781269 остановлен до runner в обеих попытках, ни diagnose, ни generation не исполнялись. Подробность в двух GitHub Annotations, недоступных текущему подключению. Нужен их текст для точного действия. Не утверждаем, что Yandex key/folder, IAM, баланс, primary или backup работают/не работают. No-quota diagnose, actual upstream, ready journal и concurrency/cache остаются открытыми gates.
 
 **NOT STARTED:** STAGING original-route cutover (нужно отдельное разрешение после PASS), отключение зависимых XAI secrets, Web Search acceptance, измерение российским мобильным оператором без VPN.
+
+## Независимая проверка core pilot
+
+Новый protected pilot-staging-jwt workflow проверяет actual report/chat/profile/photo/Realtime и **отдельный OpenWeather**, не обращаясь к ИИ и не расходуя его дневную квоту. Он не является подтверждением DeepSeek/YandexGPT и не переключает original route. Причина старого pre-run Yandex failure по-прежнему требует текста Annotations; новую ротацию ключа/подбор аккаунта/сброс квоты не выполнять.
