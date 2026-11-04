@@ -380,10 +380,19 @@ function Profile() {
     void loadFeaturedGear(auth.user.id);
 
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
-      // STAGING intentionally hides bio from direct profiles SELECT.
-      // Read the full private profile through owner-scoped my_profile_full(),
-      // which checks auth.uid() on the server. Never broaden public grants.
-      supabase.rpc("my_profile_full").maybeSingle(),
+      // STAGING intentionally denies direct SELECT of private profiles.bio.
+      // Prefer the owner-scoped RPC there. Legacy production lacks this RPC:
+      // only for "function not found" do we retain its existing query path.
+      (async () => {
+        const secured = await supabase.rpc("my_profile_full").maybeSingle();
+        if (!secured.error || !["PGRST202", "42883"].includes(secured.error.code ?? ""))
+          return secured;
+        return supabase
+          .from("profiles")
+          .select("username,display_name,bio,avatar_url,chat_city")
+          .eq("id", auth.user.id)
+          .maybeSingle();
+      })(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
       supabase.rpc("my_fishing_progress"),
       supabase.rpc("my_fishing_specializations_v2"),
