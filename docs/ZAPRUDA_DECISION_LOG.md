@@ -67,3 +67,6 @@ ID / дата / точная формулировка владельца / за�
 ### Execution evidence after D15 (no new owner waiver)
 04.11.2026: e9fd4aa fixes actual320px header clipping;610d0f9 corrects daily brief caller JWT/RLS and is deployed to STAGING only; c216963 bounds stalled decorative room artwork using its existing fallback. No feature ID/status obligation, category, title, production role or release scope is removed. Current source c216963,13 CI PASS,26 targeted hosted cases PASS; full protected/hosted/KING/production gates stay open. The old six QA rows remain absent. Five new exact disposable feedback rows from successful41850073063 are retained pending the separately required owner authorization.
 
+
+## D17 — 04.11.2026: полное сохранение истории бренда
+Владелец прямо потребовал **«зафиксируй все это, чтобы не потерялось ничего»**. Для решения D16 создан [архивный индекс](ZAPRUDA_BRAND_IDENTITY_ARCHIVE_INDEX_20261104.md), 35 исходных изображений упакованы в отдельный ZIP с SHA-256. Индекс сохраняет альтернативы, отметки 03/06 и 01/05/11/20, premium B, геометрию тонкой рыбки, спокойные обои, Carbon, Neon Threads, Topographic, принципы меню и темы. **В GitHub зафиксированы тексты и manifest ссылки; бинарный ZIP пока передаётся владельцу отдельно и требует сохранения в постоянном хранилище.** Ни PR #93, ни main, ни production, ни версия не меняются по данному решению.
