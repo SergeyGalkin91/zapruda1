@@ -47,3 +47,6 @@ Frontend regression: restore the saved prior build while retaining compatible ad
 
 ## Повторный read-only срез FINAL RELEASE INTEGRATION
 [Fresh exact diff](../qa/product-contract/SCHEMA_DIFF_20261104_FINAL.json), 04.11.2026 19:31 Москва: все11 catalog-difference sections совпадают с предыдущим срезом; STAGING65 / Production62 migrations, Edge9 /9. Никакая миграция не повторялась и Production не менялась. Env/OAuth/backup/PITR/restore dry run не объявлены проверенными; это сохраняемые readiness gates. Условное разрешение main не разрешает Production SQL/deploy.
+
+## Последняя разрешённая дельта STAGING
+После каталожного snapshot19:31MSK SQL этой задачей не менялся. Добавлена только существующая в репозитории Edge Function `daily-fishing-brief` version1, verify_jwt=true, с пользовательским RLS-контекстом; source readback совпадает с Git610d0f9/c216963. Свежий [Edge inventory](../qa/product-contract/EDGE_INVENTORY_FINAL_20261104.json): STAGING10 функций / Production9. Это отдельная требуемая операция будущего переноса, не применённая к Production. Production env/OAuth/backup/PITR/restore dry run по-прежнему UNVERIFIED; публикацию не выполнять. Каталожный JSON сохраняет точное время своего среза, а [live security readback](../qa/product-contract/LIVE_FINAL_SECURITY_20261104.json) отдельно фиксирует club RLS и applied deltas22:00MSK.

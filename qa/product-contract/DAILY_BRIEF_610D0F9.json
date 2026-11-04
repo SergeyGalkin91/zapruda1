@@ -1,0 +1,50 @@
+{
+  "code_sha": "610d0f9b56c23e282fdb01b33e08b0b2c9aa933c",
+  "current_code_sha": "c21696356cd1e9eb211af06e8645ab8872002701",
+  "project": "yudtbifopfnjtjanaqrd",
+  "production_touched": false,
+  "deployment": {
+    "slug": "daily-fishing-brief",
+    "version": 1,
+    "status": "ACTIVE",
+    "verify_jwt": true,
+    "created_at": 1793816272080,
+    "ezbr_sha256": "47f652c97ec14cbb78cdbd3baa5e0d03b17011214bc35921461df9a329b4a9bc"
+  },
+  "source_readback": {
+    "version": 1,
+    "verify_jwt": true,
+    "ezbr_sha256": "47f652c97ec14cbb78cdbd3baa5e0d03b17011214bc35921461df9a329b4a9bc",
+    "indexMatchesGit": true,
+    "handlerMatchesGit": true
+  },
+  "pinned_deno": {
+    "run_id": 41881268738,
+    "job_id": 126754047086,
+    "passed": 9,
+    "failed": 0,
+    "level": "isolated HTTP dependencies with actual pinned Supabase SDK; not real JWT acceptance"
+  },
+  "anonymous_probe": {
+    "anonymous_status": 401,
+    "body": "{\"code\":\"UNAUTHORIZED_NO_AUTH_HEADER\",\"message\":\"Missing authorization header\"}"
+  },
+  "hosted": {
+    "deploy_id": "6aeb7074b9ebab9a847e7a5d",
+    "deployed_sha": "610d0f9b56c23e282fdb01b33e08b0b2c9aa933c",
+    "level": "Actual existing confirmed single-user hosted UI",
+    "verified": [
+      "Invited Netlify authentication",
+      "Existing ZAPRUDA login",
+      "RLS-scoped home-city preference read",
+      "Actual Open-Meteo weather and sourced news rendered",
+      "No JWT/cookie/credential inspected or copied"
+    ],
+    "screenshot": "hosted-final/zapruda-daily-brief-after-610d0f9.jpg",
+    "remaining": [
+      "Four distinct JWT users on final source",
+      "Full hosted two-user publication/media/retry",
+      "KING genuine independent acceptance"
+    ]
+  }
+}

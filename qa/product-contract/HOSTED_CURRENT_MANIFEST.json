@@ -1,0 +1,94 @@
+{
+  "code_sha": "c21696356cd1e9eb211af06e8645ab8872002701",
+  "deploy_id": "6aeb7c4c1253f47978473cd0",
+  "cases": 26,
+  "layout_pass": 26,
+  "scope": "Focused single-account hosted CSS iframe regression, not full functional or physical-device E2E. Earlier96 cases belong to e9fd4aa.",
+  "capture_limits": "Native parent-browser context images;1440px right edge may exceed the bitmap. See summary for replacement filenames and limits.",
+  "files": [
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-c216-black-1440.jpg",
+      "bytes": 113915,
+      "sha256": "981d9a9a7c05ffbda8783dab633fa6b226ca76c1de0e6a9a44e85aab7e32812a",
+      "git_blob_sha": "0c1cff67dcc1ca6e525b50566b4bcd7699c32065"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-c216-black-768.jpg",
+      "bytes": 100898,
+      "sha256": "ac1e06b4906dcd6d4920c0615b02f30da63a76cbfeb838ea708d0aa03d95f392",
+      "git_blob_sha": "df500c333477d8e06d0d34c948dc847bd73f4dae"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-c216-blue-390.jpg",
+      "bytes": 88090,
+      "sha256": "6d29fc3528a414684bfb4a21f66e9ae65979f384596af0e3329e1aa7303d0e88",
+      "git_blob_sha": "f49d33cfa2978d67e220204f834fa9c280cc846a"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-c216-blue-daily.jpg",
+      "bytes": 89962,
+      "sha256": "f90bac0a56e9b588cbbcc1138e925489bc80a0ca4d4af6e1a8e1de3c726b3e71",
+      "git_blob_sha": "07e5d20914883959a3cb9154e4f3079cff0999c8"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-chat-thumbnail-after-c216963.jpg",
+      "bytes": 78874,
+      "sha256": "d6fec5ce78d02149132f8158e488fc9fb8eed1999d76c5a8a368b29272fe20dc",
+      "git_blob_sha": "7c8299bb29f75a9c4a9d46dd74197b581eb405c3"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-chat-thumbnail-regression.json",
+      "bytes": 3735,
+      "sha256": "eb27e9c315617446222df1d1372012621de652fb4afd468b0d0c13fb94232511",
+      "git_blob_sha": "4931bf72bc7b080faa3016ef0dc58d050078ae67"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-current-classic-320-feed-c216963.jpg",
+      "bytes": 82148,
+      "sha256": "e81c9962179aca943b74ad9d2a1d5a525b76032b7891335cb5f59e4057143d5d",
+      "git_blob_sha": "f9414100f33c9f1abeac48598cdc92d173f53e13"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-current-classic-390-feed-c216963.jpg",
+      "bytes": 86556,
+      "sha256": "750f829ee059a083db06627eca2c444e6312b173552f29d44b08b37c5b37cb56",
+      "git_blob_sha": "1c270802949ff94dbe67b7b928de09c4464a538b"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-current-electric-blue-1440-feed-c216963.jpg",
+      "bytes": 119097,
+      "sha256": "9ebda98f6b5f740eb9515ea70a02a98fb65d220bcc25afc5d04b38b2ad361901",
+      "git_blob_sha": "e00d32f904566392803c18046492f1ecfc27d218"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-current-electric-blue-320-feed-c216963.jpg",
+      "bytes": 83744,
+      "sha256": "6cf33845967b631c5fd8ba6e9f9f990a336d1b30941c339ae1f65cc53196f64e",
+      "git_blob_sha": "86365aefef473688c849c826b66d2563f0fd7178"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-current-electric-blue-768-feed-c216963.jpg",
+      "bytes": 103665,
+      "sha256": "2ab06765722f8e11f45713691b42284a95dcdc28603d89860073e09613a5e6c1",
+      "git_blob_sha": "6a3ff50d5f544e1e09545700be9abd4944f78eb9"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-hosted-cases-c216963.json",
+      "bytes": 39665,
+      "sha256": "528ab68506cf8dcd14321035aa26d69ce6192280967044f26e359d1840b1acb6",
+      "git_blob_sha": "fedb4703af4f168315a4662f0963ba0bbde24574"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-hosted-console-c216963.json",
+      "bytes": 12593,
+      "sha256": "f751f33b20c1df4d9b3cbac7959fadcabfa0468171fdf32461539263d90b28b5",
+      "git_blob_sha": "3d2d06d3345b9bc90801151a977e881a42f9b79c"
+    },
+    {
+      "path": "qa/product-contract/hosted-current/zapruda-hosted-summary-c216963.json",
+      "bytes": 1554,
+      "sha256": "71bff7b35e5985531264a5640ae5a56f5867c5b93063dc82d46167a6d805eda8",
+      "git_blob_sha": "285f61b229f0bf90287a63ed6864779ac8169d7d"
+    }
+  ]
+}

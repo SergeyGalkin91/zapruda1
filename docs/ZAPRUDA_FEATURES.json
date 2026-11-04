@@ -1,5 +1,5 @@
 {
-  "source_sha": "e9fd4aa8172d7e55553c0882640ecebb75c9d421",
+  "source_sha": "c21696356cd1e9eb211af06e8645ab8872002701",
   "features": [
     {
       "id": "AUTH-01",
@@ -23,7 +23,7 @@
       "status": "IMPLEMENTED",
       "acceptance": "AuthSessionBoundary.test.tsx; два пользователя в одном браузере",
       "evidence": "f3bbe1b authenticated Browser 41850073063 PASS: two distinct UI logins and same-browser account isolation; hosted one-account login independently observed.",
-      "blocker": "Final e9fd4aa protected regression and complete hosted two-account acceptance remain open."
+      "blocker": "Final c216963 protected regression and complete hosted two-account acceptance remain open."
     },
     {
       "id": "AUTH-03",
@@ -130,8 +130,8 @@
       "backend": "chat_places/chat_messages, ensure_chat_place",
       "status": "STAGING VERIFIED",
       "acceptance": "GeographicChat.test.tsx; два JWT",
-      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix. Final c216963 additionally fixes a stalled decorative room photo; actual hosted chat layout/readiness passed in both themes atall4required widths. No user-message media path was changed.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "CHAT-02",
@@ -143,7 +143,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "GeographicChat.test.tsx; chat-media.test.ts; outsider denial",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "CHAT-03",
@@ -155,7 +155,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "reconnect, два клиента, ввод во время обновления",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "CHAT-04",
@@ -167,7 +167,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "доставка → unread → прочитано → другой клиент",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "SOC-03",
@@ -227,7 +227,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "ProfilePrivateRead.test.tsx; profile-save-feedback.test.ts",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "PROFILE-02",
@@ -263,7 +263,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "NewReport.test.tsx; reload/zero-catch",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "REPORT-02",
@@ -275,7 +275,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "back/next/reload на всех шагах, invalid focus",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "REPORT-03",
@@ -287,7 +287,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "pilot-schema-database.test.ts; NewReport.test.tsx; lost response/retry",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "REPORT-04",
@@ -299,7 +299,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "report-photo-security.test.ts; report-privacy-database.test.ts; check-report-photo-browser.mjs",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "STREET-01",
@@ -311,7 +311,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "reload, завершение, отказ storage",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "STREET-02",
@@ -323,7 +323,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "ожидание > минуты без действий",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "STREET-03",
@@ -335,7 +335,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "создать/восстановить выбранные снасти",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "STREET-04",
@@ -347,7 +347,7 @@
       "status": "STAGING VERIFIED",
       "acceptance": "повторный импорт, отмена, публикация один раз",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "MAP-01",
@@ -371,7 +371,7 @@
       "status": "IMPLEMENTED",
       "acceptance": "owner/outsider, добровольное раскрытие",
       "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
-      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate c216963 requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "SPOT-01",
@@ -546,12 +546,12 @@
       "feature": "погода/единицы/ошибки",
       "module": "AI FISHING",
       "priority": "P?",
-      "source": "src/components/DailyFishingBrief.tsx; src/lib/weather-units.ts",
+      "source": "src/components/DailyFishingBrief.tsx; src/lib/weather-units.ts; supabase/functions/daily-fishing-brief/handler.ts",
       "backend": "openweather-current/daily-fishing-brief",
       "status": "IMPLEMENTED",
       "acceptance": "weather-units.test.ts; live актуальность",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "IMPLEMENTED по inventory; live погода не принята"
+      "evidence": "610d0f9 handler deployed only to STAGING,version1,verify_jwt=true; live source readback matches Git. Real confirmed-user hosted home-city weather/news rendered atall4widths/boththemes on c216963; anonymous direct probe401. Pinned-SDK Deno9/9 and source CI PASS. No service-role preference reads, cache sharing or AI route cutover.",
+      "blocker": "Positive proof covers the current single-account daily brief, not every weather/AI path or four-user final protected acceptance. Full paid AI contract stays blocked separately."
     },
     {
       "id": "AI-03",
@@ -646,20 +646,20 @@
       "backend": "localStorage theme",
       "status": "IMPLEMENTED",
       "acceptance": "appearance.test.ts; visual-theme-smoke.cjs",
-      "evidence": "Exact e9fd4aa deployed by clean-cache Netlify retry6aeb663d03e8681d52163b74. Actual hosted 96/96 single-account CSS-frame layout/readiness cases:12 routes×4widths×2themes, persisted themes, no horizontal overflow and STAGING-only observed backend origins; original Matte Black restored. Three-engine header CI SUCCESS.",
-      "blocker": "Full functional hosted signup/recovery/two-account transactions, physical keyboard/safe area and final protected JWT regression remain open;16 cases expose daily-summary/guide errors. See final report and hash manifest."
+      "evidence": "Final c216963 / Netlify6aeb7c4c1253f47978473cd0:26 focused single-account hosted layout/readiness cases PASS; feed and chat at320/390/768/1440 in both themes;12 routes at320 Matte Black. Theme persisted through navigation and original Matte Black restored. Historical96 cases remain scoped to e9fd4aa.",
+      "blocker": "Full hosted signup/recovery/two-account transactions, physical keyboard/safe area and final protected JWT regression remain open. Guide backend contract error persists; ordinary CI and layout checks are not release approval."
     },
     {
       "id": "UI-02",
       "feature": "premium/mobile/accessibility/все экраны",
       "module": "Общая платформа",
       "priority": "P0",
-      "source": "src/components/Shell.tsx; src/styles.css; scripts/browser-shell-bounds.cjs; scripts/e2e/authenticated-browser-live.mjs; qa/hosted-viewport.html",
+      "source": "src/components/Shell.tsx; src/styles.css; scripts/browser-shell-bounds.cjs; scripts/e2e/authenticated-browser-live.mjs; qa/hosted-viewport.html; src/components/ChatRoomThumbnail.tsx",
       "backend": "реальные loading/empty/error данные",
       "status": "IMPLEMENTED",
       "acceptance": "UI_ACCEPTANCE: 320/390/1440 обе темы",
-      "evidence": "Header defect fixed and hosted verified on e9fd4aa:320px client305, profile197–241/menu249–293, both44×44. 96 layout/readiness cases PASS with actual error states preserved;441 local tests/typecheck/build and13 ordinary CI workflows PASS. Native context screenshots include before/after and both themes at4 CSS widths.",
-      "blocker": "Complete accessibility/all-screen functional acceptance is open. Missing guide backend contract and daily-summary service remain real errors; role-only screens, physical device keyboard/safe area and hosted two-user transactions are unverified."
+      "evidence": "Hosted header correction e9fd4aa fits320px client305 with44px controls. c216963 bounds stalled decorative room photos to5s using the existing icon, with5 component regressions. Final13 CI workflows PASS,446 tests/37 files;26 targeted hosted layout/readiness cases PASS with real error states retained. Before/after context screenshots and metrics saved.",
+      "blocker": "Complete accessibility/all-screen functional acceptance remains open; guide contract errors, authorized role-only screens, physical keyboard/safe area and hosted two-user transactions are not accepted. Latest variantB brand direction is preserved; production assets/prototypes and separate visual acceptance remain pending."
     },
     {
       "id": "RELEASE-01",

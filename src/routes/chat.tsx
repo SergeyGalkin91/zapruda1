@@ -1,3 +1,4 @@
+import { ChatRoomThumbnail } from "@/components/ChatRoomThumbnail";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
@@ -863,24 +864,7 @@ export function GeographicChat() {
                         (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")
                       }
                     >
-                      <span
-                        className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34435E] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]"
-                        aria-hidden="true"
-                      >
-                        <img
-                          src={ROOM_PHOTOS[t.key]}
-                          loading="lazy"
-                          alt=""
-                          className="absolute inset-0 size-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            e.currentTarget.nextElementSibling?.classList.remove("hidden");
-                          }}
-                        />
-                        <span className="relative z-10 hidden text-2xl text-[#D7FF35]">
-                          {t.icon}
-                        </span>
-                      </span>
+                      <ChatRoomThumbnail src={ROOM_PHOTOS[t.key]} fallback={t.icon} />
                       <span className="min-w-0">
                         <span className="block truncate text-base font-black text-white">
                           {t.label}

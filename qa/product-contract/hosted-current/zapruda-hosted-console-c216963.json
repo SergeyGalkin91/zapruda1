@@ -1,0 +1,406 @@
+{
+  "sha": "c21696356cd1e9eb211af06e8645ab8872002701",
+  "scope": "Parent QA tab captured warnings/errors only, query strings removed; not a complete HTTP/WebSocket trace.",
+  "entries": [
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:34:34.151Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:34:37.361Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:34:37.374Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:34:41.467Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:34:41.482Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:34:45.505Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:34:45.527Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:34:59.750Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:34:59.766Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:35:03.763Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:35:03.780Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:36:59.723Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:36:59.724Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:37:05.409Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:37:05.429Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:37:17.119Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:37:17.145Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:37:23.193Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:37:23.210Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:37:53.716Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:37:53.736Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:37:57.747Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:37:57.783Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:38:20.316Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:44:18.138Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:12.299Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:12.299Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:13.266Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:17.138Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:17.160Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:23.000Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:23.017Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:29.117Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:29.131Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:36.226Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:36.240Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:42.305Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:45:42.321Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:12.913Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:12.926Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:20.713Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:20.725Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:25.387Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:25.404Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:31.529Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:31.544Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:37.579Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:37.591Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:43.684Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:43.700Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:49.781Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:46:49.793Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:47:35.385Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:47:35.386Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:47:40.368Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:47:40.383Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:47:46.275Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:47:46.294Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:47:50.409Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:47:50.424Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:47:58.177Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:47:58.193Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:48:02.302Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:48:02.312Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:48:52.534Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:48:52.564Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:48:56.943Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:48:56.970Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:49:04.703Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:49:04.723Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:49:08.856Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:49:08.885Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:49:59.566Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:49:59.568Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:50:04.326Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:50:04.341Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:50:10.062Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:50:10.079Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:50:15.259Z",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "level": "error",
+      "timestamp": "2026-11-04T18:50:15.282Z",
+      "message": "Error sending browser metadata to extension: Object"
+    }
+  ]
+}

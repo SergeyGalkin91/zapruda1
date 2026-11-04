@@ -1,0 +1,34 @@
+{
+  "sha": "c21696356cd1e9eb211af06e8645ab8872002701",
+  "deployId": "6aeb7c4c1253f47978473cd0",
+  "caseCount": 26,
+  "layoutPass": 26,
+  "dailyBriefPass": 8,
+  "renderedErrors": [
+    {
+      "route": "/communities",
+      "width": 320,
+      "theme": "classic",
+      "markers": [
+        "Не удалось",
+        "Could not find",
+        "does not exist"
+      ]
+    }
+  ],
+  "scope": "Focused final regression:12 routes at320 Matte Black, plus feed/chat atall4widths/boththemes; actual single-account hosted same-origin CSS iframe, not complete functional or physical-device E2E.",
+  "historical": "The earlier96-case matrix belongs to e9fd4aa and is retained separately.",
+  "screenshots": [
+    "zapruda-current-classic-320-feed-c216963.jpg",
+    "zapruda-current-classic-390-feed-c216963.jpg",
+    "zapruda-c216-black-768.jpg",
+    "zapruda-c216-black-1440.jpg",
+    "zapruda-current-electric-blue-320-feed-c216963.jpg",
+    "zapruda-c216-blue-390.jpg",
+    "zapruda-current-electric-blue-768-feed-c216963.jpg",
+    "zapruda-current-electric-blue-1440-feed-c216963.jpg"
+  ],
+  "restoredTheme": "classic",
+  "restoredThemeVerified": "Real settings aria-pressed Matte Black=true / Electric Blue=false after all extra captures.",
+  "captureLimits": "Native parent-browser context captures, not physical-device screenshots. Child CSS widths differ from bitmap size; 1440px right edge can extend beyond the parent bitmap. Some replacement captures were made after the measured case; captures do not independently prove functional acceptance."
+}
