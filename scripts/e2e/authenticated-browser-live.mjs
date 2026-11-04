@@ -9,14 +9,16 @@ const url = process.env.ZAPRUDA_E2E_STAGING_URL,
   key = process.env.ZAPRUDA_E2E_PUBLISHABLE_KEY;
 if (url !== "https://yudtbifopfnjtjanaqrd.supabase.co" || !key)
   throw Error("STAGING_CONFIGURATION_REQUIRED");
-const base = "http://127.0.0.1:3000",
+const base = process.env.ZAPRUDA_BROWSER_BASE_URL || "http://127.0.0.1:3000",
   place = "00000000-0000-4000-8000-000000000001";
+if (!["http://127.0.0.1:3000", "https://deploy-preview-93--zapruda1.netlify.app"].includes(base))
+  throw Error("BROWSER_TARGET_NOT_ALLOWED");
 const tag = "QA-ACCEPT-" + randomUUID();
 const out = "qa/authenticated-browser";
 mkdirSync(out, { recursive: true });
 const result = {
   sha: process.env.GITHUB_SHA,
-  environment: "local frontend + real Supabase STAGING JWT",
+  environment: base + " + real Supabase STAGING JWT",
   passed: false,
   cleanup: false,
   checks: [],
@@ -217,6 +219,7 @@ try {
     await a
       .getByLabel("Название отчёта *", { exact: true })
       .fill(tag + (withFish ? " fish-private" : " no-catch-private"));
+    await a.getByLabel("Дата рыбалки", { exact: true }).fill(new Date().toISOString().slice(0, 10));
     await a
       .getByLabel("Вид рыбалки для достижений *", { exact: true })
       .selectOption({ label: "Фидер" });

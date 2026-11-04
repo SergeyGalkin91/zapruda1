@@ -54,6 +54,8 @@ jobs:
           bunx playwright install --with-deps chromium firefox webkit
       - name: Real authenticated browser journeys and screenshots
         if: ${{ !cancelled() }}
+        env:
+          ZAPRUDA_BROWSER_BASE_URL: https://deploy-preview-93--zapruda1.netlify.app
         run: |
           node .output/server/index.mjs > /tmp/authenticated-server.log 2>&1 &
           SERVER_PID=$!
@@ -62,6 +64,19 @@ jobs:
             if curl -fsS http://127.0.0.1:3000/auth -o /dev/null; then break; fi
             sleep 2
           done
+          node --input-type=module <<'JS'
+          const sha = process.env.GITHUB_SHA;
+          const root = "https://api.github.com/repos/SergeyGalkin91/zapruda1";
+          let ready = false;
+          for (let attempt = 0; attempt < 40; attempt++) {
+            const pr = await fetch(root + "/pulls/93").then(r => r.json());
+            if (pr.head?.sha !== sha) throw Error("PREVIEW_HEAD_CHANGED");
+            const status = await fetch(root + "/commits/" + sha + "/status").then(r => r.json());
+            if (status.statuses?.some(s => s.context === "netlify/zapruda1/deploy-preview" && s.state === "success")) { ready = true; break; }
+            await new Promise(resolve => setTimeout(resolve, 15000));
+          }
+          if (!ready) throw Error("EXACT_SHA_PREVIEW_NOT_READY");
+          JS
           node scripts/e2e/authenticated-browser-live.mjs
       - uses: actions/upload-artifact@v4
         if: always()
