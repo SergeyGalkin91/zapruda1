@@ -10,6 +10,7 @@ on:
       - "supabase/staging/rollback_v075_pilot_schema.sql"
       - "supabase/tests/unit/*dependencies*"
       - "supabase/functions/chat-photo-*/**"
+      - "supabase/functions/daily-fishing-brief/**"
       - "scripts/check-pilot-postgres.mjs"
       - "scripts/check-community-postgres.mjs"
       - "scripts/e2e/pilot-schema-live.mjs"
@@ -40,7 +41,9 @@ jobs:
         with:
           deno-version: v2.x
       - name: Typecheck both actual chat photo entrypoints
-        run: deno check --node-modules-dir=auto supabase/functions/chat-photo-upload/index.ts supabase/functions/chat-photo-access/index.ts supabase/staging/functions/submit-community-request/index.ts
+        run: deno check --node-modules-dir=auto supabase/functions/chat-photo-upload/index.ts supabase/functions/chat-photo-access/index.ts supabase/staging/functions/submit-community-request/index.ts supabase/functions/daily-fishing-brief/index.ts
+      - name: Daily brief auth context, account isolation and honest upstream errors
+        run: deno test --node-modules-dir=auto supabase/functions/daily-fishing-brief/handler.test.ts
       - run: node --check scripts/e2e/pilot-schema-live.mjs
       - run: node --check scripts/e2e/feedback-live.mjs
       - uses: actions/upload-artifact@v4

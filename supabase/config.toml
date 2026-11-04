@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.zapruda-daily-advice-yandex]
 verify_jwt = true
+
+[functions.daily-fishing-brief]
+verify_jwt = true
