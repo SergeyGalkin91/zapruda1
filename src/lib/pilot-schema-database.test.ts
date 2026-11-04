@@ -18,6 +18,7 @@ const fish = [{ species: "SQL fixture", weight_kg: 1, length_cm: 10 }];
 const deltas = [
   "v075_report_integrity.sql",
   "v075_public_chat.sql",
+  "v075_chat_client_message_identity.sql",
   "v075_private_gear_marks.sql",
   "v075_profile_progress.sql",
   "v075_pilot_realtime.sql",
@@ -186,6 +187,29 @@ describe("Public chat metadata and private media (isolated SQL)", () => {
     await actAsFixture(db, users.owner);
     expect((await db.query("select id from public.chat_places")).rows).toHaveLength(11);
     expect((await db.query("select id from public.chat_messages")).rows).toEqual([]);
+  });
+  it("allows one own client UUID without permitting identity spoofing or overwrites", async () => {
+    await actAsFixture(db, users.owner);
+    const country = (
+      await db.query<{ id: string }>(
+        "select id from public.chat_places where country_code='RU' and level='country'",
+      )
+    ).rows[0]!.id;
+    const insert = (actor = users.owner) =>
+      db.query(
+        "insert into public.chat_messages(id,user_id,body,place_id)values($1,$2,'Retry identity',$3)",
+        [msg, actor, country],
+      );
+    await insert();
+    await denied(() => insert(), "23505");
+    await denied(() => db.query("update public.chat_messages set id=$1 where id=$2", [other, msg]));
+    await actAsFixture(db, users.outsider);
+    await denied(() => insert());
+    expect(
+      (await db.query("select body from public.chat_messages where id=$1", [msg])).rows,
+    ).toEqual([{ body: "Retry identity" }]);
+    await actAsFixture(db, "", "anon");
+    await denied(() => insert());
   });
   it("checks authorship, bounded text and allowed reaction values", async () => {
     await actAsFixture(db, users.owner);

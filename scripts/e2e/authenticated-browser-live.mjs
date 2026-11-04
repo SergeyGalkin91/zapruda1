@@ -354,8 +354,10 @@ try {
   for (const [k, v] of Object.entries(process.env))
     if (/ZAPRUDA_E2E_.*(?:KEY|EMAIL|PASSWORD)/.test(k) && v)
       detail = detail.split(v).join("[REDACTED]");
-  result.detail = detail.replace(/[^\s]+@[^\s]+/g, "[EMAIL]")
-    .replace(/eyJ[A-Za-z0-9_.-]+/g, "[JWT]").slice(0, 1400);
+  result.detail = detail
+    .replace(/[^\s]+@[^\s]+/g, "[EMAIL]")
+    .replace(/eyJ[A-Za-z0-9_.-]+/g, "[JWT]")
+    .slice(0, 1400);
   process.exitCode = 1;
 } finally {
   try {
