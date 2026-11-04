@@ -16,7 +16,8 @@ const summary = {
 const accounts = [],
   reports = [],
   kits = [],
-  gear = [];
+  gear = [],
+  messages = [];
 let owner,
   stranger,
   privateReport,
@@ -69,6 +70,54 @@ async function must(result, code) {
 async function noRows(api, table, field, id) {
   const result = await api.from(table).select("id").eq(field, id);
   requireThat(!result.error && result.data.length === 0, "PILOT_PRIVATE_ROW_EXPOSED");
+}
+async function foreignMutationDenied(result) {
+  requireThat(result.error || result.data?.length === 0, "PILOT_FOREIGN_MUTATION_ALLOWED");
+}
+async function realtimeInsert(api, placeId, body) {
+  await api.realtime.setAuth(stranger.token);
+  let received;
+  const event = new Promise((resolve) => {
+    received = resolve;
+  });
+  const channel = api.channel("pilot-message-" + randomUUID()).on(
+    "postgres_changes",
+    {
+      event: "INSERT",
+      schema: "public",
+      table: "chat_messages",
+      filter: "place_id=eq." + placeId,
+    },
+    (payload) => {
+      if (payload.new.user_id === owner.id && payload.new.body === body) received(true);
+    },
+  );
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("PILOT_MESSAGE_SUBSCRIBE_TIMEOUT")), 15000);
+    channel.subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        clearTimeout(timer);
+        resolve(true);
+      } else if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(status)) {
+        clearTimeout(timer);
+        reject(new Error("PILOT_MESSAGE_SUBSCRIBE_FAILED"));
+      }
+    });
+  });
+  return async () => {
+    let timer;
+    try {
+      await Promise.race([
+        event,
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error("PILOT_MESSAGE_NOT_DELIVERED")), 15000);
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer);
+      await api.removeChannel(channel);
+    }
+  };
 }
 function form(parent, id) {
   const body = new FormData();
@@ -149,6 +198,26 @@ try {
   requireThat(catches.length === 1, "PILOT_DUPLICATE_CATCH");
   await noRows(stranger.api, "fishing_reports", "id", privateReport);
   await noRows(stranger.api, "catches", "report_id", privateReport);
+  await foreignMutationDenied(
+    await stranger.api
+      .from("fishing_reports")
+      .update({ title: "[QA rejected mutation]" })
+      .eq("id", privateReport)
+      .select("id"),
+  );
+  await foreignMutationDenied(
+    await stranger.api.from("fishing_reports").delete().eq("id", privateReport).select("id"),
+  );
+  requireThat(
+    (await owner.api.from("fishing_reports").select("latitude,longitude").eq("id", privateReport))
+      .error,
+    "PILOT_EXACT_GPS_SELECT_ALLOWED",
+  );
+  const retained = await must(
+    await owner.api.from("fishing_reports").select("id,title").eq("id", privateReport).single(),
+    "PILOT_REPORT_OWNER_READ_FAILED",
+  );
+  requireThat(retained.title === request.p_report.title, "PILOT_PRIVATE_REPORT_MUTATED");
   const failedId = randomUUID();
   reports.push(failedId);
   const failed = await owner.api.rpc("publish_report_with_catches", {
@@ -255,6 +324,7 @@ try {
     "PILOT_CHAT_SEND_FAILED",
   );
   message = sent.id;
+  messages.push(message);
   const reaction = await stranger.api
     .from("chat_message_reactions")
     .insert({ message_id: message, user_id: stranger.id, emoji: "👍" });
@@ -325,8 +395,15 @@ try {
   await safeImage(await photoStatus("chat-photo-access", chatPhoto, owner.token));
   // This is a public signed-in chat: another confirmed participant CAN view it.
   await safeImage(await photoStatus("chat-photo-access", chatPhoto, stranger.token));
+  const deniedGuestPhoto = await photoStatus("chat-photo-access", chatPhoto);
+  // The JWT gateway may return 401/403; the access handler intentionally uses
+  // empty 404 to avoid disclosing whether a protected photo exists. Hosted
+  // logs from run 41750476167 attempt 3 confirmed that empty 404 path.
+  summary.guestChatPhotoStatus = deniedGuestPhoto.status;
   requireThat(
-    (await photoStatus("chat-photo-access", chatPhoto)).status === 401,
+    [401, 403, 404].includes(deniedGuestPhoto.status) &&
+      !deniedGuestPhoto.headers.get("content-type")?.startsWith("image/") &&
+      !Buffer.from(await deniedGuestPhoto.arrayBuffer()).includes(Buffer.from([0xff, 0xd8])),
     "PILOT_GUEST_CHAT_PHOTO_ALLOWED",
   );
   const direct = await owner.api.storage
@@ -339,6 +416,63 @@ try {
   });
   requireThat(wrongDelete.status === 404, "PILOT_STRANGER_CHAT_DELETE_ALLOWED");
   passed("real-chat-send-reaction-sanitized-photo-retry-and-Storage-boundary");
+  phase = "global_chat_message_realtime";
+  const global = await must(
+    await owner.api.from("chat_places").select("id").eq("level", "global").single(),
+    "PILOT_GLOBAL_ROOM_MISSING",
+  );
+  const globalBody = "[QA temporary] real Realtime message " + randomUUID();
+  const delivered = await realtimeInsert(stranger.api, global.id, globalBody);
+  const globalSent = await must(
+    await owner.api
+      .from("chat_messages")
+      .insert({ user_id: owner.id, place_id: global.id, topic: "general", body: globalBody })
+      .select("id")
+      .single(),
+    "PILOT_GLOBAL_SEND_FAILED",
+  );
+  messages.push(globalSent.id);
+  await delivered();
+  await foreignMutationDenied(
+    await stranger.api
+      .from("chat_messages")
+      .update({ body: "[QA rejected edit]" })
+      .eq("id", globalSent.id)
+      .select("id"),
+  );
+  await foreignMutationDenied(
+    await stranger.api.from("chat_messages").delete().eq("id", globalSent.id).select("id"),
+  );
+  requireThat(
+    (
+      await guest
+        .from("chat_messages")
+        .insert({ user_id: owner.id, place_id: global.id, body: "[QA rejected guest]" })
+    ).error,
+    "PILOT_GUEST_CHAT_WRITE_ALLOWED",
+  );
+  const forbiddenPlace = await must(
+    await owner.api
+      .from("chat_places")
+      .select("id")
+      .eq("level", "country")
+      .neq("country_code", prefs.home_country_code)
+      .limit(1)
+      .single(),
+    "PILOT_OTHER_COUNTRY_REQUIRED",
+  );
+  const forbidden = await owner.api
+    .from("chat_messages")
+    .insert({
+      user_id: owner.id,
+      place_id: forbiddenPlace.id,
+      topic: "general",
+      body: "[QA temporary] geographic restriction probe",
+    })
+    .select("id");
+  if (forbidden.data?.length) messages.push(...forbidden.data.map((row) => row.id));
+  requireThat(forbidden.error, "PILOT_FOREIGN_GEOGRAPHY_WRITE_ALLOWED");
+  passed("global-message-actual-Realtime-foreign-mutations-guest-and-geography-denied");
   phase = "private_gear_marks_profile";
   const previous = await must(
     await owner.api.from("angler_gear_sets").select("id").eq("is_primary", true).maybeSingle(),
@@ -390,6 +524,25 @@ try {
   );
   requireThat(kitRows.filter((k) => k.is_primary).length === 1, "PILOT_MULTIPLE_PRIMARY_KITS");
   await noRows(stranger.api, "angler_gear", "id", rod);
+  await foreignMutationDenied(
+    await stranger.api
+      .from("angler_gear")
+      .update({ model: "QA rejected edit" })
+      .eq("id", rod)
+      .select("id"),
+  );
+  await foreignMutationDenied(
+    await stranger.api.from("angler_gear").delete().eq("id", rod).select("id"),
+  );
+  requireThat(
+    (
+      await must(
+        await owner.api.from("angler_gear").select("id,model").eq("id", rod).single(),
+        "PILOT_OWN_GEAR_MISSING",
+      )
+    ).model === "QA transport",
+    "PILOT_FOREIGN_GEAR_MUTATED",
+  );
   requireThat(
     (await stranger.api.rpc("set_my_primary_gear_set", { p_kit_id: kits[0] })).error,
     "PILOT_FOREIGN_PRIMARY_KIT_ALLOWED",
@@ -460,9 +613,9 @@ try {
           });
           requireThat([204, 404].includes(removed.status), "PILOT_PHOTO_CLEANUP_FAILED");
         }
-      if (message)
+      if (messages.length)
         await must(
-          await owner.api.from("chat_messages").delete().eq("id", message),
+          await owner.api.from("chat_messages").delete().in("id", messages),
           "PILOT_CHAT_CLEANUP_FAILED",
         );
       if (mark)

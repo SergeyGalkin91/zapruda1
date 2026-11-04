@@ -25,6 +25,7 @@ jobs:
       ZAPRUDA_E2E_RACER_B_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_B_EMAIL }}
       ZAPRUDA_E2E_RACER_B_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_B_PASSWORD }}
       ZAPRUDA_SPOT_E2E_UPLOAD_PROBE: "true"
+      ZAPRUDA_FEEDBACK_E2E_TELEGRAM_DISABLED: "readback-v1-no-outbound-code"
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -33,6 +34,9 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Actual API transactions visibility media and cleanup
         run: node scripts/e2e/pilot-schema-live.mjs
+      - name: Real JWT feedback save history privacy and concurrent limit
+        if: ${{ !cancelled() }}
+        run: node scripts/e2e/feedback-live.mjs
       - name: Independent real SPOT JWT boundaries and rejected upload
         if: ${{ !cancelled() }}
         run: node scripts/e2e/spot-v075-live.mjs

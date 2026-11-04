@@ -269,7 +269,7 @@ function ProfileSections() {
   );
 }
 
-function Profile() {
+export function Profile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -380,11 +380,19 @@ function Profile() {
     void loadFeaturedGear(auth.user.id);
 
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("username,display_name,bio,avatar_url,chat_city")
-        .eq("id", auth.user.id)
-        .maybeSingle(),
+      // Adopt PR #101: private bio is readable only through the own-profile RPC
+      // in STAGING. Keep compatibility with the legacy schema only when that
+      // RPC is absent; never fall back after an authorization/network failure.
+      (async () => {
+        const secured = await supabase.rpc("my_profile_full").maybeSingle();
+        if (!secured.error || !["PGRST202", "42883"].includes(secured.error.code ?? ""))
+          return secured;
+        return supabase
+          .from("profiles")
+          .select("username,display_name,bio,avatar_url,chat_city")
+          .eq("id", auth.user.id)
+          .maybeSingle();
+      })(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
       supabase.rpc("my_fishing_progress"),
       supabase.rpc("my_fishing_specializations_v2"),
