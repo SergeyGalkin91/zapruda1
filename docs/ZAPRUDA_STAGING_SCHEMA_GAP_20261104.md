@@ -47,3 +47,7 @@ Read-only инвентаризация через Supabase и фактическ
 ## Решение о готовности
 
 Полный пилот всего приложения — **NO-GO** до устранения критичных schema gaps и реального E2E. Узкая проверка SPOT authorization, приватного photo transport, SQL award/revoke и UI presentation имеет отдельные доказательства; она не доказывает полный чат/отчёты/профиль.
+
+## Продолжение выравнивания схемы — 04.11.2026
+
+Последующая сверка обнаружила уже применённые дельты catches/comments (20261104000548/000608) и geographic text chat (20261104001134): прежние 31/22 — исторический срез. Эти дельты приняты как baseline и повторно не накладываются. Подготовлены атомарное report+catch сохранение с retry receipt, защищённые chat photos без прямого Storage signing, private gear/marks и необходимые profile aggregates/activity. [План, контракты, rollback и фактические gates](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md). Состояние новых hosted deploy и точный CI смотреть в evidence этого документа; подготовленные SQL/скрипты сами по себе не являются PASS.

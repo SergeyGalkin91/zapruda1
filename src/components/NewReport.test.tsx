@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   invoke: vi.fn(),
   from: vi.fn(),
   insert: vi.fn(),
+  rpc: vi.fn(),
   navigate: vi.fn(),
 }));
 vi.mock("@tanstack/react-router", () => ({
@@ -21,6 +22,7 @@ vi.mock("@/integrations/supabase/client", () => ({
     auth: { getUser: mocks.getUser, getSession: mocks.getSession },
     functions: { invoke: mocks.invoke },
     from: mocks.from,
+    rpc: mocks.rpc,
   },
 }));
 const user = {
@@ -28,10 +30,15 @@ const user = {
   is_anonymous: false,
   email_confirmed_at: "2026-01-01T00:00:00Z",
 };
+const rpcReply = (value: unknown) => {
+  const pending = Promise.resolve(value);
+  return Object.assign(pending, { setHeader: vi.fn(() => pending) });
+};
 beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
   mocks.getUser.mockResolvedValue({ data: { user }, error: null });
+  mocks.rpc.mockImplementation(() => rpcReply({ data: null, error: { code: "OFFLINE_FIXTURE" } }));
   mocks.getSession.mockResolvedValue({
     data: { session: { user, access_token: "offline-token-fixture" } },
     error: null,
@@ -53,6 +60,7 @@ beforeEach(() => {
       select: vi.fn(),
       eq: vi.fn(),
       order: vi.fn(),
+      setHeader: vi.fn(),
       limit: vi.fn(async () => result),
       then: (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve),
       insert: (values: unknown) => {
@@ -61,7 +69,8 @@ beforeEach(() => {
       },
       single: async () => ({ data: { id: "offline-report-id" }, error: null }),
     };
-    for (const method of [query.select, query.eq, query.order]) method.mockReturnValue(query);
+    for (const method of [query.select, query.eq, query.order, query.setHeader])
+      method.mockReturnValue(query);
     return query;
   });
 });
@@ -83,6 +92,52 @@ async function fillReport() {
   return { ...view, form: submit.closest("form")! };
 }
 describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
+  it("keeps the draft when the atomic catch transaction fails after a successful preflight", async () => {
+    const { form } = await fillReport();
+    const original = mocks.from.getMockImplementation()!;
+    mocks.from.mockImplementation((table: string) =>
+      table === "catches"
+        ? { select: () => ({ limit: async () => ({ data: [], error: null }) }) }
+        : original(table),
+    );
+    fireEvent.change(screen.getByPlaceholderText("Вид (щука, окунь…)"), {
+      target: { value: "Окунь" },
+    });
+    fireEvent.submit(form);
+    await screen.findByText(
+      "Не удалось сохранить отчёт с уловом. Черновик сохранён — попробуй позже.",
+    );
+    expect(mocks.rpc).toHaveBeenCalledTimes(1);
+    expect(mocks.insert).not.toHaveBeenCalled();
+    expect(localStorage.getItem("zapruda-report-draft-v1-offline-account-a")).toContain("Окунь");
+  });
+  it("reuses the persisted request ID after a lost transaction response and page reload", async () => {
+    const view = await fillReport();
+    const original = mocks.from.getMockImplementation()!;
+    mocks.from.mockImplementation((table: string) =>
+      table === "catches"
+        ? { select: () => ({ limit: async () => ({ data: [], error: null }) }) }
+        : original(table),
+    );
+    fireEvent.change(screen.getByPlaceholderText("Вид (щука, окунь…)"), {
+      target: { value: "Окунь" },
+    });
+    fireEvent.submit(view.form);
+    await screen.findByText(
+      "Не удалось сохранить отчёт с уловом. Черновик сохранён — попробуй позже.",
+    );
+    const id = mocks.rpc.mock.calls[0]![1].p_report_id;
+    view.unmount();
+    mocks.rpc.mockImplementation(() => rpcReply({ data: id, error: null }));
+    render(<NewReport />);
+    await screen.findByText(
+      "Черновик восстановлен на этом устройстве. Фотографии нужно добавить снова.",
+    );
+    fireEvent.submit(screen.getByRole("button", { name: "Опубликовать отчёт" }).closest("form")!);
+    await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" }));
+    expect(mocks.rpc.mock.calls[1]![1].p_report_id).toBe(id);
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
   it("does not transmit a photo after its account's route has unmounted", async () => {
     let completeBitmap: (value: unknown) => void = () => {};
     const bitmapRequest = vi.fn(

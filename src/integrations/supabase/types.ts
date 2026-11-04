@@ -3118,6 +3118,10 @@ export type Database = {
       };
     };
     Functions: {
+      publish_report_with_catches: {
+        Args: { p_report_id: string; p_report: Json; p_catches: Json };
+        Returns: string;
+      };
       zc_spot_public_leaderboard: {
         Args: { p_spot_id: string; p_league: string };
         Returns: Json;

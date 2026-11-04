@@ -60,10 +60,10 @@ export function NewReport() {
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [savedReportId, setSavedReportId] = useState<string | null>(null);
-  const [savedCatches, setSavedCatches] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(0);
   const [progress, setProgress] = useState("");
   const draftKey = useRef<string | null>(null);
+  const publicationId = useRef<string | null>(null);
   const alive = useRef(true);
   const photoUploadIds = useRef(new Map<File, string>());
   const [draftReady, setDraftReady] = useState(false);
@@ -78,10 +78,18 @@ export function NewReport() {
         if (data.user) {
           const key = "zapruda-report-draft-v1-" + data.user.id;
           draftKey.current = key;
+          publicationId.current = crypto.randomUUID();
           try {
             const raw = localStorage.getItem(key);
             if (raw) {
               const saved = JSON.parse(raw) as Record<string, unknown>;
+              if (
+                typeof saved["publicationId"] === "string" &&
+                /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+                  saved["publicationId"],
+                )
+              )
+                publicationId.current = saved["publicationId"];
               const val = (k: string) => (typeof saved[k] === "string" ? (saved[k] as string) : "");
               setTitle(val("title"));
               setLocation(val("location"));
@@ -131,6 +139,7 @@ export function NewReport() {
       localStorage.setItem(
         draftKey.current,
         JSON.stringify({
+          publicationId: publicationId.current,
           title,
           location,
           weather,
@@ -257,6 +266,7 @@ export function NewReport() {
   }
 
   function clearLocalDraft() {
+    publicationId.current = crypto.randomUUID();
     if (draftKey.current) {
       try {
         localStorage.removeItem(draftKey.current);
@@ -445,6 +455,15 @@ export function NewReport() {
       if (user.id !== actor) throw new Error("Сессия изменилась. Открой отчёт из своего аккаунта.");
       if (user.is_anonymous || !user.email_confirmed_at)
         throw new Error("Подтверди почту, чтобы публиковать отчёты.");
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (!alive.current) return;
+      if (
+        sessionError ||
+        sessionData.session?.user.id !== actor ||
+        !sessionData.session.access_token
+      )
+        throw new Error("Сессия изменилась. Открой отчёт из своего аккаунта.");
+      const authorization = `Bearer ${sessionData.session.access_token}`;
 
       // Verify the catch store before any report INSERT when fish were entered.
       // A no-catch outing must not probe or create a fish record.
@@ -473,67 +492,62 @@ export function NewReport() {
       let reportId = savedReportId;
       if (!reportId) {
         setProgress("Сохраняем отчёт…");
-        const { data: report, error: reportError } = await supabase
-          .from("fishing_reports")
-          .insert({
-            user_id: user.id,
-            title: cleanTitle,
-            body:
-              [
-                story.trim(),
-                technique.trim() ? "Техника: " + technique.trim() : "",
-                lures.trim() ? "Приманки: " + lures.trim() : "",
-              ]
-                .filter(Boolean)
-                .join("\n\n") || null,
-            location_name: location.trim() || null,
-            weather_summary: weather.trim() || null,
-            air_temperature_c: temperature.trim() ? Number(temperature) : null,
-            pressure_hpa: pressure.trim() ? Number(pressure) * 1.33322 : null,
-            wind_direction: windDirection.trim() || null,
-            wind_speed_ms: windSpeed.trim() ? Number(windSpeed) : null,
-            is_public: isPublic,
-            fishing_method: fishingMethod,
-          })
-          .select("id")
-          .single();
-        if (!alive.current) return;
-        if (reportError) throw reportError;
-        reportId = report.id;
-        setSavedReportId(reportId);
-      }
-
-      if (!savedCatches && hasCatches) {
-        // If the previous insert succeeded but its response was lost, do not insert the same catch twice.
-        // The batch insert is atomic, so an existing catch means this report already has its saved batch.
-        const { data: existingCatches, error: existingError } = await supabase
-          .from("catches")
-          .select("id")
-          .eq("report_id", reportId)
-          .limit(1);
-        if (!alive.current) return;
-        if (existingError)
-          throw new Error("Не удалось проверить сохранённый улов: " + existingError.message);
-        const alreadyStored = Boolean(existingCatches?.length);
-        const validCatches = alreadyStored
-          ? []
-          : catches
-              .filter((c) => c.species.trim())
-              .map((c) => ({
-                report_id: reportId,
-                user_id: user.id,
-                species: c.species.trim(),
-                weight_kg: c.weight.trim() ? Number(c.weight) : null,
-                length_cm: c.length.trim() ? Number(c.length) : null,
-                technique: technique.trim() || null,
-                lure: lures.trim() || null,
-              }));
-        if (validCatches.length) {
-          const { error: catchesError } = await supabase.from("catches").insert(validCatches);
+        const values = {
+          title: cleanTitle,
+          body:
+            [
+              story.trim(),
+              technique.trim() ? "Техника: " + technique.trim() : "",
+              lures.trim() ? "Приманки: " + lures.trim() : "",
+            ]
+              .filter(Boolean)
+              .join("\n\n") || null,
+          location_name: location.trim() || null,
+          weather_summary: weather.trim() || null,
+          air_temperature_c: temperature.trim() ? Number(temperature) : null,
+          pressure_hpa: pressure.trim() ? Number(pressure) * 1.33322 : null,
+          wind_direction: windDirection.trim() || null,
+          wind_speed_ms: windSpeed.trim() ? Number(windSpeed) : null,
+          is_public: isPublic,
+          fishing_method: fishingMethod,
+        };
+        if (hasCatches) {
+          // Report + entered catches + retry receipt commit together under existing RLS.
+          // Keep this ID in the local draft if a committed response is lost.
+          const { data: committedId, error: commitError } = await supabase
+            .rpc("publish_report_with_catches", {
+              p_report_id: publicationId.current!,
+              p_report: values,
+              p_catches: catches
+                .filter((c) => c.species.trim())
+                .map((c) => ({
+                  species: c.species.trim(),
+                  weight_kg: c.weight.trim() ? Number(c.weight) : null,
+                  length_cm: c.length.trim() ? Number(c.length) : null,
+                  technique: technique.trim() || null,
+                  lure: lures.trim() || null,
+                })),
+            })
+            .setHeader("Authorization", authorization);
           if (!alive.current) return;
-          if (catchesError) throw new Error("Не удалось сохранить улов: " + catchesError.message);
+          if (commitError || typeof committedId !== "string")
+            throw new Error(
+              "Не удалось сохранить отчёт с уловом. Черновик сохранён — попробуй позже.",
+            );
+          reportId = committedId;
+        } else {
+          // A no-catch outing still has no dependency on catches or the new RPC.
+          const { data: report, error: reportError } = await supabase
+            .from("fishing_reports")
+            .insert({ ...values, user_id: user.id })
+            .setHeader("Authorization", authorization)
+            .select("id")
+            .single();
+          if (!alive.current) return;
+          if (reportError) throw reportError;
+          reportId = report.id;
         }
-        setSavedCatches(true);
+        setSavedReportId(reportId);
       }
 
       for (const [i, photo] of photos.entries()) {
@@ -550,7 +564,7 @@ export function NewReport() {
         body.set("file", prepared, "photo.jpg");
         const { data: photoResult, error: uploadError } = await supabase.functions.invoke(
           "report-photo-upload",
-          { body },
+          { body, headers: { Authorization: authorization } },
         );
         if (!alive.current) return;
         if (uploadError || photoResult?.photo_id !== photoId) {
@@ -667,289 +681,292 @@ export function NewReport() {
         )}
       </div>
       <form className="space-y-6" onSubmit={publish}>
-        <section className="panel grid gap-4 p-5 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <Label t="Название отчёта *">
+        <fieldset disabled={Boolean(savedReportId)} className="min-w-0 space-y-6">
+          <section className="panel grid gap-4 p-5 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <Label t="Название отчёта *">
+                <input
+                  className="field"
+                  placeholder="Например, утро на Кудьме"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  maxLength={120}
+                  required
+                />
+              </Label>
+            </div>
+            <Label t="Вид рыбалки для достижений *">
+              <select
+                className="field"
+                value={fishingMethod}
+                required
+                onChange={(e) => setFishingMethod(e.target.value)}
+              >
+                <option value="" disabled>
+                  Выбери дисциплину…
+                </option>
+                {FISHING_DISCIPLINES.map((d) => (
+                  <option key={d.code} value={d.code}>
+                    {d.title}
+                  </option>
+                ))}
+              </select>
+            </Label>
+            <Label t="Водоём из Атласа (по желанию)">
+              <select
+                className="field"
+                value={selectedWaterbody}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setSelectedWaterbody(id);
+                  const water = catalogWaters.find((w) => w.id === id);
+                  if (water) setLocation(water.name + (water.region ? " · " + water.region : ""));
+                }}
+              >
+                <option value="">Не выбирать — обычный отчёт</option>
+                {catalogWaters.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.name} · {w.region || w.country_code}
+                  </option>
+                ))}
+              </select>
+            </Label>
+            <Label t="Место (без точных координат)">
               <input
                 className="field"
-                placeholder="Например, утро на Кудьме"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                maxLength={120}
-                required
+                placeholder="Например, Волга у Нижнего"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
               />
             </Label>
-          </div>
-          <Label t="Вид рыбалки для достижений *">
-            <select
-              className="field"
-              value={fishingMethod}
-              required
-              onChange={(e) => setFishingMethod(e.target.value)}
-            >
-              <option value="" disabled>
-                Выбери дисциплину…
-              </option>
-              {FISHING_DISCIPLINES.map((d) => (
-                <option key={d.code} value={d.code}>
-                  {d.title}
-                </option>
-              ))}
-            </select>
-          </Label>
-          <Label t="Водоём из Атласа (по желанию)">
-            <select
-              className="field"
-              value={selectedWaterbody}
-              onChange={(e) => {
-                const id = e.target.value;
-                setSelectedWaterbody(id);
-                const water = catalogWaters.find((w) => w.id === id);
-                if (water) setLocation(water.name + (water.region ? " · " + water.region : ""));
-              }}
-            >
-              <option value="">Не выбирать — обычный отчёт</option>
-              {catalogWaters.map((w) => (
-                <option key={w.id} value={w.id}>
-                  {w.name} · {w.region || w.country_code}
-                </option>
-              ))}
-            </select>
-          </Label>
-          <Label t="Место (без точных координат)">
-            <input
-              className="field"
-              placeholder="Например, Волга у Нижнего"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </Label>
-          <p className="md:col-span-2 text-xs leading-5 text-zinc-400">
-            Для ачивки выбери водоём, укажи пойманный вид и приложи фото ниже. Заявка отправится
-            автоматически после публикации. GPS и отдельные анкеты не нужны.
-          </p>
-          <Label t="Погода">
-            <input
-              className="field"
-              placeholder="Пасмурно, небольшой дождь"
-              value={weather}
-              onChange={(e) => setWeather(e.target.value)}
-            />
-          </Label>
-          <Label t="Температура, °C">
-            <input
-              className="field"
-              type="number"
-              step="0.1"
-              placeholder="+12"
-              value={temperature}
-              onChange={(e) => setTemperature(e.target.value)}
-            />
-          </Label>
-          <Label t="Давление, мм рт. ст.">
-            <input
-              className="field"
-              type="number"
-              step="0.1"
-              placeholder="752"
-              value={pressure}
-              onChange={(e) => setPressure(e.target.value)}
-            />
-          </Label>
-          <Label t="Направление ветра">
-            <input
-              className="field"
-              placeholder="СЗ"
-              value={windDirection}
-              onChange={(e) => setWindDirection(e.target.value)}
-            />
-          </Label>
-          <Label t="Ветер, м/с">
-            <input
-              className="field"
-              type="number"
-              min="0"
-              step="0.1"
-              placeholder="4"
-              value={windSpeed}
-              onChange={(e) => setWindSpeed(e.target.value)}
-            />
-          </Label>
-          <Label t="Техника ловли">
-            <input
-              className="field"
-              placeholder="Джиг, ступенька"
-              value={technique}
-              onChange={(e) => setTechnique(e.target.value)}
-            />
-          </Label>
-          <Label t="Приманки">
-            <input
-              className="field"
-              placeholder="Виброхвост 3”, колебалка 10 г"
-              value={lures}
-              onChange={(e) => setLures(e.target.value)}
-            />
-          </Label>
-          <div className="md:col-span-2">
-            <Label t="Рассказ">
-              <textarea
-                className="field min-h-28"
-                placeholder="Как прошла рыбалка? Где стоял, что пробовал, были ли поклёвки?"
-                value={story}
-                onChange={(e) => setStory(e.target.value)}
-              />
-            </Label>
-          </div>
-          <label className="flex items-center gap-2 text-sm md:col-span-2">
-            <input
-              type="checkbox"
-              checked={isPublic}
-              onChange={(e) => setIsPublic(e.target.checked)}
-            />
-            Опубликовать в общей ленте
-          </label>
-        </section>
-
-        <section className="panel space-y-4 p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl border border-lime-300/30 bg-lime-300/10 text-lime-300">
-              <Camera className="size-5" aria-hidden="true" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold">Фотографии с рыбалки</h2>
-              <p className="text-xs text-muted-foreground">
-                До 6 фотографий · JPG, PNG, WebP · до 8 МБ каждая
-              </p>
-            </div>
-          </div>
-          <label
-            className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-lime-300/35 bg-lime-300/[0.035] px-4 py-5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10 ${savedReportId ? "pointer-events-none opacity-50" : ""}`}
-          >
-            <ImagePlus className="size-5" aria-hidden="true" />
-            {photos.length ? "Заменить выбранные фотографии" : "Выбрать фотографии"}
-            <input
-              aria-label="Выбрать фотографии с рыбалки"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              disabled={Boolean(savedReportId)}
-              className="sr-only"
-              onChange={(e) => choosePhotos(e.target.files)}
-            />
-          </label>
-          {previews.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {previews.map((src, index) => (
-                <div
-                  key={src}
-                  className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10"
-                >
-                  <img
-                    src={src}
-                    alt={`Фото к отчёту ${index + 1}`}
-                    className="size-full object-cover"
-                  />
-                  {!savedReportId && (
-                    <button
-                      type="button"
-                      className="absolute right-2 top-2 rounded-lg bg-black/75 p-2 text-white transition hover:bg-black"
-                      onClick={() => setPhotos((current) => current.filter((_, i) => i !== index))}
-                      aria-label={`Убрать фотографию ${index + 1}`}
-                    >
-                      <Trash2 className="size-4" aria-hidden="true" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          {photos.length > 0 && (
-            <div className="rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-3">
-              <button
-                className="btn-ghost inline-flex items-center gap-2"
-                type="button"
-                disabled={aiWorking}
-                onClick={() => void identifyFish()}
-              >
-                <Sparkles className="size-4 text-[#D7FF35]" />
-                {aiWorking ? "Рассматриваем фото…" : "Подсказать вид рыбы по фото (ИИ)"}
-              </button>
-              <p className="mt-2 text-xs text-zinc-400">
-                Опционально: изображение отправляется ИИ только после твоего нажатия. Результат
-                можно исправить.
-              </p>
-              {aiMessage && (
-                <p className="mt-2 text-xs text-[#D7FF35]" role="status">
-                  {aiMessage}
-                </p>
-              )}
-            </div>
-          )}
-          <p className="text-xs leading-5 text-muted-foreground">
-            Перед загрузкой удаляются метаданные фотографии, включая GPS. В общей ленте будет
-            обработанная копия. Проверь, не раскрывают ли текст и само изображение место рыбалки.
-          </p>
-        </section>
-
-        <section className="panel space-y-3 p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold">Улов</h2>
-            <button
-              type="button"
-              className="btn-ghost"
-              onClick={() => setCatches((c) => [...c, { species: "", weight: "", length: "" }])}
-            >
-              + Рыба
-            </button>
-          </div>
-          <datalist id="zapruda-atlas-species">
-            {catalogFishes.map((f) => (
-              <option key={f.id} value={f.name} />
-            ))}
-          </datalist>
-          {catches.map((c, i) => (
-            <div
-              key={i}
-              className="grid grid-cols-[1fr_auto] gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-[2fr_1fr_1fr_auto]"
-            >
+            <p className="md:col-span-2 text-xs leading-5 text-zinc-400">
+              Для ачивки выбери водоём, укажи пойманный вид и приложи фото ниже. Заявка отправится
+              автоматически после публикации. GPS и отдельные анкеты не нужны.
+            </p>
+            <Label t="Погода">
               <input
-                className="field col-span-2 sm:col-span-1"
-                list="zapruda-atlas-species"
-                placeholder="Вид (щука, окунь…)"
-                value={c.species}
-                onChange={(e) => upd(i, "species", e.target.value)}
+                className="field"
+                placeholder="Пасмурно, небольшой дождь"
+                value={weather}
+                onChange={(e) => setWeather(e.target.value)}
               />
+            </Label>
+            <Label t="Температура, °C">
               <input
                 className="field"
                 type="number"
-                min="0"
-                step="0.01"
-                placeholder="Вес, кг"
-                value={c.weight}
-                onChange={(e) => upd(i, "weight", e.target.value)}
+                step="0.1"
+                placeholder="+12"
+                value={temperature}
+                onChange={(e) => setTemperature(e.target.value)}
               />
+            </Label>
+            <Label t="Давление, мм рт. ст.">
+              <input
+                className="field"
+                type="number"
+                step="0.1"
+                placeholder="752"
+                value={pressure}
+                onChange={(e) => setPressure(e.target.value)}
+              />
+            </Label>
+            <Label t="Направление ветра">
+              <input
+                className="field"
+                placeholder="СЗ"
+                value={windDirection}
+                onChange={(e) => setWindDirection(e.target.value)}
+              />
+            </Label>
+            <Label t="Ветер, м/с">
               <input
                 className="field"
                 type="number"
                 min="0"
                 step="0.1"
-                placeholder="Длина, см"
-                value={c.length}
-                onChange={(e) => upd(i, "length", e.target.value)}
+                placeholder="4"
+                value={windSpeed}
+                onChange={(e) => setWindSpeed(e.target.value)}
               />
+            </Label>
+            <Label t="Техника ловли">
+              <input
+                className="field"
+                placeholder="Джиг, ступенька"
+                value={technique}
+                onChange={(e) => setTechnique(e.target.value)}
+              />
+            </Label>
+            <Label t="Приманки">
+              <input
+                className="field"
+                placeholder="Виброхвост 3”, колебалка 10 г"
+                value={lures}
+                onChange={(e) => setLures(e.target.value)}
+              />
+            </Label>
+            <div className="md:col-span-2">
+              <Label t="Рассказ">
+                <textarea
+                  className="field min-h-28"
+                  placeholder="Как прошла рыбалка? Где стоял, что пробовал, были ли поклёвки?"
+                  value={story}
+                  onChange={(e) => setStory(e.target.value)}
+                />
+              </Label>
+            </div>
+            <label className="flex items-center gap-2 text-sm md:col-span-2">
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+              />
+              Опубликовать в общей ленте
+            </label>
+          </section>
+
+          <section className="panel space-y-4 p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-xl border border-lime-300/30 bg-lime-300/10 text-lime-300">
+                <Camera className="size-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold">Фотографии с рыбалки</h2>
+                <p className="text-xs text-muted-foreground">
+                  До 6 фотографий · JPG, PNG, WebP · до 8 МБ каждая
+                </p>
+              </div>
+            </div>
+            <label
+              className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-lime-300/35 bg-lime-300/[0.035] px-4 py-5 text-sm font-semibold text-lime-300 transition hover:bg-lime-300/10 ${savedReportId ? "pointer-events-none opacity-50" : ""}`}
+            >
+              <ImagePlus className="size-5" aria-hidden="true" />
+              {photos.length ? "Заменить выбранные фотографии" : "Выбрать фотографии"}
+              <input
+                aria-label="Выбрать фотографии с рыбалки"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                disabled={Boolean(savedReportId)}
+                className="sr-only"
+                onChange={(e) => choosePhotos(e.target.files)}
+              />
+            </label>
+            {previews.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {previews.map((src, index) => (
+                  <div
+                    key={src}
+                    className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10"
+                  >
+                    <img
+                      src={src}
+                      alt={`Фото к отчёту ${index + 1}`}
+                      className="size-full object-cover"
+                    />
+                    {!savedReportId && (
+                      <button
+                        type="button"
+                        className="absolute right-2 top-2 rounded-lg bg-black/75 p-2 text-white transition hover:bg-black"
+                        onClick={() =>
+                          setPhotos((current) => current.filter((_, i) => i !== index))
+                        }
+                        aria-label={`Убрать фотографию ${index + 1}`}
+                      >
+                        <Trash2 className="size-4" aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            {photos.length > 0 && (
+              <div className="rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-3">
+                <button
+                  className="btn-ghost inline-flex items-center gap-2"
+                  type="button"
+                  disabled={aiWorking}
+                  onClick={() => void identifyFish()}
+                >
+                  <Sparkles className="size-4 text-[#D7FF35]" />
+                  {aiWorking ? "Рассматриваем фото…" : "Подсказать вид рыбы по фото (ИИ)"}
+                </button>
+                <p className="mt-2 text-xs text-zinc-400">
+                  Опционально: изображение отправляется ИИ только после твоего нажатия. Результат
+                  можно исправить.
+                </p>
+                {aiMessage && (
+                  <p className="mt-2 text-xs text-[#D7FF35]" role="status">
+                    {aiMessage}
+                  </p>
+                )}
+              </div>
+            )}
+            <p className="text-xs leading-5 text-muted-foreground">
+              Перед загрузкой удаляются метаданные фотографии, включая GPS. В общей ленте будет
+              обработанная копия. Проверь, не раскрывают ли текст и само изображение место рыбалки.
+            </p>
+          </section>
+
+          <section className="panel space-y-3 p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold">Улов</h2>
               <button
                 type="button"
                 className="btn-ghost"
-                aria-label="Удалить"
-                onClick={() => setCatches((x) => x.filter((_, j) => j !== i))}
+                onClick={() => setCatches((c) => [...c, { species: "", weight: "", length: "" }])}
               >
-                ✕
+                + Рыба
               </button>
             </div>
-          ))}
-        </section>
-
+            <datalist id="zapruda-atlas-species">
+              {catalogFishes.map((f) => (
+                <option key={f.id} value={f.name} />
+              ))}
+            </datalist>
+            {catches.map((c, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-[1fr_auto] gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-[2fr_1fr_1fr_auto]"
+              >
+                <input
+                  className="field col-span-2 sm:col-span-1"
+                  list="zapruda-atlas-species"
+                  placeholder="Вид (щука, окунь…)"
+                  value={c.species}
+                  onChange={(e) => upd(i, "species", e.target.value)}
+                />
+                <input
+                  className="field"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Вес, кг"
+                  value={c.weight}
+                  onChange={(e) => upd(i, "weight", e.target.value)}
+                />
+                <input
+                  className="field"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  placeholder="Длина, см"
+                  value={c.length}
+                  onChange={(e) => upd(i, "length", e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="btn-ghost"
+                  aria-label="Удалить"
+                  onClick={() => setCatches((x) => x.filter((_, j) => j !== i))}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </section>
+        </fieldset>
         {error && (
           <p
             className="rounded-lg border border-destructive/40 p-3 text-sm text-destructive"

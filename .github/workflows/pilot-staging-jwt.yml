@@ -1,0 +1,40 @@
+name: Pilot reports chat profile real JWT (protected)
+on:
+  push:
+    branches: [feat/ai-yandex-deepseek-staging]
+    paths: [.github/pilot-e2e-request.txt]
+permissions:
+  contents: read
+concurrency:
+  group: pilot-staging-schema-e2e
+  cancel-in-progress: false
+jobs:
+  real-pilot:
+    runs-on: ubuntu-24.04
+    environment: staging-e2e
+    timeout-minutes: 12
+    env:
+      ZAPRUDA_E2E_STAGING_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+      ZAPRUDA_E2E_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+      ZAPRUDA_E2E_OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
+      ZAPRUDA_E2E_OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
+      ZAPRUDA_E2E_SEATED_EMAIL: ${{ secrets.ZAPRUDA_E2E_SEATED_EMAIL }}
+      ZAPRUDA_E2E_SEATED_PASSWORD: ${{ secrets.ZAPRUDA_E2E_SEATED_PASSWORD }}
+      ZAPRUDA_E2E_RACER_A_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
+      ZAPRUDA_E2E_RACER_A_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_A_PASSWORD }}
+      ZAPRUDA_E2E_RACER_B_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_B_EMAIL }}
+      ZAPRUDA_E2E_RACER_B_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_B_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - name: Actual API transactions visibility media and cleanup
+        run: node scripts/e2e/pilot-schema-live.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pilot-real-JWT-safe-result
+          path: qa/pilot-safe/
+          retention-days: 7

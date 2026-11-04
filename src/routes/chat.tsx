@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ChevronRight,
   Globe2,
@@ -15,8 +15,9 @@ import {
 import { Shell } from "@/components/Shell";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
+import { prepareReportPhoto } from "@/lib/report-photo";
 import { countries } from "@/lib/geo";
-import { chatPhotoError, chatPhotoPath, shouldCreateChatMessage } from "@/lib/chat-media";
+import { chatPhotoError, shouldCreateChatMessage } from "@/lib/chat-media";
 
 type ChatTopic = "general" | "reports" | "waters" | "partners" | "gear" | "tips";
 type Level = "global" | "country" | "region" | "city";
@@ -120,6 +121,8 @@ export const Route = createFileRoute("/chat")({
 function GeographicChat() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const alive = useRef(true);
+  const photoUploadId = useRef<string | null>(null);
   const [uid, setUid] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -147,10 +150,11 @@ function GeographicChat() {
   const threadOpen = Boolean(search.place);
 
   useEffect(() => {
-    let alive = true;
+    let active = true;
+    alive.current = true;
     void (async () => {
       const { data: auth, error: authError } = await supabase.auth.getUser();
-      if (!alive) return;
+      if (!active) return;
       if (authError || !auth.user) {
         setUid("");
         setLoading(false);
@@ -162,7 +166,7 @@ function GeographicChat() {
         .select("id,parent_id,level,country_code,name,created_by")
         .order("name")
         .limit(1500);
-      if (!alive) return;
+      if (!active) return;
       if (queryError) setError("Не удалось загрузить географию чатов: " + queryError.message);
       else {
         setError("");
@@ -170,13 +174,14 @@ function GeographicChat() {
       }
       setLoading(false);
     })().catch((e) => {
-      if (alive) {
+      if (active) {
         setError(e instanceof Error ? e.message : "Не удалось открыть чаты.");
         setLoading(false);
       }
     });
     return () => {
-      alive = false;
+      active = false;
+      alive.current = false;
     };
   }, []);
 
@@ -280,6 +285,11 @@ function GeographicChat() {
     setChatError("");
     setChatLoading(true);
 
+    const objectUrls = new Set<string>();
+    const revokePhotos = () => {
+      for (const url of objectUrls) URL.revokeObjectURL(url);
+      objectUrls.clear();
+    };
     let requestNumber = 0;
     const fetchMessages = async () => {
       const thisRequest = ++requestNumber;
@@ -311,22 +321,42 @@ function GeographicChat() {
             setReactions((liked || []) as ChatReaction[]);
           const { data: attached } = await api
             .from("chat_message_photos")
-            .select("message_id,storage_path")
+            .select("id,message_id")
             .in(
               "message_id",
               fetched.map((m) => m.id),
             );
           if (alive && thisRequest === requestNumber && attached?.length) {
-            const signed = await Promise.all(
-              attached.map(async (p: { message_id: string; storage_path: string }) => {
-                const { data: link } = await supabase.storage
-                  .from("chat-photos")
-                  .createSignedUrl(p.storage_path, 1800);
-                return [p.message_id, link?.signedUrl || ""] as const;
+            const { data: session } = await supabase.auth.getSession();
+            const token = session.session?.user.id === uid ? session.session.access_token : null;
+            if (!alive || thisRequest !== requestNumber || !token) return;
+            const downloaded = await Promise.all(
+              attached.map(async (p: { id: string; message_id: string }) => {
+                const { data: image, error: imageError } = await supabase.functions.invoke(
+                  "chat-photo-access?photo_id=" + encodeURIComponent(p.id),
+                  { method: "GET", headers: { Authorization: `Bearer ${token}` } },
+                );
+                return {
+                  messageId: p.message_id,
+                  image: !imageError && image instanceof Blob ? image : null,
+                };
               }),
             );
-            if (alive && thisRequest === requestNumber) setPhotoUrls(Object.fromEntries(signed));
-          } else if (alive && thisRequest === requestNumber) setPhotoUrls({});
+            if (!alive || thisRequest !== requestNumber) return;
+            revokePhotos();
+            const links: Record<string, string> = {};
+            for (const result of downloaded) {
+              if (result.image) {
+                const url = URL.createObjectURL(result.image);
+                objectUrls.add(url);
+                links[result.messageId] = url;
+              }
+            }
+            setPhotoUrls(links);
+          } else if (alive && thisRequest === requestNumber) {
+            revokePhotos();
+            setPhotoUrls({});
+          }
         } else {
           setReactions([]);
           setPhotoUrls({});
@@ -355,6 +385,7 @@ function GeographicChat() {
     window.addEventListener("focus", onFocus);
     return () => {
       alive = false;
+      revokePhotos();
       window.removeEventListener("focus", onFocus);
       void supabase.removeChannel(channel);
     };
@@ -429,6 +460,7 @@ function GeographicChat() {
   }
 
   function abandonPendingPhoto() {
+    photoUploadId.current = null;
     // The text message is already persisted. Only cancel its unfinished attachment.
     setPendingPhotoMessageId(null);
     setPhoto(null);
@@ -457,6 +489,17 @@ function GeographicChat() {
     setBusy(true);
     setChatError("");
     try {
+      const { data: auth } = await supabase.auth.getSession();
+      const session = auth.session;
+      if (!alive.current) return;
+      if (
+        !session ||
+        session.user.id !== uid ||
+        session.user.is_anonymous ||
+        !session.user.email_confirmed_at
+      )
+        throw new Error("Войди в подтверждённый аккаунт, чтобы отправить сообщение.");
+      const token = session.access_token;
       let messageId = pendingPhotoMessageId;
       if (shouldCreateChatMessage(messageId)) {
         const { data: message, error: sendError } = await api
@@ -464,6 +507,7 @@ function GeographicChat() {
           .insert({ user_id: uid, body: outgoing || "📷 Фото", place_id: selectedPlace.id, topic })
           .select("id")
           .single();
+        if (!alive.current) return;
         if (sendError || !message?.id)
           throw new Error(
             "Сообщение не отправлено: " + (sendError?.message || "сервер не вернул ID"),
@@ -472,35 +516,41 @@ function GeographicChat() {
         if (photo) setPendingPhotoMessageId(messageId);
       }
       if (photo && messageId) {
-        const path = chatPhotoPath(uid, messageId, photo.type, crypto.randomUUID());
-        const { error: uploadError } = await supabase.storage
-          .from("chat-photos")
-          .upload(path, photo, { contentType: photo.type, upsert: false });
-        if (uploadError) throw new Error("Фото не загружено: " + uploadError.message);
-        const { error: linkError } = await api
-          .from("chat_message_photos")
-          .insert({ message_id: messageId, user_id: uid, storage_path: path });
-        if (linkError) {
-          await supabase.storage
-            .from("chat-photos")
-            .remove([path])
-            .catch(() => undefined);
-          throw new Error("Фото не прикреплено: " + linkError.message);
-        }
+        const id = photoUploadId.current ?? crypto.randomUUID();
+        photoUploadId.current = id;
+        const prepared = await prepareReportPhoto(photo);
+        if (!alive.current) return;
+        const form = new FormData();
+        form.set("report_id", messageId);
+        form.set("photo_id", id);
+        form.set("sort_order", "0");
+        form.set("file", prepared, "photo.jpg");
+        const { data: uploaded, error: uploadError } = await supabase.functions.invoke(
+          "chat-photo-upload",
+          {
+            body: form,
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        if (!alive.current) return;
+        if (uploadError || uploaded?.photo_id !== id)
+          throw new Error("Не удалось сохранить фотографию. Повтори загрузку.");
       }
+      photoUploadId.current = null;
       setDraft("");
       setPhoto(null);
       setPendingPhotoMessageId(null);
       setReplyTo(null);
       setRefreshIndex((i) => i + 1);
     } catch (cause) {
+      if (!alive.current) return;
       setChatError(
         (pendingPhotoMessageId ? "Попробуй повторить загрузку. " : "") +
           (cause instanceof Error ? cause.message : "Неожиданная ошибка отправки."),
       );
       setRefreshIndex((i) => i + 1);
     } finally {
-      setBusy(false);
+      if (alive.current) setBusy(false);
     }
   }
 

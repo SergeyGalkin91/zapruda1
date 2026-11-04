@@ -71,3 +71,7 @@ PROD read-only: 5 публичных отчётов, заполненных то
 В report publication добавлен required-store preflight до первого INSERT: при отсутствующем catches черновик сохраняется без частичной записи. Добавлены проверки account binding и остановки поздней публикации/фото-запроса. Пять новых offline UI регрессий; итоговый набор — 380 тестов (результат конкретного последнего HEAD смотреть в Actions). Никакой новой schema migration этим safety-изменением не применялось.
 
 На предыдущем source 6598d6c расширенный [visual run 41739546750](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41739546750) полностью PASS: Chromium/WebKit/Firefox, 320/390/768/1440, обе темы, десять маршрутов, screenshots/overflow/errors. Гостевой placeholder не подтверждает работающую БД — schema gap найден отдельно.
+
+## Продолжение выравнивания схемы — 04.11.2026
+
+Последующая сверка обнаружила уже применённые дельты catches/comments (20261104000548/000608) и geographic text chat (20261104001134): прежние 31/22 — исторический срез. Эти дельты приняты как baseline и повторно не накладываются. Подготовлены атомарное report+catch сохранение с retry receipt, защищённые chat photos без прямого Storage signing, private gear/marks и необходимые profile aggregates/activity. [План, контракты, rollback и фактические gates](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md). Состояние новых hosted deploy и точный CI смотреть в evidence этого документа; подготовленные SQL/скрипты сами по себе не являются PASS.

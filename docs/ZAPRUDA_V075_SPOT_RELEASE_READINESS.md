@@ -26,3 +26,7 @@
 Профиль/аналитика после смены пользователя очищаются AuthSessionBoundary; same-user token refresh сохраняет черновик. Сам wizard в три шага, server unread receipts и активные CARP/WINTER/BOAT не реализованы этой ревизией и остаются NOT STARTED/PARTIAL согласно spec. В STAGING нет private_fishing_marks: существующий UI личных меток не считается работающей hosted-функцией. Нужны отдельные schema/dependency/real-JWT gates.
 
 **P0 BLOCKED:** [22 frontend-referenced таблицы отсутствуют в isolated STAGING](ZAPRUDA_STAGING_SCHEMA_GAP_20261104.md), включая catches/comments/public-chat. Required-store preflight предотвращает создание частичного отчёта и сохраняет draft; он не заменяет недостающую схему. Полный staging pilot этого UI не готов.
+
+## Продолжение выравнивания схемы — 04.11.2026
+
+Последующая сверка обнаружила уже применённые дельты catches/comments (20261104000548/000608) и geographic text chat (20261104001134): прежние 31/22 — исторический срез. Эти дельты приняты как baseline и повторно не накладываются. Подготовлены атомарное report+catch сохранение с retry receipt, защищённые chat photos без прямого Storage signing, private gear/marks и необходимые profile aggregates/activity. [План, контракты, rollback и фактические gates](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md). Состояние новых hosted deploy и точный CI смотреть в evidence этого документа; подготовленные SQL/скрипты сами по себе не являются PASS.
