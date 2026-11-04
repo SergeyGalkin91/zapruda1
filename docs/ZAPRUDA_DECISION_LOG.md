@@ -52,3 +52,6 @@ ID / дата / точная формулировка владельца / за�
 
 ## D13 — 04.11.2026: техническая приёмка и release preparation
 Выполнены исправления send-retry/read-summary и пустая защищённая схема Atlas только в STAGING; настоящий JWT и Browser выполняются на exact SHA. Все 56 ID сохраняются. Новые факты в [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md); исторический аудит 8b54b53 сохранён с указателем. Это не owner release GO, не разрешение main/production/version. Устаревшие статусы wizard/unread/timer исправлены без отката дизайна.
+
+## Техническая приёмка 2051567 (не release GO)
+Подтверждены настоящие local/STAGING Browser-сценарии чата/отчётов/STREET и загрузившиеся viewport-снимки; hosted доступ остаётся BLOCKED_NETLIFY_AUTH. Исправлены UUID no-catch retry и преждевременный enable чата до загрузки комнаты. Источники 56 функций нормализованы в реальные уникальные пути, нестабильные номера строк убраны; добавлены CSS/workflow/Markdown source checks и седьмой regression. Ни один ID/модуль/титул/scope не удалён и не перенесён. Main/production/version не изменены.

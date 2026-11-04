@@ -8,7 +8,8 @@ function fixture(fn) {
   const root = mkdtempSync(join(tmpdir(), "zc-contract-"));
   try {
     for (const p of ["docs", "AGENTS.md"]) cpSync(p, join(root, p), { recursive: true });
-    for (const p of [".git", "src", "supabase", "scripts"]) symlinkSync(resolve(p), join(root, p));
+    for (const p of [".git", ".github", "src", "supabase", "scripts"])
+      symlinkSync(resolve(p), join(root, p));
     const path = join(root, "docs/ZAPRUDA_FEATURES.json");
     const data = JSON.parse(readFileSync(path, "utf8"));
     fn({ root, data, save: () => writeFileSync(path, JSON.stringify(data)) });
@@ -47,4 +48,17 @@ test("rejects missing source and local link", () =>
     writeFileSync(join(root, "docs/ZAPRUDA_UI_ACCEPTANCE.md"), "[broken](missing-contract.md)");
     assert.ok(check(root).some((e) => e.includes("missing source")));
     assert.ok(check(root).some((e) => e.includes("broken local link")));
+  }));
+
+test("rejects missing theme CSS and workflow paths", () =>
+  fixture(({ root, data, save }) => {
+    for (const path of [
+      "src/missing-theme.css",
+      ".github/workflows/missing-contract.yml",
+      "docs/missing-source.md",
+    ]) {
+      data.features[0].source = path;
+      save();
+      assert.ok(check(root).some((e) => e.includes("missing source " + path)));
+    }
   }));

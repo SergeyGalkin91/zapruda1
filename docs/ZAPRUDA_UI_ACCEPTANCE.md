@@ -15,7 +15,9 @@ CURRENT_PRODUCT_SPEC + DECISION_LOG → последние референсы в
 - Реальные loading/error/empty states с retry/CTA; нулевой каталог не заполнять фальшивой рыбой/пользователями.
 - В консоли нет необработанных ошибок; сеть без запросов к production и без скрытых 4xx/5xx основных данных.
 
-## Матрица снимков — каждый пункт в двух темах, на трёх обязательных ширинах
+## Исторический исходный план снимков (до d421980)
+
+NOT CAPTURED/PENDING ниже — исходный baseline. Актуальные доказательства — в FINAL_ACCEPTANCE; они отдельно маркируют localhost/STAGING и настоящий hosted Preview.
 | Экран | Сценарии | До | После / сравнение |
 |---|---|---|---|
 | /auth | вход, регистрация, recovery, validation | NOT CAPTURED | PENDING |
@@ -42,3 +44,6 @@ Cloud Browser открыл preview #93: реальная пустая лента
 
 ## Итог visual CI
 Run 41768499027, SHA 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd: PASS. 320/390/768/1440, Chromium/WebKit/Firefox, обе темы, no horizontal overflow, theme persistence, computed-color audit. Палитра: lime/bright-blue 5.29:1, lime/blue 8.44:1, light/eggplant 7.78:1; это отдельные пары, не общий WCAG аудит. Guest/local isolated build, не авторизованный Netlify mobile E2E. Добавлены CI PNG 390 и 320 в qa/product-contract, просмотрены визуально.
+
+## Актуальный технический результат 2051567
+Actual Browser 41777927568 PASS: Chromium/Firefox/WebKit × 320/390/768/1440 × Matte Black/Electric Blue × 10 маршрутов, 243 viewport-снимка после завершения загрузки данных и видимых изображений, no horizontal overflow. Тесты авторизованы настоящими STAGING JWT; admin — только denial, роли не назначались. Полный архив artifact 13298351128, expires 11.11.2026 05:20 UTC. Это localhost frontend, не hosted Netlify: hosted gate BLOCKED_NETLIFY_AUTH. Физическая клавиатура/сеть и owner pixel review открыты. После завершения CI среда стала недоступна, перенос полного архива не выполнен; оригинал остаётся в Actions.

@@ -1,0 +1,43 @@
+{
+  "source_sha": "2051567279592071ecad053014a6467e71805353",
+  "environment": "http://127.0.0.1:3000 + real Supabase STAGING JWT",
+  "workflow_run": 41777927568,
+  "job_id": 126402511658,
+  "overall_workflow": "FAIL: FEEDBACK_NONEMPTY_ACCOUNT_PRECONDITION",
+  "core_api_step": "PASS",
+  "spot_negative_step": "PASS",
+  "browser_step": "PASS",
+  "browser_cleanup": true,
+  "auth_users": "two distinct actual confirmed UI logins; four actual confirmed JWT accounts in core",
+  "observed_http": {
+    "chat_committed_response_lost": 201,
+    "no_catch_report_committed_response_lost": 201,
+    "catch_report_rpc_committed_response_lost": 200
+  },
+  "assertions": [
+    "one persisted chat message after response loss",
+    "B unread -> open/read -> reload zero; foreign watermark mutation denied",
+    "real Realtime preserves A's unsent draft",
+    "three-step report back/next/reload; catch/no-catch/photo/private publication; no premature submit",
+    "committed lost-response retry: one report and one entered catch; outsider private read denied",
+    "STREET tick >1min, reload, tackle/lure, opt-in import, same-browser user isolation",
+    "243 viewport screenshots; Chromium/Firefox/WebKit x 320/390/768/1440 x two themes x ten routes; auth/data/image readiness and no horizontal overflow"
+  ],
+  "screenshots_count": 243,
+  "screenshot_mode": "viewport after auth, route loaders and visible images settled",
+  "artifact": {
+    "id": 13298351128,
+    "url": "https://github.com/SergeyGalkin91/zapruda1/actions/runs/41777927568/artifacts/13298351128",
+    "zip_bytes": 32371326,
+    "sha256": "sha256:416987bb6d4bff1597514f4eb0ad134666bdda15bf9a0e17602277db92d32d62",
+    "expires_at": "2026-11-11T05:20:43Z"
+  },
+  "limitations": [
+    "hosted Netlify separately BLOCKED_NETLIFY_AUTH; protection retained, not retried",
+    "no physical device keyboard or mobile network acceptance",
+    "no genuine KING evidence/approved spot/independent moderator",
+    "admin route tested only as unauthorized denial",
+    "work environment became unavailable after CI completion; complete archive transfer and individual latest image inspection could not finish"
+  ],
+  "provenance": "Summary transcribed from parsed authenticated-browser/result.json and finished workflow step metadata before environment loss; raw archive remains authoritative."
+}

@@ -64,6 +64,7 @@ const firstMessage = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.place = "10000000-0000-4000-8000-000000000081";
   mocks.callbacks.clear();
   mocks.subscriptions.length = 0;
   mocks.rows = [firstMessage];
@@ -136,6 +137,46 @@ async function open() {
   return { ...view, composer };
 }
 describe("Geographic chat (offline component regressions, not real JWT)", () => {
+  it("does not enable sending after login until the selected room has loaded", async () => {
+    mocks.place = "00000000-0000-4000-8000-000000000001";
+    let release!: (value: unknown) => void;
+    const pending = new Promise((resolve) => {
+      release = resolve;
+    });
+    const original = mocks.from.getMockImplementation()!;
+    let requested = false;
+    mocks.from.mockImplementation((table: string) => {
+      const q = original(table);
+      if (table === "chat_places") {
+        requested = true;
+        q.then = (resolve: (v: unknown) => unknown) => pending.then(resolve);
+      }
+      return q;
+    });
+    render(<GeographicChat />);
+    await waitFor(() => expect(requested).toBe(true));
+    const composer = screen.getByLabelText("Сообщение для выбранной ветки");
+    expect(composer).toBeDisabled();
+    fireEvent.submit(composer.closest("form")!);
+    expect(mocks.getSession).not.toHaveBeenCalled();
+    await act(async () =>
+      release({
+        data: [
+          {
+            id: mocks.place,
+            parent_id: null,
+            level: "global",
+            country_code: null,
+            name: "Вся ZAPRUDA",
+            created_by: null,
+          },
+        ],
+        error: null,
+      }),
+    );
+    await waitFor(() => expect(composer).not.toBeDisabled());
+    await screen.findByText(firstMessage.body);
+  });
   it("recovers the original message after its successful insert loses the response", async () => {
     const original = mocks.from.getMockImplementation()!;
     let insertedId = "";

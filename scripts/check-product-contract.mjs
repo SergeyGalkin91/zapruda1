@@ -66,7 +66,7 @@ export function check(root = process.cwd(), base = process.env.CONTRACT_BASE_SHA
     if (f.status === "DEFERRED" && !log.includes("DEFERRED:" + f.id + ":"))
       errors.push(f.id + ": deferral requires explicit owner decision in log");
     for (const m of (f.source || "").matchAll(
-      /(?:src|supabase|scripts)\/[\w./-]+\.(?:tsx?|mjs|sql)/g,
+      /(?:src|supabase|scripts|docs|\.github)\/[\w./-]+\.(?:tsx?|mjs|sql|css|ya?ml|md)/g,
     ))
       if (!existsSync(resolve(root, m[0]))) errors.push(f.id + ": missing source " + m[0]);
   }

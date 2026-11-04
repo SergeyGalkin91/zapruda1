@@ -10,13 +10,13 @@ P0 из FEATURE_MATRIX — обязательные критерии уже за
 |---|---|---|
 | G0 требования | все согласованные идеи имеют ID, код/пробел, критерий, владельца решения и scope | DRAFT матрица в этом PR; ревью открыто |
 | G1 стабильность | вход/confirm/recovery/выход, feed reload без FK ошибки, профиль save/readback, все P0 переходы | OPEN; FK по PR #110 применена, live открыт |
-| G2 chat | два реальных JWT, Realtime/text/photo/reaction/reply, reconnect и unread/read receipts | OPEN для полной приёмки; mine/unread/read-state реализованы, требуется положительный A→B Browser E2E |
-| G3 report | 3 шага, no-catch, draft/reload, privacy, retry без дубля, atomic catches, фото/GPS/EXIF | OPEN для полной приёмки; 3 шага реализованы, требуется signed-in publish/retry E2E |
+| G2 chat | два реальных JWT, Realtime/text/photo/reaction/reply, reconnect и unread/read receipts | OPEN для полной приёмки; mine/unread/read-state реализованы, положительный A→B/read/reload PASS на 2051567 в local/STAGING; полный G2/hosted/physical остаётся OPEN |
+| G3 report | 3 шага, no-catch, draft/reload, privacy, retry без дубля, atomic catches, фото/GPS/EXIF | OPEN для полной приёмки; 3 шага реализованы, signed-in private catch/no-catch/lost-response retry PASS на 2051567; hosted/physical review OPEN |
 | G4 UI | before/after 320/390/1440, обе темы, последние референсы, контраст/focus/keyboard/no overflow | OPEN; см. UI_ACCEPTANCE |
 | G5 безопасность | guest/owner/outsider/разрешённые роли, RLS/ACL/RPC/Storage, закрытые оригиналы, JWT isolation | OPEN; тесты и старые snapshot не live |
 | G6 STREET/SPOT/KING если в пилоте | сессия → opt-in report; реальный legal SPOT/evidence; независимая модерация, tie/race/revoke/history/notifications | OPEN; нельзя подделывать данные/роли |
 | G7 backend/deploy | свежий read-only STAGING inventory, сверка с нужными контрактами, deployed SHA = tested SHA, только STAGING в preview | OPEN; не повторять applied миграции |
-| G8 CI | typecheck/lint/tests/build + необходимые SQL/browser checks на exact code SHA, изучить skipped/failed jobs | quality PASS на d41f02f; остальные exact-head результаты в FINAL_ACCEPTANCE |
+| G8 CI | typecheck/lint/tests/build + необходимые SQL/browser checks на exact code SHA, изучить skipped/failed jobs | 2051567: 13 ordinary checks и 430 tests PASS; JWT core и Browser шаги PASS; overall protected FAIL из-за feedback QA precondition |
 | G9 AI если включён | актуальная погода, primary/backup, Web Search OFF, quota/cache/failure/privacy live | OPEN; cutover требует отдельного разрешения |
 | G10 пилот и версия | owner-approved scope + приёмка + явное разрешение конкретной версии | OPEN; автоматический bump/tag/release запрещён |
 

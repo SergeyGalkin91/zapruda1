@@ -7,7 +7,7 @@
 Прочитать этот файл, [журнал решений](ZAPRUDA_DECISION_LOG.md), [матрицу](ZAPRUDA_FEATURE_MATRIX.md), [release gates](ZAPRUDA_RELEASE_GATES.md), затем проверить актуальный HEAD PR #93, изменения зависимых PR и тематический issue. При UI-работе читать [UI acceptance](ZAPRUDA_UI_ACCEPTANCE.md). Номер старого design lock не равен текущей версии продукта.
 
 ## Источники и границы доказательств
-- Текущий проверяемый код PR #93: `5c9ce64fb5fde4eacbcabf955237d9b72b715559`. Результаты и ограничения финальной технической приёмки: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
+- Текущий проверяемый код PR #93: `2051567279592071ecad053014a6467e71805353`. Результаты и ограничения финальной технической приёмки: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
 - [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111) — исходный аудит и единственный документальный PR этой консолидации, не утверждённая реализация.
 - [PR #92](https://github.com/SergeyGalkin91/zapruda1/pull/92) — UX-направление и foundations, не готовый wizard.
 - [PR #109](https://github.com/SergeyGalkin91/zapruda1/pull/109) — новый README о всех направлениях рыбалки; открыт, не слит.
@@ -83,7 +83,7 @@ Matte Black по умолчанию, Electric Blue альтернативная 
 
 **Запреты:** main/production/DNS/публичный релиз/реальные платежи/Render/force-push/массовая очистка/фиктивные KING и модераторы/удаление функциональности. Версию не повышать автоматически. Этот PR не снимает ни один gate.
 
-## Сверка продолжения d421980 (04.11)
+## История: сверка продолжения d421980 (04.11)
 Реализованы серверный private read-state, фильтры mine/unread, трёхшаговый отчёт с review/датой/снастями, STREET ticking timer/account storage/import. 422 tests/34 files локально PASS; TypeScript/build PASS; lint 0 ошибок/6 прежних warnings. Новый protected JWT run ждёт environment approval, не считать новым PASS. Историческая core JWT-приёмка из 87592b7 сохранена в ZAPRUDA_STAGING_JWT_ACCEPTANCE_20261104.md. Workflow contract в #111 не разрешает релиз и не активируется в #93 до отдельного принятия документационного PR.
 
 ## Решение владельца 04.11.2026 — целевое имя следующего обновления
@@ -93,5 +93,5 @@ Matte Black по умолчанию, Electric Blue альтернативная 
 ## Уточнение браузерной QA 04.11
 В d421980 выявлена отправка формы при переходе 2→3 из-за смены типа той же DOM-кнопки. Исправлено в 90f3f54: key next/publish + preventDefault, default privacy=false. Одна созданная при QA запись без улова снята с публичной ленты (is_public=false), удаление не выполнено: инструмент запросил подтверждение и оно истекло. Положительный endpoint публикации таким образом прошёл в браузере, но весь wizard до повторной проверки не считать принятым. Локально 423/34 PASS, lint 0 ошибок/6 warnings, typecheck/build PASS.
 
-## Итоговая scoped приёмка текущего SHA
+## История: scoped приёмка 3fbaa2c
 13 ordinary CI и protected real-JWT run 41768491411 PASS. Core cleanup true; обратная проверка: 5 QA feedback UUID уже отсутствуют, 1 отдельный QA no-catch report остаётся private. Полный KING/двухпользовательский positive receipt browser/мобильная owner approval не закрыты. Исторические строки «JWT ждёт» выше не переопределяют этот фактический результат. Версия 0.7.5 не изменена, owner target из журнала сохранён.
