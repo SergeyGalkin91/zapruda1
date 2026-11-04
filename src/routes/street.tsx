@@ -165,7 +165,7 @@ function StreetPage() {
   return (
     <Shell>
       <div className="mx-auto max-w-4xl space-y-5">
-        <section className="overflow-hidden rounded-[28px] border border-[#D7FF35]/30 bg-[radial-gradient(circle_at_85%_15%,#283721_0%,#101713_36%,#080B0C_75%)] p-5 sm:p-9">
+        <section className="z-electric-street-hero overflow-hidden rounded-[28px] border border-[#D7FF35]/30 bg-[radial-gradient(circle_at_85%_15%,#283721_0%,#101713_36%,#080B0C_75%)] p-5 sm:p-9">
           <p className="text-xs font-black uppercase tracking-[0.23em] text-[#D7FF35]">
             ZAPRUDA COMMUNITY / URBAN FISHING
           </p>
