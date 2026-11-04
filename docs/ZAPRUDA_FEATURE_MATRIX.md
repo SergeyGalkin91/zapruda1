@@ -1,6 +1,6 @@
 # ZAPRUDA — матрица 56 постоянных требований
 Машиночитаемый источник: [ZAPRUDA_FEATURES.json](ZAPRUDA_FEATURES.json). Дата: 04.11.2026.
-Код сверки: `d42198088e852a8adb4411f6cf11e9a87cd68161` (PR #93). Документы — DRAFT, не release approval.
+Код сверки: `90f3f54da86d5bf977611402b755bf69c037ae2c` (PR #93). Документы — DRAFT, не release approval.
 IMPLEMENTED означает код, STAGING VERIFIED/E2E VERIFIED — только указанный сценарий и доказательство. PLANNED/BLOCKED сохраняются в обязательном плане. DEFERRED требует явного owner decision.
 P0 — обязательный gate; P? — предлагаемый состав; FULL — полный продукт, не автоматический перенос.
 

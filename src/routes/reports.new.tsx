@@ -55,7 +55,7 @@ export function NewReport() {
   const [fishingMethod, setFishingMethod] = useState("");
   const [lures, setLures] = useState("");
   const [story, setStory] = useState("");
-  const [isPublic, setIsPublic] = useState(true);
+  const [isPublic, setIsPublic] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
@@ -1107,14 +1107,18 @@ export function NewReport() {
           )}
           {step < 3 ? (
             <button
+              key="next-step"
               type="button"
               className="btn-primary"
-              onClick={(e) => nextStep(e.currentTarget.form!)}
+              onClick={(e) => {
+                e.preventDefault();
+                nextStep(e.currentTarget.form!);
+              }}
             >
               Далее
             </button>
           ) : (
-            <button className="btn-primary" disabled={saving}>
+            <button key="publish-report" type="submit" className="btn-primary" disabled={saving}>
               {saving
                 ? "Сохраняем…"
                 : savedReportId
