@@ -30,3 +30,5 @@ Include newly aligned empty Atlas catalog/own progress reads and read-only Yande
 2026-11-04 final visual proof: wait for authenticated route loaders and visible images, scroll to top, capture actual viewport instead of distorted full-page fixed backgrounds. Superseded 397 run canceled during engine installation after core cleanup, before UI writes.
 
 2026-11-04 fix real Browser race: canCompose requires loaded geography/selected room, not just uid; delayed global-room regression. Keep lost-response report and settled viewport acceptance.
+
+2026-11-04 P0 continuation: old exact six QA rows confirmed absent; club message membership scoped and meetup leave/cancel guards applied only to STAGING, live rollback checks PASS. Repeat all four real JWT accounts, feedback precondition/concurrency, core privacy/Realtime and actual browser journeys on this exact candidate. No precondition bypass or quota reset; protected environment approval remains mandatory. Hosted Netlify can now be opened through invited Google login in Cloud Browser; independent CI still has no Netlify access session. No cookies/JWT copied.

@@ -116,6 +116,27 @@ describe("club message membership scope", () => {
       "anon",
     );
   });
+  it("revokes a previously accepted member after membership removal", async () => {
+    expect(
+      (await asUser(u[0]!, "select body from social_group_messages where group_id=$1", [groupA]))
+        .rows,
+    ).toHaveLength(1);
+    await db.exec("reset role");
+    // Only this disconnected transaction's fixture, never a hosted membership.
+    await db.query("delete from social_group_members where group_id=$1 and user_id=$2", [
+      groupA,
+      u[0],
+    ]);
+    expect(
+      (await asUser(u[0]!, "select body from social_group_messages where group_id=$1", [groupA]))
+        .rows,
+    ).toHaveLength(0);
+    await denied(
+      u[0]!,
+      "insert into social_group_messages(group_id,user_id,body) values($1,$2,'Forbidden')",
+      [groupA, u[0]],
+    );
+  });
 });
 
 describe("meetup leave, cancellation, capacity and privacy", () => {
