@@ -50,6 +50,9 @@ async function loginApi(role) {
 }
 async function loginUI(page, account) {
   await page.goto(base + "/auth?mode=in");
+  await expect(page.getByRole("button", { name: "Войти в ZAPRUDA →", exact: true })).toBeVisible({
+    timeout: 20000,
+  });
   if (new URL(page.url()).origin !== new URL(base).origin)
     throw Error("LOGIN_ORIGIN_CHANGED_NO_CREDENTIALS_SENT");
   await page
@@ -91,17 +94,11 @@ try {
     b = await cb.newPage();
   diagnosticPage = a;
   result.requestedBase = base;
-  if (base.startsWith("https://deploy-preview-93--")) {
-    await a.goto(base + "/auth?mode=in");
-    const redirect = new URL(a.url());
-    if (redirect.origin === "https://app.netlify.com" && redirect.pathname === "/edge-access") {
-      result.hostedStatus = "BLOCKED_NETLIFY_AUTH";
-      result.limitations.push(
-        "Hosted Preview requires independent Netlify authentication; no protection bypass or cookies copied",
-      );
-      base = "http://127.0.0.1:3000";
-      result.environment = base + " + real Supabase STAGING JWT; hosted check separately blocked";
-    } else if (redirect.origin !== new URL(base).origin) throw Error("UNEXPECTED_PREVIEW_ORIGIN");
+  if (process.env.ZAPRUDA_HOSTED_PREVIEW_STATUS === "BLOCKED_NETLIFY_AUTH") {
+    result.hostedStatus = "BLOCKED_NETLIFY_AUTH";
+    result.limitations.push(
+      "Known hosted Netlify access wall on f8fdb54/82082ae; not retried, protection retained; local proof only",
+    );
   }
   for (const page of [a, b])
     await page.route("**/*", (route) => {
