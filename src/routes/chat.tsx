@@ -122,6 +122,7 @@ export function GeographicChat() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const alive = useRef(true);
+  const pendingSend = useRef<{ id: string; signature: string } | null>(null);
   const photoUploadId = useRef<string | null>(null);
   const [uid, setUid] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
@@ -601,11 +602,33 @@ export function GeographicChat() {
       const token = session.access_token;
       let messageId = pendingPhotoMessageId;
       if (shouldCreateChatMessage(messageId)) {
-        const { data: message, error: sendError } = await api
+        const text = outgoing || "📷 Фото";
+        const signature = JSON.stringify([uid, selectedPlace.id, topic, text]);
+        if (pendingSend.current?.signature !== signature)
+          pendingSend.current = { id: crypto.randomUUID(), signature };
+        const requestId = pendingSend.current.id;
+        let { data: message, error: sendError } = await api
           .from("chat_messages")
-          .insert({ user_id: uid, body: outgoing || "📷 Фото", place_id: selectedPlace.id, topic })
+          .insert({ id: requestId, user_id: uid, body: text, place_id: selectedPlace.id, topic })
           .select("id")
           .single();
+        if (sendError || !message?.id) {
+          // A committed insert may lose its HTTP response. Reuse its ID and
+          // accept only the exact own payload; never insert again with a new ID.
+          const recovered = await api
+            .from("chat_messages")
+            .select("id")
+            .eq("id", requestId)
+            .eq("user_id", uid)
+            .eq("body", text)
+            .eq("place_id", selectedPlace.id)
+            .eq("topic", topic)
+            .single();
+          if (!recovered.error && recovered.data?.id === requestId) {
+            message = recovered.data;
+            sendError = null;
+          }
+        }
         if (!alive.current) return;
         if (sendError || !message?.id)
           throw new Error(
@@ -635,6 +658,7 @@ export function GeographicChat() {
         if (uploadError || uploaded?.photo_id !== id)
           throw new Error("Не удалось сохранить фотографию. Повтори загрузку.");
       }
+      pendingSend.current = null;
       photoUploadId.current = null;
       setDraft("");
       setPhoto(null);
