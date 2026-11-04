@@ -137,10 +137,20 @@
             scrollWidth: doc.documentElement.scrollWidth,
             overflow: doc.documentElement.scrollWidth > doc.documentElement.clientWidth,
             route: win.location.pathname,
-            theme: doc.documentElement.dataset.theme || doc.documentElement.getAttribute("class"),
+            theme: doc.documentElement.dataset.zaprudaBackground || null,
             signedInProfileLink: !!doc.querySelector('header a[href="/profile"]'),
             bottomNavPadding: nav ? win.getComputedStyle(nav).paddingBottom : null,
             activeElement: doc.activeElement?.tagName,
+            loading: /Загрузка(?:…|\.\.\.)|Загружаем/i.test(doc.body.innerText),
+            visibleImagesPending: Array.from(doc.images).filter((img) => {
+              const box = img.getBoundingClientRect();
+              return (
+                box.top < win.innerHeight &&
+                box.bottom > 0 &&
+                box.width > 0 &&
+                (!img.complete || img.naturalWidth === 0)
+              );
+            }).length,
             resourceOrigins: counts,
             foreignBackend,
             networkLimit:
