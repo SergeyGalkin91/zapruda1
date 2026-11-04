@@ -98,6 +98,28 @@ function submitReport(form: HTMLElement) {
   fireEvent.submit(form);
 }
 describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
+  it("clears restored review fields and returns to private step one", async () => {
+    localStorage.setItem(
+      "zapruda-report-draft-v1-offline-account-a",
+      JSON.stringify({
+        step: 3,
+        title: "Stored QA",
+        fishedOn: "2026-11-04",
+        tackle: "Stored tackle",
+        fishingMethod: "feeder",
+        isPublic: true,
+      }),
+    );
+    render(<NewReport />);
+    fireEvent.click(await screen.findByRole("button", { name: "Очистить черновик" }));
+    expect((screen.getByLabelText("Дата рыбалки") as HTMLInputElement).value).toBe("");
+    expect(screen.getByRole("button", { name: "Далее" })).toBeTruthy();
+    await waitFor(() =>
+      expect(
+        JSON.parse(localStorage.getItem("zapruda-report-draft-v1-offline-account-a")!).isPublic,
+      ).toBe(false),
+    );
+  });
   it("reaches review without publishing and requires a separate submit click", async () => {
     await fillReport();
     fireEvent.click(screen.getByRole("button", { name: "Далее" }));

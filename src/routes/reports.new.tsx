@@ -297,6 +297,10 @@ export function NewReport() {
       }
     }
     setDraftRestored(false);
+    setStep(1);
+    setFishedOn("");
+    setTackle("");
+    setPhotos([]);
     setTitle("");
     setLocation("");
     setWeather("");
@@ -310,7 +314,7 @@ export function NewReport() {
     setStory("");
     setSelectedWaterbody("");
     setCatches([{ species: "", weight: "", length: "" }]);
-    setIsPublic(true);
+    setIsPublic(false);
   }
 
   useEffect(() => {
