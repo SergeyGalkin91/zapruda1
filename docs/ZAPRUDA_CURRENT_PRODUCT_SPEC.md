@@ -3,6 +3,7 @@
 Контракт сохраняет требования; он не объявляет функции готовыми и не разрешает релиз.
 
 ## Начало каждой Work-задачи
+**Актуальный подробный аудит/блокеры и план 0.7.6:** [ZAPRUDA_KING_FINISH_DEEP_AUDIT_20261104.md](ZAPRUDA_KING_FINISH_DEEP_AUDIT_20261104.md). Перед следующим Work по KING FINISH сверить его с живым HEAD, а не принимать исторические SHA и результаты за текущие.
 Прочитать этот файл, [журнал решений](ZAPRUDA_DECISION_LOG.md), [матрицу](ZAPRUDA_FEATURE_MATRIX.md), [release gates](ZAPRUDA_RELEASE_GATES.md), затем проверить актуальный HEAD PR #93, изменения зависимых PR и тематический issue. При UI-работе читать [UI acceptance](ZAPRUDA_UI_ACCEPTANCE.md). Номер старого design lock не равен текущей версии продукта.
 
 ## Источники и границы доказательств
