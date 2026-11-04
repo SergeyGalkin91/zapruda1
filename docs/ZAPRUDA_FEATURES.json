@@ -1,5 +1,5 @@
 {
-  "source_sha": "90f3f54da86d5bf977611402b755bf69c037ae2c",
+  "source_sha": "3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd",
   "features": [
     {
       "id": "AUTH-01",
@@ -274,7 +274,7 @@
       "backend": "тот же черновик и публикация",
       "status": "IMPLEMENTED",
       "acceptance": "back/next/reload на всех шагах, invalid focus",
-      "evidence": "src/components/NewReport.test.tsx: сохранены safety regressions; полный wizard QA ещё открыт.",
+      "evidence": "Netlify 90f3f54: 1→2→3, no automatic submit, private review, reload restores step; screenshot qa/product-contract/zapruda-report-review-20261104.jpg. Publication retry regression retained; full photo/mobile E2E open.",
       "blocker": "Три шага, review, back/next, per-account draft. Авторизованный браузерный wizard E2E открыт."
     },
     {
@@ -305,7 +305,7 @@
       "id": "STREET-01",
       "feature": "старт/восстановление/завершение, район, рыба/заметки",
       "module": "ZAPRUDA STREET",
-      "priority": "P?",
+      "priority": "P1",
       "source": "/street; street.tsx",
       "backend": "localStorage zapruda:street-session:v1",
       "status": "IMPLEMENTED",
@@ -317,7 +317,7 @@
       "id": "STREET-02",
       "feature": "самостоятельно обновляемая длительность",
       "module": "ZAPRUDA STREET",
-      "priority": "P?",
+      "priority": "P1",
       "source": "src/routes/street.tsx; src/lib/street-storage.ts",
       "backend": "startedAt/finishedAt",
       "status": "IMPLEMENTED",
@@ -329,7 +329,7 @@
       "id": "STREET-03",
       "feature": "структурированные снасти/приманки",
       "module": "ZAPRUDA STREET",
-      "priority": "P?",
+      "priority": "P1",
       "source": "src/routes/street.tsx; src/lib/street-storage.ts",
       "backend": "пока species/note/at",
       "status": "IMPLEMENTED",
@@ -341,12 +341,12 @@
       "id": "STREET-04",
       "feature": "добровольный импорт/приватность/без дубля",
       "module": "ZAPRUDA STREET",
-      "priority": "P?",
+      "priority": "P1",
       "source": "reports.new.tsx:182 importStreetSession",
       "backend": "локальный источник → draft; isPublic=false",
       "status": "IMPLEMENTED",
       "acceptance": "повторный импорт, отмена, публикация один раз",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
+      "evidence": "Cloud Browser: start/finish, tackle+lures persisted after reload, voluntary import to private report; no public catch created.",
       "blocker": "Добровольный импорт из v2 ключа своего аккаунта, снасти/приманки/дата; приватный draft; исходник сохранён. UI E2E открыт."
     },
     {
@@ -666,12 +666,12 @@
       "feature": "защита требований/версии",
       "module": "Общая платформа",
       "priority": "P0",
-      "source": "CURRENT_PRODUCT_SPEC; RELEASE_GATES; AGENTS.md",
+      "source": "scripts/check-product-contract.mjs; .github/workflows/product-contract.yml",
       "backend": "change log / owner approval",
       "status": "IMPLEMENTED",
       "acceptance": "ручная матрица SHA/evidence/решение",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "IMPLEMENTED документальный процесс в этом PR; автоматического merge-blocker нет"
+      "evidence": "6/6 checker regressions locally; GitHub product-contract run 41767104280 PASS.",
+      "blocker": "CI installed in #111, not merged into #93; no release approval or main branch protection change."
     }
   ]
 }

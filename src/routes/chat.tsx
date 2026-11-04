@@ -401,6 +401,12 @@ export function GeographicChat() {
             setPhotoUrls({});
           }
         } else {
+          const { error: visitError } = await api.rpc("mark_chat_read", {
+            p_place: placeId,
+            p_topic: topic,
+            p_message: null,
+          });
+          if (alive && visitError) setReadError("Не удалось сохранить посещение чата.");
           setReactions([]);
           setPhotoUrls({});
         }

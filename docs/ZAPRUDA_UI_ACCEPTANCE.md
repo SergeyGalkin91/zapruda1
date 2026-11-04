@@ -42,3 +42,6 @@ CURRENT_PRODUCT_SPEC + DECISION_LOG → последние референсы в
 
 ## Фактическая проверка 04.11 — продолжение
 Cloud Browser открыл preview #93: реальная пустая лента без ошибки FK; browser console не содержит ошибки приложения, только сообщение расширения о metadata. До: чрезмерно крупный hero, техническая метка CONCEPT 01 и слоган только STREET. Исправления d421980: компактнее заголовок, удалена CONCEPT-метка, перечислены разные направления рыбалки, CTA «Новый отчёт» допускает рыбалку без улова. Скриншот before сохранён. After и mobile acceptance проверять по текущему deployed SHA; не переносить старые результаты автоматически.
+
+## Реальный браузерный результат и артефакты
+См. [QA evidence](../qa/product-contract/ACCEPTANCE_20261104.md). Cloud Browser 1363px: обе темы, no horizontal overflow, реальная лента без PGRST200, STREET reload+tackle/lures→opt-in report, review after refresh. Это не полный mobile/auth/receipt E2E. Снимки before/after в qa/product-contract. Исторические NOT CAPTURED строки выше отражают первоначальную инвентаризацию; актуальные scoped результаты — в QA evidence.
