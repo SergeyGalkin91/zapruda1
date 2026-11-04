@@ -1,0 +1,14 @@
+# Netlify Alpha: TanStack Start SSR is built with Nitro's Netlify adapter.
+# Docker continues to override NITRO_PRESET=node-server independently.
+[build]
+command = "bun run build"
+publish = "dist"
+
+[build.environment]
+NITRO_PRESET = "netlify"
+
+# PR previews use only the isolated STAGING backend. These are public client
+# credentials; never put service-role keys or provider secrets in VITE_*.
+[context.deploy-preview.environment]
+VITE_SUPABASE_URL = "https://yudtbifopfnjtjanaqrd.supabase.co"
+VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_GHxXu3_sK5YtuXeftTfwSQ_hK0F5mx8"

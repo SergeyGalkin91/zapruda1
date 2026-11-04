@@ -1,9 +1,27 @@
+import {
+  PROFILE_SAVE_SUCCESS,
+  profileSaveNetworkError,
+  performProfileSave,
+} from "@/lib/profile-save-feedback";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  BrainCircuit, Check, Compass, Fish, MapPin, Save, Settings2, ShieldCheck,
-  Sparkles, UserRound, Waves, LogOut, Pencil, X, MessageSquareText,
+  BrainCircuit,
+  Check,
+  Compass,
+  Fish,
+  MapPin,
+  Save,
+  Settings2,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+  Waves,
+  LogOut,
+  Pencil,
+  X,
+  MessageSquareText,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
@@ -14,6 +32,7 @@ import { ActivityAchievements } from "@/components/ActivityAchievements";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import type { FishingSpecialization } from "@/lib/disciplines";
 import { supabase } from "@/integrations/supabase/client";
+import { loadPublicReportPhotos } from "@/lib/public-report-photos";
 import type { FishingProgress } from "@/lib/progression";
 import { EMPTY_PROGRESS } from "@/lib/progression";
 
@@ -21,7 +40,10 @@ export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
       { title: "Профиль рыболова и достижения — ZAPRUDA" },
-      { name: "description", content: "Настройки снастей, любимые виды рыбы, XP, уровни и достижения рыболова." },
+      {
+        name: "description",
+        content: "Настройки снастей, любимые виды рыбы, XP, уровни и достижения рыболова.",
+      },
     ],
   }),
   component: Profile,
@@ -57,9 +79,28 @@ const EMPTY_FORM: AnglerForm = {
   search_radius_km: 30,
 };
 
-const SPECIES = ["Щука", "Судак", "Окунь", "Жерех", "Голавль", "Форель", "Карп", "Сом", "Лещ", "Карась"] as const;
+const SPECIES = [
+  "Щука",
+  "Судак",
+  "Окунь",
+  "Жерех",
+  "Голавль",
+  "Форель",
+  "Карп",
+  "Сом",
+  "Лещ",
+  "Карась",
+] as const;
 
-function Label({ name, children, hint }: { name: string; children: React.ReactNode; hint?: string }) {
+function Label({
+  name,
+  children,
+  hint,
+}: {
+  name: string;
+  children: React.ReactNode;
+  hint?: string;
+}) {
   return (
     <label className="block space-y-1.5">
       <span className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">{name}</span>
@@ -70,10 +111,14 @@ function Label({ name, children, hint }: { name: string; children: React.ReactNo
 }
 
 function ProfileDetail({ label, value }: { label: string; value?: string | number | null }) {
-  return <div className="min-w-0 rounded-xl border border-white/10 bg-black/15 px-4 py-3">
-    <dt className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">{label}</dt>
-    <dd className="mt-1.5 whitespace-pre-wrap break-words text-sm text-zinc-100">{value || "Не указано"}</dd>
-  </div>;
+  return (
+    <div className="min-w-0 rounded-xl border border-white/10 bg-black/15 px-4 py-3">
+      <dt className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">{label}</dt>
+      <dd className="mt-1.5 whitespace-pre-wrap break-words text-sm text-zinc-100">
+        {value || "Не указано"}
+      </dd>
+    </div>
+  );
 }
 
 type FeaturedGear = {
@@ -84,7 +129,6 @@ type FeaturedGear = {
   line: string | null;
 };
 
-
 type TrophyPhoto = { reportId: string; title: string; url: string };
 function TrophyGallery({ userId }: { userId: string }) {
   const [photos, setPhotos] = useState<TrophyPhoto[]>([]);
@@ -93,51 +137,108 @@ function TrophyGallery({ userId }: { userId: string }) {
   useEffect(() => {
     let active = true;
     void (async () => {
-      setLoading(true); setError("");
-      const reports = await supabase.from("fishing_reports")
-        .select("id,title").eq("user_id", userId).eq("is_public", true)
-        .order("created_at", { ascending: false }).limit(24);
+      setLoading(true);
+      setError("");
+      const reports = await supabase
+        .from("fishing_reports")
+        .select("id,title")
+        .eq("user_id", userId)
+        .eq("is_public", true)
+        .order("created_at", { ascending: false })
+        .limit(24);
       if (reports.error) throw reports.error;
       const list = reports.data ?? [];
-      if (!list.length) { if (active) setPhotos([]); return; }
-      const photoRows = await supabase.from("report_photos")
-        .select("report_id,storage_path,sort_order").in("report_id", list.map(x => x.id))
-        .order("sort_order", { ascending: true }).limit(36);
-      if (photoRows.error) throw photoRows.error;
-      const rows = photoRows.data ?? [];
-      if (!rows.length) { if (active) setPhotos([]); return; }
-      const signed = await supabase.storage.from("report-photos").createSignedUrls(rows.map(x => x.storage_path), 3600);
-      if (signed.error) throw signed.error;
-      const titles = new Map(list.map(x => [x.id, x.title]));
-      if (active) setPhotos(rows.flatMap((row, index) => {
-        const url = signed.data?.[index]?.signedUrl;
-        return url ? [{ reportId: row.report_id, title: titles.get(row.report_id) ?? "Трофей", url }] : [];
-      }));
-    })().catch(() => { if (active) setError("Фотографии пока недоступны."); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+      if (!list.length) {
+        if (active) setPhotos([]);
+        return;
+      }
+      const gallery = await loadPublicReportPhotos(list.map((report) => report.id));
+      if (active)
+        setPhotos(
+          list
+            .flatMap((report) =>
+              (gallery[report.id] ?? []).map((url) => ({
+                reportId: report.id,
+                title: report.title,
+                url,
+              })),
+            )
+            .slice(0, 36),
+        );
+    })()
+      .catch(() => {
+        if (active) setError("Фотографии пока недоступны.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [userId]);
-  return <section aria-labelledby="zapruda-trophies" className="mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0C100E] p-5 sm:p-7">
-    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-      <div><p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#A78BFA]">ZAPRUDA / TROPHY WALL</p>
-      <h2 id="zapruda-trophies" className="mt-2 text-3xl font-black uppercase leading-none tracking-[-0.06em] text-white sm:text-4xl">ТРОФЕИ<span className="text-[#D7FF35]">.</span></h2></div>
-      <span className="rounded-full border border-[#A78BFA]/30 px-3 py-1.5 text-xs font-bold text-[#A78BFA]">{photos.length} фото</span>
-    </div>
-    {loading && <p className="text-sm text-zinc-400">Загружаем трофеи…</p>}
-    {error && <p className="text-sm text-zinc-400">{error}</p>}
-    {!loading && !error && !photos.length && <div className="rounded-2xl border border-dashed border-[#A78BFA]/30 bg-[#191522] p-6">
-      <p className="text-sm font-bold text-white">Твоя стена трофеев пока пуста.</p>
-      <p className="mt-1 text-xs text-zinc-400">Фотографии появятся из твоих публичных отчётов.</p>
-      <Link to="/reports/new" className="mt-4 inline-flex rounded-full bg-[#D7FF35] px-5 py-2.5 text-xs font-black uppercase text-black">Добавить выезд</Link>
-    </div>}
-    {!!photos.length && <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-      {photos.map((photo, index) => <a key={photo.reportId + "-" + index} href={photo.url} target="_blank" rel="noopener noreferrer" aria-label={"Открыть фото: " + photo.title}
-        className="group relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#1A1D19]">
-        <img src={photo.url} loading="lazy" alt={photo.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105"/>
-        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent px-3 pb-3 pt-10 text-[11px] font-bold text-white">{photo.title}</span>
-      </a>)}
-    </div>}
-  </section>;
+  return (
+    <section
+      aria-labelledby="zapruda-trophies"
+      className="mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0C100E] p-5 sm:p-7"
+    >
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#A78BFA]">
+            ZAPRUDA / TROPHY WALL
+          </p>
+          <h2
+            id="zapruda-trophies"
+            className="mt-2 text-3xl font-black uppercase leading-none tracking-[-0.06em] text-white sm:text-4xl"
+          >
+            ТРОФЕИ<span className="text-[#D7FF35]">.</span>
+          </h2>
+        </div>
+        <span className="rounded-full border border-[#A78BFA]/30 px-3 py-1.5 text-xs font-bold text-[#A78BFA]">
+          {photos.length} фото
+        </span>
+      </div>
+      {loading && <p className="text-sm text-zinc-400">Загружаем трофеи…</p>}
+      {error && <p className="text-sm text-zinc-400">{error}</p>}
+      {!loading && !error && !photos.length && (
+        <div className="rounded-2xl border border-dashed border-[#A78BFA]/30 bg-[#191522] p-6">
+          <p className="text-sm font-bold text-white">Твоя стена трофеев пока пуста.</p>
+          <p className="mt-1 text-xs text-zinc-400">
+            Фотографии появятся из твоих публичных отчётов.
+          </p>
+          <Link
+            to="/reports/new"
+            className="mt-4 inline-flex rounded-full bg-[#D7FF35] px-5 py-2.5 text-xs font-black uppercase text-black"
+          >
+            Добавить выезд
+          </Link>
+        </div>
+      )}
+      {!!photos.length && (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {photos.map((photo, index) => (
+            <a
+              key={photo.reportId + "-" + index}
+              href={photo.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={"Открыть фото: " + photo.title}
+              className="group relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#1A1D19]"
+            >
+              <img
+                src={photo.url}
+                loading="lazy"
+                alt={photo.title}
+                className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              />
+              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent px-3 pb-3 pt-10 text-[11px] font-bold text-white">
+                {photo.title}
+              </span>
+            </a>
+          ))}
+        </div>
+      )}
+    </section>
+  );
 }
 
 function ProfileSections() {
@@ -147,16 +248,28 @@ function ProfileSections() {
     { label: "СТАФФ", detail: "Твои комплекты", href: "#my-gear-sets", color: "#D7FF35" },
     { label: "ПРОГРЕСС", detail: "Ранги и достижения", href: "#angler-progress", color: "#A78BFA" },
   ];
-  return <nav aria-label="Разделы профиля" className="mb-7 grid grid-cols-2 gap-2 sm:grid-cols-4">
-    {items.map((item,index)=><a key={item.href} href={item.href} className="group rounded-[20px] border border-white/10 bg-[#111511] p-4 transition hover:border-[#D7FF35]/50 hover:bg-[#1A2016]">
-      <span className="text-[10px] font-black tracking-widest" style={{color:item.color}}>0{index+1} / ZAPRUDA</span>
-      <span className="mt-3 block text-lg font-black uppercase tracking-tight text-white sm:text-xl">{item.label}</span>
-      <span className="mt-1 block text-xs text-zinc-400">{item.detail} ↗</span>
-    </a>)}
-  </nav>;
+  return (
+    <nav aria-label="Разделы профиля" className="mb-7 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      {items.map((item, index) => (
+        <a
+          key={item.href}
+          href={item.href}
+          className="group rounded-[20px] border border-white/10 bg-[#111511] p-4 transition hover:border-[#D7FF35]/50 hover:bg-[#1A2016]"
+        >
+          <span className="text-[10px] font-black tracking-widest" style={{ color: item.color }}>
+            0{index + 1} / ZAPRUDA
+          </span>
+          <span className="mt-3 block text-lg font-black uppercase tracking-tight text-white sm:text-xl">
+            {item.label}
+          </span>
+          <span className="mt-1 block text-xs text-zinc-400">{item.detail} ↗</span>
+        </a>
+      ))}
+    </nav>
+  );
 }
 
-function Profile() {
+export function Profile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -170,6 +283,7 @@ function Profile() {
   const [specializations, setSpecializations] = useState<FishingSpecialization[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const saveInFlight = useRef(false);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -180,22 +294,32 @@ function Profile() {
     setPreferences((current) => ({ ...current, [field]: value }));
 
   const loadFeaturedGear = useCallback(async (id: string) => {
-    const { data: kit, error: kitError } = await (supabase as any)
+    const { data: kit, error: kitError } = await supabase
       .from("angler_gear_sets")
       .select("title,fishing_method,rod_id,reel_id,line_id")
-      .eq("user_id", id).eq("is_primary", true).maybeSingle();
+      .eq("user_id", id)
+      .eq("is_primary", true)
+      .maybeSingle();
     if (kitError || !kit) {
       setFeaturedGear(null);
       return;
     }
     const ids = [kit.rod_id, kit.reel_id, kit.line_id].filter(Boolean) as string[];
-    const { data: gear, error: gearError } = await supabase.from("angler_gear")
-      .select("id,brand,model,variant").eq("user_id", id).in("id", ids);
+    const { data: gear, error: gearError } = await supabase
+      .from("angler_gear")
+      .select("id,brand,model,variant")
+      .eq("user_id", id)
+      .in("id", ids);
     if (gearError || !gear) {
       setFeaturedGear(null);
       return;
     }
-    const gearById = new Map(gear.map(item => [item.id, [item.brand,item.model,item.variant].filter(Boolean).join(" ")]));
+    const gearById = new Map(
+      gear.map((item) => [
+        item.id,
+        [item.brand, item.model, item.variant].filter(Boolean).join(" "),
+      ]),
+    );
     const rod = gearById.get(kit.rod_id);
     const reel = gearById.get(kit.reel_id);
     if (!rod || !reel) {
@@ -207,7 +331,7 @@ function Profile() {
       fishingMethod: kit.fishing_method || "",
       rod,
       reel,
-      line: kit.line_id ? gearById.get(kit.line_id) ?? null : null,
+      line: kit.line_id ? (gearById.get(kit.line_id) ?? null) : null,
     });
   }, []);
 
@@ -221,19 +345,34 @@ function Profile() {
       // Reset private page state with a full navigation after the session is cleared.
       window.location.assign("/");
     } catch (err) {
-      setSignOutError(err instanceof Error ? err.message : "Не удалось выйти из аккаунта. Попробуй ещё раз.");
+      setSignOutError(
+        err instanceof Error ? err.message : "Не удалось выйти из аккаунта. Попробуй ещё раз.",
+      );
       setSigningOut(false);
     }
   }
 
+  const loadSequence = useRef(0);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      loadSequence.current += 1;
+    };
+  }, []);
+
   const loadProfile = useCallback(async () => {
+    const sequence = ++loadSequence.current;
+    const isCurrent = () => mountedRef.current && sequence === loadSequence.current;
     setLoading(true);
     setError("");
     const { data: auth, error: authError } = await supabase.auth.getUser();
+    if (!isCurrent()) return;
     if (authError || !auth.user) {
       setLoading(false);
       setUserId(null);
-      setError(authError?.message || "Чтобы заполнить профиль, войди в аккаунт.");
+      setError("Чтобы заполнить профиль, войди в аккаунт ZAPRUDA.");
       return;
     }
     setUserId(auth.user.id);
@@ -241,29 +380,50 @@ function Profile() {
     void loadFeaturedGear(auth.user.id);
 
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
-      supabase.from("profiles").select("username,display_name,bio,avatar_url,chat_city").eq("id", auth.user.id).maybeSingle(),
+      // Adopt PR #101: private bio is readable only through the own-profile RPC
+      // in STAGING. Keep compatibility with the legacy schema only when that
+      // RPC is absent; never fall back after an authorization/network failure.
+      (async () => {
+        const secured = await supabase.rpc("my_profile_full").maybeSingle();
+        if (!secured.error || !["PGRST202", "42883"].includes(secured.error.code ?? ""))
+          return secured;
+        return supabase
+          .from("profiles")
+          .select("username,display_name,bio,avatar_url,chat_city")
+          .eq("id", auth.user.id)
+          .maybeSingle();
+      })(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
       supabase.rpc("my_fishing_progress"),
       supabase.rpc("my_fishing_specializations_v2"),
     ]);
 
+    if (!isCurrent()) return;
     if (profileResult.error) {
       setError("Не удалось загрузить профиль: " + profileResult.error.message);
     } else if (profileResult.data) {
       const meta = auth.user.user_metadata ?? {};
       const providerName = [meta["full_name"], meta["name"], meta["display_name"]]
-        .find((value): value is string => typeof value === "string" && value.trim().length > 0)?.trim();
-      const providerAvatar = [meta["avatar_url"], meta["picture"]]
-        .find((value): value is string => typeof value === "string" && /^https:\/\//i.test(value)) ?? null;
+        .find((value): value is string => typeof value === "string" && value.trim().length > 0)
+        ?.trim();
+      const providerAvatar =
+        [meta["avatar_url"], meta["picture"]].find(
+          (value): value is string => typeof value === "string" && /^https:\/\//i.test(value),
+        ) ?? null;
       const emailPrefix = auth.user.email?.split("@")[0] ?? "";
       const currentName = profileResult.data.display_name?.trim() ?? "";
-      const canFillName = !!providerName && (!currentName || currentName === emailPrefix || currentName === "angler");
+      const canFillName =
+        !!providerName && (!currentName || currentName === emailPrefix || currentName === "angler");
       const canFillAvatar = !!providerAvatar && !profileResult.data.avatar_url;
       const additions: { display_name?: string; avatar_url?: string } = {};
       if (canFillName) additions.display_name = providerName;
       if (canFillAvatar && providerAvatar) additions.avatar_url = providerAvatar;
       if (Object.keys(additions).length) {
-        const { error: syncError } = await supabase.from("profiles").update(additions).eq("id", auth.user.id);
+        const { error: syncError } = await supabase
+          .from("profiles")
+          .update(additions)
+          .eq("id", auth.user.id);
+        if (!isCurrent()) return;
         if (syncError) console.warn("OAuth profile import skipped:", syncError.message);
         else profileResult.data = { ...profileResult.data, ...additions };
       }
@@ -275,17 +435,20 @@ function Profile() {
     }
 
     if (prefsResult.error) {
-      setError((prev) => prev + " Не удалось загрузить рыболовную анкету: " + prefsResult.error.message);
+      setError(
+        (prev) => prev + " Не удалось загрузить рыболовную анкету: " + prefsResult.error.message,
+      );
     } else if (prefsResult.data) {
       const row = prefsResult.data;
       setPreferences({
         home_city: row.home_city,
         home_region: row.home_region,
         main_technique: row.main_technique,
-        fishing_methods: Array.from(new Set([
-          row.main_technique,
-          ...((row.fishing_methods ?? []) as string[]),
-        ].filter(Boolean))),
+        fishing_methods: Array.from(
+          new Set(
+            [row.main_technique, ...((row.fishing_methods ?? []) as string[])].filter(Boolean),
+          ),
+        ),
         target_species: row.target_species,
         fishing_access: row.fishing_access,
         transport: row.transport,
@@ -299,48 +462,65 @@ function Profile() {
 
     if (progressResult.error) {
       setProgress(null);
-      setError((prev) => prev + " Не удалось рассчитать достижения: " + progressResult.error.message);
+      setError(
+        (prev) => prev + " Не удалось рассчитать достижения: " + progressResult.error.message,
+      );
     } else {
       const raw = progressResult.data?.[0];
-      setProgress(raw ? {
-        report_count: Number(raw.report_count),
-        catches_count: Number(raw.catches_count),
-        photo_count: Number(raw.photo_count),
-        photo_reports: Number(raw.photo_reports),
-        reactions_received: Number(raw.reactions_received),
-        trips_organized: Number(raw.trips_organized),
-        heaviest_catch_kg: raw.heaviest_catch_kg == null ? null : Number(raw.heaviest_catch_kg),
-      } : EMPTY_PROGRESS);
+      setProgress(
+        raw
+          ? {
+              report_count: Number(raw.report_count),
+              catches_count: Number(raw.catches_count),
+              photo_count: Number(raw.photo_count),
+              photo_reports: Number(raw.photo_reports),
+              reactions_received: Number(raw.reactions_received),
+              trips_organized: Number(raw.trips_organized),
+              heaviest_catch_kg:
+                raw.heaviest_catch_kg == null ? null : Number(raw.heaviest_catch_kg),
+            }
+          : EMPTY_PROGRESS,
+      );
     }
     if (specializationsResult.error) {
-      setError((prev) => prev + " Не удалось загрузить дисциплины: " + specializationsResult.error.message);
+      setError(
+        (prev) => prev + " Не удалось загрузить дисциплины: " + specializationsResult.error.message,
+      );
       setSpecializations([]);
     } else {
-      setSpecializations((specializationsResult.data ?? []).map((row) => ({
-        fishing_method: row.fishing_method,
-        report_count: Number(row.report_count),
-        credited_reports: Number(row.credited_reports),
-        catches_count: Number(row.catches_count),
-        credited_catches: Number(row.credited_catches),
-        photo_reports: Number(row.photo_reports),
-        credited_photo_reports: Number(row.credited_photo_reports),
-        distinct_waters: Number(row.distinct_waters),
-        active_days: Number(row.active_days),
-        distinct_species: Number(row.distinct_species),
-        heaviest_catch_kg: row.heaviest_catch_kg == null ? null : Number(row.heaviest_catch_kg),
-      })));
+      setSpecializations(
+        (specializationsResult.data ?? []).map((row) => ({
+          fishing_method: row.fishing_method,
+          report_count: Number(row.report_count),
+          credited_reports: Number(row.credited_reports),
+          catches_count: Number(row.catches_count),
+          credited_catches: Number(row.credited_catches),
+          photo_reports: Number(row.photo_reports),
+          credited_photo_reports: Number(row.credited_photo_reports),
+          distinct_waters: Number(row.distinct_waters),
+          active_days: Number(row.active_days),
+          distinct_species: Number(row.distinct_species),
+          heaviest_catch_kg: row.heaviest_catch_kg == null ? null : Number(row.heaviest_catch_kg),
+        })),
+      );
     }
     setLoading(false);
   }, [loadFeaturedGear]);
 
-  useEffect(() => { void loadProfile(); }, [loadProfile]);
+  useEffect(() => {
+    void loadProfile();
+  }, [loadProfile]);
 
   function toggleMethod(method: string) {
     setPreferences((current) => {
       const selected = current.fishing_methods.includes(method);
       if (selected && current.fishing_methods.length === 1) return current;
-      const methods = selected ? current.fishing_methods.filter(code => code !== method) : [...current.fishing_methods, method];
-      const primary = methods.includes(current.main_technique) ? current.main_technique : methods[0];
+      const methods = selected
+        ? current.fishing_methods.filter((code) => code !== method)
+        : [...current.fishing_methods, method];
+      const primary = methods.includes(current.main_technique)
+        ? current.main_technique
+        : (methods[0] ?? current.main_technique);
       return { ...current, main_technique: primary, fishing_methods: methods };
     });
   }
@@ -365,10 +545,14 @@ function Profile() {
 
   async function saveProfile(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!userId || saving) return;
+    if (!userId || saveInFlight.current) return;
+    // An older profile fetch must not overwrite edits while saving.
+    loadSequence.current += 1;
     const requestedUsername = username.trim();
     if (requestedUsername && !/^[a-zA-Z0-9_.-]{3,30}$/.test(requestedUsername)) {
-      setError("Никнейм: от 3 до 30 символов, латинские буквы, цифры, точка, дефис или подчёркивание.");
+      setError(
+        "Никнейм: от 3 до 30 символов, латинские буквы, цифры, точка, дефис или подчёркивание.",
+      );
       return;
     }
     if (!preferences.fishing_methods.length) {
@@ -379,196 +563,455 @@ function Profile() {
       setError("Чтобы показывать город в общем чате, сначала укажи город рыбалки.");
       return;
     }
+    saveInFlight.current = true;
     setSaving(true);
     setError("");
     setNotice("");
-    const { error: profileError } = await supabase.from("profiles")
-      .update({ username: requestedUsername || null, display_name: displayName.trim() || null, bio: bio.trim() || null, chat_city: shareChatCity ? preferences.home_city.trim() : null })
-      .eq("id", userId);
-    if (profileError) {
-      setError("Не удалось сохранить имя и описание: " + profileError.message);
+    try {
+      const result = await performProfileSave(
+        () =>
+          supabase
+            .from("profiles")
+            .update({
+              username: requestedUsername || null,
+              display_name: displayName.trim() || null,
+              bio: bio.trim() || null,
+              chat_city: shareChatCity ? preferences.home_city.trim() : null,
+            })
+            .eq("id", userId),
+        () =>
+          supabase.from("angler_preferences").upsert(
+            {
+              user_id: userId,
+              ...preferences,
+              home_city: preferences.home_city.trim(),
+              home_region: preferences.home_region.trim(),
+              favorite_lures: preferences.favorite_lures.trim(),
+              tackle_text: preferences.tackle_text.trim(),
+              preferred_water: preferences.preferred_water.trim(),
+              fishing_notes: preferences.fishing_notes.trim(),
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "user_id" },
+          ),
+      );
+      if (result.status === "profile-error") {
+        setError("Не удалось сохранить имя и описание: " + result.message);
+      } else if (result.status === "preferences-error") {
+        setError("Имя сохранено, но настройки рыбалки не обновлены: " + result.message);
+      } else if (result.status === "network-error") {
+        setError(profileSaveNetworkError(result.profileSaved, result.cause));
+      } else {
+        setNotice(PROFILE_SAVE_SUCCESS);
+        setEditing(false);
+      }
+    } catch {
+      setError("Не удалось завершить сохранение. Проверь соединение и повтори попытку.");
+    } finally {
+      saveInFlight.current = false;
       setSaving(false);
-      return;
     }
-
-    const { error: prefsError } = await supabase.from("angler_preferences").upsert({
-      user_id: userId,
-      ...preferences,
-      home_city: preferences.home_city.trim(),
-      home_region: preferences.home_region.trim(),
-      favorite_lures: preferences.favorite_lures.trim(),
-      tackle_text: preferences.tackle_text.trim(),
-      preferred_water: preferences.preferred_water.trim(),
-      fishing_notes: preferences.fishing_notes.trim(),
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
-    setSaving(false);
-    if (prefsError) {
-      setError("Имя сохранено, но настройки рыбалки не обновлены: " + prefsError.message);
-      return;
-    }
-    setNotice("Профиль сохранён. Способы ловли и предпочтения обновлены.");
-    setEditing(false);
   }
 
   return (
     <Shell>
       <section className="relative mb-6 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#1E251A] via-[#101310] to-[#070908] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:p-8">
         <div className="pointer-events-none absolute -right-16 -top-20 size-60 rounded-full bg-[#D7FF35]/10 blur-3xl" />
-        <p className="relative text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">ZAPRUDA / Профиль рыболова</p>
+        <p className="relative text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">
+          ZAPRUDA / Профиль рыболова
+        </p>
         <div className="relative mt-4 flex flex-wrap items-center gap-4">
-          {avatarUrl
-            ? <img src={avatarUrl} alt="" className="size-24 rounded-full border-[3px] border-[#D7FF35]/70 object-cover shadow-[0_0_28px_rgba(215,255,53,0.13)]" />
-            : <div className="flex size-20 items-center justify-center rounded-full border border-[#D7FF35]/35 bg-[#D7FF35]/10"><UserRound className="size-9 text-[#D7FF35]" /></div>}
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt=""
+              className="size-24 rounded-full border-[3px] border-[#D7FF35]/70 object-cover shadow-[0_0_28px_rgba(215,255,53,0.13)]"
+            />
+          ) : (
+            <div className="flex size-20 items-center justify-center rounded-full border border-[#D7FF35]/35 bg-[#D7FF35]/10">
+              <UserRound className="size-9 text-[#D7FF35]" />
+            </div>
+          )}
           <div className="min-w-0 flex-1">
-            <h1 className="text-[clamp(1.9rem,5vw,3.3rem)] font-black uppercase leading-[0.98] tracking-[-0.055em] text-white">{displayName || username || "Мой рыболовный профиль"}</h1>
-            <p className="mt-1 text-sm text-[#A6B1A0]">{username ? "@" + username : "Укажи никнейм"}{preferences.home_city ? " · " + preferences.home_city : ""}</p>
-            <p className="mt-2 text-xs text-zinc-400">{bio || "Расскажи, где и на что любишь ловить."}</p>
+            <h1 className="max-w-full text-[clamp(1.05rem,4.3vw,3.3rem)] font-black uppercase leading-[1.12] tracking-[-0.035em] text-white [overflow-wrap:normal] break-normal">
+              {displayName || username || "Мой рыболовный профиль"}
+            </h1>
+            <p className="mt-1 text-sm text-[#A6B1A0]">
+              {username ? "@" + username : "Укажи никнейм"}
+              {preferences.home_city ? " · " + preferences.home_city : ""}
+            </p>
+            <p className="mt-2 text-xs text-zinc-400">
+              {bio || "Расскажи, где и на что любишь ловить."}
+            </p>
           </div>
           <div className="flex max-w-full flex-col items-start gap-3 sm:items-end">
             <div className="flex max-w-full flex-wrap gap-2 sm:justify-end">
-              {preferences.fishing_methods.map(method => {
-                const item = FISHING_DISCIPLINES.find(entry => entry.code === method);
-                return <span key={method} className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]">
-                  {item?.icon ?? "🎣"} {item?.title ?? method}
-                </span>;
+              {preferences.fishing_methods.map((method) => {
+                const item = FISHING_DISCIPLINES.find((entry) => entry.code === method);
+                return (
+                  <span
+                    key={method}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]"
+                  >
+                    {item?.icon ?? "🎣"} {item?.title ?? method}
+                  </span>
+                );
               })}
             </div>
-            {userId && <a href="#my-gear-sets" className="group block max-w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-left transition hover:border-[#D7FF35]/40 sm:max-w-[345px]">
-              <span className="flex items-center gap-2 text-xs font-bold text-[#D7FF35]">
-                <Fish className="size-4" aria-hidden="true" />
-                {featuredGear ? "Чем ловлю · " + featuredGear.title : "Мои рыболовные комплекты"}
-              </span>
-              {featuredGear ? <span className="mt-2 block space-y-1 text-xs leading-5 text-zinc-200">
-                <span className="block break-words"><strong className="font-bold text-white">Удилище:</strong> {featuredGear.rod}</span>
-                <span className="block break-words"><strong className="font-bold text-white">Катушка:</strong> {featuredGear.reel}</span>
-                {featuredGear.line && <span className="block break-words"><strong className="font-bold text-white">Шнур:</strong> {featuredGear.line}</span>}
-                {featuredGear.fishingMethod && <span className="block text-zinc-400">{featuredGear.fishingMethod}</span>}
-              </span> : <span className="mt-1 block text-xs text-zinc-400">Собрать первый комплект из моих снастей →</span>}
-            </a>}
+            {userId && (
+              <a
+                href="#my-gear-sets"
+                className="group block max-w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-left transition hover:border-[#D7FF35]/40 sm:max-w-[345px]"
+              >
+                <span className="flex items-center gap-2 text-xs font-bold text-[#D7FF35]">
+                  <Fish className="size-4" aria-hidden="true" />
+                  {featuredGear ? "Чем ловлю · " + featuredGear.title : "Мои рыболовные комплекты"}
+                </span>
+                {featuredGear ? (
+                  <span className="mt-2 block space-y-1 text-xs leading-5 text-zinc-200">
+                    <span className="block break-words">
+                      <strong className="font-bold text-white">Удилище:</strong> {featuredGear.rod}
+                    </span>
+                    <span className="block break-words">
+                      <strong className="font-bold text-white">Катушка:</strong> {featuredGear.reel}
+                    </span>
+                    {featuredGear.line && (
+                      <span className="block break-words">
+                        <strong className="font-bold text-white">Шнур:</strong> {featuredGear.line}
+                      </span>
+                    )}
+                    {featuredGear.fishingMethod && (
+                      <span className="block text-zinc-400">{featuredGear.fishingMethod}</span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="mt-1 block text-xs text-zinc-400">
+                    Собрать первый комплект из моих снастей →
+                  </span>
+                )}
+              </a>
+            )}
           </div>
+        </div>
+        <div className="relative mt-5 flex justify-end">
+          <Link
+            to="/settings"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#D7FF35]/30 bg-black/25 px-4 py-2 text-sm font-bold text-[#D7FF35] transition hover:border-[#D7FF35]/60 hover:bg-[#D7FF35]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]"
+          >
+            <Settings2 className="size-4" aria-hidden="true" />
+            Настройки → Оформление
+          </Link>
         </div>
       </section>
 
-      {loading && <div className="panel p-6 text-zinc-400">Загружаем рыболовный профиль и достижения…</div>}
-      {error && <div role="alert" className="mb-4 rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</div>}
-      {notice && <div role="status" className="mb-4 flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 p-4 text-sm text-[#D7FF35]"><Check className="size-4" />{notice}</div>}
+      {loading && (
+        <div className="panel p-6 text-zinc-400">Загружаем рыболовный профиль и достижения…</div>
+      )}
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200"
+        >
+          {error}
+        </div>
+      )}
+      {notice && (
+        <div
+          role="status"
+          className="mb-4 flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 p-4 text-sm text-[#D7FF35]"
+        >
+          <Check className="size-4" />
+          {notice}
+        </div>
+      )}
 
       {!loading && userId && (
         <>
           <section className="mb-8 rounded-3xl border border-white/10 bg-[#151915] p-5 sm:p-7">
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">01 / Анкета</p>
-                <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.035em] sm:text-3xl">Твой рыболовный профиль</h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">Именно эти данные используются для персонального подбора мест: город, транспорт, способы ловли, приманки и снасти.</p>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">
+                  01 / Анкета
+                </p>
+                <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.035em] sm:text-3xl">
+                  Твой рыболовный профиль
+                </h2>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
+                  Именно эти данные используются для персонального подбора мест: город, транспорт,
+                  способы ловли, приманки и снасти.
+                </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {!editing && <button type="button" onClick={() => { setError(""); setNotice(""); setEditing(true); }}
-                  className="btn-primary inline-flex min-h-10 items-center gap-2">
-                  <Pencil className="size-4" /> Редактировать
-                </button>}
-                <Link to="/assistant" className="inline-flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 px-3 py-2 text-xs font-bold text-[#D7FF35] transition hover:bg-[#D7FF35]/10">
+                {!editing && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError("");
+                      setNotice("");
+                      setEditing(true);
+                    }}
+                    className="btn-primary inline-flex min-h-11 items-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]"
+                  >
+                    <Pencil className="size-4" /> Редактировать
+                  </button>
+                )}
+                <Link
+                  to="/assistant"
+                  className="inline-flex items-center gap-2 rounded-xl border border-[#D7FF35]/30 px-3 py-2 text-xs font-bold text-[#D7FF35] transition hover:bg-[#D7FF35]/10"
+                >
                   <BrainCircuit className="size-4" /> К советнику
                 </Link>
               </div>
             </div>
 
             {editing ? (
-              <form onSubmit={saveProfile} className="space-y-5">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Label name="Никнейм"><input className="field" maxLength={30} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="например, zaprudafish" /></Label>
-                <Label name="Отображаемое имя"><input className="field" maxLength={100} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Как тебя называть?" /></Label>
-                <Label name="Город рыбалки"><input className="field" maxLength={100} value={preferences.home_city} onChange={(e) => update("home_city", e.target.value)} placeholder="Нижний Новгород" /></Label>
-                <Label name="Регион"><input className="field" maxLength={120} value={preferences.home_region} onChange={(e) => update("home_region", e.target.value)} placeholder="Нижегородская область" /></Label>
-                <label className="flex items-start gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-3 text-sm sm:col-span-2">
-                  <input type="checkbox" checked={shareChatCity} onChange={e => setShareChatCity(e.target.checked)} className="mt-1 size-4 accent-[#D7FF35]" />
-                  <span><strong className="block text-zinc-100">Показывать мой город в общем чате</strong>
-                    <span className="mt-1 block text-xs leading-5 text-zinc-400">Например: «river_hunter (Нижний Новгород)». Только название города будет публичным. Рыболовные места, метки и остальная анкета останутся приватными. Можно отключить в любой момент.</span>
-                  </span>
-                </label>
-                <div className="space-y-2 sm:col-span-2">
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">Мои способы ловли · можно выбрать несколько</p>
+              <form onSubmit={saveProfile} aria-busy={saving} className="space-y-5">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Label name="Никнейм">
+                    <input
+                      className="field"
+                      maxLength={30}
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="например, zaprudafish"
+                    />
+                  </Label>
+                  <Label name="Отображаемое имя">
+                    <input
+                      className="field"
+                      maxLength={100}
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Как тебя называть?"
+                    />
+                  </Label>
+                  <Label name="Город рыбалки">
+                    <input
+                      className="field"
+                      maxLength={100}
+                      value={preferences.home_city}
+                      onChange={(e) => update("home_city", e.target.value)}
+                      placeholder="Нижний Новгород"
+                    />
+                  </Label>
+                  <Label name="Регион">
+                    <input
+                      className="field"
+                      maxLength={120}
+                      value={preferences.home_region}
+                      onChange={(e) => update("home_region", e.target.value)}
+                      placeholder="Нижегородская область"
+                    />
+                  </Label>
+                  <label className="flex items-start gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-3 text-sm sm:col-span-2">
+                    <input
+                      type="checkbox"
+                      checked={shareChatCity}
+                      onChange={(e) => setShareChatCity(e.target.checked)}
+                      className="mt-1 size-4 accent-[#D7FF35]"
+                    />
+                    <span>
+                      <strong className="block text-zinc-100">
+                        Показывать мой город в общем чате
+                      </strong>
+                      <span className="mt-1 block text-xs leading-5 text-zinc-400">
+                        Например: «river_hunter (Нижний Новгород)». Только название города будет
+                        публичным. Рыболовные места, метки и остальная анкета останутся приватными.
+                        Можно отключить в любой момент.
+                      </span>
+                    </span>
+                  </label>
+                  <div className="space-y-2 sm:col-span-2">
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">
+                      Мои способы ловли · можно выбрать несколько
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {FISHING_DISCIPLINES.map((item) => {
+                        const selected = preferences.fishing_methods.includes(item.code);
+                        return (
+                          <button
+                            key={item.code}
+                            type="button"
+                            aria-pressed={selected}
+                            onClick={() => toggleMethod(item.code)}
+                            className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}
+                          >
+                            {selected ? "✓ " : ""}
+                            {item.icon} {item.title}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-zinc-500">
+                      Например, Спиннинг + Фидер. Выбранные способы появятся в шапке профиля.
+                      Минимум один.
+                    </p>
+                  </div>
+                  <Label name="Основной способ для ИИ-советника">
+                    <select
+                      className="field"
+                      value={preferences.main_technique}
+                      onChange={(e) => update("main_technique", e.target.value)}
+                    >
+                      {preferences.fishing_methods.map((method) => (
+                        <option key={method} value={method}>
+                          {FISHING_DISCIPLINES.find((x) => x.code === method)?.title ?? method}
+                        </option>
+                      ))}
+                    </select>
+                  </Label>
+                  <Label name="С берега или с лодки">
+                    <select
+                      className="field"
+                      value={preferences.fishing_access}
+                      onChange={(e) => update("fishing_access", e.target.value)}
+                    >
+                      {["Берег", "Лодка", "Берег и лодка"].map((item) => (
+                        <option key={item}>{item}</option>
+                      ))}
+                    </select>
+                  </Label>
+                  <Label name="Транспорт">
+                    <select
+                      className="field"
+                      value={preferences.transport}
+                      onChange={(e) => update("transport", e.target.value)}
+                    >
+                      {["Без машины", "Есть машина", "Общественный транспорт", "Любой"].map(
+                        (item) => (
+                          <option key={item}>{item}</option>
+                        ),
+                      )}
+                    </select>
+                  </Label>
+                  <Label
+                    name="Радиус поиска, км"
+                    hint="Фильтрация по расстоянию появится после подключения геокодирования и координат водоёмов."
+                  >
+                    <input
+                      className="field"
+                      type="number"
+                      min={1}
+                      max={300}
+                      value={preferences.search_radius_km}
+                      onChange={(e) =>
+                        update(
+                          "search_radius_km",
+                          Math.max(1, Math.min(300, Number(e.target.value) || 1)),
+                        )
+                      }
+                    />
+                  </Label>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">
+                    Какую рыбу хочешь ловить
+                  </p>
                   <div className="flex flex-wrap gap-2">
-                    {FISHING_DISCIPLINES.map(item => {
-                      const selected = preferences.fishing_methods.includes(item.code);
-                      return <button key={item.code} type="button" aria-pressed={selected}
-                        onClick={() => toggleMethod(item.code)}
-                        className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}>
-                        {selected ? "✓ " : ""}{item.icon} {item.title}
-                      </button>;
+                    {SPECIES.map((species) => {
+                      const selected = preferences.target_species.includes(species);
+                      return (
+                        <button
+                          key={species}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => toggleSpecies(species)}
+                          className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}
+                        >
+                          {selected ? "✓ " : ""}
+                          {species}
+                        </button>
+                      );
                     })}
                   </div>
-                  <p className="text-xs text-zinc-500">Например, Спиннинг + Фидер. Выбранные способы появятся в шапке профиля. Минимум один.</p>
                 </div>
-                <Label name="Основной способ для ИИ-советника">
-                  <select className="field" value={preferences.main_technique} onChange={(e) => update("main_technique", e.target.value)}>
-                    {preferences.fishing_methods.map(method => <option key={method} value={method}>{FISHING_DISCIPLINES.find(x => x.code === method)?.title ?? method}</option>)}
-                  </select>
-                </Label>
-                <Label name="С берега или с лодки">
-                  <select className="field" value={preferences.fishing_access} onChange={(e) => update("fishing_access", e.target.value)}>
-                    {["Берег","Лодка","Берег и лодка"].map((item) => <option key={item}>{item}</option>)}
-                  </select>
-                </Label>
-                <Label name="Транспорт">
-                  <select className="field" value={preferences.transport} onChange={(e) => update("transport", e.target.value)}>
-                    {["Без машины","Есть машина","Общественный транспорт","Любой"].map((item) => <option key={item}>{item}</option>)}
-                  </select>
-                </Label>
-                <Label name="Радиус поиска, км" hint="Фильтрация по расстоянию появится после подключения геокодирования и координат водоёмов.">
-                  <input className="field" type="number" min={1} max={300} value={preferences.search_radius_km} onChange={(e) => update("search_radius_km", Math.max(1, Math.min(300, Number(e.target.value) || 1)))} />
-                </Label>
-              </div>
 
-              <div className="space-y-2">
-                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">Какую рыбу хочешь ловить</p>
-                <div className="flex flex-wrap gap-2">
-                  {SPECIES.map((species) => {
-                    const selected = preferences.target_species.includes(species);
-                    return (
-                      <button key={species} type="button" aria-pressed={selected}
-                        onClick={() => toggleSpecies(species)}
-                        className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}>
-                        {selected ? "✓ " : ""}{species}
-                      </button>
-                    );
-                  })}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Label
+                    name="Дополнительные заметки о снастях"
+                    hint="Для выбора брендов, моделей и размеров используй каталог ниже."
+                  >
+                    <textarea
+                      className="field min-h-32"
+                      maxLength={1600}
+                      value={preferences.tackle_text}
+                      onChange={(e) => update("tackle_text", e.target.value)}
+                      placeholder={"Narval Euphoria 10–42 г\nDaiwa Prorex LT 3000\nШнур PE #1.2"}
+                    />
+                  </Label>
+                  <Label name="Любимые приманки" hint="Важен вес и тип: поможет подобрать технику.">
+                    <textarea
+                      className="field min-h-32"
+                      maxLength={800}
+                      value={preferences.favorite_lures}
+                      onChange={(e) => update("favorite_lures", e.target.value)}
+                      placeholder="Джиг 10–22 г, силикон 4–6”, колебалки, пилькеры…"
+                    />
+                  </Label>
+                  <Label name="Любимые водоёмы">
+                    <textarea
+                      className="field min-h-24"
+                      maxLength={500}
+                      value={preferences.preferred_water}
+                      onChange={(e) => update("preferred_water", e.target.value)}
+                      placeholder="Ока, Волга, малые реки, озёра…"
+                    />
+                  </Label>
+                  <Label name="Пожелания для ИИ">
+                    <textarea
+                      className="field min-h-24"
+                      maxLength={800}
+                      value={preferences.fishing_notes}
+                      onChange={(e) => update("fishing_notes", e.target.value)}
+                      placeholder="Например: только с берега, люблю рассвет, интересует судак…"
+                    />
+                  </Label>
                 </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Label name="Дополнительные заметки о снастях" hint="Для выбора брендов, моделей и размеров используй каталог ниже.">
-                  <textarea className="field min-h-32" maxLength={1600} value={preferences.tackle_text} onChange={(e) => update("tackle_text", e.target.value)} placeholder={"Narval Euphoria 10–42 г\nDaiwa Prorex LT 3000\nШнур PE #1.2"} />
+                <Label name="О себе">
+                  <textarea
+                    className="field min-h-20"
+                    maxLength={400}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Несколько слов для других рыбаков"
+                  />
                 </Label>
-                <Label name="Любимые приманки" hint="Важен вес и тип: поможет подобрать технику.">
-                  <textarea className="field min-h-32" maxLength={800} value={preferences.favorite_lures} onChange={(e) => update("favorite_lures", e.target.value)} placeholder="Джиг 10–22 г, силикон 4–6”, колебалки, пилькеры…" />
-                </Label>
-                <Label name="Любимые водоёмы">
-                  <textarea className="field min-h-24" maxLength={500} value={preferences.preferred_water} onChange={(e) => update("preferred_water", e.target.value)} placeholder="Ока, Волга, малые реки, озёра…" />
-                </Label>
-                <Label name="Пожелания для ИИ">
-                  <textarea className="field min-h-24" maxLength={800} value={preferences.fishing_notes} onChange={(e) => update("fishing_notes", e.target.value)} placeholder="Например: только с берега, люблю рассвет, интересует судак…" />
-                </Label>
-              </div>
-              <Label name="О себе">
-                <textarea className="field min-h-20" maxLength={400} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Несколько слов для других рыбаков" />
-              </Label>
-              <div className="mt-7 space-y-4 border-t border-[#D7FF35]/25 pt-6">
-                <div className="flex items-start gap-2 text-xs leading-5 text-zinc-400">
-                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#D7FF35]" />
-                  После сохранения откроется готовая анкета. Снасти и личные предпочтения останутся приватными.
+                <div className="mt-7 space-y-4 border-t border-[#D7FF35]/25 pt-6">
+                  <div className="flex items-start gap-2 text-xs leading-5 text-zinc-400">
+                    <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#D7FF35]" />
+                    После сохранения откроется готовая анкета. Снасти и личные предпочтения
+                    останутся приватными.
+                  </div>
+                  {error && (
+                    <p
+                      className="rounded-xl border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200"
+                      aria-live="off"
+                    >
+                      {error}
+                    </p>
+                  )}
+                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                    <button
+                      className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 px-5"
+                      type="button"
+                      onClick={cancelEditing}
+                      disabled={saving}
+                    >
+                      <X className="size-4" /> Отмена
+                    </button>
+                    <button
+                      className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold"
+                      type="submit"
+                      disabled={saving}
+                      aria-label="Сохранить редактирование профиля"
+                    >
+                      <Save className="size-5" />{" "}
+                      {saving ? "Сохраняем изменения…" : "Сохранить редактирование профиля"}
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-3">
-                  <button className="btn-ghost inline-flex min-h-12 items-center gap-2 px-5" type="button" onClick={cancelEditing} disabled={saving}>
-                    <X className="size-4" /> Отмена
-                  </button>
-                  <button className="btn-primary inline-flex min-h-12 flex-1 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold sm:flex-none" type="submit" disabled={saving} aria-label="Сохранить редактирование профиля">
-                    <Save className="size-5" /> {saving ? "Сохраняем изменения…" : "Сохранить редактирование профиля"}
-                  </button>
-                </div>
-              </div>
-            </form>
+              </form>
             ) : (
               <dl className="space-y-5">
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -578,22 +1021,48 @@ function Profile() {
                   <ProfileDetail label="Регион" value={preferences.home_region} />
                   <ProfileDetail label="С берега или с лодки" value={preferences.fishing_access} />
                   <ProfileDetail label="Транспорт" value={preferences.transport} />
-                  <ProfileDetail label="Радиус поиска" value={preferences.search_radius_km + " км"} />
-                  <ProfileDetail label="Город в общем чате" value={shareChatCity ? preferences.home_city + " (показывается)" : "Скрыт"} />
+                  <ProfileDetail
+                    label="Радиус поиска"
+                    value={preferences.search_radius_km + " км"}
+                  />
+                  <ProfileDetail
+                    label="Город в общем чате"
+                    value={shareChatCity ? preferences.home_city + " (показывается)" : "Скрыт"}
+                  />
                 </div>
                 <div>
-                  <dt className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">Мои способы ловли</dt>
+                  <dt className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">
+                    Мои способы ловли
+                  </dt>
                   <dd className="flex flex-wrap gap-2">
-                    {preferences.fishing_methods.map(method => <span key={method} className="rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]">
-                      {FISHING_DISCIPLINES.find(x => x.code === method)?.icon ?? "🎣"} {method}{method === preferences.main_technique ? " · основной" : ""}
-                    </span>)}
+                    {preferences.fishing_methods.map((method) => (
+                      <span
+                        key={method}
+                        className="rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]"
+                      >
+                        {FISHING_DISCIPLINES.find((x) => x.code === method)?.icon ?? "🎣"} {method}
+                        {method === preferences.main_technique ? " · основной" : ""}
+                      </span>
+                    ))}
                   </dd>
                 </div>
                 <div>
-                  <dt className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">Интересующая рыба</dt>
-                  <dd className="flex flex-wrap gap-2">{preferences.target_species.length ? preferences.target_species.map(species =>
-                    <span key={species} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-zinc-200">{species}</span>)
-                    : <span className="text-sm text-zinc-500">Пока не выбраны виды рыб</span>}
+                  <dt className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">
+                    Интересующая рыба
+                  </dt>
+                  <dd className="flex flex-wrap gap-2">
+                    {preferences.target_species.length ? (
+                      preferences.target_species.map((species) => (
+                        <span
+                          key={species}
+                          className="rounded-xl border border-white/10 px-3 py-2 text-xs text-zinc-200"
+                        >
+                          {species}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-sm text-zinc-500">Пока не выбраны виды рыб</span>
+                    )}
                   </dd>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -604,22 +1073,32 @@ function Profile() {
                   <ProfileDetail label="О себе" value={bio} />
                 </div>
                 <p className="flex items-center gap-2 border-t border-white/10 pt-4 text-xs text-zinc-500">
-                  <ShieldCheck className="size-4 text-[#D7FF35]" /> Личные снасти, предпочтения и рыболовные метки не публикуются в общем доступе.
+                  <ShieldCheck className="size-4 text-[#D7FF35]" /> Личные снасти, предпочтения и
+                  рыболовные метки не публикуются в общем доступе.
                 </p>
               </dl>
             )}
           </section>
 
-          <section aria-labelledby="angler-map-title" className="mb-7 overflow-hidden rounded-3xl border border-[#D7FF35]/20 bg-[#151915] p-5 sm:p-7">
+          <section
+            aria-labelledby="angler-map-title"
+            className="mb-7 overflow-hidden rounded-3xl border border-[#D7FF35]/20 bg-[#151915] p-5 sm:p-7"
+          >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">ZAPRUDA / Моя карта</p>
-                <h2 id="angler-map-title" className="mt-2 flex items-center gap-2 text-xl font-extrabold text-white">
-                  <MapPin className="size-5 text-[#D7FF35]" aria-hidden="true" /> Рыболовная карта региона
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">
+                  ZAPRUDA / Моя карта
+                </p>
+                <h2
+                  id="angler-map-title"
+                  className="mt-2 flex items-center gap-2 text-xl font-extrabold text-white"
+                >
+                  <MapPin className="size-5 text-[#D7FF35]" aria-hidden="true" /> Рыболовная карта
+                  региона
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
-                  Яндекс Карты по городу из твоего профиля. Найди водоёмы и спланируй выезд.
-                  Точные места рыбалки здесь не публикуются.
+                  Яндекс Карты по городу из твоего профиля. Найди водоёмы и спланируй выезд. Точные
+                  места рыбалки здесь не публикуются.
                 </p>
               </div>
               {preferences.home_city.trim() && (
@@ -636,7 +1115,8 @@ function Profile() {
             {preferences.home_city.trim() ? (
               <>
                 <p className="mb-3 mt-5 text-xs font-semibold text-[#D7FF35]">
-                  {preferences.home_city}{preferences.home_region ? ` · ${preferences.home_region}` : ""}
+                  {preferences.home_city}
+                  {preferences.home_region ? ` · ${preferences.home_region}` : ""}
                 </p>
                 <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0D100C]">
                   <iframe
@@ -648,11 +1128,15 @@ function Profile() {
                     referrerPolicy="strict-origin-when-cross-origin"
                   />
                 </div>
-                <p className="mt-3 text-xs text-zinc-500">Карта отображается сторонним сервисом Яндекс. Геолокация устройства не запрашивается.</p>
+                <p className="mt-3 text-xs text-zinc-500">
+                  Карта отображается сторонним сервисом Яндекс. Геолокация устройства не
+                  запрашивается.
+                </p>
               </>
             ) : (
               <div className="mt-5 rounded-2xl border border-dashed border-white/15 bg-black/20 p-5 text-sm text-zinc-300">
-                Заполни поле «Город рыбалки» выше и сохрани профиль — здесь появится карта твоего региона.
+                Заполни поле «Город рыбалки» выше и сохрани профиль — здесь появится карта твоего
+                региона.
               </div>
             )}
           </section>
@@ -661,7 +1145,11 @@ function Profile() {
 
           <TrophyGallery userId={userId} />
 
-          <PrivateFishingMarks userId={userId} homeCity={preferences.home_city} homeRegion={preferences.home_region} />
+          <PrivateFishingMarks
+            userId={userId}
+            homeCity={preferences.home_city}
+            homeRegion={preferences.home_region}
+          />
 
           <AnglerTackleCabinet
             userId={userId}
@@ -670,24 +1158,44 @@ function Profile() {
           />
 
           <div className="mb-6 mt-6 flex flex-wrap gap-3">
-            <Link to="/guides" className="btn-ghost inline-flex">Кабинет рыболовного гида</Link>
-            <Link to="/spearfishing" className="btn-ghost inline-flex">Подводная охота</Link>
+            <Link to="/guides" className="btn-ghost inline-flex">
+              Кабинет рыболовного гида
+            </Link>
+            <Link to="/spearfishing" className="btn-ghost inline-flex">
+              Подводная охота
+            </Link>
           </div>
           {progress ? (
-            <div id="angler-progress"><FishingProgressTree progress={progress} /><FishingDisciplineTree stats={specializations} preferredMethod={preferences.main_technique} /></div>
+            <div id="angler-progress">
+              <FishingProgressTree progress={progress} />
+              <FishingDisciplineTree
+                stats={specializations}
+                preferredMethod={preferences.main_technique}
+              />
+            </div>
           ) : (
-            <div className="panel p-5 text-sm text-zinc-400">Пока не удалось загрузить ветку достижений. Попробуй обновить страницу.</div>
+            <div className="panel p-5 text-sm text-zinc-400">
+              Пока не удалось загрузить ветку достижений. Попробуй обновить страницу.
+            </div>
           )}
 
           <ActivityAchievements />
 
-          <section aria-label="Обратная связь и управление аккаунтом" className="mt-10 mb-6 space-y-5 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7">
+          <section
+            aria-label="Обратная связь и управление аккаунтом"
+            className="mt-10 mb-6 space-y-5 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7"
+          >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <h2 className="text-base font-bold text-white">Предложения и сотрудничество</h2>
-                <p className="mt-1 text-sm text-zinc-400">Идеи для ZAPRUDA, предложения по улучшению, сообщения об ошибках и партнёрство.</p>
+                <p className="mt-1 text-sm text-zinc-400">
+                  Идеи для ZAPRUDA, предложения по улучшению, сообщения об ошибках и партнёрство.
+                </p>
               </div>
-              <Link to="/feedback" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-5 py-2.5 text-sm font-bold text-[#D7FF35] transition hover:border-[#D7FF35]/70 hover:bg-[#D7FF35]/20">
+              <Link
+                to="/feedback"
+                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-5 py-2.5 text-sm font-bold text-[#D7FF35] transition hover:border-[#D7FF35]/70 hover:bg-[#D7FF35]/20"
+              >
                 <MessageSquareText className="size-4" aria-hidden="true" />
                 Предложения и сотрудничество
               </Link>
@@ -696,7 +1204,9 @@ function Profile() {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-white">Аккаунт ZAPRUDA</h2>
-                  <p className="mt-1 text-sm text-zinc-400">Выйти из аккаунта на этом устройстве.</p>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    Выйти из аккаунта на этом устройстве.
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -708,7 +1218,11 @@ function Profile() {
                   {signingOut ? "Выходим…" : "Выйти из аккаунта"}
                 </button>
               </div>
-              {signOutError && <p role="alert" className="mt-3 text-sm text-red-300">{signOutError}</p>}
+              {signOutError && (
+                <p role="alert" className="mt-3 text-sm text-red-300">
+                  {signOutError}
+                </p>
+              )}
             </div>
           </section>
         </>
@@ -717,8 +1231,12 @@ function Profile() {
         <div className="panel p-7 text-center">
           <Settings2 className="mx-auto size-9 text-[#D7FF35]" />
           <h2 className="mt-4 text-lg font-bold">Войди, чтобы прокачивать рыболова</h2>
-          <p className="mt-2 text-sm text-zinc-400">Анкета, ранги, XP и достижения привязаны к твоему аккаунту.</p>
-          <Link search={{ mode: "in" }} to="/auth" className="btn-primary mt-5 inline-flex">Войти в ZAPRUDA</Link>
+          <p className="mt-2 text-sm text-zinc-400">
+            Анкета, ранги, XP и достижения привязаны к твоему аккаунту.
+          </p>
+          <Link search={{ mode: "in" }} to="/auth" className="btn-primary mt-5 inline-flex">
+            Войти в ZAPRUDA
+          </Link>
         </div>
       )}
     </Shell>
