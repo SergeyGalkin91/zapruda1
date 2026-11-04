@@ -6,7 +6,7 @@
 Прочитать этот файл, [журнал решений](ZAPRUDA_DECISION_LOG.md), [матрицу](ZAPRUDA_FEATURE_MATRIX.md), [release gates](ZAPRUDA_RELEASE_GATES.md), затем проверить актуальный HEAD PR #93, изменения зависимых PR и тематический issue. При UI-работе читать [UI acceptance](ZAPRUDA_UI_ACCEPTANCE.md). Номер старого design lock не равен текущей версии продукта.
 
 ## Источники и границы доказательств
-- Код проверен на HEAD PR #93: `652779c74c4189a518555945be1188f7535201fc`.
+- Код проверен на HEAD PR #93: `d42198088e852a8adb4411f6cf11e9a87cd68161`.
 - [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111) — исходный аудит и единственный документальный PR этой консолидации, не утверждённая реализация.
 - [PR #92](https://github.com/SergeyGalkin91/zapruda1/pull/92) — UX-направление и foundations, не готовый wizard.
 - [PR #109](https://github.com/SergeyGalkin91/zapruda1/pull/109) — новый README о всех направлениях рыбалки; открыт, не слит.
@@ -81,6 +81,9 @@ Matte Black по умолчанию, Electric Blue альтернативная 
 Исторические документы сохраняются с точечными SUPERSEDED-указателями; тесты, миграции и commit history не удаляются. Сначала инвентаризация ссылок, затем отдельное подтверждение любой очистки.
 
 **Запреты:** main/production/DNS/публичный релиз/реальные платежи/Render/force-push/массовая очистка/фиктивные KING и модераторы/удаление функциональности. Версию не повышать автоматически. Этот PR не снимает ни один gate.
+
+## Сверка продолжения d421980 (04.11)
+Реализованы серверный private read-state, фильтры mine/unread, трёхшаговый отчёт с review/датой/снастями, STREET ticking timer/account storage/import. 422 tests/34 files локально PASS; TypeScript/build PASS; lint 0 ошибок/6 прежних warnings. Новый protected JWT run ждёт environment approval, не считать новым PASS. Историческая core JWT-приёмка из 87592b7 сохранена в ZAPRUDA_STAGING_JWT_ACCEPTANCE_20261104.md. Workflow contract в #111 не разрешает релиз и не активируется в #93 до отдельного принятия документационного PR.
 
 ## Решение владельца 04.11.2026 — целевое имя следующего обновления
 **Целевой релизный идентификатор: `0.7.1 KING FINISH` — выбран владельцем.** Все новые продуктовые решения из текущего обсуждения передавать в CURRENT_PRODUCT_SPEC, FEATURE_MATRIX, DECISION_LOG и RELEASE_GATES до реализации/обновления. Сохранить все 56 feature IDs, 8 модулей и 7 титулов; непринятые функции остаются в roadmap, исключение из ближайшего пилота — только с явной записью согласования. `KING FINISH` — имя запланированного обновления, а НЕ подтверждение того, что KING уже реализован/прошёл E2E.

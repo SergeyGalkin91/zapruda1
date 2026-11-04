@@ -145,6 +145,11 @@ export function GeographicChat() {
   const [error, setError] = useState("");
   const [chatError, setChatError] = useState("");
   const [refreshIndex, setRefreshIndex] = useState(0);
+  const [roomFilter, setRoomFilter] = useState("all");
+  const [readSummary, setReadSummary] = useState<
+    Record<string, { joined: boolean; unread: number }>
+  >({});
+  const [readError, setReadError] = useState("");
   const [roomSearchOpen, setRoomSearchOpen] = useState(false);
   const [roomSearch, setRoomSearch] = useState("");
   const threadOpen = Boolean(search.place);
@@ -218,6 +223,44 @@ export function GeographicChat() {
   const regions = places.filter((p) => p.parent_id === country?.id && p.level === "region");
   const cities = places.filter((p) => p.parent_id === region?.id && p.level === "city");
   const currentTopic = TOPICS.find((t) => t.key === topic) ?? TOPICS[0]!;
+
+  useEffect(() => {
+    if (!uid) {
+      setReadSummary({});
+      return;
+    }
+    let active = true;
+    const load = async () => {
+      const { data, error } = await api.rpc("chat_room_read_summary", { p_place: placeId });
+      if (!active) return;
+      if (error) {
+        setReadError("Учёт прочтений недоступен. Попробуй обновить чаты.");
+        setReadSummary({});
+        return;
+      }
+      setReadError("");
+      setReadSummary(
+        Object.fromEntries(
+          (data || []).map((r: { topic: string; joined: boolean; unread: number }) => [r.topic, r]),
+        ),
+      );
+    };
+    void load();
+    const channel = supabase
+      .channel("chat-read-summary-" + uid + "-" + placeId)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chat_messages", filter: "place_id=eq." + placeId },
+        () => void load(),
+      )
+      .subscribe();
+    window.addEventListener("focus", load);
+    return () => {
+      active = false;
+      window.removeEventListener("focus", load);
+      void supabase.removeChannel(channel);
+    };
+  }, [uid, placeId, refreshIndex, threadOpen]);
 
   // Read-only last-message previews for the selected geographic scope.
   // No invented unread counts or mock messages; errors leave the descriptive fallback.
@@ -410,6 +453,36 @@ export function GeographicChat() {
       void supabase.removeChannel(channel);
     };
   }, [uid, selectedPlace, placeId, topic, refreshIndex, threadOpen]);
+
+  useEffect(() => {
+    if (!uid || !threadOpen || !messages.length || typeof IntersectionObserver === "undefined")
+      return;
+    const last = messages.at(-1)!;
+    const node = document.querySelector('[data-chat-message="' + last.id + '"]');
+    if (!node) return;
+    let disposed = false;
+    const mark = async () => {
+      if (document.visibilityState !== "visible") return;
+      const { error } = await api.rpc("mark_chat_read", {
+        p_place: placeId,
+        p_topic: topic,
+        p_message: last.id,
+      });
+      if (!disposed && error)
+        setReadError("Не удалось сохранить прочтение. Обнови ветку для повторной попытки.");
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) void mark();
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(node);
+    return () => {
+      disposed = true;
+      observer.disconnect();
+    };
+  }, [uid, threadOpen, placeId, topic, messages]);
 
   async function createPlace(e: FormEvent<HTMLFormElement>, level: "region" | "city") {
     e.preventDefault();
@@ -642,34 +715,36 @@ export function GeographicChat() {
             СВОИ НА СВЯЗИ
           </h1>
           <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="Фильтр чатов">
-            <span
-              className="flex min-h-11 items-center justify-center rounded-2xl bg-[#D7FF35] px-2 text-sm font-black text-[#10140A]"
-              aria-current="true"
-            >
-              Все
-            </span>
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60"
-              title="Появится после подключения истории участия"
-            >
-              Мои чаты
-            </button>
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9] opacity-60"
-              title="Появится после подключения учёта прочтений"
-            >
-              Непрочитанные
-            </button>
+            {[
+              ["all", "Все"],
+              ["mine", "Мои чаты"],
+              ["unread", "Непрочитанные"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                disabled={!uid}
+                aria-pressed={roomFilter === value}
+                onClick={() => setRoomFilter(value!)}
+                className={
+                  "min-h-11 rounded-2xl border px-2 text-xs " +
+                  (roomFilter === value
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-white/20 text-white")
+                }
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </header>
       )}
 
+      {readError && (
+        <p role="alert" className="mb-3 text-sm text-red-200">
+          {readError}
+        </p>
+      )}
       {loading && <p className="mb-5 text-sm text-zinc-400">Загружаем разделы чатов…</p>}
       {error && (
         <p
@@ -714,63 +789,90 @@ export function GeographicChat() {
                       </button>
                     </div>
                   )}
-                {TOPICS.filter((t) =>
-                  (t.label + " " + t.description)
-                    .toLocaleLowerCase("ru-RU")
-                    .includes(roomSearch.trim().toLocaleLowerCase("ru-RU")),
-                ).map((t) => (
-                  <button
-                    key={t.key}
-                    type="button"
-                    onClick={() =>
-                      uid
-                        ? go(placeId, t.key)
-                        : void navigate({ to: "/auth", search: { mode: "in" } })
-                    }
-                    aria-pressed={topic === t.key}
-                    className={
-                      "z-room-row border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
-                      (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")
-                    }
-                  >
-                    <span
-                      className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34435E] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]"
-                      aria-hidden="true"
+                {roomFilter !== "all" &&
+                  !TOPICS.some((t) =>
+                    roomFilter === "mine"
+                      ? readSummary[t.key]?.joined
+                      : (readSummary[t.key]?.unread || 0) > 0,
+                  ) && (
+                    <p role="status" className="p-4 text-sm text-muted-foreground">
+                      {roomFilter === "mine"
+                        ? "В этом разделе ещё нет посещённых чатов."
+                        : "В этом разделе нет непрочитанных сообщений."}
+                    </p>
+                  )}
+                {TOPICS.filter(
+                  (t) =>
+                    roomFilter === "all" ||
+                    (roomFilter === "mine"
+                      ? readSummary[t.key]?.joined
+                      : (readSummary[t.key]?.unread || 0) > 0),
+                )
+                  .filter((t) =>
+                    (t.label + " " + t.description)
+                      .toLocaleLowerCase("ru-RU")
+                      .includes(roomSearch.trim().toLocaleLowerCase("ru-RU")),
+                  )
+                  .map((t) => (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() =>
+                        uid
+                          ? go(placeId, t.key)
+                          : void navigate({ to: "/auth", search: { mode: "in" } })
+                      }
+                      aria-pressed={topic === t.key}
+                      className={
+                        "z-room-row border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
+                        (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")
+                      }
                     >
-                      <img
-                        src={ROOM_PHOTOS[t.key]}
-                        loading="lazy"
-                        alt=""
-                        className="absolute inset-0 size-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                          e.currentTarget.nextElementSibling?.classList.remove("hidden");
-                        }}
-                      />
-                      <span className="relative z-10 hidden text-2xl text-[#D7FF35]">{t.icon}</span>
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-base font-black text-white">
-                        {t.label}
+                      <span
+                        className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34435E] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]"
+                        aria-hidden="true"
+                      >
+                        <img
+                          src={ROOM_PHOTOS[t.key]}
+                          loading="lazy"
+                          alt=""
+                          className="absolute inset-0 size-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                          }}
+                        />
+                        <span className="relative z-10 hidden text-2xl text-[#D7FF35]">
+                          {t.icon}
+                        </span>
                       </span>
-                      <span className="mt-1 block truncate text-xs leading-5 text-[#A99AD9]">
-                        {roomLastMessages[t.key]?.body || t.description}
+                      <span className="min-w-0">
+                        <span className="block truncate text-base font-black text-white">
+                          {t.label}
+                          {(readSummary[t.key]?.unread || 0) > 0 && (
+                            <span className="ml-2 rounded-full bg-primary px-2 text-xs text-primary-foreground">
+                              {readSummary[t.key]!.unread}
+                            </span>
+                          )}
+                        </span>
+                        <span className="mt-1 block truncate text-xs leading-5 text-[#A99AD9]">
+                          {roomLastMessages[t.key]?.body || t.description}
+                        </span>
                       </span>
-                    </span>
-                    <span className="min-w-0 max-w-16 text-right text-[10px] tabular-nums text-[#B4A1D7]">
-                      {roomLastMessages[t.key] && (
-                        <time dateTime={roomLastMessages[t.key]!.created_at}>
-                          {new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", {
-                            day: "2-digit",
-                            month: "short",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </time>
-                      )}
-                    </span>
-                  </button>
-                ))}
+                      <span className="min-w-0 max-w-16 text-right text-[10px] tabular-nums text-[#B4A1D7]">
+                        {roomLastMessages[t.key] && (
+                          <time dateTime={roomLastMessages[t.key]!.created_at}>
+                            {new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", {
+                              day: "2-digit",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </time>
+                        )}
+                      </span>
+                    </button>
+                  ))}
               </div>
             </section>
           )}
@@ -1020,6 +1122,11 @@ export function GeographicChat() {
                         }
                       >
                         {t.icon} {t.label}
+                        {(readSummary[t.key]?.unread || 0) > 0 && (
+                          <span className="ml-2 rounded-full bg-primary px-2 text-xs text-primary-foreground">
+                            {readSummary[t.key]!.unread}
+                          </span>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1049,6 +1156,7 @@ export function GeographicChat() {
                   {messages.map((message) => (
                     <article
                       key={message.id}
+                      data-chat-message={message.id}
                       className={
                         message.user_id === uid
                           ? "ml-auto max-w-[90%] space-y-1.5 sm:max-w-[78%]"

@@ -1,5 +1,19 @@
 > **SUPERSEDED как единственная актуальная точка входа (04.11.2026).** Сначала читать [CURRENT_PRODUCT_SPEC](ZAPRUDA_CURRENT_PRODUCT_SPEC.md), [DECISION_LOG](ZAPRUDA_DECISION_LOG.md) и [UI_ACCEPTANCE](ZAPRUDA_UI_ACCEPTANCE.md). Исторические требования ниже не отменяют поздние прямые решения владельца. Референсы и доказательства сохранены; никакого автоматического отката интерфейса.
 
+# Актуальный handoff после настоящего JWT PASS — 04.11.2026
+
+Продолжать только [PR93](https://github.com/SergeyGalkin91/zapruda1/pull/93) → release/v0.7.5-spot; точный HEAD читать из GitHub. [CURRENT_STATE](ZAPRUDA_CURRENT_STATE_20261104.md), [JWT acceptance](ZAPRUDA_STAGING_JWT_ACCEPTANCE_20261104.md), [readiness](ZAPRUDA_V075_SPOT_RELEASE_READINESS.md), [alignment](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md), [matrix](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md) имеют приоритет над историческим журналом ниже.
+
+Branch rule исправлено с сохранением reviewers. Run 41759969230/source8273912: core/Realtime/weather + feedback v2 + SPOT negative preflight PASS, owned cleanup подтверждён отдельно. 421 offline tests — не подмена JWT. В STAGING уже применены **8** наших дельт, последняя **20261104021404 v075_feedback_atomic_limits**; feedback **v2**/JWT=true без Telegram. Не повторять старые/adopted миграции и не перезаписывать функцию v1.
+
+Следующее: отдельное явное согласие на read-only GitHub email для Netlify Auth → действительный deploy SHA/env/hosted UI; Yandex canary config YANDEX_KEY_MISSING → настоящий upstream без сброса квот → отдельное разрешение на cutover. Текст Annotations больше не нужен, прежний branch blocker установлен/устранён. 8 missing tables + Atlas view + 6 RPC остаются. Не применять #105 по старому драфту; отдельные evidence/confirmation/view checks. Unconfirmed/live KING/российская мобильная сеть остаются недоказанными gates.
+
+Main, production, DNS, платежи и public release не менять. Существующий PR108 из зеркала в main не объединялся (auto_merge=null); новый дубль не создан. #109 README — отдельный открытый docs PR. Оригинальный AI v14, Yandex canary v2 и legacy keys сохранены. Дизайн v0.6.0-admin-rc.1, обе темы, навигация не меняются.
+
+---
+
+## Исторический журнал до снятия branch blocker
+
 # Передача работы — 04.11.2026: актуальная версия
 
 Сначала читать [CURRENT_STATE](ZAPRUDA_CURRENT_STATE_20261104.md), [SCHEMA ALIGNMENT](ZAPRUDA_STAGING_SCHEMA_ALIGNMENT_20261104.md), [48 dependency contracts](ZAPRUDA_STAGING_DEPENDENCY_MATRIX_20261104.md), [AI acceptance](ZAPRUDA_DEEPSEEK_STAGING_ACCEPTANCE.md), [RELEASE READINESS](ZAPRUDA_V075_SPOT_RELEASE_READINESS.md) и утверждённый UX-spec. PR #93 → SPOT; head определять из GitHub, зеркало work/v075-consolidation-20261104. Не переигрывать уже применённые семь дельт или adopted 000548/000608/001134/002109. STAGING 45 public tables/RLS; новая isolated/component база 410/32.

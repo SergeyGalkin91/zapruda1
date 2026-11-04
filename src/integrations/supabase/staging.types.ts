@@ -1228,6 +1228,15 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      mark_chat_read: {
+        Args: { p_place: string; p_topic: string; p_message?: string | null };
+        Returns: undefined;
+      };
+      chat_room_read_summary: {
+        Args: { p_place: string };
+        Returns: { topic: string; joined: boolean; unread: number }[];
+      };
+
       claim_ai_daily_advice_slot: {
         Args: {
           p_advice_day: string;

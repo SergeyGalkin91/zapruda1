@@ -82,10 +82,16 @@ Trust markers in report/chat photos and safer AI lease schema are intentional ST
 
 ## Subsequent changes retained
 
-20261104004040 adds confirmed own global-room sending alongside existing geography restrictions. 20261104005024 adds an **empty** owner-readable admin membership lookup with no API role assignment. 20261104005501 adds own follows writes and an intentionally signed-in-readable social graph. 20261104010044 adds owner-only safe feedback read columns; body/contact/direct writes remain closed and its submission broker is NOT deployed. These migrations were read back, not replayed. Isolated regression fixtures cover their boundaries; no new live-JWT PASS is inferred.
+20261104004040 adds confirmed own global-room sending alongside existing geography restrictions. 20261104005024 adds an **empty** owner-readable admin membership lookup with no API role assignment. 20261104005501 adds own follows writes and an intentionally signed-in-readable social graph. 20261104010044 adds owner-only safe feedback read columns; body/contact/direct writes remain closed. Submission broker v2 is now deployed only in STAGING, JWT-protected and without Telegram; see the acceptance update below. These migrations were read back, not replayed. Isolated regression fixtures cover their boundaries; no new live-JWT PASS is inferred.
 
 Rollback now refuses the subsequent global policy even on an empty DB, because deleting the confirmed-write guard would change its security contract. A disposable captured pre-subsequent clone still verifies empty rollback/reapply and refusal to discard content. Use a newly reviewed forward plan for the current hosted schema.
 
 ## Acceptance boundary
 
 Core report/catch/comment, geographic chat/media, own gear/marks/profile are structurally aligned. Signed-JWT/API/Realtime remains protected-run evidence only. Full KING requires an owner-authorized independent moderator, legal real spot and genuine evidence. Admin/guide/payment/Atlas/spearfishing and feedback submission are not declared pilot-ready by a metadata table count.
+
+## Acceptance update — 04.11.2026 02:23 UTC
+
+Inventory remains **45 public tables/all RLS**, 8 absent tables + Atlas view + 6 client RPCs. No Atlas draft/guide/payment schema was applied. **20261104021404 v075_feedback_atomic_limits** adds a server-only invoker RPC and SELECT(user_id) to the own-row feedback contract, preserving closed body/contact and direct-write denial. This is not a new client RPC dependency or a production delta.
+
+[Run41759969230/source8273912](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41759969230): genuine core report/catch/privacy/chat/media/Realtime/profile/gear/weather and feedback v2 PASS; exact fixture cleanup independently confirmed. Current four-account run does not prove unconfirmed/live KING/hosted Netlify browser/Atlas/paid guide flows. Source #101 profile fix adopted without extending bio privileges. #105 independently reviewed but not applied; missing progress view, confirmed actor and sanitized evidence contracts need their own tests. [Full acceptance](ZAPRUDA_STAGING_JWT_ACCEPTANCE_20261104.md).
