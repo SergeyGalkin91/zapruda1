@@ -7,7 +7,7 @@
 Прочитать этот файл, [журнал решений](ZAPRUDA_DECISION_LOG.md), [матрицу](ZAPRUDA_FEATURE_MATRIX.md), [release gates](ZAPRUDA_RELEASE_GATES.md), затем проверить актуальный HEAD PR #93, изменения зависимых PR и тематический issue. При UI-работе читать [UI acceptance](ZAPRUDA_UI_ACCEPTANCE.md). Номер старого design lock не равен текущей версии продукта.
 
 ## Источники и границы доказательств
-- Текущий проверяемый код PR #93: `f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec`. Результаты и ограничения финальной технической приёмки: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
+- Текущий проверяемый код PR #93: `e9fd4aa8172d7e55553c0882640ecebb75c9d421`. Актуальные результаты и условное разрешение main: [FINAL_RELEASE_INTEGRATION](ZAPRUDA_FINAL_RELEASE_INTEGRATION_20261104.md). Исторические SHA сохраняются в FINAL_ACCEPTANCE.
 - [PR #111](https://github.com/SergeyGalkin91/zapruda1/pull/111) — исходный аудит и единственный документальный PR этой консолидации, не утверждённая реализация.
 - [PR #92](https://github.com/SergeyGalkin91/zapruda1/pull/92) — UX-направление и foundations, не готовый wizard.
 - [PR #109](https://github.com/SergeyGalkin91/zapruda1/pull/109) — новый README о всех направлениях рыбалки; открыт, не слит.
@@ -81,7 +81,7 @@ Matte Black по умолчанию, Electric Blue альтернативная 
 Риски: недостающие STAGING зависимости Atlas/guide/admin/AI membership/spearfishing, защищённые JWT runs, отсутствие независимого модератора/реального evidence, не принятая визуальная сверка, конфликт старых документов, приватность локального storage. Исторический SQL snapshot не равен текущему backend.
 Исторические документы сохраняются с точечными SUPERSEDED-указателями; тесты, миграции и commit history не удаляются. Сначала инвентаризация ссылок, затем отдельное подтверждение любой очистки.
 
-**Запреты:** main/production/DNS/публичный релиз/реальные платежи/Render/force-push/массовая очистка/фиктивные KING и модераторы/удаление функциональности. Версию не повышать автоматически. Этот PR не снимает ни один gate.
+**Запреты:** main без всех обязательных gates; Production/DNS/публичный релиз/реальные платежи/Render/force-push/массовая очистка/фиктивные KING и модераторы/удаление функциональности. Версию не повышать автоматически. Этот PR не снимает ни один gate.
 
 ## История: сверка продолжения d421980 (04.11)
 Реализованы серверный private read-state, фильтры mine/unread, трёхшаговый отчёт с review/датой/снастями, STREET ticking timer/account storage/import. 422 tests/34 files локально PASS; TypeScript/build PASS; lint 0 ошибок/6 прежних warnings. Новый protected JWT run ждёт environment approval, не считать новым PASS. Историческая core JWT-приёмка из 87592b7 сохранена в ZAPRUDA_STAGING_JWT_ACCEPTANCE_20261104.md. Workflow contract в #111 не разрешает релиз и не активируется в #93 до отдельного принятия документационного PR.
@@ -98,3 +98,6 @@ Matte Black по умолчанию, Electric Blue альтернативная 
 
 ## P0 continuation 04.11.2026
 [Актуальная техническая приёмка](ZAPRUDA_P0_CLOSURE_20261104.md) фиксирует исправленные клубные RLS и выход/отмену СХОДОК, PostgreSQL regressions, новый protected run и настоящий hosted доступ. [Production readiness](ZAPRUDA_PRODUCTION_READINESS_20261104.md) — только read-only diff и будущая последовательность. Все 56 ID/8 модулей/7 титулов сохранены; GO не выдан.
+
+## Последнее прямое разрешение владельца — FINAL RELEASE INTEGRATION
+Обновление main разрешено при выполнении всех обязательных gates из нового задания; повторное общее разрешение на main тогда не требуется. Сейчас NO-GO. Успешный protected run f3bbe1b не переносится автоматически на позднюю Shell-правку. Все семь KING-титулов обязательны в запрошенной 0.7.6, пока владелец явно не утвердит иной scope; прежняя маркировка FULL не является исключением. Production SQL/deploy, роли реальных пользователей, bump/tag/release остаются запрещены.

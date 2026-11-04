@@ -1,6 +1,7 @@
 # ZAPRUDA — условия следующего обновления
 04.11.2026. Контракт DRAFT. Техническая база v0.7.5 SPOT; целевой релиз 0.7.6 KING FINISH. Текущие результаты: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
-**Релиз NO-GO до закрытия обязательных gates и отдельного решения владельца.**
+**NO-GO. Последнее задание владельца уже разрешает main при выполнении всех обязательных gates; повторное общее разрешение тогда не требуется. Production/deploy/bump/tag не разрешены.**
+Актуальный срез: [FINAL_RELEASE_INTEGRATION](ZAPRUDA_FINAL_RELEASE_INTEGRATION_20261104.md). Исторические результаты ниже относятся к указанным SHA.
 
 ## Состав пилота
 P0 из FEATURE_MATRIX — обязательные критерии уже запрошенной приёмки. P? — предлагаемый состав для утверждения, FULL — полный продукт/поздняя очередь без автоматического переноса. Не объявлять весь продукт обязательным к одномоментному выпуску; не исключать незавершённые функции из обязательного плана.
@@ -16,7 +17,7 @@ P0 из FEATURE_MATRIX — обязательные критерии уже за
 | G5 безопасность | guest/owner/outsider/разрешённые роли, RLS/ACL/RPC/Storage, закрытые оригиналы, JWT isolation | OPEN; тесты и старые snapshot не live |
 | G6 STREET/SPOT/KING если в пилоте | сессия → opt-in report; реальный legal SPOT/evidence; независимая модерация, tie/race/revoke/history/notifications | OPEN; нельзя подделывать данные/роли |
 | G7 backend/deploy | свежий read-only STAGING inventory, сверка с нужными контрактами, deployed SHA = tested SHA, только STAGING в preview | OPEN; не повторять applied миграции |
-| G8 CI | typecheck/lint/tests/build + необходимые SQL/browser checks на exact code SHA, изучить skipped/failed jobs | 2051567: 13 ordinary checks и 430 tests PASS; JWT core и Browser шаги PASS; overall protected FAIL из-за feedback QA precondition |
+| G8 CI | typecheck/lint/tests/build + необходимые SQL/browser checks на exact code SHA, изучить skipped/failed jobs | f3bbe1b: protected 41850073063 SUCCESS; current e9fd4aa quality/SQL checks PASS, final appearance/hosted/JWT scope — по актуальному отчёту |
 | G9 AI если включён | актуальная погода, primary/backup, Web Search OFF, quota/cache/failure/privacy live | OPEN; cutover требует отдельного разрешения |
 | G10 пилот и версия | owner-approved scope + приёмка + явное разрешение конкретной версии | OPEN; автоматический bump/tag/release запрещён |
 
@@ -40,5 +41,8 @@ Main/production/DNS/реальные платежи/Render не затрагив
 ## Итог фактических checks (не release GO)
 HEAD 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd: 13 ordinary workflows и protected JWT 41768491411 PASS. Contract run 41768599499 PASS на docs 3df7fb1. Это закрывает перечисленные API/CI-проверки, но не все G0–G10: остаются full positive receipts/UI, visual owner review, полный KING, daily brief/Atlas и прочие зависимости. Не bump/tag/merge автоматически.
 
-## P0 continuation f3bbe1b (04.11.2026)
+## Исторический P0 continuation до последнего owner approval (04.11.2026)
 Текущий [P0 результат](ZAPRUDA_P0_CLOSURE_20261104.md): security deltas/SQL regressions и 13 ordinary workflows PASS; protected **41850073063 WAITING**. Это не PASS и не разрешение обновить main. [Read-only production diff/порядок/backup/rollback](ZAPRUDA_PRODUCTION_READINESS_20261104.md). Нужны actual JWT, полный hosted mobile scope, реальные KING dependencies и отдельный owner release GO.
+
+## D15: обязательные финальные gates
+Все 56 ID/8 модулей/7 титулов сохраняются. Protected f3bbe1b SUCCESS установлен; поздняя UI-правка требует финальной проверки. Hosted Netlify four-width/two-theme/transaction scope и KING не закрыты. Новые пять feedback fixtures требуют отдельного точного cleanup; прежние шесть не повторять. До PASS каждого обязательного пункта main NO-GO.

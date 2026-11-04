@@ -1,5 +1,5 @@
 {
-  "source_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+  "source_sha": "e9fd4aa8172d7e55553c0882640ecebb75c9d421",
   "features": [
     {
       "id": "AUTH-01",
@@ -10,8 +10,8 @@
       "backend": "Supabase Auth",
       "status": "IMPLEMENTED",
       "acceptance": "AuthSessionBoundary.test.tsx; реальный signup/confirm/login/recovery",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "IMPLEMENTED — ветви найдены; live не перепроверен"
+      "evidence": "Protected f3bbe1b PASS uses four existing confirmed accounts; actual hosted email/password login succeeded. New signup/confirmation/recovery is not asserted by this evidence.",
+      "blocker": "Full signup/confirm/recovery and final hosted matrix remain open; no unapproved account or role created."
     },
     {
       "id": "AUTH-02",
@@ -22,8 +22,8 @@
       "backend": "session + email confirmation",
       "status": "IMPLEMENTED",
       "acceptance": "AuthSessionBoundary.test.tsx; два пользователя в одном браузере",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "IMPLEMENTED — STAGING E2E открыт"
+      "evidence": "f3bbe1b authenticated Browser 41850073063 PASS: two distinct UI logins and same-browser account isolation; hosted one-account login independently observed.",
+      "blocker": "Final e9fd4aa protected regression and complete hosted two-account acceptance remain open."
     },
     {
       "id": "AUTH-03",
@@ -130,8 +130,8 @@
       "backend": "chat_places/chat_messages, ensure_chat_place",
       "status": "STAGING VERIFIED",
       "acceptance": "GeographicChat.test.tsx; два JWT",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "CHAT-02",
@@ -142,8 +142,8 @@
       "backend": "chat_message_reactions/photos; chat-photo-upload/access",
       "status": "STAGING VERIFIED",
       "acceptance": "GeographicChat.test.tsx; chat-media.test.ts; outsider denial",
-      "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance. Exact-head core API/media/reaction/Storage PASS in 41777927568; full reply/photo UI matrix not asserted.",
-      "blocker": "Указанные API/JWT проверки пройдены. Полный авторизованный UI, physical-mobile и расширенные пользовательские сценарии остаются отдельной приёмкой."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "CHAT-03",
@@ -154,8 +154,8 @@
       "backend": "subscriptions сообщения/реакции/фото",
       "status": "STAGING VERIFIED",
       "acceptance": "reconnect, два клиента, ввод во время обновления",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "CHAT-04",
@@ -163,11 +163,11 @@
       "module": "COMMUNITY",
       "priority": "P0",
       "source": "src/routes/chat.tsx; supabase/staging/v075_chat_read_state.sql",
-      "backend": "модель посещений/read receipts не подтверждена",
+      "backend": "chat_read_state; mark_chat_read; chat_room_read_summary — server-authoritative read state",
       "status": "STAGING VERIFIED",
       "acceptance": "доставка → unread → прочитано → другой клиент",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "SOC-03",
@@ -202,8 +202,8 @@
       "backend": "meetup_posts/members/messages/private_details",
       "status": "IMPLEMENTED",
       "acceptance": "Выход/повторная заявка, освобождение и гонка последнего места, отмена и private denial; scripts/check-community-postgres.mjs; src/lib/community-boundaries-database.test.ts",
-      "evidence": "f3bbe1b: quality 41850086290 PASS, 441 tests/36 files; PostgreSQL 17 five race rounds 41850086325 PASS. STAGING rollback roles/claims PASS, 0 fixtures. Signed JWT run 41850073063 WAITING.",
-      "blocker": "Full acceptance BLOCKED: actual JWT/hosted mobile gates; СХОДКИ остаются бесплатными и отдельными от платных выездов."
+      "evidence": "STAGING rollback repeated PASS, 0 club/meetup fixtures. Actual PostgreSQL five last-seat race rounds PASS. Existing leave/cancel delta remains applied. Common four-JWT run 41850073063 SUCCESS does not itself assert meetup signed-JWT leave/cancel.",
+      "blocker": "Named PostgreSQL/RLS scenarios pass; final hosted/signed-JWT meetup scope remains open. Free meetups remain separate from paid trips."
     },
     {
       "id": "SOC-06",
@@ -214,8 +214,8 @@
       "backend": "social_groups, club_creation_requests",
       "status": "BLOCKED",
       "acceptance": "Accepted membership конкретной группы; чужой клуб/pending/declined/removed/anon denied; независимые JWT и подтверждённое создание/модерация",
-      "evidence": "20261104133211 applied STAGING: correlated SELECT/INSERT, no other permissive policy. PostgreSQL/RLS regressions incl removed member PASS; live STAGING rollback PASS. Actual four-account JWT gate WAITING, не выдан за PASS.",
-      "blocker": "Full club contract BLOCKED: confirm_club_creation_payment absent in STAGING and real invitation/payment/moderation JWT gates. Message RLS flaw fixed; no payment or role fabrication."
+      "evidence": "Live correlated SELECT/INSERT membership policies verified again; rollback negatives PASS for other club/pending/declined/anonymous, zero persistent fixtures. Common protected f3bbe1b run SUCCESS; full club moderation/payment not asserted.",
+      "blocker": "Message RLS defect fixed. Full club creation/invitation/moderation/payment contract remains blocked; no fabricated rights or payments."
     },
     {
       "id": "PROFILE-01",
@@ -226,8 +226,8 @@
       "backend": "profiles, angler_preferences/gear/gear_sets",
       "status": "STAGING VERIFIED",
       "acceptance": "ProfilePrivateRead.test.tsx; profile-save-feedback.test.ts",
-      "evidence": "Real confirmed JWT run 41768491411 PASS on 3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd; API/Realtime/media/profile checks only. Core fixture cleanup true. Not full browser/mobile/KING acceptance.",
-      "blocker": "Указанные API/JWT проверки пройдены. Полный авторизованный UI, physical-mobile и расширенные пользовательские сценарии остаются отдельной приёмкой."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "PROFILE-02",
@@ -262,8 +262,8 @@
       "backend": "per-user localStorage; fishing_reports/catches",
       "status": "STAGING VERIFIED",
       "acceptance": "NewReport.test.tsx; reload/zero-catch",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "REPORT-02",
@@ -274,8 +274,8 @@
       "backend": "тот же черновик и публикация",
       "status": "STAGING VERIFIED",
       "acceptance": "back/next/reload на всех шагах, invalid focus",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "REPORT-03",
@@ -286,8 +286,8 @@
       "backend": "invoker RPC, private retry receipt",
       "status": "STAGING VERIFIED",
       "acceptance": "pilot-schema-database.test.ts; NewReport.test.tsx; lost response/retry",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "REPORT-04",
@@ -298,8 +298,8 @@
       "backend": "report_photos, private media gateway",
       "status": "STAGING VERIFIED",
       "acceptance": "report-photo-security.test.ts; report-privacy-database.test.ts; check-report-photo-browser.mjs",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "STREET-01",
@@ -310,8 +310,8 @@
       "backend": "localStorage zapruda:street-session:v1",
       "status": "STAGING VERIFIED",
       "acceptance": "reload, завершение, отказ storage",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "STREET-02",
@@ -322,8 +322,8 @@
       "backend": "startedAt/finishedAt",
       "status": "STAGING VERIFIED",
       "acceptance": "ожидание > минуты без действий",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "STREET-03",
@@ -331,11 +331,11 @@
       "module": "ZAPRUDA STREET",
       "priority": "P1",
       "source": "src/routes/street.tsx; src/lib/street-storage.ts",
-      "backend": "пока species/note/at",
+      "backend": "Per-user local session: tackle, lures, catches and notes; private opt-in report import",
       "status": "STAGING VERIFIED",
       "acceptance": "создать/восстановить выбранные снасти",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "STREET-04",
@@ -346,8 +346,8 @@
       "backend": "локальный источник → draft; isPublic=false",
       "status": "STAGING VERIFIED",
       "acceptance": "повторный импорт, отмена, публикация один раз",
-      "evidence": "2051567 / actual confirmed JWT Browser 41777927568 PASS, cleanup=true. Two UI users; chat committed-response loss => 1 row, unread/read/reload/foreign marker/draft; report no-catch POST201 and catch RPC200 response loss => 1 report/1 catch; private/photo/reload/back/next; STREET tick >1min/tackle/lure/import/account switch. Local frontend + real STAGING.",
-      "blocker": "Only named local/STAGING scenarios accepted. Hosted Netlify access, physical keyboard/network, broader role/scope and owner approval remain separate gates."
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "MAP-01",
@@ -370,14 +370,14 @@
       "backend": "private_fishing_marks",
       "status": "IMPLEMENTED",
       "acceptance": "owner/outsider, добровольное раскрытие",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "IMPLEMENTED по inventory, live открыт"
+      "evidence": "f3bbe1bc / protected run 41850073063 SUCCESS: four confirmed real JWTs; API/privacy/Storage/Realtime/read state; actual two-user localhost browser, private atomic reports/retry and STREET isolation. Core/browser fixture cleanup=true. Feedback PASS left five exact disposable rows requiring separately approved cleanup. This is not hosted Netlify acceptance and predates the later Shell-only UI fix.",
+      "blocker": "Named f3bbe1b STAGING scenarios verified; final candidate e9fd4aa requires final protected/hosted acceptance. No production or full KING acceptance."
     },
     {
       "id": "SPOT-01",
       "feature": "каталог подтверждённых спотов",
       "module": "ZARUBA",
-      "priority": "P?",
+      "priority": "P0 при KING",
       "source": "src/components/ZaprudaPublicSpotAtlas.tsx, src/components/SpotLeaderboards.tsx",
       "backend": "zc_public_spots",
       "status": "IMPLEMENTED",
@@ -389,7 +389,7 @@
       "id": "SPOT-02",
       "feature": "заявка/доказательства/решение",
       "module": "ZARUBA",
-      "priority": "P?",
+      "priority": "P0 при KING",
       "source": "src/components/SpotCatchFlow.tsx",
       "backend": "zapruda-spot-records Edge",
       "status": "IMPLEMENTED",
@@ -413,7 +413,7 @@
       "id": "KING-01",
       "feature": "KING OF THE SPOT / LENGTH KING",
       "module": "TROPHY SYSTEM",
-      "priority": "P?",
+      "priority": "P0 при KING",
       "source": "src/lib/spot-records.ts; src/components/SpotLeaderboards.tsx",
       "backend": "spot-records Edge/SQL",
       "status": "IMPLEMENTED",
@@ -425,7 +425,7 @@
       "id": "KING-02",
       "feature": "KING OF UL / MICRO KING",
       "module": "TROPHY SYSTEM",
-      "priority": "P?",
+      "priority": "P0 при KING",
       "source": "src/lib/spot-records.ts",
       "backend": "проверка снасти/этики сервером",
       "status": "IMPLEMENTED",
@@ -437,37 +437,37 @@
       "id": "KING-03",
       "feature": "KING OF THE LAKE",
       "module": "TROPHY SYSTEM",
-      "priority": "FULL",
+      "priority": "P0 при KING",
       "source": "src/lib/spot-records.ts",
       "backend": "waterbody/species verification",
       "status": "PLANNED",
       "acceptance": "карп/амур, территория и допуск",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "PLANNED для полного продукта — policy есть, запуск не принят"
+      "evidence": "All seven nominations remain in pure policy/schema; current public submission/review/leaderboard only supports STREET/UL. CARP/WINTER/BOAT complete public server/UI flows are not implemented or accepted.",
+      "blocker": "Mandatory for the requested seven-title 0.7.6 scope unless owner explicitly changes scope: public flow implementation plus lawful category/territory/season validation and genuine independent E2E."
     },
     {
       "id": "KING-04",
       "feature": "KING OF THE ICE",
       "module": "TROPHY SYSTEM",
-      "priority": "FULL",
+      "priority": "P0 при KING",
       "source": "src/lib/spot-records.ts",
       "backend": "region/season/method/species",
       "status": "PLANNED",
       "acceptance": "сезон/территория/отзыв",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "PLANNED для полного продукта — policy есть"
+      "evidence": "All seven nominations remain in pure policy/schema; current public submission/review/leaderboard only supports STREET/UL. CARP/WINTER/BOAT complete public server/UI flows are not implemented or accepted.",
+      "blocker": "Mandatory for the requested seven-title 0.7.6 scope unless owner explicitly changes scope: public flow implementation plus lawful category/territory/season validation and genuine independent E2E."
     },
     {
       "id": "KING-05",
       "feature": "TROPHY KING",
       "module": "TROPHY SYSTEM",
-      "priority": "FULL",
+      "priority": "P0 при KING",
       "source": "src/lib/spot-records.ts",
       "backend": "boat/species/scope",
       "status": "PLANNED",
       "acceptance": "вид/территория/подлинность",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "PLANNED для полного продукта — policy есть"
+      "evidence": "All seven nominations remain in pure policy/schema; current public submission/review/leaderboard only supports STREET/UL. CARP/WINTER/BOAT complete public server/UI flows are not implemented or accepted.",
+      "blocker": "Mandatory for the requested seven-title 0.7.6 scope unless owner explicitly changes scope: public flow implementation plus lawful category/territory/season validation and genuine independent E2E."
     },
     {
       "id": "KING-06",
@@ -478,8 +478,8 @@
       "backend": "v075_spot_scoped_subscriptions_no_self_review.sql",
       "status": "BLOCKED",
       "acceptance": "spot-moderation-database.test.ts; 4 роли real JWT",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "BLOCKED для live — нужен разрешённый независимый модератор; не назначать фиктивного"
+      "evidence": "Four signed JWTs passed negative moderation/evidence preflight in 41850073063. Live STAGING: 0 moderators, 0 approved/reviewed SPOT, 0 catches, 0 title holders.",
+      "blocker": "No genuine independent moderator, eligible approved SPOT or real evidence; positive KING remains BLOCKED. Owner scope decision required before any narrower release."
     },
     {
       "id": "KING-07",
@@ -646,20 +646,20 @@
       "backend": "localStorage theme",
       "status": "IMPLEMENTED",
       "acceptance": "appearance.test.ts; visual-theme-smoke.cjs",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "IMPLEMENTED основа; визуальный PASS текущего preview не заявлен"
+      "evidence": "Exact e9fd4aa deployed by clean-cache Netlify retry6aeb663d03e8681d52163b74. Actual hosted 96/96 single-account CSS-frame layout/readiness cases:12 routes×4widths×2themes, persisted themes, no horizontal overflow and STAGING-only observed backend origins; original Matte Black restored. Three-engine header CI SUCCESS.",
+      "blocker": "Full functional hosted signup/recovery/two-account transactions, physical keyboard/safe area and final protected JWT regression remain open;16 cases expose daily-summary/guide errors. See final report and hash manifest."
     },
     {
       "id": "UI-02",
       "feature": "premium/mobile/accessibility/все экраны",
       "module": "Общая платформа",
       "priority": "P0",
-      "source": "src/components/Shell.tsx; src/styles.css; /auth; /; /communities; /reports/new; /partners; /chat; /profile; /admin; /assistant",
+      "source": "src/components/Shell.tsx; src/styles.css; scripts/browser-shell-bounds.cjs; scripts/e2e/authenticated-browser-live.mjs; qa/hosted-viewport.html",
       "backend": "реальные loading/empty/error данные",
-      "status": "PLANNED",
+      "status": "IMPLEMENTED",
       "acceptance": "UI_ACCEPTANCE: 320/390/1440 обе темы",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "PLANNED до браузерного сравнения и исправлений"
+      "evidence": "Header defect fixed and hosted verified on e9fd4aa:320px client305, profile197–241/menu249–293, both44×44. 96 layout/readiness cases PASS with actual error states preserved;441 local tests/typecheck/build and13 ordinary CI workflows PASS. Native context screenshots include before/after and both themes at4 CSS widths.",
+      "blocker": "Complete accessibility/all-screen functional acceptance is open. Missing guide backend contract and daily-summary service remain real errors; role-only screens, physical device keyboard/safe area and hosted two-user transactions are unverified."
     },
     {
       "id": "RELEASE-01",
@@ -670,8 +670,8 @@
       "backend": "change log / owner approval",
       "status": "IMPLEMENTED",
       "acceptance": "ручная матрица SHA/evidence/решение",
-      "evidence": "Immutable 56-ID baseline, all fields/status/source/local links and JSON/Markdown tested; seven checker regressions including CSS/workflow/Markdown source paths. Final docs-head Actions evidence in Checks.",
-      "blocker": "Workflow remains in draft #111 until separately accepted; no release GO or main branch-protection change."
+      "evidence": "56 immutable IDs and seven checker regressions remain preserved. Latest owner authorization allows main only after every required gate; no automatic release/production/version/tag approval.",
+      "blocker": "NO-GO: hosted/final protected/KING and production readiness gates remain. Contract workflow is in existing #111 until its standard integration."
     }
   ]
 }

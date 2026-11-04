@@ -4,6 +4,9 @@
 command = "bun run build"
 publish = "dist"
 
+[context.deploy-preview]
+command = "bun run build && node scripts/write-preview-viewport.mjs"
+
 [build.environment]
 NITRO_PRESET = "netlify"
 

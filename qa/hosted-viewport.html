@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="frame-src 'self' https://app.netlify.com; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>ZAPRUDA — hosted viewport QA</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #15191d;
+        color: #f5f5f5;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+      }
+      header {
+        padding: 12px 16px;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 18px;
+      }
+      p {
+        margin: 4px 0;
+      }
+      label {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        margin: 8px 12px 8px 0;
+      }
+      select,
+      button {
+        min-height: 44px;
+        padding: 8px;
+        font: inherit;
+      }
+      #viewport {
+        display: block;
+        width: 390px;
+        height: 844px;
+        border: 0;
+        background: #05090b;
+      }
+      #metrics {
+        white-space: pre-wrap;
+        margin: 12px 16px;
+        overflow-wrap: anywhere;
+      }
+      #sha {
+        font-size: 12px;
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Авторизованный hosted QA · PR #93</h1>
+      <p id="sha">Deployed SHA: __DEPLOYED_SHA__</p>
+      <p>
+        Настоящее приложение в CSS viewport фрейма. Вход и тема — через интерфейс приложения. Этот
+        экран не подтверждает физическую клавиатуру и safe area телефона.
+      </p>
+      <label
+        >Ширина
+        <select id="width" aria-label="Ширина viewport">
+          <option>320</option>
+          <option selected>390</option>
+          <option>768</option>
+          <option>1440</option>
+        </select></label
+      >
+      <label
+        >Высота
+        <select id="height" aria-label="Высота viewport">
+          <option>568</option>
+          <option selected>640</option>
+          <option>844</option>
+          <option>936</option>
+        </select></label
+      >
+      <label
+        >Раздел
+        <select id="route" aria-label="Маршрут приложения">
+          <option value="/">Лента</option>
+          <option value="/communities">Комьюнити</option>
+          <option value="/partners">Выезды</option>
+          <option value="/chat">Чат</option>
+          <option value="/messages">Личные</option>
+          <option value="/reports/new">Отчёт</option>
+          <option value="/street">STREET</option>
+          <option value="/profile">Профиль</option>
+          <option value="/settings">Настройки</option>
+          <option value="/atlas">Atlas / SPOT</option>
+          <option value="/competitions">ZARUBA / KING</option>
+          <option value="/assistant">ИИ-рыболов</option>
+          <option value="/auth?mode=in">Вход</option>
+          <option value="/auth?mode=up">Регистрация</option>
+        </select></label
+      >
+      <button id="measure" type="button">Обновить показатели</button>
+      <p id="state" role="status">Ожидание приложения</p>
+    </header>
+    <iframe id="viewport" title="Размещённое приложение ZAPRUDA" src="about:blank"></iframe>
+    <pre id="metrics" aria-label="Показатели размещённого приложения"></pre>
+    <script>
+      const frame = document.getElementById("viewport");
+      const width = document.getElementById("width");
+      const route = document.getElementById("route");
+      const height = document.getElementById("height");
+      const state = document.getElementById("state");
+      const metrics = document.getElementById("metrics");
+      const stageHost = "yudtbifopfnjtjanaqrd.supabase.co";
+      const allowed = location.hostname === "deploy-preview-93--zapruda1.netlify.app";
+      const widths = new Set(["320", "390", "768", "1440"]);
+      const heights = new Set(["568", "640", "844", "936"]);
+      const routes = new Set(Array.from(route.options, (o) => o.value));
+      function measure() {
+        if (!allowed) return;
+        try {
+          const win = frame.contentWindow,
+            doc = frame.contentDocument;
+          if (!doc || win.location.origin !== location.origin) throw new Error("APP_NOT_READY");
+          const counts = {};
+          for (const entry of win.performance.getEntriesByType("resource")) {
+            const url = new URL(entry.name, location.origin);
+            if (!["http:", "https:", "ws:", "wss:"].includes(url.protocol)) continue;
+            const origin = url.origin;
+            counts[origin] = (counts[origin] || 0) + 1;
+          }
+          const foreignBackend = Object.keys(counts).filter(
+            (o) =>
+              new URL(o).hostname.endsWith(".supabase.co") && new URL(o).hostname !== stageHost,
+          );
+          const nav = doc.querySelector('nav[aria-label="Мобильная навигация"]');
+          const result = {
+            deployedSha: "__DEPLOYED_SHA__",
+            level: "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+            requestedWidth: Number(width.value),
+            innerWidth: win.innerWidth,
+            innerHeight: win.innerHeight,
+            clientWidth: doc.documentElement.clientWidth,
+            scrollWidth: doc.documentElement.scrollWidth,
+            overflow: doc.documentElement.scrollWidth > doc.documentElement.clientWidth,
+            route: win.location.pathname,
+            theme: doc.documentElement.dataset.zaprudaBackground || null,
+            signedInProfileLink: !!doc.querySelector('header a[href="/profile"]'),
+            bottomNavPadding: nav ? win.getComputedStyle(nav).paddingBottom : null,
+            activeElement: doc.activeElement?.tagName,
+            loading: /Загрузка(?:…|\.\.\.)|Загружаем/i.test(doc.body.innerText),
+            visibleImagesPending: Array.from(doc.images).filter((img) => {
+              const box = img.getBoundingClientRect();
+              return (
+                box.top < win.innerHeight &&
+                box.bottom > 0 &&
+                box.width > 0 &&
+                (!img.complete || img.naturalWidth === 0)
+              );
+            }).length,
+            resourceOrigins: counts,
+            foreignBackend,
+            networkLimit:
+              "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+          };
+          metrics.textContent = JSON.stringify(result, null, 2);
+          state.textContent = foreignBackend.length
+            ? "FAIL: чужой backend"
+            : result.overflow
+              ? "FAIL: горизонтальный скролл"
+              : "Показатели обновлены";
+        } catch {
+          state.textContent = "Приложение ещё загружается или требует входа через основную вкладку";
+        }
+      }
+      width.addEventListener("change", () => {
+        if (!allowed || !widths.has(width.value)) return;
+        frame.style.width = width.value + "px";
+        requestAnimationFrame(measure);
+      });
+      height.addEventListener("change", () => {
+        if (!allowed || !heights.has(height.value)) return;
+        frame.style.height = height.value + "px";
+        requestAnimationFrame(measure);
+      });
+      route.addEventListener("change", () => {
+        if (allowed && routes.has(route.value)) frame.src = route.value;
+      });
+      frame.addEventListener("load", measure);
+      document.getElementById("measure").addEventListener("click", measure);
+      if (allowed) {
+        frame.style.height = height.value + "px";
+        frame.src = "/";
+      } else state.textContent = "Недоступно вне canonical Netlify Preview #93";
+    </script>
+  </body>
+</html>

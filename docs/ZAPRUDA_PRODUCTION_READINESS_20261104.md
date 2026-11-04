@@ -44,3 +44,6 @@ No environment secret values read or copied. Required names must be checked in t
 ## Rollback boundaries
 
 Frontend regression: restore the saved prior build while retaining compatible additive database objects. Database/privacy regression: disable the affected feature and apply a reviewed forward permissions fix; do not restore an insecure broad ACL as a blind rollback. Preserve new accepted data and audit history. Data-loss incident: use verified database PITR/backup and the separate Storage manifest in an approved recovery window; account for new writes since the backup and validate both data and object references. No DROP/CASCADE, TRUNCATE, role grant, production migration or destructive rollback was run.
+
+## Повторный read-only срез FINAL RELEASE INTEGRATION
+[Fresh exact diff](../qa/product-contract/SCHEMA_DIFF_20261104_FINAL.json), 04.11.2026 19:31 Москва: все11 catalog-difference sections совпадают с предыдущим срезом; STAGING65 / Production62 migrations, Edge9 /9. Никакая миграция не повторялась и Production не менялась. Env/OAuth/backup/PITR/restore dry run не объявлены проверенными; это сохраняемые readiness gates. Условное разрешение main не разрешает Production SQL/deploy.

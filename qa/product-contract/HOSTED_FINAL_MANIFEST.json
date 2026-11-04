@@ -1,0 +1,125 @@
+{
+  "code_sha": "e9fd4aa8172d7e55553c0882640ecebb75c9d421",
+  "deploy_id": "6aeb663d03e8681d52163b74",
+  "scope": "Actual hosted authenticated single-account same-origin iframe CSS viewport; not a physical-device or complete two-user publication E2E",
+  "case_count": 96,
+  "geometry_pass": 96,
+  "rendered_error_cases": 16,
+  "capture_limit": "Native 1363x936 parent-browser context screenshots; child CSS viewport width differs from bitmap width. 1440px child extends beyond the screenshot right edge. JSON metrics cover the full child viewport. Browser preview collaboration controls may overlay content; no physical-device claim.",
+  "files": [
+    {
+      "path": "qa/product-contract/hosted-final/classic-1440-feed-e9fd4aa-context.jpg",
+      "bytes": 107809,
+      "sha256": "69b907c982e3f89a15b7562deb956fde67383356544ed4f01a8040a2cb3983a7",
+      "git_blob_sha": "3755c4eed0e6083e99b59bcd364608c2305f3166"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/classic-320-feed-e9fd4aa-context.jpg",
+      "bytes": 79263,
+      "sha256": "4270fed1fbcb74b7a028c6988478f4176cf601e5c28a3f640d9b3bef4a4597fb",
+      "git_blob_sha": "5bc8fcb6bf51a7490fa44d23ccf05b9d49d3e56b"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/classic-320-feed-viewport-aa67109.jpg",
+      "bytes": 74639,
+      "sha256": "61143d0e7e1fcd8ce34d0510f7f78da7d79a85439acf87391c1f12ad737fedfb",
+      "git_blob_sha": "263423ee4cf68292ec5f0a2f7c1a73c9227f6547"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/classic-390-chat-e9fd4aa-context.jpg",
+      "bytes": 79079,
+      "sha256": "cf545952a5933e52050519748dc809baa5c0b79f19697dcc9210ca9b4b3e83da",
+      "git_blob_sha": "d86b8d2e6125e3adc27f3a6bd5338c5a90418ab8"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/classic-390-feed-e9fd4aa-context.jpg",
+      "bytes": 83224,
+      "sha256": "d366132069ddfc3beb0c204db068a6759e314fc87f810ee633ea18fe925b8d89",
+      "git_blob_sha": "e70d65296dd4153de16187ae48a04a5a2d33c0f3"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/classic-390-reports-new-e9fd4aa-context.jpg",
+      "bytes": 78648,
+      "sha256": "1511fe7a41de0e4b7adb9bdb46b29254604a950aa15d914e85fa126e2860ccf8",
+      "git_blob_sha": "361ae4f57c6320755d782af72e124d7472c891d8"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/classic-768-feed-e9fd4aa-context.jpg",
+      "bytes": 96190,
+      "sha256": "c054e5756dff48a70c75ad61a521844f37393596cebf64b297c24083de297a5b",
+      "git_blob_sha": "a5cc980a1669a172f046662ecea211cb7e903d95"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/electric-blue-1440-feed-e9fd4aa-context.jpg",
+      "bytes": 113264,
+      "sha256": "56a5dd6c11fa04db39e281a38307d93a53da9fac3548892d37ffa7d99876558a",
+      "git_blob_sha": "47faa923b4bfecbd885eee379f776e1ea7c04267"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/electric-blue-320-feed-e9fd4aa-context.jpg",
+      "bytes": 78843,
+      "sha256": "55504b3f7dd9ed6e46714f69ccbedc0f6c5a66ff0a54e290e2339a97abe44f2f",
+      "git_blob_sha": "8ec78117e833c5ed48cf93f1dc33b15aed0c9373"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/electric-blue-390-chat-e9fd4aa-context.jpg",
+      "bytes": 81175,
+      "sha256": "f4e487c740b5eac65f90d370c6280e6b47b0a851ed995187964a35931c147c07",
+      "git_blob_sha": "f8ab021a0548c13552c03eacc1cbb2ff6afff2c1"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/electric-blue-390-feed-e9fd4aa-context.jpg",
+      "bytes": 84726,
+      "sha256": "4c86346a4c64f0c0311a87609340a3e9be2b2d7570589451b35371ad056f79b2",
+      "git_blob_sha": "54c3c4fcae66379852b9859c2033aaaf34005fad"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/electric-blue-390-reports-new-e9fd4aa-context.jpg",
+      "bytes": 80255,
+      "sha256": "6d082113ddd61fb981f20155b498df1b9bfc38a71184cacd5965ec949b767cfa",
+      "git_blob_sha": "a19592ae7a224d2fc2b0626b1a60ff46fb0230d6"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/electric-blue-768-feed-e9fd4aa-context.jpg",
+      "bytes": 99644,
+      "sha256": "776384f7a9a538f10a4699295b5321b0bc8468539ad4a5555df398305ae10021",
+      "git_blob_sha": "03e356554fbb6d8b5c1222d443725798c6fce764"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/header-after-e9fd4aa.json",
+      "bytes": 393,
+      "sha256": "83e0c35661bec955d812e9da7c9464ab6c099e5ff1ca87c03835de5f357d9d97",
+      "git_blob_sha": "a4c7de0143e789074c3e64c4d8cd26c461958341"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/header-before-aa67109.json",
+      "bytes": 428,
+      "sha256": "b09c463ca4199372a8ba4d34f61aa60ca8918d22d2106028549c5126a7afc2ce",
+      "git_blob_sha": "76204dbe812b1f3e5cf4a11948c409b3e80b3148"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/netlify-deploy-error-e9fd4aa.json",
+      "bytes": 424,
+      "sha256": "b817e8d91e6c53f06895c6cc0fc80edd16f4f97ab9e9e2d307ca91105e420a68",
+      "git_blob_sha": "86bdb2a4466cff6a239ddd99da4255da2d6e7da6"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/netlify-deploy-error-retry-e9fd4aa.json",
+      "bytes": 374,
+      "sha256": "c9bd45b2aee46c182dfa06938b1c5e55566b40377bcad427c8d93766e7b3e8d9",
+      "git_blob_sha": "d78c08cc01bc2e463c52f23785483a5ca88ffcc2"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/viewport-cases-e9fd4aa.json",
+      "bytes": 145055,
+      "sha256": "4d38873a4da54d78c982b1721525cd8512933013aebf831184ee9a4a6828554a",
+      "git_blob_sha": "b267d150b402b976a24b310b531ae358e7df7f94"
+    },
+    {
+      "path": "qa/product-contract/hosted-final/viewport-summary-e9fd4aa.json",
+      "bytes": 4244,
+      "sha256": "59570701ff87d174901f23c423d9b5ee2253def7cd2adf48c010d3021e29aa84",
+      "git_blob_sha": "daeaf97d768774963df412cb83a70752d0e07384"
+    }
+  ]
+}

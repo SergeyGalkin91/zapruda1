@@ -1,3 +1,5 @@
+> Исторический срез. Актуальное продолжение и условное разрешение main: [FINAL_RELEASE_INTEGRATION](ZAPRUDA_FINAL_RELEASE_INTEGRATION_20261104.md). Protected 41850073063 теперь SUCCESS на f3bbe1b; последующая UI-правка проверяется отдельно.
+
 # ZAPRUDA — P0 continuation, 04.11.2026
 
 **NO-GO.** Technical version remains 0.7.5; target 0.7.6 KING FINISH is unchanged. Code candidate: `f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec`, existing PR #93. This report supersedes the current-state cleanup and security paragraphs of earlier acceptance reports; their exact-SHA results remain historical evidence.

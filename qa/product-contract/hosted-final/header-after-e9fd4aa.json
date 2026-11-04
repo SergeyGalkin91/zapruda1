@@ -1,0 +1,21 @@
+{
+  "client": 305,
+  "controls": [
+    {
+      "height": 44,
+      "label": "Профиль",
+      "left": 197,
+      "right": 241,
+      "width": 44
+    },
+    {
+      "height": 44,
+      "label": "Открыть список разделов",
+      "left": 249,
+      "right": 293,
+      "width": 44
+    }
+  ],
+  "sourceSha": "e9fd4aa8172d7e55553c0882640ecebb75c9d421",
+  "viewport": 320
+}

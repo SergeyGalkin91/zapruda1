@@ -1,0 +1,7 @@
+{
+  "sha": "e9fd4aa8172d7e55553c0882640ecebb75c9d421",
+  "deployId": "6aeb6373443569202d91a5c3",
+  "phase": "Deploying",
+  "buildCompleted": true,
+  "error": "7:56:53 PM:   Deploy did not succeed with HTTP Error 500: Failed to execute deploy: [PUT /deploys/{deploy_id}/functions/{name}][500] uploadDeployFunction default  &{Code:500 Message:could not upload function: invalid character '<' looking for beginning of value}"
+}
