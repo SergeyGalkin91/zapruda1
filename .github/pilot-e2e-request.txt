@@ -10,3 +10,5 @@ Final authenticated browser acceptance: two actual users, read receipts/retry, r
 Reconcile unread list at PostgreSQL-ready/rejoin; fix compile regression in new lost-response test.
 
 Include newly aligned empty Atlas catalog/own progress reads and read-only Yandex diagnose; real UI lost report-RPC response must retry without duplicate catch.
+
+2026-11-04 authenticated harness: use official playwright/test expect export; rerun actual JWT Browser acceptance.

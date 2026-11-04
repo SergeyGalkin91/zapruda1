@@ -1,6 +1,6 @@
 /** Real confirmed STAGING users, isolated local frontend. No fake KING/spot/role.
  * Credentials never enter screenshots/logs; only owned QA rows are removed. */
-import { chromium, firefox, webkit, expect } from "playwright";
+import { chromium, firefox, webkit, expect } from "playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
