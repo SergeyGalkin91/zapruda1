@@ -66,7 +66,12 @@ Deno.serve(async (req: Request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const { data: identity, error: authError } = await userClient.auth.getUser(token);
-  if (authError || !identity.user || identity.user.is_anonymous || !identity.user.email_confirmed_at) {
+  if (
+    authError ||
+    !identity.user ||
+    identity.user.is_anonymous ||
+    !identity.user.email_confirmed_at
+  ) {
     return respond(401, { error: "Требуется подтверждённый аккаунт ZAPRUDA." });
   }
 
