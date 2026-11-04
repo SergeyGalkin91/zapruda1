@@ -8,6 +8,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { chromium, webkit, firefox } = require("playwright");
+const { assertShellBounds } = require("./browser-shell-bounds.cjs");
 const ENGINE = process.env.VISUAL_BROWSER || "chromium";
 const ENGINES = { chromium, webkit, firefox };
 assert(ENGINE in ENGINES, "Unsupported VISUAL_BROWSER: " + ENGINE);
@@ -110,6 +111,7 @@ async function openRoute(page, route) {
   const actual = await variables(page);
   assert(!actual.routeError, route + ": React route error screen");
   assert(!actual.horizontalOverflow, route + ": horizontal overflow");
+  await assertShellBounds(page);
   return actual;
 }
 

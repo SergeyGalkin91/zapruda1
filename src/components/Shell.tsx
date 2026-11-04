@@ -140,18 +140,24 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="min-h-screen overflow-x-clip pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-0">
       <ActivityTracker />
       <header className="sticky top-0 z-50 border-b border-white/[0.09] z-electric-shell-header bg-[#0D100C]/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
-          <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0">
-            <Wordmark />
-          </Link>
-          {isNetlifyStagingPreview && (
-            <span
-              className="rounded-lg border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-2 py-1 text-[10px] font-black tracking-wide text-[#D7FF35]"
-              title="Тестовая среда Supabase STAGING"
+        <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6">
+          <div className="flex min-w-0 flex-col items-start sm:flex-row sm:items-center sm:gap-3">
+            <Link
+              to="/"
+              aria-label="ZAPRUDA — на главную"
+              className="inline-flex min-h-11 shrink-0 items-center"
             >
-              STAGING
-            </span>
-          )}
+              <Wordmark />
+            </Link>
+            {isNetlifyStagingPreview && (
+              <span
+                className="rounded-lg border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-1.5 py-0.5 text-[9px] font-black tracking-wide text-[#D7FF35] sm:px-2 sm:py-1 sm:text-[10px]"
+                title="Тестовая среда Supabase STAGING"
+              >
+                STAGING
+              </span>
+            )}
+          </div>
           <nav aria-label="Основная навигация" className="hidden items-center gap-1 xl:flex">
             {desktopNav.map(({ to, label, Icon }) => (
               <Link
@@ -174,26 +180,29 @@ export function Shell({ children }: { children: ReactNode }) {
               <>
                 <a
                   href="/profile"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3"
+                  aria-label="Профиль"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3"
                 >
                   <UserRound className="size-4" aria-hidden="true" />
-                  Профиль
+                  <span className="hidden sm:inline">Профиль</span>
                 </a>
               </>
             ) : (
               <Link
                 search={{ mode: "in" }}
                 to="/auth"
-                className="inline-flex rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white"
+                aria-label="Войти"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white"
               >
-                Войти
+                <LogIn className="size-4 sm:hidden" aria-hidden="true" />
+                <span className="hidden sm:inline">Войти</span>
               </Link>
             )}
             <details className="relative group">
               <summary
                 aria-label="Открыть список разделов"
                 aria-controls="zapruda-extra-nav"
-                className="inline-flex size-10 cursor-pointer list-none items-center justify-center rounded-xl border border-white/15 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 [&::-webkit-details-marker]:hidden"
+                className="inline-flex size-11 cursor-pointer list-none items-center justify-center rounded-xl border border-white/15 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 [&::-webkit-details-marker]:hidden"
               >
                 <Menu className="size-5 group-open:hidden" aria-hidden="true" />
                 <X className="hidden size-5 group-open:block" aria-hidden="true" />

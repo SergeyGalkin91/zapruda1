@@ -5,6 +5,8 @@ import { createClient } from "@supabase/supabase-js";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { jpeg } from "./pilot-photo-fixture.mjs";
+import shellBounds from "../browser-shell-bounds.cjs";
+const { assertShellBounds } = shellBounds;
 const url = process.env.ZAPRUDA_E2E_STAGING_URL,
   key = process.env.ZAPRUDA_E2E_PUBLISHABLE_KEY;
 if (url !== "https://yudtbifopfnjtjanaqrd.supabase.co" || !key)
@@ -419,13 +421,14 @@ try {
             .toBe(true);
           if (await p.evaluate(() => document.documentElement.scrollWidth > innerWidth))
             throw Error("AUTHENTICATED_HORIZONTAL_OVERFLOW");
+          await assertShellBounds(p);
           await shot(p, `${name}-${width}-${theme}-${label}`);
         }
       }
     await br.close();
   }
   result.checks.push(
-    "authenticated 3-engine x 4-width x 2-theme route screenshots and overflow; unauthorized admin only",
+    "authenticated 3-engine x 4-width x 2-theme route screenshots, header control bounds and 44px targets; unauthorized admin only",
   );
   result.passed = true;
 } catch (e) {
