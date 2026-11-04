@@ -1,0 +1,46 @@
+name: SPOT isolated PostgreSQL transaction races
+on:
+  pull_request:
+    paths:
+      - ".github/v075-validation-request.txt"
+      - "supabase/staging/*spot*"
+      - "supabase/tests/unit/spot*"
+      - "scripts/check-spot-postgres.mjs"
+      - ".github/workflows/spot-postgres.yml"
+permissions:
+  contents: read
+jobs:
+  transaction-races:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: spot_sql_unit
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d spot_sql_unit"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+      - name: Real concurrent SQL transactions on a disposable database
+        env:
+          SPOT_SQL_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/spot_sql_unit
+        run: node scripts/check-spot-postgres.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spot-postgres-transaction-proof
+          path: qa/spot-postgres.json
+          retention-days: 7

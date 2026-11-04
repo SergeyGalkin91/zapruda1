@@ -1,0 +1,23 @@
+name: Netlify preview STAGING isolation guard
+on:
+  pull_request:
+    paths:
+      - ".github/v075-validation-request.txt"
+      - "src/integrations/supabase/client.ts"
+      - "src/components/Shell.tsx"
+      - "scripts/check-preview-isolation.mjs"
+      - ".github/workflows/preview-staging-guard.yml"
+  workflow_dispatch:
+jobs:
+  source-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - run: node scripts/check-preview-isolation.mjs

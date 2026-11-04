@@ -1,0 +1,11 @@
+[
+  "tests/unit/spot_bootstrap.sql",
+  "staging/DRAFT_v075_spot_records_security_review.sql",
+  "staging/DRAFT_v075_private_evidence_bucket.sql",
+  "staging/DRAFT_v075_evidence_storage_gate.sql",
+  "staging/DRAFT_v075_spot_end_to_end.sql",
+  "staging/DRAFT_v075_spot_evidence_view.sql",
+  "staging/v075_spot_scoped_subscriptions_no_self_review.sql",
+  "staging/v075_spot_predecessor_notification_race_guard.sql",
+  "staging/v075_spot_revocation_recalculation.sql"
+]

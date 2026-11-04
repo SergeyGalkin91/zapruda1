@@ -1,0 +1,8 @@
+# Netlify Alpha: TanStack Start SSR is built with Nitro's Netlify adapter.
+# Docker continues to override NITRO_PRESET=node-server independently.
+[build]
+command = "bun run build"
+publish = "dist"
+
+[build.environment]
+NITRO_PRESET = "netlify"

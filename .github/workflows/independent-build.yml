@@ -1,0 +1,62 @@
+name: Independent Node hosting proof
+on:
+  pull_request:
+    paths:
+      - ".github/v075-validation-request.txt"
+      - "vite.config.ts"
+      - "package.json"
+      - "bun.lock"
+      - "Dockerfile"
+      - ".github/workflows/independent-build.yml"
+permissions:
+  contents: read
+jobs:
+  node-host:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      NITRO_PRESET: node-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - name: Reject the Lovable build dependency
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFileSync} from 'node:fs';
+          const pkg=JSON.parse(readFileSync('package.json','utf8'));
+          assert.equal(pkg.devDependencies['@lovable.dev/vite-tanstack-config'],undefined);
+          assert.doesNotMatch(readFileSync('bun.lock','utf8'),/@lovable\.dev\//);
+          assert.doesNotMatch(readFileSync('vite.config.ts','utf8'),/@lovable\.dev\//);
+          JS
+      - run: bun run build
+      - name: Run the actual standalone Node output
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .output/server/index.mjs
+          mkdir -p qa/independent
+          PORT=4192 HOST=127.0.0.1 node .output/server/index.mjs > qa/independent/server.log 2>&1 &
+          INDEPENDENT_SERVER_PID=$!
+          trap 'kill "$INDEPENDENT_SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4192/ >/dev/null; then READY=1; break; fi
+            sleep 1
+          done
+          test "$READY" = 1
+          for route in auth profile chat communities competitions assistant; do
+            curl -fsS "http://127.0.0.1:4192/$route" > "qa/independent/$route.html"
+          done
+          git diff --exit-code -- package.json bun.lock src/routeTree.gen.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: independent-node-http-proof
+          path: qa/independent/
+          retention-days: 7

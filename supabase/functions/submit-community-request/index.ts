@@ -36,7 +36,10 @@ function publicKey() {
   const legacy = Deno.env.get("SUPABASE_ANON_KEY");
   if (legacy) return legacy;
   try {
-    const keys = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}") as Record<string, string>;
+    const keys = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}") as Record<
+      string,
+      string
+    >;
     return keys.default ?? "";
   } catch {
     return "";
@@ -91,9 +94,17 @@ Deno.serve(async (req: Request) => {
   if (requestType !== "improvement" && requestType !== "cooperation" && requestType !== "bug") {
     return respond(400, { error: "Выбери тип обращения." });
   }
-  if (category.length > 80 || subject.length < 4 || subject.length > 120 ||
-      body.length < 15 || body.length > 2000 || contact.length > 180) {
-    return respond(400, { error: "Проверь заголовок (4–120 символов), текст (15–2000) и контактные данные." });
+  if (
+    category.length > 80 ||
+    subject.length < 4 ||
+    subject.length > 120 ||
+    body.length < 15 ||
+    body.length > 2000 ||
+    contact.length > 180
+  ) {
+    return respond(400, {
+      error: "Проверь заголовок (4–120 символов), текст (15–2000) и контактные данные.",
+    });
   }
 
   const admin = createClient(supabaseUrl, secret, {
@@ -102,11 +113,13 @@ Deno.serve(async (req: Request) => {
 
   // Per-account limits. Client roles cannot INSERT directly into the inbox.
   const now = Date.now();
-  const recent = await admin.from("community_requests")
+  const recent = await admin
+    .from("community_requests")
     .select("id", { count: "exact", head: true })
     .eq("user_id", identity.user.id)
     .gte("created_at", new Date(now - 60 * 60 * 1000).toISOString());
-  const daily = await admin.from("community_requests")
+  const daily = await admin
+    .from("community_requests")
     .select("id", { count: "exact", head: true })
     .eq("user_id", identity.user.id)
     .gte("created_at", new Date(now - 24 * 60 * 60 * 1000).toISOString());
@@ -118,14 +131,18 @@ Deno.serve(async (req: Request) => {
     return respond(429, { error: "Лимит обращений достигнут. Попробуй позже." });
   }
 
-  const inserted = await admin.from("community_requests").insert({
-    user_id: identity.user.id,
-    request_type: requestType,
-    category,
-    subject,
-    body,
-    contact,
-  }).select("id").single();
+  const inserted = await admin
+    .from("community_requests")
+    .insert({
+      user_id: identity.user.id,
+      request_type: requestType,
+      category,
+      subject,
+      body,
+      contact,
+    })
+    .select("id")
+    .single();
 
   if (inserted.error || !inserted.data) {
     return respond(503, { error: "Не удалось сохранить обращение. Повтори отправку позже." });
@@ -146,7 +163,9 @@ Deno.serve(async (req: Request) => {
       "Сообщение:\n" + body,
       contact ? "Контакт (указал отправитель): " + contact : "",
       "ID обращения: " + id,
-    ].filter(Boolean).join("\n\n");
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
     try {
       const telegramResponse = await fetch(
@@ -163,18 +182,21 @@ Deno.serve(async (req: Request) => {
         },
       );
       if (telegramResponse.ok) {
-        const result = await telegramResponse.json() as { ok?: boolean };
+        const result = (await telegramResponse.json()) as { ok?: boolean };
         delivered = result.ok === true;
       }
     } catch {
       // A Telegram failure must not discard the original saved request.
     }
 
-    const updated = await admin.from("community_requests").update({
-      telegram_status: delivered ? "sent" : "failed",
-      telegram_attempts: 1,
-      telegram_sent_at: delivered ? new Date().toISOString() : null,
-    }).eq("id", id);
+    const updated = await admin
+      .from("community_requests")
+      .update({
+        telegram_status: delivered ? "sent" : "failed",
+        telegram_attempts: 1,
+        telegram_sent_at: delivered ? new Date().toISOString() : null,
+      })
+      .eq("id", id);
     if (updated.error) console.error("Telegram delivery status persistence failed", { id });
   }
 
