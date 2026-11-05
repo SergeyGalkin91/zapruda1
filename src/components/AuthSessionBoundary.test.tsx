@@ -2,14 +2,16 @@ import { useState } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthSessionBoundary } from "./AuthSessionBoundary";
-type Session = { user: { id: string } };
+type Session = { user: { id: string }; access_token?: string };
 type AuthObserver = (callback: (event: string, session: Session | null) => void) => {
   data: { subscription: { unsubscribe: () => void } };
 };
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   onAuth: vi.fn<AuthObserver>(),
+  close: vi.fn(async (_token: string) => {}),
 }));
+vi.mock("@/lib/on-spot-api", () => ({ closeOnSpotSession: mocks.close }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: { auth: { getSession: mocks.getSession, onAuthStateChange: mocks.onAuth } },
 }));
@@ -87,6 +89,23 @@ describe("Route cache identity boundaries (offline UI tests, not JWT E2E)", () =
     act(() => mocks.onAuth.mock.calls[0]?.[0]("SIGNED_IN", { user: { id: "account-b" } }));
     act(() => oldSetter?.("PRIVATE_PREVIOUS_ACCOUNT"));
     expect(screen.queryByText("PRIVATE_PREVIOUS_ACCOUNT")).not.toBeInTheDocument();
+  });
+  it("revokes only the previous actor's latest presence session on switch", async () => {
+    await start();
+    act(() =>
+      mocks.onAuth.mock.calls[0]?.[0]("TOKEN_REFRESHED", {
+        user: { id: "account-a" },
+        access_token: "offline-refreshed-A",
+      }),
+    );
+    expect(mocks.close).not.toHaveBeenCalled();
+    act(() =>
+      mocks.onAuth.mock.calls[0]?.[0]("SIGNED_IN", {
+        user: { id: "account-b" },
+        access_token: "offline-B",
+      }),
+    );
+    await waitFor(() => expect(mocks.close).toHaveBeenCalledExactlyOnceWith("offline-refreshed-A"));
   });
   it("ignores a stale initial session once a newer auth event has arrived", async () => {
     let resolveSession: (value: unknown) => void = () => {};

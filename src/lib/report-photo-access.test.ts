@@ -1,4 +1,7 @@
+// @vitest-environment node
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createClient } from "@supabase/supabase-js";
 import { createReportPhotoAccessHandler } from "../../supabase/functions/report-photo-access/handler";
 
 const photo = "20000000-0000-4000-8000-000000000001";
@@ -21,6 +24,24 @@ beforeEach(() => {
   deps.remove.mockResolvedValue(undefined);
 });
 describe("Photo visibility gateway (offline handler regressions, not live JWT E2E)", () => {
+  it("preserves the derivative bytes through the SDK for authenticated shared-photo previews", async () => {
+    const handler = createReportPhotoAccessHandler(deps);
+    const client = createClient("https://disconnected.invalid", "offline-key", {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { fetch: (input, init) => handler(new Request(input, init)) },
+    });
+    const { data, error } = await client.functions.invoke<Blob>(
+      "report-photo-access?photo_id=" + photo,
+      {
+        method: "GET",
+        headers: { Authorization: "Bearer offline-fixture", Accept: "application/octet-stream" },
+      },
+    );
+    expect(error).toBeNull();
+    expect(data?.type).toBe("application/octet-stream");
+    expect(new Uint8Array(await data!.arrayBuffer())).toEqual(jpeg);
+    expect(deps.resolve).toHaveBeenCalledWith(photo, "offline-fixture");
+  });
   it("serves only the authorized derivative with no-cache and no reusable Storage token", async () => {
     const response = await createReportPhotoAccessHandler(deps)(request());
     expect(response.status).toBe(200);

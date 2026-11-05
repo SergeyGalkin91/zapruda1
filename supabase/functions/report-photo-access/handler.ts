@@ -11,7 +11,7 @@ const headers = {
   "Cache-Control": "private, no-store, max-age=0",
   "CDN-Cache-Control": "no-store",
   "X-Content-Type-Options": "nosniff",
-  Vary: "Authorization, Origin",
+  Vary: "Authorization, Origin, Accept",
 };
 const reply = (status: number) => new Response(null, { status, headers });
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -62,7 +62,10 @@ export function createReportPhotoAccessHandler(deps: Dependencies) {
         status: 200,
         headers: {
           ...headers,
-          "Content-Type": "image/jpeg",
+          "Content-Type":
+            jwt && request.headers.get("Accept") === "application/octet-stream"
+              ? "application/octet-stream"
+              : "image/jpeg",
           "Content-Disposition": 'inline; filename="report-photo.jpg"',
         },
       });

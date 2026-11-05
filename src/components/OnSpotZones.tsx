@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isSpotStaging } from "@/lib/spot-api";
 import { onSpotCatalog, onSpotMembership } from "@/lib/on-spot-api";
 import type { OnSpotZone } from "@/integrations/supabase/on-spot.types";
+import { OnSpotZoneSocial } from "@/components/OnSpotZoneSocial";
 
 /** Explicit chat participation only. No geolocation, member roster or inferred presence. */
 export function OnSpotZones() {
@@ -14,6 +15,7 @@ export function OnSpotZones() {
   const [loading, setLoading] = useState(allowed);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
+  const [openZone, setOpenZone] = useState("");
   const generation = useRef(0);
   const membershipRequest = useRef(0);
   const invalidate = useCallback(() => {
@@ -38,6 +40,7 @@ export function OnSpotZones() {
         invalidate();
         invalidateMembership();
         setZones([]);
+        setOpenZone("");
         setBusy("");
         setError("");
         setActor(next);
@@ -100,6 +103,7 @@ export function OnSpotZones() {
     try {
       await onSpotMembership(actor, zone.zone_id, !zone.is_member);
       if (current !== generation.current) return;
+      if (zone.is_member && openZone === zone.zone_id) setOpenZone("");
       // Re-read authority instead of displaying an optimistic membership.
       await load();
     } catch (cause) {
@@ -177,6 +181,17 @@ export function OnSpotZones() {
                     Открыть чат
                   </Link>
                 )}
+                {zone.is_member && (
+                  <button
+                    type="button"
+                    className="btn-ghost min-h-11"
+                    disabled={loading || Boolean(busy)}
+                    aria-expanded={openZone === zone.zone_id}
+                    onClick={() => setOpenZone(openZone === zone.zone_id ? "" : zone.zone_id)}
+                  >
+                    Люди и встречи
+                  </button>
+                )}
                 <button
                   type="button"
                   className={zone.is_member ? "btn-ghost" : "btn-primary"}
@@ -191,6 +206,13 @@ export function OnSpotZones() {
                       : "Вступить в зону"}
                 </button>
               </div>
+              {actor && zone.is_member && openZone === zone.zone_id && (
+                <OnSpotZoneSocial
+                  key={actor + ":" + zone.zone_id}
+                  actor={actor}
+                  zone={zone.zone_id}
+                />
+              )}
             </li>
           ))}
         </ul>

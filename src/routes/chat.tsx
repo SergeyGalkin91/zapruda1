@@ -1,4 +1,5 @@
 import { ChatRoomThumbnail } from "@/components/ChatRoomThumbnail";
+import { OnSpotMessageActions } from "@/components/OnSpotMessageActions";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
@@ -1155,6 +1156,11 @@ export function GeographicChat() {
                                 : "Общий чат сообщества"}
                         {" · отдельная переписка для каждого раздела"}
                       </p>
+                      {selectedPlace?.level === "spot-zone" && (
+                        <Link className="btn-ghost mt-2 min-h-11 text-sm" to="/on-spot">
+                          Люди и встречи зоны
+                        </Link>
+                      )}
                     </div>
                     <button
                       type="button"
@@ -1279,6 +1285,15 @@ export function GeographicChat() {
                           </a>
                         )}
                       </div>
+                      {selectedPlace?.level === "spot-zone" && uid && message.user_id !== uid && (
+                        <OnSpotMessageActions
+                          actor={uid}
+                          place={placeId}
+                          id={message.id}
+                          peer={message.user_id}
+                          onBlock={() => setRefreshIndex((i) => i + 1)}
+                        />
+                      )}
                       <div className="flex flex-wrap items-center gap-1.5">
                         {REACTION_EMOJI.map((emoji) => {
                           const likes = reactions.filter(

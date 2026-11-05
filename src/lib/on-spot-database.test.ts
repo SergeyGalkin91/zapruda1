@@ -4,22 +4,14 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { readFileSync, readdirSync } from "node:fs";
 import type { PGlite } from "@electric-sql/pglite";
 import type { OnSpotZone } from "../integrations/supabase/on-spot.types";
-import {
-  actAsFixture,
-  applySqlFile,
-  createIsolatedPostgres,
-  fixtureUsers as users,
-} from "../test/isolated-postgres";
+import { actAsFixture, fixtureUsers as users } from "../test/isolated-postgres";
+import { createIsolatedOnSpotPostgres } from "../test/on-spot-postgres";
 const zone = "11000000-0000-4000-8000-000000000001",
   room = "22000000-0000-4000-8000-000000000001",
   spot = "33000000-0000-4000-8000-000000000001";
 const message = "44000000-0000-4000-8000-000000000001",
   photo = "55000000-0000-4000-8000-000000000001",
   global = "00000000-0000-4000-8000-000000000001";
-const names = readdirSync("supabase/staging").filter((n) =>
-  /^\d{14}_v076_on_spot_zone_membership\.sql$/.test(n),
-);
-if (names.length !== 1) throw Error("Expected exactly one new STAGING delta");
 let db: PGlite;
 const catalog = () => db.query<OnSpotZone>("select * from public.zc_osp_catalog()");
 const join = (id = zone) => db.query("select public.zc_osp_join($1) as room", [id]);
@@ -34,25 +26,7 @@ async function denied(fn: () => Promise<unknown>, code = "42501") {
   }
 }
 beforeAll(async () => {
-  db = await createIsolatedPostgres();
-  for (const p of [
-    "tests/unit/pilot_dependencies_context.sql",
-    "tests/unit/report_dependencies_adopted.sql",
-    "tests/unit/chat_dependencies_adopted.sql",
-    "staging/v075_report_integrity.sql",
-    "staging/v075_public_chat.sql",
-    "staging/v075_chat_client_message_identity.sql",
-    "staging/v075_chat_read_state.sql",
-  ])
-    await applySqlFile(db, p);
-  // Exact observed STAGING global policy, fixture only; never replay baseline on hosted DB.
-  await db.exec(
-    "create policy staging_geo_messages_global_send on public.chat_messages for insert to authenticated with check(user_id=auth.uid() and place_id='00000000-0000-4000-8000-000000000001' and exists(select 1 from public.chat_places p where p.id=place_id and p.level='global'))",
-  );
-  await db.exec(
-    "create table public.zc_public_spots(id uuid primary key,state text not null,reviewed_at timestamptz)",
-  );
-  await applySqlFile(db, "staging/" + names[0]);
+  db = await createIsolatedOnSpotPostgres();
 }, 30000);
 beforeEach(async () => {
   await db.exec("begin; reset role");

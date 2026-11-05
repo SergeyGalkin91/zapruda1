@@ -51,16 +51,21 @@ Deno.serve(async (request: Request) => {
         .eq("id", photo.report_id)
         .maybeSingle();
       if (
-        reportError ||
-        !report ||
-        report.user_id !== photo.user_id ||
-        (!report.is_public && report.user_id !== callerId) ||
+        (report && report.user_id !== photo.user_id) ||
         path !== `${photo.user_id}/${photo.report_id}/${photo.id}.jpg`
       )
         return null;
+      const ordinary = !reportError && report && (report.is_public || report.user_id === callerId);
+      if (!ordinary) {
+        // A named participant can view a sanitized shared photo without access to the private report.
+        // The caller JWT and consent RPC remain authoritative; never issue a Storage URL.
+        if (!callerId || !photo.sanitized_path || !photo.sanitized_at) return null;
+        const access = await caller.rpc("zc_osp_shared_photo_access", { p_photo: photo.id });
+        if (access.error || access.data !== true) return null;
+      }
       return {
         path,
-        owner: report.user_id === callerId,
+        owner: Boolean(ordinary && report.user_id === callerId),
         ready: Boolean(photo.sanitized_path && photo.sanitized_at),
       };
     },
