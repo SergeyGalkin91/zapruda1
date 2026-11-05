@@ -1,5 +1,6 @@
+import { ChatRoomThumbnail } from "@/components/ChatRoomThumbnail";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ChevronRight,
   Globe2,
@@ -15,8 +16,9 @@ import {
 import { Shell } from "@/components/Shell";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
+import { prepareReportPhoto } from "@/lib/report-photo";
 import { countries } from "@/lib/geo";
-import { chatPhotoError, chatPhotoPath, shouldCreateChatMessage } from "@/lib/chat-media";
+import { chatPhotoError, shouldCreateChatMessage } from "@/lib/chat-media";
 
 type ChatTopic = "general" | "reports" | "waters" | "partners" | "gear" | "tips";
 type Level = "global" | "country" | "region" | "city";
@@ -117,9 +119,12 @@ export const Route = createFileRoute("/chat")({
   component: GeographicChat,
 });
 
-function GeographicChat() {
+export function GeographicChat() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const alive = useRef(true);
+  const pendingSend = useRef<{ id: string; signature: string } | null>(null);
+  const photoUploadId = useRef<string | null>(null);
   const [uid, setUid] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -142,15 +147,21 @@ function GeographicChat() {
   const [error, setError] = useState("");
   const [chatError, setChatError] = useState("");
   const [refreshIndex, setRefreshIndex] = useState(0);
+  const [roomFilter, setRoomFilter] = useState("all");
+  const [readSummary, setReadSummary] = useState<
+    Record<string, { joined: boolean; unread: number }>
+  >({});
+  const [readError, setReadError] = useState("");
   const [roomSearchOpen, setRoomSearchOpen] = useState(false);
   const [roomSearch, setRoomSearch] = useState("");
   const threadOpen = Boolean(search.place);
 
   useEffect(() => {
-    let alive = true;
+    let active = true;
+    alive.current = true;
     void (async () => {
       const { data: auth, error: authError } = await supabase.auth.getUser();
-      if (!alive) return;
+      if (!active) return;
       if (authError || !auth.user) {
         setUid("");
         setLoading(false);
@@ -162,7 +173,7 @@ function GeographicChat() {
         .select("id,parent_id,level,country_code,name,created_by")
         .order("name")
         .limit(1500);
-      if (!alive) return;
+      if (!active) return;
       if (queryError) setError("Не удалось загрузить географию чатов: " + queryError.message);
       else {
         setError("");
@@ -170,13 +181,14 @@ function GeographicChat() {
       }
       setLoading(false);
     })().catch((e) => {
-      if (alive) {
+      if (active) {
         setError(e instanceof Error ? e.message : "Не удалось открыть чаты.");
         setLoading(false);
       }
     });
     return () => {
-      alive = false;
+      active = false;
+      alive.current = false;
     };
   }, []);
 
@@ -189,6 +201,7 @@ function GeographicChat() {
     map.get(GLOBAL_ID);
   const placeId = selectedPlace?.id || GLOBAL_ID;
   const topic = search.topic;
+  const canCompose = Boolean(uid && selectedPlace && threadOpen && !loading && !chatLoading);
   const crumbs = useMemo(() => {
     const result: Place[] = [];
     const seen = new Set<string>();
@@ -213,6 +226,48 @@ function GeographicChat() {
   const regions = places.filter((p) => p.parent_id === country?.id && p.level === "region");
   const cities = places.filter((p) => p.parent_id === region?.id && p.level === "city");
   const currentTopic = TOPICS.find((t) => t.key === topic) ?? TOPICS[0]!;
+
+  useEffect(() => {
+    if (!uid) {
+      setReadSummary({});
+      return;
+    }
+    let active = true;
+    const load = async () => {
+      const { data, error } = await api.rpc("chat_room_read_summary", { p_place: placeId });
+      if (!active) return;
+      if (error) {
+        setReadError("Учёт прочтений недоступен. Попробуй обновить чаты.");
+        setReadSummary({});
+        return;
+      }
+      setReadError("");
+      setReadSummary(
+        Object.fromEntries(
+          (data || []).map((r: { topic: string; joined: boolean; unread: number }) => [r.topic, r]),
+        ),
+      );
+    };
+    void load();
+    const channel = supabase
+      .channel("chat-read-summary-" + uid + "-" + placeId, {
+        config: { postgres_changes_options: { wait: true, timeout: 20000 } },
+      })
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chat_messages", filter: "place_id=eq." + placeId },
+        () => void load(),
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") void load();
+      });
+    window.addEventListener("focus", load);
+    return () => {
+      active = false;
+      window.removeEventListener("focus", load);
+      void supabase.removeChannel(channel);
+    };
+  }, [uid, placeId, refreshIndex, threadOpen]);
 
   // Read-only last-message previews for the selected geographic scope.
   // No invented unread counts or mock messages; errors leave the descriptive fallback.
@@ -280,6 +335,11 @@ function GeographicChat() {
     setChatError("");
     setChatLoading(true);
 
+    const objectUrls = new Set<string>();
+    const revokePhotos = () => {
+      for (const url of objectUrls) URL.revokeObjectURL(url);
+      objectUrls.clear();
+    };
     let requestNumber = 0;
     const fetchMessages = async () => {
       const thisRequest = ++requestNumber;
@@ -311,23 +371,49 @@ function GeographicChat() {
             setReactions((liked || []) as ChatReaction[]);
           const { data: attached } = await api
             .from("chat_message_photos")
-            .select("message_id,storage_path")
+            .select("id,message_id")
             .in(
               "message_id",
               fetched.map((m) => m.id),
             );
           if (alive && thisRequest === requestNumber && attached?.length) {
-            const signed = await Promise.all(
-              attached.map(async (p: { message_id: string; storage_path: string }) => {
-                const { data: link } = await supabase.storage
-                  .from("chat-photos")
-                  .createSignedUrl(p.storage_path, 1800);
-                return [p.message_id, link?.signedUrl || ""] as const;
+            const { data: session } = await supabase.auth.getSession();
+            const token = session.session?.user.id === uid ? session.session.access_token : null;
+            if (!alive || thisRequest !== requestNumber || !token) return;
+            const downloaded = await Promise.all(
+              attached.map(async (p: { id: string; message_id: string }) => {
+                const { data: image, error: imageError } = await supabase.functions.invoke(
+                  "chat-photo-access?photo_id=" + encodeURIComponent(p.id),
+                  { method: "GET", headers: { Authorization: `Bearer ${token}` } },
+                );
+                return {
+                  messageId: p.message_id,
+                  image: !imageError && image instanceof Blob ? image : null,
+                };
               }),
             );
-            if (alive && thisRequest === requestNumber) setPhotoUrls(Object.fromEntries(signed));
-          } else if (alive && thisRequest === requestNumber) setPhotoUrls({});
+            if (!alive || thisRequest !== requestNumber) return;
+            revokePhotos();
+            const links: Record<string, string> = {};
+            for (const result of downloaded) {
+              if (result.image) {
+                const url = URL.createObjectURL(result.image);
+                objectUrls.add(url);
+                links[result.messageId] = url;
+              }
+            }
+            setPhotoUrls(links);
+          } else if (alive && thisRequest === requestNumber) {
+            revokePhotos();
+            setPhotoUrls({});
+          }
         } else {
+          const { error: visitError } = await api.rpc("mark_chat_read", {
+            p_place: placeId,
+            p_topic: topic,
+            p_message: null,
+          });
+          if (alive && visitError) setReadError("Не удалось сохранить посещение чата.");
           setReactions([]);
           setPhotoUrls({});
         }
@@ -335,11 +421,13 @@ function GeographicChat() {
     };
     void fetchMessages();
     const channel = supabase
-      .channel("zapruda-chat-" + placeId + "-" + topic)
+      .channel("zapruda-chat-" + placeId + "-" + topic, {
+        config: { postgres_changes_options: { wait: true, timeout: 20000 } },
+      })
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "chat_messages",
           filter: "place_id=eq." + placeId,
@@ -348,17 +436,66 @@ function GeographicChat() {
           void fetchMessages();
         },
       )
-      .subscribe();
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chat_message_photos" },
+        () => {
+          void fetchMessages();
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chat_message_reactions" },
+        () => {
+          void fetchMessages();
+        },
+      )
+      .subscribe((status) => {
+        // Reconcile the interval before the database listener became ready,
+        // including reconnects. fetchMessages preserves the unsent draft.
+        if (status === "SUBSCRIBED") void fetchMessages();
+      });
     const onFocus = () => {
       void fetchMessages();
     };
     window.addEventListener("focus", onFocus);
     return () => {
       alive = false;
+      revokePhotos();
       window.removeEventListener("focus", onFocus);
       void supabase.removeChannel(channel);
     };
   }, [uid, selectedPlace, placeId, topic, refreshIndex, threadOpen]);
+
+  useEffect(() => {
+    if (!uid || !threadOpen || !messages.length || typeof IntersectionObserver === "undefined")
+      return;
+    const last = messages.at(-1)!;
+    const node = document.querySelector('[data-chat-message="' + last.id + '"]');
+    if (!node) return;
+    let disposed = false;
+    const mark = async () => {
+      if (document.visibilityState !== "visible") return;
+      const { error } = await api.rpc("mark_chat_read", {
+        p_place: placeId,
+        p_topic: topic,
+        p_message: last.id,
+      });
+      if (!disposed && error)
+        setReadError("Не удалось сохранить прочтение. Обнови ветку для повторной попытки.");
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) void mark();
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(node);
+    return () => {
+      disposed = true;
+      observer.disconnect();
+    };
+  }, [uid, threadOpen, placeId, topic, messages]);
 
   async function createPlace(e: FormEvent<HTMLFormElement>, level: "region" | "city") {
     e.preventDefault();
@@ -429,6 +566,7 @@ function GeographicChat() {
   }
 
   function abandonPendingPhoto() {
+    photoUploadId.current = null;
     // The text message is already persisted. Only cancel its unfinished attachment.
     setPendingPhotoMessageId(null);
     setPhoto(null);
@@ -441,7 +579,7 @@ function GeographicChat() {
   async function send(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const body = draft.trim();
-    if ((!body && !photo) || !uid || busy || !selectedPlace) return;
+    if ((!body && !photo) || !canCompose || busy || !selectedPlace) return;
     const author = replyTo?.profiles?.display_name || replyTo?.profiles?.username || "Рыболов";
     const quoted = replyTo ? replyTo.body.slice(0, 180).replace(/\s+/g, " ").trim() : "";
     const outgoing = replyTo ? "↪ " + author.slice(0, 40) + ": " + quoted + "\n" + body : body;
@@ -457,13 +595,47 @@ function GeographicChat() {
     setBusy(true);
     setChatError("");
     try {
+      const { data: auth } = await supabase.auth.getSession();
+      const session = auth.session;
+      if (!alive.current) return;
+      if (
+        !session ||
+        session.user.id !== uid ||
+        session.user.is_anonymous ||
+        !session.user.email_confirmed_at
+      )
+        throw new Error("Войди в подтверждённый аккаунт, чтобы отправить сообщение.");
+      const token = session.access_token;
       let messageId = pendingPhotoMessageId;
       if (shouldCreateChatMessage(messageId)) {
-        const { data: message, error: sendError } = await api
+        const text = outgoing || "📷 Фото";
+        const signature = JSON.stringify([uid, selectedPlace.id, topic, text]);
+        if (pendingSend.current?.signature !== signature)
+          pendingSend.current = { id: crypto.randomUUID(), signature };
+        const requestId = pendingSend.current.id;
+        let { data: message, error: sendError } = await api
           .from("chat_messages")
-          .insert({ user_id: uid, body: outgoing || "📷 Фото", place_id: selectedPlace.id, topic })
+          .insert({ id: requestId, user_id: uid, body: text, place_id: selectedPlace.id, topic })
           .select("id")
           .single();
+        if (sendError || !message?.id) {
+          // A committed insert may lose its HTTP response. Reuse its ID and
+          // accept only the exact own payload; never insert again with a new ID.
+          const recovered = await api
+            .from("chat_messages")
+            .select("id")
+            .eq("id", requestId)
+            .eq("user_id", uid)
+            .eq("body", text)
+            .eq("place_id", selectedPlace.id)
+            .eq("topic", topic)
+            .single();
+          if (!recovered.error && recovered.data?.id === requestId) {
+            message = recovered.data;
+            sendError = null;
+          }
+        }
+        if (!alive.current) return;
         if (sendError || !message?.id)
           throw new Error(
             "Сообщение не отправлено: " + (sendError?.message || "сервер не вернул ID"),
@@ -472,35 +644,42 @@ function GeographicChat() {
         if (photo) setPendingPhotoMessageId(messageId);
       }
       if (photo && messageId) {
-        const path = chatPhotoPath(uid, messageId, photo.type, crypto.randomUUID());
-        const { error: uploadError } = await supabase.storage
-          .from("chat-photos")
-          .upload(path, photo, { contentType: photo.type, upsert: false });
-        if (uploadError) throw new Error("Фото не загружено: " + uploadError.message);
-        const { error: linkError } = await api
-          .from("chat_message_photos")
-          .insert({ message_id: messageId, user_id: uid, storage_path: path });
-        if (linkError) {
-          await supabase.storage
-            .from("chat-photos")
-            .remove([path])
-            .catch(() => undefined);
-          throw new Error("Фото не прикреплено: " + linkError.message);
-        }
+        const id = photoUploadId.current ?? crypto.randomUUID();
+        photoUploadId.current = id;
+        const prepared = await prepareReportPhoto(photo);
+        if (!alive.current) return;
+        const form = new FormData();
+        form.set("report_id", messageId);
+        form.set("photo_id", id);
+        form.set("sort_order", "0");
+        form.set("file", prepared, "photo.jpg");
+        const { data: uploaded, error: uploadError } = await supabase.functions.invoke(
+          "chat-photo-upload",
+          {
+            body: form,
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        if (!alive.current) return;
+        if (uploadError || uploaded?.photo_id !== id)
+          throw new Error("Не удалось сохранить фотографию. Повтори загрузку.");
       }
+      pendingSend.current = null;
+      photoUploadId.current = null;
       setDraft("");
       setPhoto(null);
       setPendingPhotoMessageId(null);
       setReplyTo(null);
       setRefreshIndex((i) => i + 1);
     } catch (cause) {
+      if (!alive.current) return;
       setChatError(
         (pendingPhotoMessageId ? "Попробуй повторить загрузку. " : "") +
           (cause instanceof Error ? cause.message : "Неожиданная ошибка отправки."),
       );
       setRefreshIndex((i) => i + 1);
     } finally {
-      setBusy(false);
+      if (alive.current) setBusy(false);
     }
   }
 
@@ -572,34 +751,36 @@ function GeographicChat() {
             СВОИ НА СВЯЗИ
           </h1>
           <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="Фильтр чатов">
-            <span
-              className="flex min-h-11 items-center justify-center rounded-2xl bg-[#D7FF35] px-2 text-sm font-black text-[#10140A]"
-              aria-current="true"
-            >
-              Все
-            </span>
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-sm text-[#A99AD9] opacity-60"
-              title="Появится после подключения истории участия"
-            >
-              Мои чаты
-            </button>
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="flex min-h-11 items-center justify-center rounded-2xl border border-[#293147] bg-[#0D121C] px-2 text-center text-xs text-[#A99AD9] opacity-60"
-              title="Появится после подключения учёта прочтений"
-            >
-              Непрочитанные
-            </button>
+            {[
+              ["all", "Все"],
+              ["mine", "Мои чаты"],
+              ["unread", "Непрочитанные"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                disabled={!uid}
+                aria-pressed={roomFilter === value}
+                onClick={() => setRoomFilter(value!)}
+                className={
+                  "min-h-11 rounded-2xl border px-2 text-xs " +
+                  (roomFilter === value
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-white/20 text-white")
+                }
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </header>
       )}
 
+      {readError && (
+        <p role="alert" className="mb-3 text-sm text-red-200">
+          {readError}
+        </p>
+      )}
       {loading && <p className="mb-5 text-sm text-zinc-400">Загружаем разделы чатов…</p>}
       {error && (
         <p
@@ -644,63 +825,73 @@ function GeographicChat() {
                       </button>
                     </div>
                   )}
-                {TOPICS.filter((t) =>
-                  (t.label + " " + t.description)
-                    .toLocaleLowerCase("ru-RU")
-                    .includes(roomSearch.trim().toLocaleLowerCase("ru-RU")),
-                ).map((t) => (
-                  <button
-                    key={t.key}
-                    type="button"
-                    onClick={() =>
-                      uid
-                        ? go(placeId, t.key)
-                        : void navigate({ to: "/auth", search: { mode: "in" } })
-                    }
-                    aria-pressed={topic === t.key}
-                    className={
-                      "z-room-row border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
-                      (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")
-                    }
-                  >
-                    <span
-                      className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#34435E] bg-[#151925] shadow-[0_4px_16px_rgba(0,0,0,.28)]"
-                      aria-hidden="true"
+                {roomFilter !== "all" &&
+                  !TOPICS.some((t) =>
+                    roomFilter === "mine"
+                      ? readSummary[t.key]?.joined
+                      : (readSummary[t.key]?.unread || 0) > 0,
+                  ) && (
+                    <p role="status" className="p-4 text-sm text-muted-foreground">
+                      {roomFilter === "mine"
+                        ? "В этом разделе ещё нет посещённых чатов."
+                        : "В этом разделе нет непрочитанных сообщений."}
+                    </p>
+                  )}
+                {TOPICS.filter(
+                  (t) =>
+                    roomFilter === "all" ||
+                    (roomFilter === "mine"
+                      ? readSummary[t.key]?.joined
+                      : (readSummary[t.key]?.unread || 0) > 0),
+                )
+                  .filter((t) =>
+                    (t.label + " " + t.description)
+                      .toLocaleLowerCase("ru-RU")
+                      .includes(roomSearch.trim().toLocaleLowerCase("ru-RU")),
+                  )
+                  .map((t) => (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() =>
+                        uid
+                          ? go(placeId, t.key)
+                          : void navigate({ to: "/auth", search: { mode: "in" } })
+                      }
+                      aria-pressed={topic === t.key}
+                      className={
+                        "z-room-row border-b border-[#202535] px-1 py-3 text-left transition last:border-b-0 hover:bg-[#151825] sm:min-h-28 " +
+                        (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")
+                      }
                     >
-                      <img
-                        src={ROOM_PHOTOS[t.key]}
-                        loading="lazy"
-                        alt=""
-                        className="absolute inset-0 size-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                          e.currentTarget.nextElementSibling?.classList.remove("hidden");
-                        }}
-                      />
-                      <span className="relative z-10 hidden text-2xl text-[#D7FF35]">{t.icon}</span>
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-base font-black text-white">
-                        {t.label}
+                      <ChatRoomThumbnail src={ROOM_PHOTOS[t.key]} fallback={t.icon} />
+                      <span className="min-w-0">
+                        <span className="block truncate text-base font-black text-white">
+                          {t.label}
+                          {(readSummary[t.key]?.unread || 0) > 0 && (
+                            <span className="ml-2 rounded-full bg-primary px-2 text-xs text-primary-foreground">
+                              {readSummary[t.key]!.unread}
+                            </span>
+                          )}
+                        </span>
+                        <span className="mt-1 block truncate text-xs leading-5 text-[#A99AD9]">
+                          {roomLastMessages[t.key]?.body || t.description}
+                        </span>
                       </span>
-                      <span className="mt-1 block truncate text-xs leading-5 text-[#A99AD9]">
-                        {roomLastMessages[t.key]?.body || t.description}
+                      <span className="min-w-0 max-w-16 text-right text-[10px] tabular-nums text-[#B4A1D7]">
+                        {roomLastMessages[t.key] && (
+                          <time dateTime={roomLastMessages[t.key]!.created_at}>
+                            {new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", {
+                              day: "2-digit",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </time>
+                        )}
                       </span>
-                    </span>
-                    <span className="min-w-0 max-w-16 text-right text-[10px] tabular-nums text-[#B4A1D7]">
-                      {roomLastMessages[t.key] && (
-                        <time dateTime={roomLastMessages[t.key]!.created_at}>
-                          {new Date(roomLastMessages[t.key]!.created_at).toLocaleString("ru-RU", {
-                            day: "2-digit",
-                            month: "short",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </time>
-                      )}
-                    </span>
-                  </button>
-                ))}
+                    </button>
+                  ))}
               </div>
             </section>
           )}
@@ -950,6 +1141,11 @@ function GeographicChat() {
                         }
                       >
                         {t.icon} {t.label}
+                        {(readSummary[t.key]?.unread || 0) > 0 && (
+                          <span className="ml-2 rounded-full bg-primary px-2 text-xs text-primary-foreground">
+                            {readSummary[t.key]!.unread}
+                          </span>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -979,6 +1175,7 @@ function GeographicChat() {
                   {messages.map((message) => (
                     <article
                       key={message.id}
+                      data-chat-message={message.id}
                       className={
                         message.user_id === uid
                           ? "ml-auto max-w-[90%] space-y-1.5 sm:max-w-[78%]"
@@ -1144,7 +1341,7 @@ function GeographicChat() {
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         className="sr-only"
-                        disabled={!uid || busy || !!pendingPhotoMessageId}
+                        disabled={!canCompose || busy || !!pendingPhotoMessageId}
                         onChange={(e) => {
                           const file = e.target.files?.[0] || null;
                           e.target.value = "";
@@ -1185,13 +1382,13 @@ function GeographicChat() {
                       placeholder={"Написать в «" + currentTopic.label + "»…"}
                       value={draft}
                       onChange={(e) => setDraft(e.target.value)}
-                      disabled={!uid || busy || chatLoading || !!pendingPhotoMessageId}
+                      disabled={!canCompose || busy || !!pendingPhotoMessageId}
                       maxLength={2000}
                     />
                     <button
                       type="submit"
                       className="btn-primary inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#D7FF35] px-4 font-black text-[#11170A]"
-                      disabled={(!draft.trim() && !photo) || !uid || busy || chatLoading}
+                      disabled={(!draft.trim() && !photo) || !canCompose || busy}
                     >
                       <Send className="size-4" /> {busy ? "Отправляем…" : "Отправить"}
                     </button>

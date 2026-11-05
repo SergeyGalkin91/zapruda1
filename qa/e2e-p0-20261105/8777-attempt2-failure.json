@@ -1,0 +1,57 @@
+{
+  "run_id": 41941541992,
+  "attempt": 2,
+  "job_id": 127009672225,
+  "artifact_id": 13382818204,
+  "code": "8777e4ffbe43211ffcb04dba968dcfe28a149bcd",
+  "browser": {
+    "sha": "8777e4ffbe43211ffcb04dba968dcfe28a149bcd",
+    "environment": "http://127.0.0.1:3000 + real Supabase STAGING JWT",
+    "passed": false,
+    "cleanup": true,
+    "checks": [
+      "real JWT Atlas catalog and own invoker progress read; no catalog fixtures inserted",
+      "two distinct actual UI password logins",
+      "UI send lost-response recovery: one persisted message; B unread via Realtime; open/read/reload; foreign marker denied; real Realtime preserves draft",
+      "real private report → explicit one-fish transfer → reload → authoritative profile; no automatic SPOT submit; foreign browser sees no handoff",
+      "actual wizard: catch/no-catch, photo, back/next, restored draft, private submit, outsider denial, no premature publish",
+      "STREET tick >1 min, reload, tackle/lure, catch log, opt-in import, same-browser account isolation"
+    ],
+    "limitations": [
+      "No genuine KING evidence/spot/moderator provisioned",
+      "No physical device keyboard or mobile network proof",
+      "No production changes"
+    ],
+    "screenshots": [
+      "390-chat-after-read.png",
+      "390-review-private-photo.png",
+      "390-big-fish-authoritative-profile.png",
+      "390-review-no-catch.png",
+      "failure-authenticated-matrix.png"
+    ],
+    "screenshotMode": "viewport; route matrix waits for auth, data loading and visible images",
+    "requestedBase": "http://127.0.0.1:3000",
+    "ai": {
+      "diagnosticOnly": true,
+      "configuration": "YANDEX_KEY_MISSING",
+      "webSearchEnabled": false
+    },
+    "chatEmbeddedRead": "OK",
+    "chatPostStatus": 201,
+    "chatAfterSendCount": 1,
+    "chatAlerts": [],
+    "fishReportCommitStatus": 200,
+    "noCatchReportCommitStatus": 201,
+    "phase": "authenticated-matrix",
+    "error": "BROWSER_ASSERTION_FAILED",
+    "detail": "locator.click: Error: strict mode violation: getByRole('button', { name: /^Matte Black/ }) resolved to 2 elements:\n    1) <button type=\"button\" aria-pressed=\"true\" class=\"rounded-2xl border p-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35] border-[#D7FF35] bg-[#D7FF35]/10\">…</button> aka getByRole('button', { name: 'Matte Black Матовый чёрный · графит + Electric Lime (по умолчанию)' })\n    2) <button type=\"button\" aria-pressed=\"true\" class=\"z-wallpaper-option\">…</button> aka getByRole('button', { name: 'Matte Black Чистый фон. Ничего лишнего' })\n\nCall log:\n  - waiting for getByRole('button', { name: /^Matte Black/ })\n"
+  },
+  "api": {
+    "sha": "8777e4ffbe43211ffcb04dba968dcfe28a149bcd",
+    "passed": true,
+    "scope": "four real confirmed JWTs; own progress; browser Origin; denied unauthorized review and upload",
+    "noPublicFixtures": true,
+    "positiveKing": "BLOCKED: genuine lawful spot, authorized independent moderator and genuine proof required",
+    "cleanup": "negative upload rejected and own catch IDs unchanged; no accepted SPOT catch created"
+  }
+}

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { Wordmark } from "@/components/Wordmark";
 import { ZaprudaPublicSpotAtlas } from "@/components/ZaprudaPublicSpotAtlas";
 import { SpotCatchFlow } from "@/components/SpotCatchFlow";
 import { SpotLeaderboards } from "@/components/SpotLeaderboards";
@@ -55,8 +56,31 @@ function CompetitionsPage() {
   }, [load]);
 
   return (
-    <Shell>
-      <header className="rounded-3xl border border-[#D7FF35]/25 bg-gradient-to-br from-[#243019] to-[#10150E] p-5 sm:p-8">
+    <Shell screen="spot">
+      <header className="z-screen-heading">
+        <div>
+          <Wordmark variant="spot" />
+          <h1 className="mt-5 text-3xl">Места, которые объединяют.</h1>
+        </div>
+      </header>
+      <p className="z-screen-description">
+        Открывай проверенные споты. Сохраняй свою воду. Участвуй честно.
+      </p>
+      <nav className="z-segments" aria-label="Разделы SPOT">
+        <a href="#approved-spot-map" aria-current="page">
+          Карта
+        </a>
+        <a href="#spot-tournaments">Турниры</a>
+        <a href="#spot-records">KING</a>
+      </nav>
+      <nav aria-label="Связанные сценарии SPOT" className="z-catch-journey">
+        <a href="/big-fish">BIG FISH · подать улов</a>
+        <a href="/big-fish#my-catches">Мои заявки и проверка</a>
+        <a href="/profile#verified-titles">Мои KING-титулы</a>
+        <a href="/on-spot">ON SPOT+ · рыбаки рядом</a>
+      </nav>
+      <ZaprudaPublicSpotAtlas />
+      <header id="spot-tournaments" className="z-premium-card mt-8 p-5 sm:p-7">
         <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">
           <Trophy className="size-5" /> ZAPRUDA / СОРЕВНОВАНИЯ
         </p>
@@ -81,12 +105,15 @@ function CompetitionsPage() {
 
       <div className="mt-6 grid gap-3">
         {!loading && !items.length && (
-          <div className="rounded-2xl border border-white/10 bg-[#151915] p-5 text-sm text-zinc-400">
+          <div className="rounded-2xl border border-white/10 bg-[var(--premium-panel)] p-5 text-sm text-zinc-400">
             Открытых турниров пока нет.
           </div>
         )}
         {items.map((c) => (
-          <article key={c.id} className="rounded-2xl border border-white/10 bg-[#151915] p-4">
+          <article
+            key={c.id}
+            className="rounded-2xl border border-white/10 bg-[var(--premium-panel)] p-4"
+          >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-black text-white">{c.title}</h2>
               <span className="rounded-lg border border-[#D7FF35]/30 px-2 py-1 text-xs font-bold text-[#D7FF35]">
@@ -103,8 +130,9 @@ function CompetitionsPage() {
         ))}
       </div>
 
-      <ZaprudaPublicSpotAtlas />
-      <SpotLeaderboards />
+      <div id="spot-records">
+        <SpotLeaderboards />
+      </div>
       <SpotCatchFlow />
     </Shell>
   );

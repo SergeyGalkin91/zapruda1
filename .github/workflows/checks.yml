@@ -22,6 +22,8 @@ jobs:
         run: node scripts/check-migration-versions.mjs
       - name: TypeScript
         run: bun run typecheck
+      - name: Product screens and transition targets
+        run: node scripts/check-route-graph.mjs
       - name: Lint
         run: bun run lint
       - name: Build

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { Crown, Fish, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { isSpotStaging, spotAction, spotToken } from "@/lib/spot-api";
+import { clearReportHandoff, readReportHandoff } from "@/lib/report-big-fish-handoff";
 
 type Spot = {
   id: string;
@@ -24,35 +26,8 @@ type QueueRow = CatchRow & {
 };
 type Notice = { id: number; message: string; created_at: string };
 
-async function spotToken(actor: string): Promise<string> {
-  const { data, error } = await supabase.auth.getSession();
-  if (error || data.session?.user.id !== actor || !data.session.access_token)
-    throw new Error("Сессия изменилась. Повтори действие из своего аккаунта.");
-  return data.session.access_token;
-}
-async function spotAction<T>(
-  actor: string,
-  action: string,
-  extra: Record<string, unknown> = {},
-): Promise<T> {
-  const token = await spotToken(actor);
-  const { data, error } = await supabase.functions.invoke("zapruda-spot-records", {
-    body: { action, ...extra },
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (error || data?.error) {
-    throw new Error(typeof data?.error === "string" ? data.error : "Операция недоступна.");
-  }
-  return data as T;
-}
-
-const isSpotStaging = () =>
-  import.meta.env["VITE_SUPABASE_URL"] === "https://yudtbifopfnjtjanaqrd.supabase.co" ||
-  (typeof window !== "undefined" &&
-    /^deploy-preview-[0-9]+--zapruda1[.]netlify[.]app$/.test(window.location.hostname));
-
 /** STAGING feature; deliberately unavailable in production until v0.7.5 security gates. */
-export function SpotCatchFlow() {
+export function SpotCatchFlow({ allowReportHandoff = false }: { allowReportHandoff?: boolean }) {
   const [uid, setUid] = useState("");
   const [spots, setSpots] = useState<Spot[]>([]);
   const [spotId, setSpotId] = useState("");
@@ -104,6 +79,18 @@ export function SpotCatchFlow() {
         setSpotId("");
         setMessage("");
         setBusy(false);
+        if (next && allowReportHandoff) {
+          const draft = readReportHandoff(next);
+          const fish = draft && draft.selected !== null ? draft.fish[draft.selected] : undefined;
+          if (fish) {
+            setSpecies(fish.species);
+            setWeight(String(fish.weight_g));
+            setLength(fish.length_mm === null ? "" : String(fish.length_mm));
+            setMessage(
+              "Одна рыба перенесена из отчёта. Укажи время, проверенный спот и отдельное фото. Заявка ещё не отправлена.",
+            );
+          }
+        }
       }
       identity.current = next;
       setUid(next);
@@ -144,7 +131,7 @@ export function SpotCatchFlow() {
       mounted.current = false;
       unsubscribe();
     };
-  }, [allowed]);
+  }, [allowed, allowReportHandoff]);
 
   const eligible = spots.filter((spot) => spot.disciplines.includes(league));
 
@@ -198,7 +185,9 @@ export function SpotCatchFlow() {
       if (error || data?.error) throw new Error("Заявка не принята сервером.");
       setMessage("Улов отправлен на проверку. Корона присваивается только после модерации.");
       setPhoto(null);
+      clearReportHandoff(actor);
       await refreshOwn();
+      window.dispatchEvent(new Event("zapruda:spot-progress-changed"));
     } catch (err) {
       if (current()) setMessage(err instanceof Error ? err.message : "Не удалось отправить улов.");
     } finally {
@@ -240,6 +229,7 @@ export function SpotCatchFlow() {
           if (!current()) return;
           setReviewed(accepted.queue ?? []);
         }
+        window.dispatchEvent(new Event("zapruda:spot-progress-changed"));
       }
       if (action === "subscribe") setMessage("Подписка на спот и выбранную дисциплину оформлена.");
       if (action === "mine" || action === "inbox" || action === "review" || action === "revoke")
@@ -255,12 +245,12 @@ export function SpotCatchFlow() {
   if (!allowed) return null;
 
   return (
-    <section className="mt-8 space-y-5 rounded-3xl border border-white/10 bg-[#0B0D12] p-5 sm:p-7">
+    <section id="big-fish-submission" className="z-premium-card mt-8 space-y-5 p-5 sm:p-7">
       <header>
         <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#D7FF35]">
           <Crown className="size-4" aria-hidden="true" /> ZAPRUDA / ZARUBA / STAGING
         </p>
-        <h2 className="mt-2 text-xl font-black text-white">Проверенный улов — заявка на KING</h2>
+        <h2 className="mt-2 text-xl font-black text-white">Одна рыба — заявка BIG FISH</h2>
         <p className="mt-2 text-sm text-zinc-400">
           Первая волна: STREET и ULTRALIGHT. Фотография остаётся в закрытом хранилище. До проверки
           модератором рекорд не меняется.

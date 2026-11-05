@@ -8,9 +8,12 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { AuthSessionBoundary } from "@/components/AuthSessionBoundary";
 
 import appCss from "../styles.css?url";
+import premiumCss from "@/premium.css?url";
+import { APPEARANCE_BOOTSTRAP_SCRIPT } from "@/lib/appearance";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -105,19 +108,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ZAPRUDA — соцсеть спиннингистов" },
-      { name: "description", content: "Рыболовные отчёты, уловы и сообщество спиннингистов." },
+      { title: "ZAPRUDA COMMUNITY — свои на одной волне" },
+      {
+        name: "description",
+        content: "Рыболовные отчёты, уловы и сообщество для всех направлений рыбалки.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "stylesheet", href: premiumCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Unbounded:wght@600;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/brand/app-icon.svg", type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: "/brand/icon-180.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -128,8 +136,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="ru">
+    <html lang="ru" suppressHydrationWarning>
       <head>
+        <style>{":root{background:#0B0D0E;color-scheme:dark}"}</style>
+        <script dangerouslySetInnerHTML={{ __html: APPEARANCE_BOOTSTRAP_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
@@ -142,11 +152,21 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const resetPrivateCache = useCallback(() => {
+    queryClient.clear();
+    // Leave the synchronous Supabase auth callback before starting loader work.
+    queueMicrotask(() => {
+      void router.invalidate().catch(() => {});
+    });
+  }, [queryClient, router]);
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <AuthSessionBoundary resetCache={resetPrivateCache}>
+        <Outlet />
+      </AuthSessionBoundary>
     </QueryClientProvider>
   );
 }

@@ -13,6 +13,7 @@ import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import {
   APP_BACKGROUNDS,
+  APP_WALLPAPERS,
   CHAT_BACKGROUNDS,
   DEFAULT_APPEARANCE,
   loadAppearance,
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/settings")({
 
 function SettingsPage() {
   const [appearance, setAppearance] = useState<Appearance>(DEFAULT_APPEARANCE);
+  const [appearanceReady, setAppearanceReady] = useState(false);
   const [notice, setNotice] = useState("");
   const [developer, setDeveloper] = useState(false);
   const [yandexKey, setYandexKey] = useState("");
@@ -44,6 +46,7 @@ function SettingsPage() {
     const saved = loadAppearance();
     setAppearance(saved);
     applyAppearance(saved);
+    setAppearanceReady(true);
     try {
       setYandexKey(localStorage.getItem("zapruda.yandex_maps_api_key") || "");
     } catch {
@@ -61,6 +64,7 @@ function SettingsPage() {
   }, []);
 
   function change(next: Appearance) {
+    if (!appearanceReady) return;
     setAppearance(next);
     const persisted = saveAppearance(next);
     setNotice(
@@ -71,8 +75,12 @@ function SettingsPage() {
   }
 
   return (
-    <Shell>
-      <div className="mx-auto max-w-4xl space-y-6">
+    <Shell screen="settings">
+      <div
+        className="mx-auto max-w-4xl space-y-6"
+        data-appearance-ready={appearanceReady ? "true" : "false"}
+        aria-busy={!appearanceReady}
+      >
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-sm text-zinc-400 transition hover:text-[#D7FF35]"
@@ -92,15 +100,17 @@ function SettingsPage() {
           </p>
         </header>
 
+        {!appearanceReady && <p role="status">Загружаем оформление…</p>}
+
         <section
           aria-labelledby="app-background-title"
-          className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7"
+          className="rounded-3xl border border-white/10 bg-[var(--premium-panel)] z-electric-settings-panel p-5 sm:p-7"
         >
           <h2
             id="app-background-title"
             className="flex items-center gap-2 text-lg font-black text-white"
           >
-            <Monitor className="size-5 text-[#D7FF35]" /> Фон приложения
+            <Monitor className="size-5 text-[#D7FF35]" /> Цветовая тема
           </h2>
           <p className="mt-2 text-sm text-zinc-400">
             Matte Black остаётся основным. Electric Blue — яркий синий фон с лаймовыми и
@@ -115,6 +125,7 @@ function SettingsPage() {
                   key={item.value}
                   type="button"
                   aria-pressed={selected}
+                  disabled={!appearanceReady}
                   onClick={() => change({ ...appearance, background: item.value })}
                   className={
                     "rounded-2xl border p-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35] " +
@@ -156,9 +167,44 @@ function SettingsPage() {
           </div>
         </section>
 
+        <section aria-labelledby="wallpaper-title" className="z-premium-card p-5 sm:p-7">
+          <p className="z-eyebrow">ТВОЁ ПРОСТРАНСТВО</p>
+          <h2 id="wallpaper-title" className="mt-2 text-lg font-bold">
+            Фон приложения
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Четыре фактуры для обеих тем. Без анимации и лишней нагрузки. Выбор сохранится на этом
+            устройстве.
+          </p>
+          <div className="z-wallpaper-options">
+            {APP_WALLPAPERS.map((item) => {
+              const selected = (appearance.wallpaper ?? "matte-black") === item.value;
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  aria-pressed={selected}
+                  disabled={!appearanceReady}
+                  className="z-wallpaper-option"
+                  onClick={() => change({ ...appearance, wallpaper: item.value })}
+                >
+                  <span
+                    className={"z-wallpaper-swatch z-wallpaper-swatch-" + item.value}
+                    aria-hidden="true"
+                  >
+                    {selected && <Check className="size-5" />}
+                  </span>
+                  <strong>{item.title}</strong>
+                  <span>{item.description}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
         <section
           aria-labelledby="chat-background-title"
-          className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7"
+          className="rounded-3xl border border-white/10 bg-[var(--premium-panel)] z-electric-settings-panel p-5 sm:p-7"
         >
           <h2
             id="chat-background-title"
@@ -192,6 +238,7 @@ function SettingsPage() {
                   key={item.value}
                   type="button"
                   aria-pressed={selected}
+                  disabled={!appearanceReady}
                   onClick={() => change({ ...appearance, chat: item.value })}
                   className={
                     "rounded-2xl border p-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35] " +
@@ -241,7 +288,7 @@ function SettingsPage() {
         </section>
 
         {developer && (
-          <section className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7">
+          <section className="rounded-3xl border border-white/10 bg-[var(--premium-panel)] z-electric-settings-panel p-5 sm:p-7">
             <h2 className="text-lg font-black text-white">Яндекс Карты · API для тестирования</h2>
             <p className="mt-2 text-xs leading-5 text-zinc-400">
               Сейчас в ZAPRUDA работает виджет Яндекс Карт. Чтобы выбирать личные точки кликом,
@@ -312,6 +359,7 @@ function SettingsPage() {
           </p>
           <button
             type="button"
+            disabled={!appearanceReady}
             onClick={() => change({ ...DEFAULT_APPEARANCE })}
             className="btn-ghost inline-flex min-h-11 items-center gap-2"
           >

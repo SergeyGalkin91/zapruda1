@@ -2,6 +2,7 @@ name: SPOT isolated PostgreSQL transaction races
 on:
   pull_request:
     paths:
+      - ".github/v075-validation-request.txt"
       - "supabase/staging/*spot*"
       - "supabase/tests/unit/spot*"
       - "scripts/check-spot-postgres.mjs"

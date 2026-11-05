@@ -74,7 +74,7 @@ export function DailyFishingBrief() {
   return (
     <section
       aria-labelledby="daily-fishing-brief"
-      className="mb-7 overflow-hidden rounded-3xl border border-[#D7FF35]/25 bg-gradient-to-br from-[#1D2717] via-[#131A12] to-[#0D100C] p-5 shadow-xl shadow-black/10 sm:p-7"
+      className="z-premium-card mt-7 mb-7 overflow-hidden p-5 sm:p-7"
     >
       <div className="flex items-start gap-3">
         <span className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-[#D7FF35]/70 bg-[#D7FF35]/10 text-[#D7FF35]">

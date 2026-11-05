@@ -24,6 +24,7 @@ import {
   MessageSquareText,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { SpotVerifiedProgress } from "@/components/SpotVerifiedProgress";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
@@ -269,7 +270,7 @@ function ProfileSections() {
   );
 }
 
-function Profile() {
+export function Profile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -380,11 +381,19 @@ function Profile() {
     void loadFeaturedGear(auth.user.id);
 
     const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("username,display_name,bio,avatar_url,chat_city")
-        .eq("id", auth.user.id)
-        .maybeSingle(),
+      // Adopt PR #101: private bio is readable only through the own-profile RPC
+      // in STAGING. Keep compatibility with the legacy schema only when that
+      // RPC is absent; never fall back after an authorization/network failure.
+      (async () => {
+        const secured = await supabase.rpc("my_profile_full").maybeSingle();
+        if (!secured.error || !["PGRST202", "42883"].includes(secured.error.code ?? ""))
+          return secured;
+        return supabase
+          .from("profiles")
+          .select("username,display_name,bio,avatar_url,chat_city")
+          .eq("id", auth.user.id)
+          .maybeSingle();
+      })(),
       supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
       supabase.rpc("my_fishing_progress"),
       supabase.rpc("my_fishing_specializations_v2"),
@@ -606,13 +615,12 @@ function Profile() {
   }
 
   return (
-    <Shell>
-      <section className="relative mb-6 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#1E251A] via-[#101310] to-[#070908] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-60 rounded-full bg-[#D7FF35]/10 blur-3xl" />
+    <Shell screen="profile">
+      <section className="z-profile-cover">
         <p className="relative text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">
           ZAPRUDA / Профиль рыболова
         </p>
-        <div className="relative mt-4 flex flex-wrap items-center gap-4">
+        <div className="z-profile-identity relative mt-5 flex flex-wrap items-center gap-4">
           {avatarUrl ? (
             <img
               src={avatarUrl}
@@ -626,7 +634,7 @@ function Profile() {
           )}
           <div className="min-w-0 flex-1">
             <h1 className="max-w-full text-[clamp(1.05rem,4.3vw,3.3rem)] font-black uppercase leading-[1.12] tracking-[-0.035em] text-white [overflow-wrap:normal] break-normal">
-              {displayName || username || "Мой рыболовный профиль"}
+              {displayName || username || "Твой профиль"}
             </h1>
             <p className="mt-1 text-sm text-[#A6B1A0]">
               {username ? "@" + username : "Укажи никнейм"}
@@ -685,17 +693,54 @@ function Profile() {
             )}
           </div>
         </div>
-        <div className="relative mt-5 flex justify-end">
-          <Link
-            to="/settings"
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#D7FF35]/30 bg-black/25 px-4 py-2 text-sm font-bold text-[#D7FF35] transition hover:border-[#D7FF35]/60 hover:bg-[#D7FF35]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35]"
-          >
-            <Settings2 className="size-4" aria-hidden="true" />
-            Настройки → Оформление
+        <div className="z-profile-stats" aria-label="Статистика рыболова">
+          <div>
+            <strong>{progress?.report_count ?? "—"}</strong>
+            <span>Отчёты</span>
+          </div>
+          <div>
+            <strong>{progress?.catches_count ?? "—"}</strong>
+            <span>Уловы</span>
+          </div>
+          <div>
+            <strong>{progress?.photo_count ?? "—"}</strong>
+            <span>Фотографии</span>
+          </div>
+        </div>
+        <div className="z-profile-actions">
+          {userId ? (
+            <a href="#profile-details" className="btn-ghost" onClick={() => setEditing(true)}>
+              Редактировать профиль
+            </a>
+          ) : (
+            <Link to="/auth" search={{ mode: "in" }} className="btn-primary">
+              Войти в профиль
+            </Link>
+          )}
+          <Link to="/settings" aria-label="Настройки оформления" className="btn-ghost">
+            <Settings2 className="size-5" />
           </Link>
         </div>
       </section>
 
+      <SpotVerifiedProgress />
+
+      {userId && (
+        <nav className="z-profile-section-links" aria-label="Разделы профиля">
+          <a href="#my-gear-sets">
+            <Fish />
+            Снасти
+          </a>
+          <a href="#angler-progress">
+            <Sparkles />
+            Достижения
+          </a>
+          <Link to="/settings">
+            <Settings2 />
+            Оформление
+          </Link>
+        </nav>
+      )}
       {loading && (
         <div className="panel p-6 text-zinc-400">Загружаем рыболовный профиль и достижения…</div>
       )}
@@ -719,7 +764,10 @@ function Profile() {
 
       {!loading && userId && (
         <>
-          <section className="mb-8 rounded-3xl border border-white/10 bg-[#151915] p-5 sm:p-7">
+          <section
+            id="profile-details"
+            className="mb-8 rounded-3xl border border-white/10 bg-[var(--premium-panel)] p-5 sm:p-7"
+          >
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#D7FF35]">
@@ -1074,7 +1122,7 @@ function Profile() {
 
           <section
             aria-labelledby="angler-map-title"
-            className="mb-7 overflow-hidden rounded-3xl border border-[#D7FF35]/20 bg-[#151915] p-5 sm:p-7"
+            className="mb-7 overflow-hidden rounded-3xl border border-[#D7FF35]/20 bg-[var(--premium-panel)] p-5 sm:p-7"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -1175,7 +1223,7 @@ function Profile() {
 
           <section
             aria-label="Обратная связь и управление аккаунтом"
-            className="mt-10 mb-6 space-y-5 rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7"
+            className="mt-10 mb-6 space-y-5 rounded-3xl border border-white/10 bg-[var(--premium-panel)] p-5 sm:p-7"
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
