@@ -27,7 +27,7 @@ fs.mkdirSync(out, { recursive: true });
         await page.locator('[data-appearance-ready="true"]').waitFor({state:"visible"});
         await page.getByRole("button",{name:theme==="classic"?/^Matte Black/:/^Electric Blue/}).first().click();
         await page.waitForFunction(t => document.documentElement.dataset.zaprudaBackground===t, theme);
-        for (const route of ["/welcome","/","/communities","/competitions","/profile"]) {
+        for (const route of ["/welcome","/","/communities","/competitions","/big-fish","/on-spot","/profile"]) {
           await page.goto(base+route, {waitUntil:"domcontentloaded"});
           await page.locator("main h1").first().waitFor();
           await page.waitForFunction(t => document.documentElement.dataset.zaprudaBackground===t,theme);

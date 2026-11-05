@@ -9,6 +9,7 @@
 import assert from "node:assert/strict";
 import { randomBytes, randomUUID } from "node:crypto";
 import { deflateSync } from "node:zlib";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 
 const EXPECTED_URL = "https://yudtbifopfnjtjanaqrd.supabase.co";
@@ -31,6 +32,8 @@ function newClient() {
 async function invoke(client, action, body = {}) {
   const { data, error } = await client.functions.invoke(API, {
     body: { action, ...body },
+    // A real browser sends Origin. Old preflight missed the gateway's URL-shadowing defect.
+    headers: { Origin: "https://deploy-preview-93--zapruda1.netlify.app" },
   });
   return { data, error };
 }
@@ -163,7 +166,62 @@ async function main() {
     assert.ifError(inbox.error);
     assert.ok(Array.isArray(inbox.data?.notifications), "Inbox must return an array");
     console.log("PASS: own catches + own inbox for " + role);
+    const progress = await invoke(client, "progress");
+    assert.ifError(progress.error);
+    for (const field of ["catches", "titles", "history"])
+      assert.ok(Array.isArray(progress.data?.progress?.[field]), "Missing owner progress " + field);
+    assert.deepEqual(
+      progress.data.progress.catches.map((c) => c.catch_id).sort(),
+      own.data.catches.map((c) => c.catch_id).sort(),
+      "Owner progress must match existing own-catches boundary",
+    );
+    assert.doesNotMatch(
+      JSON.stringify(progress.data.progress),
+      /storage_key|owner_id|scope_id|latitude|longitude|https:/,
+      "Progress disclosed private fields",
+    );
+    const foreignArgument = await client.rpc("zc_spot_my_progress", { p_user_id: randomUUID() });
+    assert.ok(foreignArgument.error, "Progress must not accept another user's identity");
+    console.log(
+      "PASS: actor-only authoritative progress; foreign identity argument denied for " + role,
+    );
   }
+
+  for (const origin of [
+    "https://deploy-preview-93--zapruda1.netlify.app",
+    "https://6aebae0a59ab32e0cc56cdfb--zapruda1.netlify.app",
+  ]) {
+    const response = await fetch(URL + "/functions/v1/" + API, {
+      method: "OPTIONS",
+      headers: {
+        Origin: origin,
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "authorization,apikey,content-type,x-client-info",
+      },
+    });
+    assert.equal(response.status, 204);
+    assert.equal(response.headers.get("access-control-allow-origin"), origin);
+  }
+  const session = await users.get("RACER_A").auth.getSession();
+  const blocked = await fetch(URL + "/functions/v1/" + API, {
+    method: "POST",
+    headers: {
+      apikey: KEY,
+      Authorization: "Bearer " + session.data.session.access_token,
+      Origin: "https://unrelated.netlify.app",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ action: "progress" }),
+  });
+  assert.equal(blocked.status, 403);
+  assert.equal(blocked.headers.get("access-control-allow-origin"), null);
+  const guest = await fetch(URL + "/functions/v1/" + API, {
+    method: "POST",
+    headers: { apikey: KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "progress" }),
+  });
+  assert.ok([401, 403].includes(guest.status), "Guest read must be denied");
+  console.log("PASS: real deployed mutable/immutable preflight; hostile Origin + guest denied");
 
   if (process.env.ZAPRUDA_SPOT_E2E_UPLOAD_PROBE === "true") {
     await negativeUploadProbe(users.get("RACER_A"));
@@ -198,6 +256,25 @@ async function main() {
   for (const client of users.values()) {
     await client.auth.signOut();
   }
+  mkdirSync("qa/architecture-live", { recursive: true });
+  writeFileSync(
+    "qa/architecture-live/spot-result.json",
+    JSON.stringify(
+      {
+        sha: process.env.GITHUB_SHA,
+        passed: true,
+        scope:
+          "four real confirmed JWTs; own progress; browser Origin; denied unauthorized review and upload",
+        noPublicFixtures: true,
+        positiveKing:
+          "BLOCKED: genuine lawful spot, authorized independent moderator and genuine proof required",
+        cleanup:
+          "negative upload rejected and own catch IDs unchanged; no accepted SPOT catch created",
+      },
+      null,
+      2,
+    ),
+  );
   console.log("SPOT v0.7.5 AUTHORIZATION PREFLIGHT PASS (read-only; not a live catch / KING E2E).");
 }
 

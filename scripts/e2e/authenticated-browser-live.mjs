@@ -244,8 +244,10 @@ try {
     );
     await a.getByRole("button", { name: "Далее", exact: true }).click();
     if (withFish) {
-      await a.getByPlaceholder("Вид (щука, окунь…)").fill("QA техническая запись");
+      // Private transport fixture only. Never submitted to SPOT or claimed as genuine evidence.
+      await a.getByPlaceholder("Вид (щука, окунь…)").fill("Щука");
       await a.getByPlaceholder("Вес, кг").fill("0.1");
+      await a.getByPlaceholder("Длина, см").fill("20");
       await a
         .getByRole("button", { name: "Выбрать фотографии с рыбалки", exact: true })
         .isVisible()
@@ -327,6 +329,42 @@ try {
     }
     const outsider = await must(B.c.from("fishing_reports").select("id").eq("id", rows[0].id));
     if (outsider.length) throw Error("REPORT_PRIVATE_LEAK");
+    if (withFish) {
+      phase = "report-big-fish-profile-navigation";
+      const nextStep = a.getByRole("region", { name: "Следующий шаг после отчёта" });
+      await expect(nextStep).toBeVisible();
+      await nextStep.getByLabel("Рыба для заявки").selectOption("0");
+      await nextStep
+        .getByRole("button", { name: "Передать одну рыбу в BIG FISH", exact: true })
+        .click();
+      await a.waitForURL(base + "/big-fish");
+      await expect(a.getByLabel("Вес одной рыбы, г")).toHaveValue(100);
+      await expect(a.getByLabel("Длина, мм")).toHaveValue(200);
+      await a.reload();
+      await expect(a.getByLabel("Вес одной рыбы, г")).toHaveValue(100);
+      const actual = await A.c.functions.invoke("zapruda-spot-records", {
+        body: { action: "progress" },
+      });
+      if (actual.error || !actual.data?.progress) throw Error("OWN_PROGRESS_API_FAILED");
+      // No fabricated approved SPOT, proof, catch or crown is created by this navigation.
+      if (actual.data.progress.catches.some((c) => c.catch_id === rows[0].id))
+        throw Error("REPORT_AUTO_SUBMITTED_TO_SPOT");
+      await a.getByRole("link", { name: "Титулы в моём профиле", exact: true }).click();
+      await expect(a.locator("#verified-titles")).toBeVisible();
+      await expect(a.locator("#verified-titles [role=alert]")).toHaveCount(0);
+      await expect(a.locator("#verified-titles [role=status]")).toHaveCount(0, { timeout: 20000 });
+      if (
+        (await a.getByRole("list", { name: "Действующие KING-титулы" }).count()) !==
+        (actual.data.progress.titles.length ? 1 : 0)
+      )
+        throw Error("PROFILE_CROWN_NOT_AUTHORITATIVE");
+      await shot(a, "390-big-fish-authoritative-profile");
+      await b.goto(base + "/big-fish");
+      await expect(b.getByLabel("Вес одной рыбы, г")).toHaveValue(null);
+      result.checks.push(
+        "real private report → explicit one-fish transfer → reload → authoritative profile; no automatic SPOT submit; foreign browser sees no handoff",
+      );
+    }
   }
   result.checks.push(
     "actual wizard: catch/no-catch, photo, back/next, restored draft, private submit, outsider denial, no premature publish",
@@ -390,6 +428,8 @@ try {
           ["/reports/new", "report"],
           ["/street", "street"],
           ["/competitions", "spot"],
+          ["/big-fish", "big-fish"],
+          ["/on-spot", "on-spot-entry-only"],
           ["/profile", "profile"],
           ["/settings", "settings"],
           ["/admin", "admin-denied"],

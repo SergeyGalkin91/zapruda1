@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { PremiumFeedHeader } from "@/components/PremiumFeedHeader";
+import { ReportBigFishNextStep } from "@/components/ReportBigFishNextStep";
 import { BrandFish } from "@/components/Wordmark";
 import { ReactionBar } from "@/components/ReactionBar";
 import { DailyFishingBrief } from "@/components/DailyFishingBrief";
@@ -403,6 +404,7 @@ function Feed() {
   return (
     <Shell screen="feed">
       <PremiumFeedHeader />
+      <ReportBigFishNextStep />
       {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
       {error && (
         <div

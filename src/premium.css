@@ -1,4 +1,26 @@
 /* Owner-approved premium B identity, 05.11.2026. Presentation only. */
+.z-catch-journey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0;
+}
+.z-catch-journey a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--premium-edge);
+  border-radius: 12px;
+  background: var(--premium-panel);
+  color: #f2f2f2;
+  font-size: 13px;
+}
+.z-catch-journey a:hover,
+.z-catch-journey a:focus-visible {
+  border-color: #d7ff35;
+  color: #d7ff35;
+}
 :root {
   --premium-panel: #14171a;
   --premium-raised: #1a1d21;

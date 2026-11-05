@@ -73,6 +73,12 @@ function CompetitionsPage() {
         <a href="#spot-tournaments">Турниры</a>
         <a href="#spot-records">KING</a>
       </nav>
+      <nav aria-label="Связанные сценарии SPOT" className="z-catch-journey">
+        <a href="/big-fish">BIG FISH · подать улов</a>
+        <a href="/big-fish#my-catches">Мои заявки и проверка</a>
+        <a href="/profile#verified-titles">Мои KING-титулы</a>
+        <a href="/on-spot">ON SPOT+ · рыбаки рядом</a>
+      </nav>
       <ZaprudaPublicSpotAtlas />
       <header id="spot-tournaments" className="z-premium-card mt-8 p-5 sm:p-7">
         <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">

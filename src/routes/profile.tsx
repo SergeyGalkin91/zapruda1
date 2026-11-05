@@ -24,6 +24,7 @@ import {
   MessageSquareText,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { SpotVerifiedProgress } from "@/components/SpotVerifiedProgress";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
 import { AnglerTackleCabinet } from "@/components/AnglerTackleCabinet";
@@ -721,6 +722,8 @@ export function Profile() {
           </Link>
         </div>
       </section>
+
+      <SpotVerifiedProgress />
 
       {userId && (
         <nav className="z-profile-section-links" aria-label="Разделы профиля">
