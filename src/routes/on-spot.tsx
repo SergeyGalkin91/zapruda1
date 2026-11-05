@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
-import { BrandFish } from "@/components/Wordmark";
+import { OnSpotZones } from "@/components/OnSpotZones";
 
 export const Route = createFileRoute("/on-spot")({
   head: () => ({ meta: [{ title: "ON SPOT+ — рыбаки рядом | ZAPRUDA" }] }),
   component: OnSpotEntry,
 });
-/** Honest entry until moderated local zones and opt-in memberships exist. Not OSP acceptance. */
+/** First catalog/membership slice; not full OSP-01…09 acceptance. */
 function OnSpotEntry() {
   return (
     <Shell screen="spot">
@@ -20,13 +20,8 @@ function OnSpotEntry() {
         Локальные знакомства на рыбалке — по взаимному желанию. Просмотр карты не делает тебя
         видимым другим людям.
       </p>
-      <section className="z-premium-card p-6">
-        <BrandFish className="z-empty-fish" />
-        <h2 className="mt-4 text-xl font-bold">Локальные зоны ещё не открыты</h2>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Присоединяйся к общему чату или найди компанию на выезд. Твоё местоположение здесь не
-          запрашивается и не публикуется.
-        </p>
+      <OnSpotZones />
+      <section className="mt-5">
         <div className="mt-5 flex flex-wrap gap-3">
           <a className="btn-primary" href="/chat?country=&place=&topic=general">
             В общий чат
