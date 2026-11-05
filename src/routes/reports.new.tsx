@@ -6,6 +6,12 @@ import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
 import { prepareReportPhoto } from "@/lib/report-photo";
+import {
+  clearReportHandoff,
+  createReportHandoff,
+  saveReportHandoff,
+} from "@/lib/report-big-fish-handoff";
+import { isSpotStaging } from "@/lib/spot-api";
 
 export const Route = createFileRoute("/reports/new")({
   head: () => ({
@@ -679,6 +685,11 @@ export function NewReport() {
         } catch {
           // A blocked browser store must not prevent completing the report.
         }
+      }
+      if (isSpotStaging()) {
+        const handoff = createReportHandoff(reportId, catches);
+        if (handoff) saveReportHandoff(user.id, handoff);
+        else clearReportHandoff(user.id);
       }
       await navigate({ to: "/" });
     } catch (caught) {

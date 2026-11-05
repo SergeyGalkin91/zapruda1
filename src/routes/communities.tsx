@@ -59,6 +59,7 @@ function Communities() {
         </a>
         <a href="#community-clubs">Клубы</a>
         <a href="#community-meetups">СХОДКИ</a>
+        <a href="/on-spot">ON SPOT+</a>
       </nav>
       <section
         id="community-geography"

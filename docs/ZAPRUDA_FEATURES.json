@@ -1,5 +1,5 @@
 {
-  "source_sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+  "source_sha": "8777e4ffbe43211ffcb04dba968dcfe28a149bcd",
   "features": [
     {
       "id": "AUTH-01",
@@ -402,12 +402,12 @@
       "feature": "пошаговый статус заявки",
       "module": "ZARUBA",
       "priority": "P?",
-      "source": "src/components/SpotCatchFlow.tsx",
-      "backend": "серверные mine/inbox/reviewed/review/revoke",
-      "status": "PLANNED",
-      "acceptance": "rejected ≠ revoked; owner visibility",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
-      "blocker": "PLANNED — выделенный status UX не принят"
+      "source": "/big-fish#my-catches; /profile#verified-titles; src/components/SpotVerifiedProgress.tsx; src/routes/big-fish.tsx",
+      "backend": "STAGING zc_spot_my_progress() + existing private review/revoke/title engine",
+      "status": "IMPLEMENTED",
+      "acceptance": "Actual own pending/verified/rejected/revoked and current titles/history; unconfirmed/stranger denied; independent genuine KING review and revocation reflected in profile",
+      "evidence": "Candidate 8777e4ffbe43211ffcb04dba968dcfe28a149bcd:483 isolated tests PASS; owner progress SQL/rollback9 and component5 PASS; STAGING RPC body MD5 e52618251fbcee5cd12f3f044e50c047 matches source; Edge v12/JWT=true source matches. Protected41941541992 waits for owner review; this is not genuine positive KING E2E.",
+      "blocker": "No authorized independent STAGING moderator, approved lawful SPOT or genuine catch evidence. Current candidate real JWT/API/browser and hosted private Preview acceptance are not yet proven."
     },
     {
       "id": "KING-01",
@@ -490,7 +490,7 @@
       "backend": "v075_spot_revocation_recalculation.sql",
       "status": "IMPLEMENTED",
       "acceptance": "check-spot-postgres.mjs; concurrent/live revoke",
-      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой.",
+      "evidence": "Тест указан как доступная проверка; PASS не установлен этой строкой. Architecture 8777e4ffbe43211ffcb04dba968dcfe28a149bcd adds isolated SQL review/revoke→owner current-title/history assertions and rollback9 PASS; profile reads current holders, never client XP. Real positive KING still BLOCKED.",
       "blocker": "IMPLEMENTED серверная основа; полный history UI PLANNED"
     },
     {

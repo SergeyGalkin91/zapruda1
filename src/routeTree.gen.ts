@@ -15,6 +15,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as AtlasRouteImport } from './routes/atlas'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BigFishRouteImport } from './routes/big-fish'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CommunitiesRouteImport } from './routes/communities'
 import { Route as CompetitionsRouteImport } from './routes/competitions'
@@ -24,6 +25,7 @@ import { Route as GuidesRouteImport } from './routes/guides'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as ModerationRouteImport } from './routes/moderation'
+import { Route as OnSpotRouteImport } from './routes/on-spot'
 import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -64,6 +66,11 @@ const AtlasRoute = AtlasRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BigFishRoute = BigFishRouteImport.update({
+  id: '/big-fish',
+  path: '/big-fish',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
@@ -109,6 +116,11 @@ const MessagesRoute = MessagesRouteImport.update({
 const ModerationRoute = ModerationRouteImport.update({
   id: '/moderation',
   path: '/moderation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnSpotRoute = OnSpotRouteImport.update({
+  id: '/on-spot',
+  path: '/on-spot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartnersRoute = PartnersRouteImport.update({
@@ -174,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/assistant': typeof AssistantRoute
   '/atlas': typeof AtlasRoute
   '/auth': typeof AuthRoute
+  '/big-fish': typeof BigFishRoute
   '/chat': typeof ChatRoute
   '/communities': typeof CommunitiesRoute
   '/competitions': typeof CompetitionsRoute
@@ -183,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/market': typeof MarketRoute
   '/messages': typeof MessagesRoute
   '/moderation': typeof ModerationRoute
+  '/on-spot': typeof OnSpotRoute
   '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
@@ -201,6 +215,7 @@ export interface FileRoutesByTo {
   '/assistant': typeof AssistantRoute
   '/atlas': typeof AtlasRoute
   '/auth': typeof AuthRoute
+  '/big-fish': typeof BigFishRoute
   '/chat': typeof ChatRoute
   '/communities': typeof CommunitiesRoute
   '/competitions': typeof CompetitionsRoute
@@ -210,6 +225,7 @@ export interface FileRoutesByTo {
   '/market': typeof MarketRoute
   '/messages': typeof MessagesRoute
   '/moderation': typeof ModerationRoute
+  '/on-spot': typeof OnSpotRoute
   '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
@@ -230,6 +246,7 @@ export interface FileRoutesById {
   '/assistant': typeof AssistantRoute
   '/atlas': typeof AtlasRoute
   '/auth': typeof AuthRoute
+  '/big-fish': typeof BigFishRoute
   '/chat': typeof ChatRoute
   '/communities': typeof CommunitiesRoute
   '/competitions': typeof CompetitionsRoute
@@ -239,6 +256,7 @@ export interface FileRoutesById {
   '/market': typeof MarketRoute
   '/messages': typeof MessagesRoute
   '/moderation': typeof ModerationRoute
+  '/on-spot': typeof OnSpotRoute
   '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
@@ -260,6 +278,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/atlas'
     | '/auth'
+    | '/big-fish'
     | '/chat'
     | '/communities'
     | '/competitions'
@@ -269,6 +288,7 @@ export interface FileRouteTypes {
     | '/market'
     | '/messages'
     | '/moderation'
+    | '/on-spot'
     | '/partners'
     | '/profile'
     | '/settings'
@@ -287,6 +307,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/atlas'
     | '/auth'
+    | '/big-fish'
     | '/chat'
     | '/communities'
     | '/competitions'
@@ -296,6 +317,7 @@ export interface FileRouteTypes {
     | '/market'
     | '/messages'
     | '/moderation'
+    | '/on-spot'
     | '/partners'
     | '/profile'
     | '/settings'
@@ -315,6 +337,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/atlas'
     | '/auth'
+    | '/big-fish'
     | '/chat'
     | '/communities'
     | '/competitions'
@@ -324,6 +347,7 @@ export interface FileRouteTypes {
     | '/market'
     | '/messages'
     | '/moderation'
+    | '/on-spot'
     | '/partners'
     | '/profile'
     | '/settings'
@@ -344,6 +368,7 @@ export interface RootRouteChildren {
   AssistantRoute: typeof AssistantRoute
   AtlasRoute: typeof AtlasRoute
   AuthRoute: typeof AuthRoute
+  BigFishRoute: typeof BigFishRoute
   ChatRoute: typeof ChatRoute
   CommunitiesRoute: typeof CommunitiesRoute
   CompetitionsRoute: typeof CompetitionsRoute
@@ -353,6 +378,7 @@ export interface RootRouteChildren {
   MarketRoute: typeof MarketRoute
   MessagesRoute: typeof MessagesRoute
   ModerationRoute: typeof ModerationRoute
+  OnSpotRoute: typeof OnSpotRoute
   PartnersRoute: typeof PartnersRoute
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
@@ -405,6 +431,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/big-fish': {
+      id: '/big-fish'
+      path: '/big-fish'
+      fullPath: '/big-fish'
+      preLoaderRoute: typeof BigFishRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -468,6 +501,13 @@ declare module '@tanstack/react-router' {
       path: '/moderation'
       fullPath: '/moderation'
       preLoaderRoute: typeof ModerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/on-spot': {
+      id: '/on-spot'
+      path: '/on-spot'
+      fullPath: '/on-spot'
+      preLoaderRoute: typeof OnSpotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partners': {
@@ -571,6 +611,7 @@ const rootRouteChildren: RootRouteChildren = {
   AssistantRoute: AssistantRoute,
   AtlasRoute: AtlasRoute,
   AuthRoute: AuthRoute,
+  BigFishRoute: BigFishRoute,
   ChatRoute: ChatRoute,
   CommunitiesRoute: CommunitiesRoute,
   CompetitionsRoute: CompetitionsRoute,
@@ -580,6 +621,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketRoute: MarketRoute,
   MessagesRoute: MessagesRoute,
   ModerationRoute: ModerationRoute,
+  OnSpotRoute: OnSpotRoute,
   PartnersRoute: PartnersRoute,
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,

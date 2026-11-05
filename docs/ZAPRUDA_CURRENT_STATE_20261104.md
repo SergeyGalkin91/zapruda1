@@ -1,3 +1,5 @@
+> **Актуальная архитектурная консолидация, 05.11.2026:** кандидат #93 `8777e4ffbe43211ffcb04dba968dcfe28a149bcd`, цель D22 **0.7.6 KING FINISH ON SPOT+**, техническая версия0.7.5. [Карта экранов](ZAPRUDA_SCREEN_MAP_20261105.md), [модули и зависимости](ZAPRUDA_MODULE_DEPENDENCIES_20261105.md), [результаты и границы](ZAPRUDA_ARCHITECTURE_CONSOLIDATION_20261105.md). Защищённый41941541992 ожидает owner review; исторические JWT PASS ниже не относятся к этому кандидату. **main/Production/release NO-GO.**
+
 # Текущее состояние — ZAPRUDA v0.7.5 SPOT, 04.11.2026
 
 **Защищённый JWT E2E PASS; публичный запуск пока NO-GO.** Канонический [PR #93](https://github.com/SergeyGalkin91/zapruda1/pull/93) → `release/v0.7.5-spot`, head `feat/ai-yandex-deepseek-staging`, work mirror `work/v075-consolidation-20261104`. Определять точный актуальный HEAD из GitHub, а не из старого текста PR. Дизайн v0.6.0-admin-rc.1, обе темы и пять вкладок сохранены.

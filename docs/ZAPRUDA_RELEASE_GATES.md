@@ -1,3 +1,5 @@
+> **Актуальная архитектурная консолидация, 05.11.2026:** кандидат #93 `8777e4ffbe43211ffcb04dba968dcfe28a149bcd`, цель D22 **0.7.6 KING FINISH ON SPOT+**, техническая версия0.7.5. [Карта экранов](ZAPRUDA_SCREEN_MAP_20261105.md), [модули и зависимости](ZAPRUDA_MODULE_DEPENDENCIES_20261105.md), [результаты и границы](ZAPRUDA_ARCHITECTURE_CONSOLIDATION_20261105.md). Защищённый41941541992 ожидает owner review; исторические JWT PASS ниже не относятся к этому кандидату. **main/Production/release NO-GO.**
+
 # ZAPRUDA — условия следующего обновления
 05.11.2026 (Москва). Контракт DRAFT. Техническая база v0.7.5 SPOT; целевой релиз 0.7.6 KING FINISH. Последний визуальный кандидат: [Premium STAGING acceptance](ZAPRUDA_PREMIUM_UI_ACCEPTANCE_20261105.md). Историческая техническая приёмка: [FINAL_ACCEPTANCE](ZAPRUDA_FINAL_ACCEPTANCE_20261104.md).
 **NO-GO. Последние D18/D19 прямо запрещают main и Production в текущей операции. База0.7.5, target0.7.6 KING FINISH; bump/tag/release не разрешены.**

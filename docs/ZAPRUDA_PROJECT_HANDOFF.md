@@ -1,3 +1,5 @@
+> **Актуальная архитектурная консолидация, 05.11.2026:** кандидат #93 `8777e4ffbe43211ffcb04dba968dcfe28a149bcd`, цель D22 **0.7.6 KING FINISH ON SPOT+**, техническая версия0.7.5. [Карта экранов](ZAPRUDA_SCREEN_MAP_20261105.md), [модули и зависимости](ZAPRUDA_MODULE_DEPENDENCIES_20261105.md), [результаты и границы](ZAPRUDA_ARCHITECTURE_CONSOLIDATION_20261105.md). Защищённый41941541992 ожидает owner review; исторические JWT PASS ниже не относятся к этому кандидату. **main/Production/release NO-GO.**
+
 > **SUPERSEDED как единственная актуальная точка входа (04.11.2026).** Сначала читать [CURRENT_PRODUCT_SPEC](ZAPRUDA_CURRENT_PRODUCT_SPEC.md), [DECISION_LOG](ZAPRUDA_DECISION_LOG.md) и [UI_ACCEPTANCE](ZAPRUDA_UI_ACCEPTANCE.md). Исторические требования ниже не отменяют поздние прямые решения владельца. Референсы и доказательства сохранены; никакого автоматического отката интерфейса.
 
 # Актуальный handoff после настоящего JWT PASS — 04.11.2026

@@ -22,3 +22,9 @@ jobs:
         run: node scripts/check-product-contract.mjs
       - name: Contract regression tests
         run: node --test scripts/check-product-contract.test.mjs
+      - name: Keep registered routes and static transitions in sync
+        run: |
+          node scripts/check-route-graph.mjs
+          PRODUCT_CODE_SHA=$(node -e 'console.log(JSON.parse(require("node:fs").readFileSync("docs/ZAPRUDA_FEATURES.json","utf8")).source_sha)')
+          node scripts/inventory-screen-transitions.mjs "$PRODUCT_CODE_SHA"
+          git diff --exit-code -- docs/ZAPRUDA_SCREEN_TRANSITIONS_20261105.md qa/architecture-20261105/screen-transitions.json
