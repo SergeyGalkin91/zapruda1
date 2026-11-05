@@ -72,3 +72,34 @@ it("keeps server-rendered appearance controls inactive until hydration, then pre
     wallpaper: "neon-threads",
   });
 });
+
+it("distinguishes the Matte Black theme from the identically named wallpaper without changing the other preference", async () => {
+  localStorage.setItem(
+    "zapruda.appearance.v1",
+    JSON.stringify({ background: "electric-blue", chat: "slate", wallpaper: "carbon" }),
+  );
+  const Settings = Route.options.component as ComponentType;
+  container = document.createElement("div");
+  container.innerHTML = renderToString(<Settings />);
+  document.body.append(container);
+  await act(async () => {
+    root = hydrateRoot(container!, <Settings />);
+  });
+  expect(within(container).getAllByRole("button", { name: /^Matte Black/ })).toHaveLength(2);
+  const theme = within(container).getByRole("region", { name: "Цветовая тема" });
+  const wallpaper = within(container).getByRole("region", { name: "Фон приложения" });
+  const matteTheme = within(theme).getByRole("button", { name: /^Matte Black/ });
+  const matteWallpaper = within(wallpaper).getByRole("button", { name: /^Matte Black/ });
+  await act(async () => {
+    fireEvent.click(matteTheme);
+  });
+  expect(matteTheme).toHaveAttribute("aria-pressed", "true");
+  expect(matteWallpaper).toHaveAttribute("aria-pressed", "false");
+  expect(document.documentElement.dataset["zaprudaBackground"]).toBe("classic");
+  expect(document.documentElement.dataset["zaprudaWallpaper"]).toBe("carbon");
+  await act(async () => {
+    fireEvent.click(matteWallpaper);
+  });
+  expect(document.documentElement.dataset["zaprudaWallpaper"]).toBe("matte-black");
+  expect(document.documentElement.dataset["zaprudaBackground"]).toBe("classic");
+});
