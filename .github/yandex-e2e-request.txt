@@ -1,0 +1,1 @@
+2026-11-04: audited STAGING-only Yandex canary; real OWNER DeepSeek and SEATED backup; same atomic daily quota; no active-route cutover.

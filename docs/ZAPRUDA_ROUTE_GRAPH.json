@@ -1,0 +1,178 @@
+{
+  "contract": "0.7.6 KING FINISH ON SPOT+; no version bump",
+  "baseline": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+  "routes": [
+    {
+      "path": "/admin/feedback",
+      "source": "src/routes/admin.feedback.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/admin/",
+      "source": "src/routes/admin.index.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/admin/operations",
+      "source": "src/routes/admin.operations.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/admin",
+      "source": "src/routes/admin.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/analytics",
+      "source": "src/routes/analytics.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/assistant",
+      "source": "src/routes/assistant.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/atlas",
+      "source": "src/routes/atlas.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/auth",
+      "source": "src/routes/auth.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/big-fish",
+      "source": "src/routes/big-fish.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/chat",
+      "source": "src/routes/chat.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/communities",
+      "source": "src/routes/communities.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/competitions",
+      "source": "src/routes/competitions.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/feedback",
+      "source": "src/routes/feedback.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/finance",
+      "source": "src/routes/finance.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/guides",
+      "source": "src/routes/guides.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/",
+      "source": "src/routes/index.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/market",
+      "source": "src/routes/market.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/messages",
+      "source": "src/routes/messages.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/moderation",
+      "source": "src/routes/moderation.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/on-spot",
+      "source": "src/routes/on-spot.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/partners",
+      "source": "src/routes/partners.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/profile",
+      "source": "src/routes/profile.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/reports/new",
+      "source": "src/routes/reports.new.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/settings",
+      "source": "src/routes/settings.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/spearfishing",
+      "source": "src/routes/spearfishing.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/specializations",
+      "source": "src/routes/specializations.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/street",
+      "source": "src/routes/street.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    },
+    {
+      "path": "/welcome",
+      "source": "src/routes/welcome.tsx",
+      "acceptance": "registered; functional acceptance tracked separately"
+    }
+  ],
+  "journey": [
+    {
+      "from": "/reports/new",
+      "to": "/",
+      "trigger": "successful actual report/catch/photo persistence; draft retained on failure"
+    },
+    {
+      "from": "/",
+      "to": "/big-fish",
+      "trigger": "explicit selection of one owned report fish; optional short-lived handoff, no automatic submission"
+    },
+    {
+      "from": "/big-fish",
+      "to": "/big-fish#my-catches",
+      "trigger": "existing private submit + independent server review; genuine positive acceptance BLOCKED"
+    },
+    {
+      "from": "/big-fish#my-catches",
+      "to": "/profile#verified-titles",
+      "trigger": "owner-only current title_holders/history; pending fish or XP is not KING"
+    },
+    {
+      "from": "/communities",
+      "to": "/on-spot",
+      "trigger": "honest local-zone entry; OSP-01…09 not accepted"
+    },
+    {
+      "from": "/on-spot",
+      "to": "/chat",
+      "trigger": "explicit general-chat fallback, not moderated zone membership"
+    }
+  ]
+}

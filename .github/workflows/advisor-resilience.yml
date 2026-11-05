@@ -1,0 +1,54 @@
+name: Advisor availability without an AI provider
+on:
+  pull_request:
+    paths:
+      - ".github/v075-validation-request.txt"
+      - "src/routes/assistant.tsx"
+      - "src/components/FishingAdvisor*"
+      - "src/lib/fishing-plan*"
+      - "src/lib/optional-ai*"
+      - "scripts/check-advisor-resilience.mjs"
+      - ".github/workflows/advisor-resilience.yml"
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox]
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      PLAN_BROWSER: ${{ matrix.engine }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - run: bun add --dev playwright@1.58.2
+      - run: bunx playwright install --with-deps ${{ matrix.engine }}
+      - name: Test guest planning and a rejected optional AI request
+        shell: bash
+        run: |
+          set -euo pipefail
+          bun run dev --host 127.0.0.1 --port 4191 > /tmp/advisor-vite.log 2>&1 &
+          ADVISOR_SERVER_PID=$!
+          trap 'kill "$ADVISOR_SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4191/assistant >/dev/null; then READY=1; break; fi
+            sleep 1
+          done
+          test "$READY" = 1
+          node scripts/check-advisor-resilience.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: advisor-resilience-${{ matrix.engine }}
+          path: qa/advisor/
+          if-no-files-found: ignore
+          retention-days: 7

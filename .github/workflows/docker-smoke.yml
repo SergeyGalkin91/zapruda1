@@ -1,0 +1,53 @@
+name: ZAPRUDA Docker image smoke test
+
+on:
+  pull_request:
+    paths:
+      - ".github/v075-validation-request.txt"
+      - "Dockerfile"
+      - "compose.staging.yaml"
+      - ".dockerignore"
+      - "bun.lock"
+      - "package.json"
+      - "src/**"
+      - ".github/workflows/docker-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docker-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate STAGING compose without credentials or deployment
+        env:
+          STAGING_SUPABASE_URL: https://example.supabase.co
+          STAGING_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-not-a-real-credential
+        run: |
+          docker compose -f compose.staging.yaml config --quiet
+      - name: Build isolated test image (no registry push)
+        run: |
+          docker build \
+            --build-arg GIT_SHA="$GITHUB_SHA" \
+            --build-arg VITE_SUPABASE_URL="https://example.supabase.co" \
+            --build-arg VITE_SUPABASE_PUBLISHABLE_KEY="ci-placeholder-not-a-real-credential" \
+            -t zapruda-community:ci .
+      - name: Start non-production container and check HTTP
+        run: |
+          docker run -d --rm --name zapruda-ci -p 127.0.0.1:3000:3000 zapruda-community:ci
+          for i in $(seq 1 30); do
+            if curl --fail --silent --output /dev/null http://127.0.0.1:3000/; then
+              echo "Container HTTP smoke passed"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs zapruda-ci
+          exit 1
+      - name: Cleanup
+        if: always()
+        run: docker rm -f zapruda-ci || true

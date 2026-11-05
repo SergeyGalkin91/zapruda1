@@ -1,1 +1,11 @@
 project_id = "sonvniuwtvzzyuglscah"
+
+# Deploy to an explicitly selected STAGING project only until privacy acceptance.
+[functions.report-photo-access]
+verify_jwt = false
+
+[functions.zapruda-daily-advice-yandex]
+verify_jwt = true
+
+[functions.daily-fishing-brief]
+verify_jwt = true

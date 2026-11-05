@@ -1,0 +1,40 @@
+Run actual protected JWT acceptance after verified branch allow rule, STAGING migration 20261104021404 and feedback v2 exact source readback. Genuine core/photo/global+geographic Realtime, private profile/gear/GPS, weather, six concurrent private feedback requests (five permitted), own history/stranger privacy, SPOT rejected upload. No original AI cutover, quota reset, moderator, public catch or production change.
+Repeat the now-unblocked protected gate on the final documented candidate to verify cold-start readiness and current-source feedback v2; genuine events and exact owned cleanup remain required.
+
+Validate current chat read-summary/RLS/invalid-marker boundaries alongside existing core JWT acceptance. Positive read-receipt UI acceptance remains separate. No role assignment or fake KING.
+
+Final request: same protected script on current candidate; chat read-state isolation/summary/invalid marker plus core JWT, no public test catches, no moderator assignment. Wizard navigation fix and draft reset must retain separate browser acceptance.
+
+Final authenticated browser acceptance: two actual users, read receipts/retry, report wizard/photo/private fixtures, STREET identity isolation and 3 engines/4 widths/2 themes. No public catch or KING fixtures.
+
+Reconcile unread list at PostgreSQL-ready/rejoin; fix compile regression in new lost-response test.
+
+Include newly aligned empty Atlas catalog/own progress reads and read-only Yandex diagnose; real UI lost report-RPC response must retry without duplicate catch.
+
+2026-11-04 authenticated harness: use official playwright/test expect export; rerun actual JWT Browser acceptance.
+
+2026-11-04 collect independent Browser evidence even if feedback quota precondition blocks; all failures still fail the job.
+
+2026-11-04 fix actual Browser failure: narrow authenticated INSERT(id) under existing chat owner/geography RLS; test collision/spoof/guest denial.
+
+2026-11-04 instrument real Browser send boundary: embedded read code, POST status, persisted row count, masked failure screenshot. No test gate relaxed.
+
+2026-11-04 fix report select accessible names; execute actual Netlify preview after matching exact SHA status, actual two-account JWT, private fixtures only.
+
+2026-11-04 preserve Netlify access protection; report blocked hosted origin and finish independent same-SHA local/STAGING QA without sending credentials off-origin. Improve actual Atlas caption contrast.
+
+2026-11-04 hosted access blocker confirmed; stop retrying protected Preview, run independent local frontend with real STAGING and explicit hosted BLOCKED status. Validate app submit control before credential entry.
+
+2026-11-04 no-catch report uses persisted UUID and exact own-payload recovery after lost response; real Browser drops only committed POST responses and checks both no-catch/catch paths. Existing STAGING grants suffice; no new DDL.
+
+2026-11-04 final visual proof: wait for authenticated route loaders and visible images, scroll to top, capture actual viewport instead of distorted full-page fixed backgrounds. Superseded 397 run canceled during engine installation after core cleanup, before UI writes.
+
+2026-11-04 fix real Browser race: canCompose requires loaded geography/selected room, not just uid; delayed global-room regression. Keep lost-response report and settled viewport acceptance.
+
+2026-11-04 P0 continuation: old exact six QA rows confirmed absent; club message membership scoped and meetup leave/cancel guards applied only to STAGING, live rollback checks PASS. Repeat all four real JWT accounts, feedback precondition/concurrency, core privacy/Realtime and actual browser journeys on this exact candidate. No precondition bypass or quota reset; protected environment approval remains mandatory. Hosted Netlify can now be opened through invited Google login in Cloud Browser; independent CI still has no Netlify access session. No cookies/JWT copied.
+
+2026-11-04 hosted QA found a real legacy olive STREET hero gradient in Electric Blue. Apply semantic theme boundary and assert computed gradient in Chromium/Firefox/WebKit at 320/390/768/1440; repeat protected gate on this corrected exact candidate. Core Auth/RLS/preconditions unchanged.
+
+2026-11-04 hosted opt-in import verified tackle/lure/date/private draft, found literal backslash-n in imported story. Use real line breaks, keep own-account storage and private default; component regression forbids escaped line-break text. Final protected request for this corrected candidate; no gates weakened.
+
+2026-11-04 final protected JWT acceptance after owner-authorized deletion of exactly five QA-FEEDBACK-94788aaa-9749-4d4f-be5f-4d551a67c545 rows using approved SQL blob 76cf8bb2d8a236cf2c407b3ff5a2fe68c32e06a1. All original guards passed; independent readback 2026-11-04T20:34:16Z: marker=0, exact IDs=0, test owner history=0. Validate current c216963 runtime (daily-brief caller Auth propagation, header bounds, chat thumbnail deadline) with all four real JWT accounts and unchanged feedback/core/SPOT/browser gates. Only this request marker changes for the exact new run SHA. Do not bypass staging-e2e approval, reset quota, weaken checks, fabricate KING, change main/Production/version, or treat local frontend as hosted Netlify acceptance.

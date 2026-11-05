@@ -10,30 +10,42 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as AtlasRouteImport } from './routes/atlas'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BigFishRouteImport } from './routes/big-fish'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CommunitiesRouteImport } from './routes/communities'
+import { Route as CompetitionsRouteImport } from './routes/competitions'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as FinanceRouteImport } from './routes/finance'
 import { Route as GuidesRouteImport } from './routes/guides'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as ModerationRouteImport } from './routes/moderation'
+import { Route as OnSpotRouteImport } from './routes/on-spot'
 import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SpearfishingRouteImport } from './routes/spearfishing'
 import { Route as SpecializationsRouteImport } from './routes/specializations'
 import { Route as StreetRouteImport } from './routes/street'
+import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminFeedbackRouteImport } from './routes/admin.feedback'
+import { Route as AdminOperationsRouteImport } from './routes/admin.operations'
 import { Route as ReportsNewRouteImport } from './routes/reports.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
@@ -56,6 +68,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BigFishRoute = BigFishRouteImport.update({
+  id: '/big-fish',
+  path: '/big-fish',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -64,6 +81,11 @@ const ChatRoute = ChatRouteImport.update({
 const CommunitiesRoute = CommunitiesRouteImport.update({
   id: '/communities',
   path: '/communities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompetitionsRoute = CompetitionsRouteImport.update({
+  id: '/competitions',
+  path: '/competitions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedbackRoute = FeedbackRouteImport.update({
@@ -96,6 +118,11 @@ const ModerationRoute = ModerationRouteImport.update({
   path: '/moderation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnSpotRoute = OnSpotRouteImport.update({
+  id: '/on-spot',
+  path: '/on-spot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PartnersRoute = PartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
@@ -126,10 +153,25 @@ const StreetRoute = StreetRouteImport.update({
   path: '/street',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminFeedbackRoute = AdminFeedbackRouteImport.update({
-  id: '/admin/feedback',
-  path: '/admin/feedback',
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFeedbackRoute = AdminFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOperationsRoute = AdminOperationsRouteImport.update({
+  id: '/operations',
+  path: '/operations',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ReportsNewRoute = ReportsNewRouteImport.update({
   id: '/reports/new',
@@ -139,26 +181,33 @@ const ReportsNewRoute = ReportsNewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/analytics': typeof AnalyticsRoute
   '/assistant': typeof AssistantRoute
   '/atlas': typeof AtlasRoute
   '/auth': typeof AuthRoute
+  '/big-fish': typeof BigFishRoute
   '/chat': typeof ChatRoute
   '/communities': typeof CommunitiesRoute
+  '/competitions': typeof CompetitionsRoute
   '/feedback': typeof FeedbackRoute
   '/finance': typeof FinanceRoute
   '/guides': typeof GuidesRoute
   '/market': typeof MarketRoute
   '/messages': typeof MessagesRoute
   '/moderation': typeof ModerationRoute
+  '/on-spot': typeof OnSpotRoute
   '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/spearfishing': typeof SpearfishingRoute
   '/specializations': typeof SpecializationsRoute
   '/street': typeof StreetRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/feedback': typeof AdminFeedbackRoute
+  '/admin/operations': typeof AdminOperationsRoute
   '/reports/new': typeof ReportsNewRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -166,71 +215,91 @@ export interface FileRoutesByTo {
   '/assistant': typeof AssistantRoute
   '/atlas': typeof AtlasRoute
   '/auth': typeof AuthRoute
+  '/big-fish': typeof BigFishRoute
   '/chat': typeof ChatRoute
   '/communities': typeof CommunitiesRoute
+  '/competitions': typeof CompetitionsRoute
   '/feedback': typeof FeedbackRoute
   '/finance': typeof FinanceRoute
   '/guides': typeof GuidesRoute
   '/market': typeof MarketRoute
   '/messages': typeof MessagesRoute
   '/moderation': typeof ModerationRoute
+  '/on-spot': typeof OnSpotRoute
   '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/spearfishing': typeof SpearfishingRoute
   '/specializations': typeof SpecializationsRoute
   '/street': typeof StreetRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/feedback': typeof AdminFeedbackRoute
+  '/admin/operations': typeof AdminOperationsRoute
   '/reports/new': typeof ReportsNewRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/analytics': typeof AnalyticsRoute
   '/assistant': typeof AssistantRoute
   '/atlas': typeof AtlasRoute
   '/auth': typeof AuthRoute
+  '/big-fish': typeof BigFishRoute
   '/chat': typeof ChatRoute
   '/communities': typeof CommunitiesRoute
+  '/competitions': typeof CompetitionsRoute
   '/feedback': typeof FeedbackRoute
   '/finance': typeof FinanceRoute
   '/guides': typeof GuidesRoute
   '/market': typeof MarketRoute
   '/messages': typeof MessagesRoute
   '/moderation': typeof ModerationRoute
+  '/on-spot': typeof OnSpotRoute
   '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/spearfishing': typeof SpearfishingRoute
   '/specializations': typeof SpecializationsRoute
   '/street': typeof StreetRoute
+  '/welcome': typeof WelcomeRoute
   '/admin/feedback': typeof AdminFeedbackRoute
+  '/admin/operations': typeof AdminOperationsRoute
   '/reports/new': typeof ReportsNewRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/analytics'
     | '/assistant'
     | '/atlas'
     | '/auth'
+    | '/big-fish'
     | '/chat'
     | '/communities'
+    | '/competitions'
     | '/feedback'
     | '/finance'
     | '/guides'
     | '/market'
     | '/messages'
     | '/moderation'
+    | '/on-spot'
     | '/partners'
     | '/profile'
     | '/settings'
     | '/spearfishing'
     | '/specializations'
     | '/street'
+    | '/welcome'
     | '/admin/feedback'
+    | '/admin/operations'
     | '/reports/new'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -238,68 +307,85 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/atlas'
     | '/auth'
+    | '/big-fish'
     | '/chat'
     | '/communities'
+    | '/competitions'
     | '/feedback'
     | '/finance'
     | '/guides'
     | '/market'
     | '/messages'
     | '/moderation'
+    | '/on-spot'
     | '/partners'
     | '/profile'
     | '/settings'
     | '/spearfishing'
     | '/specializations'
     | '/street'
+    | '/welcome'
     | '/admin/feedback'
+    | '/admin/operations'
     | '/reports/new'
+    | '/admin'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/analytics'
     | '/assistant'
     | '/atlas'
     | '/auth'
+    | '/big-fish'
     | '/chat'
     | '/communities'
+    | '/competitions'
     | '/feedback'
     | '/finance'
     | '/guides'
     | '/market'
     | '/messages'
     | '/moderation'
+    | '/on-spot'
     | '/partners'
     | '/profile'
     | '/settings'
     | '/spearfishing'
     | '/specializations'
     | '/street'
+    | '/welcome'
     | '/admin/feedback'
+    | '/admin/operations'
     | '/reports/new'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AnalyticsRoute: typeof AnalyticsRoute
   AssistantRoute: typeof AssistantRoute
   AtlasRoute: typeof AtlasRoute
   AuthRoute: typeof AuthRoute
+  BigFishRoute: typeof BigFishRoute
   ChatRoute: typeof ChatRoute
   CommunitiesRoute: typeof CommunitiesRoute
+  CompetitionsRoute: typeof CompetitionsRoute
   FeedbackRoute: typeof FeedbackRoute
   FinanceRoute: typeof FinanceRoute
   GuidesRoute: typeof GuidesRoute
   MarketRoute: typeof MarketRoute
   MessagesRoute: typeof MessagesRoute
   ModerationRoute: typeof ModerationRoute
+  OnSpotRoute: typeof OnSpotRoute
   PartnersRoute: typeof PartnersRoute
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
   SpearfishingRoute: typeof SpearfishingRoute
   SpecializationsRoute: typeof SpecializationsRoute
   StreetRoute: typeof StreetRoute
-  AdminFeedbackRoute: typeof AdminFeedbackRoute
+  WelcomeRoute: typeof WelcomeRoute
   ReportsNewRoute: typeof ReportsNewRoute
 }
 
@@ -310,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analytics': {
@@ -340,6 +433,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/big-fish': {
+      id: '/big-fish'
+      path: '/big-fish'
+      fullPath: '/big-fish'
+      preLoaderRoute: typeof BigFishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat': {
       id: '/chat'
       path: '/chat'
@@ -352,6 +452,13 @@ declare module '@tanstack/react-router' {
       path: '/communities'
       fullPath: '/communities'
       preLoaderRoute: typeof CommunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/competitions': {
+      id: '/competitions'
+      path: '/competitions'
+      fullPath: '/competitions'
+      preLoaderRoute: typeof CompetitionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feedback': {
@@ -396,6 +503,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModerationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/on-spot': {
+      id: '/on-spot'
+      path: '/on-spot'
+      fullPath: '/on-spot'
+      preLoaderRoute: typeof OnSpotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/partners': {
       id: '/partners'
       path: '/partners'
@@ -438,12 +552,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StreetRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/feedback': {
       id: '/admin/feedback'
-      path: '/admin/feedback'
+      path: '/feedback'
       fullPath: '/admin/feedback'
       preLoaderRoute: typeof AdminFeedbackRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/operations': {
+      id: '/admin/operations'
+      path: '/operations'
+      fullPath: '/admin/operations'
+      preLoaderRoute: typeof AdminOperationsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/reports/new': {
       id: '/reports/new'
@@ -455,27 +590,45 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminFeedbackRoute: typeof AdminFeedbackRoute
+  AdminOperationsRoute: typeof AdminOperationsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminFeedbackRoute: AdminFeedbackRoute,
+  AdminOperationsRoute: AdminOperationsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AnalyticsRoute: AnalyticsRoute,
   AssistantRoute: AssistantRoute,
   AtlasRoute: AtlasRoute,
   AuthRoute: AuthRoute,
+  BigFishRoute: BigFishRoute,
   ChatRoute: ChatRoute,
   CommunitiesRoute: CommunitiesRoute,
+  CompetitionsRoute: CompetitionsRoute,
   FeedbackRoute: FeedbackRoute,
   FinanceRoute: FinanceRoute,
   GuidesRoute: GuidesRoute,
   MarketRoute: MarketRoute,
   MessagesRoute: MessagesRoute,
   ModerationRoute: ModerationRoute,
+  OnSpotRoute: OnSpotRoute,
   PartnersRoute: PartnersRoute,
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
   SpearfishingRoute: SpearfishingRoute,
   SpecializationsRoute: SpecializationsRoute,
   StreetRoute: StreetRoute,
-  AdminFeedbackRoute: AdminFeedbackRoute,
+  WelcomeRoute: WelcomeRoute,
   ReportsNewRoute: ReportsNewRoute,
 }
 export const routeTree = rootRouteImport
