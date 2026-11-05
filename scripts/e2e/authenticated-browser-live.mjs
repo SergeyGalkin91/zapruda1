@@ -6,7 +6,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { jpeg } from "./pilot-photo-fixture.mjs";
 import shellBounds from "../browser-shell-bounds.cjs";
+import appearanceControls from "../browser-appearance-controls.cjs";
 const { assertShellBounds } = shellBounds;
+const { appThemeButton } = appearanceControls;
 const url = process.env.ZAPRUDA_E2E_STAGING_URL,
   key = process.env.ZAPRUDA_E2E_PUBLISHABLE_KEY;
 if (url !== "https://yudtbifopfnjtjanaqrd.supabase.co" || !key)
@@ -424,12 +426,18 @@ try {
     diagnosticPage = p;
     await loginUI(p, A);
     for (const width of [320, 390, 768, 1440])
-      for (const theme of ["matte", "electric-blue"]) {
+      for (const theme of ["classic", "electric-blue"]) {
+        result.matrixContext = { engine: name, width, theme, route: "/settings" };
         await p.setViewportSize({ width, height: 900 });
         await p.goto(base + "/settings");
-        await p
-          .getByRole("button", { name: theme === "matte" ? /^Matte Black/ : /^Electric Blue/ })
-          .click();
+        await p.locator('[data-appearance-ready="true"]').waitFor({ state: "visible" });
+        const wallpaperBefore = await p.locator("html").getAttribute("data-zapruda-wallpaper");
+        const themeButton = appThemeButton(p, theme);
+        await expect(themeButton).toHaveCount(1);
+        await themeButton.click();
+        await expect(themeButton).toHaveAttribute("aria-pressed", "true");
+        await expect(p.locator("html")).toHaveAttribute("data-zapruda-background", theme);
+        await expect(p.locator("html")).toHaveAttribute("data-zapruda-wallpaper", wallpaperBefore);
         for (const [path, label] of [
           ["/", "feed"],
           ["/communities", "communities"],
@@ -444,6 +452,7 @@ try {
           ["/settings", "settings"],
           ["/admin", "admin-denied"],
         ]) {
+          result.matrixContext = { engine: name, width, theme, route: path };
           await p.goto(base + path);
           await p.locator("main").waitFor();
           await expect(p.getByRole("link", { name: "Профиль", exact: true })).toBeVisible({

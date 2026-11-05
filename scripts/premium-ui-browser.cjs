@@ -5,6 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const engines = require("playwright");
 const { assertShellBounds } = require("./browser-shell-bounds.cjs");
+const { appThemeButton } = require("./browser-appearance-controls.cjs");
 const engine = process.env.VISUAL_BROWSER || "chromium";
 const base = process.env.VISUAL_BASE_URL || "http://127.0.0.1:3000";
 const out = path.resolve(process.env.VISUAL_OUTPUT_DIR || "appearance-evidence", "premium");
@@ -25,8 +26,13 @@ fs.mkdirSync(out, { recursive: true });
       for (const theme of ["classic","electric-blue"]) {
         await page.goto(base+"/settings", {waitUntil:"domcontentloaded"});
         await page.locator('[data-appearance-ready="true"]').waitFor({state:"visible"});
-        await page.getByRole("button",{name:theme==="classic"?/^Matte Black/:/^Electric Blue/}).first().click();
+        assert.equal(await page.getByRole("button",{name:/^Matte Black/}).count(),2,"Theme/wallpaper name collision fixture missing");
+        const paperBefore=await page.locator("html").getAttribute("data-zapruda-wallpaper");
+        const themeControl=appThemeButton(page,theme);
+        assert.equal(await themeControl.count(),1,"App theme must be unambiguous within its region");
+        await themeControl.click();
         await page.waitForFunction(t => document.documentElement.dataset.zaprudaBackground===t, theme);
+        assert.equal(await page.locator("html").getAttribute("data-zapruda-wallpaper"),paperBefore,"Theme changed independent wallpaper");
         for (const route of ["/welcome","/","/communities","/competitions","/big-fish","/on-spot","/profile"]) {
           await page.goto(base+route, {waitUntil:"domcontentloaded"});
           await page.locator("main h1").first().waitFor();

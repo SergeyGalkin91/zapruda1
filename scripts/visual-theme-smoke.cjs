@@ -5,6 +5,7 @@
  * Requires a locally started Nitro app and Playwright browsers.
  */
 const assert = require("node:assert/strict");
+const { appThemeButton } = require("./browser-appearance-controls.cjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const { chromium, webkit, firefox } = require("playwright");
@@ -161,8 +162,8 @@ async function openRoute(page, route) {
         assert.equal(before.theme, "classic", "Matte Black must remain default");
         assert.equal(before.primary, COLORS.lime);
         assert.equal(before.undergroundViolet, "#b4a1d7", "Default visual tokens must not change");
-        const black = page.getByRole("button", { name: /Matte Black/ }).first();
-        const blue = page.getByRole("button", { name: /Electric Blue/ }).first();
+        const black = appThemeButton(page, "classic");
+        const blue = appThemeButton(page, "electric-blue");
         assert(await black.isVisible(), "Matte Black selector missing");
         assert(await blue.isVisible(), "Electric Blue selector missing");
         assert.equal(await black.getAttribute("aria-pressed"), "true", "Matte default not selected");
@@ -212,7 +213,7 @@ async function openRoute(page, route) {
           .filter({ hasText: "Electric Blue" }).waitFor({ state: "visible" });
         const persisted = await variables(page);
         assert.equal(persisted.background, COLORS.blue, "Blue preference lost after reload");
-        assert.equal(await page.getByRole("button", {name:/Electric Blue/}).first().getAttribute("aria-pressed"), "true");
+        assert.equal(await appThemeButton(page, "electric-blue").getAttribute("aria-pressed"), "true");
 
         const routes = ["/", "/communities", "/partners", "/chat", "/profile", "/assistant", "/reports/new", "/street", "/competitions", "/messages"];
         const checks = [];
@@ -265,11 +266,11 @@ async function openRoute(page, route) {
         }
 
         await openRoute(page, "/settings");
-        await page.getByRole("button", {name:/Matte Black/}).first().click();
+        await appThemeButton(page, "classic").click();
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "classic");
         const restored = await variables(page);
         assert.equal(restored.background, COLORS.matte);
-        assert.equal(await page.getByRole("button", {name:/Matte Black/}).first().getAttribute("aria-pressed"), "true");
+        assert.equal(await appThemeButton(page, "classic").getAttribute("aria-pressed"), "true");
         await page.reload({ waitUntil: "domcontentloaded" });
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "classic");
         assert.equal((await variables(page)).background, COLORS.matte, "Matte preference lost after reload");

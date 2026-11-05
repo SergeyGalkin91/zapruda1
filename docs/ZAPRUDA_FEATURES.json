@@ -1,5 +1,5 @@
 {
-  "source_sha": "8777e4ffbe43211ffcb04dba968dcfe28a149bcd",
+  "source_sha": "37eb39aa92e55607e58234f264da0470c973fe10",
   "features": [
     {
       "id": "AUTH-01",
@@ -22,8 +22,8 @@
       "backend": "session + email confirmation",
       "status": "IMPLEMENTED",
       "acceptance": "AuthSessionBoundary.test.tsx; два пользователя в одном браузере",
-      "evidence": "f3bbe1b authenticated Browser 41850073063 PASS: two distinct UI logins and same-browser account isolation; hosted one-account login independently observed. Protected41908405475 / real-pilot126849136280 SUCCESS on4eba367; four distinct confirmed JWTs, actual API and authenticated localhost/STAGING browser, core/browser cleanup=true. Later Premium UI57c23c2 requires separate hosted acceptance.",
-      "blocker": "Full hosted/new Premium UI/physical-device acceptance remains OPEN. Protected API and localhost/STAGING browser on4eba367 are PASS; do not relabel as57c23c2 acceptance."
+      "evidence": "f3bbe1b authenticated Browser 41850073063 PASS: two distinct UI logins and same-browser account isolation; hosted one-account login independently observed. Protected41908405475 / real-pilot126849136280 SUCCESS on4eba367; four distinct confirmed JWTs, actual API and authenticated localhost/STAGING browser, core/browser cleanup=true. Later Premium UI57c23c2 requires separate hosted acceptance. Latest37eb protected41957327094 SUCCESS: two distinct actual UI logins, same-browser isolation, confirmed JWT boundaries; localhost frontend with real STAGING,292 matrix/scenario PNG and cleanup=true.",
+      "blocker": "Full hosted37eb/new-account confirmation/recovery/physical-device acceptance remains OPEN; current localhost/STAGING signed-in acceptance passed. No unconfirmed real account was created."
     },
     {
       "id": "AUTH-03",
@@ -442,8 +442,8 @@
       "backend": "waterbody/species verification",
       "status": "PLANNED",
       "acceptance": "карп/амур, территория и допуск",
-      "evidence": "All seven nominations remain in pure policy/schema; current public submission/review/leaderboard only supports STREET/UL. CARP/WINTER/BOAT complete public server/UI flows are not implemented or accepted.",
-      "blocker": "Mandatory for the requested seven-title 0.7.6 scope unless owner explicitly changes scope: public flow implementation plus lawful category/territory/season validation and genuine independent E2E."
+      "evidence": "Candidate37eb39aa92e55607e58234f264da0470c973fe10: protected41957327094 SUCCESS; four real JWTs and actual UI private report -> one-fish handoff/reload -> authoritative empty-title profile, foreign denial, cleanup=true. No accepted genuine SPOT application or awarded title is claimed.484 offline tests/42 files and13 ordinary workflows PASS. Historical SQL title/revocation/rollback is distinct evidence.",
+      "blocker": "P0 genuine accepted application, independent review, awarded/revoked title/profile remain BLOCKED:0 approved+reviewed lawful STAGING SPOT,0 authorized independent moderators and no genuine evidence. Netlify hosted exact-SHA acceptance awaits Google device approval."
     },
     {
       "id": "KING-04",
