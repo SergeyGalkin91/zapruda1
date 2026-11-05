@@ -21,6 +21,7 @@ const members = [users.owner, users.captain, users.fourth, randomUUID(), randomU
 const identities = [...members, users.outsider];
 const sessions = new Map(identities.map((id) => [id, randomUUID()]));
 let db: PGlite;
+let windowsApplyResult: unknown;
 async function as(id: string, role = "authenticated") {
   await actAsFixture(db, id, role);
   await db.query("select set_config('test.session_id',$1,true)", [sessions.get(id) ?? ""]);
@@ -139,6 +140,7 @@ beforeAll(async () => {
   const manualApply = execFileSync(process.execPath, ["scripts/on-spot-staging-apply.mjs"], {
     encoding: "utf8",
   });
+  const windowsApply = manualApply.replace(/\n/g, "\r\n");
   await db.exec(`
     create schema supabase_migrations;
     create table supabase_migrations.schema_migrations (
@@ -148,9 +150,18 @@ beforeAll(async () => {
     );
   `);
 
-  const expectApplyFailure = async (message: string) => {
-    await expect(db.exec(manualApply)).rejects.toThrow(message);
+  const expectApplyFailure = async (message: string, query = manualApply) => {
+    await expect(db.exec(query)).rejects.toThrow(message);
     await db.exec("rollback");
+  };
+  const expectStage2Absent = async () => {
+    const state = await db.query(`
+      select to_regclass('zc_osp_internal.presences') as presence,
+        to_regprocedure('public.zc_osp_social(text,uuid,jsonb)') as rpc,
+        exists(select 1 from supabase_migrations.schema_migrations
+          where version='20261105044404') as recorded
+    `);
+    expect(state.rows).toEqual([{ presence: null, rpc: null, recorded: false }]);
   };
   await expectApplyFailure("Expected STAGING membership fingerprint is missing");
   await db.query(
@@ -161,31 +172,29 @@ beforeAll(async () => {
     ],
   );
 
+  const tampered = windowsApply.replace(
+    /(\$zapruda_reviewed_base64\$\r\n)([A-Za-z0-9+/])/,
+    (_match, prefix: string, first: string) => prefix + (first === "A" ? "B" : "A"),
+  );
+  expect(tampered).not.toBe(windowsApply);
+  await expectApplyFailure("Reviewed migration SHA-256 does not match this script", tampered);
+  await expectStage2Absent();
+
   // Force a failure after the DDL, at the migration ledger write.
   await db.exec(`
     alter table supabase_migrations.schema_migrations
       add constraint test_reject_stage2_history check (version <> '20261105044404');
   `);
   await expectApplyFailure("test_reject_stage2_history");
-  const failed = await db.query(`
-    select to_regclass('zc_osp_internal.presences') as presence,
-      to_regprocedure('public.zc_osp_social(text,uuid,jsonb)') as rpc
-  `);
-  expect(failed.rows).toEqual([{ presence: null, rpc: null }]);
+  await expectStage2Absent();
+  await expectApplyFailure("test_reject_stage2_history", windowsApply);
+  await expectStage2Absent();
   await db.exec(`
     alter table supabase_migrations.schema_migrations drop constraint test_reject_stage2_history;
   `);
 
-  const applied = await db.exec(manualApply);
-  expect(applied.at(-1)?.rows).toEqual([
-    {
-      status: "STAGING_APPLIED",
-      version: "20261105044404",
-      name: "v076_on_spot_social_privacy",
-      sha256: "194e9b0606071a674cd15b44631c062d21aab657af0cb639e1f3459b2c57e16e",
-    },
-  ]);
-  await expectApplyFailure("Social privacy history or schema already exists");
+  windowsApplyResult = (await db.exec(windowsApply)).at(-1)?.rows;
+  await expectApplyFailure("Social privacy history or schema already exists", windowsApply);
   await applySqlFile(db, "staging/DRAFT_v076_on_spot_community_zone_approval.sql");
 }, 30000);
 beforeEach(async () => {
@@ -238,6 +247,16 @@ afterAll(async () => {
 });
 
 describe("ON SPOT+ social privacy and consent (isolated PostgreSQL)", () => {
+  it("executes the full Windows CRLF SQL and verifies its migration SHA-256 in PostgreSQL", () => {
+    expect(windowsApplyResult).toEqual([
+      {
+        status: "STAGING_APPLIED",
+        version: "20261105044404",
+        name: "v076_on_spot_social_privacy",
+        sha256: "194e9b0606071a674cd15b44631c062d21aab657af0cb639e1f3459b2c57e16e",
+      },
+    ]);
+  });
   it("records the reviewed stage 2 source exactly once through the manual STAGING transaction", async () => {
     const history = await db.query(
       "select statements from supabase_migrations.schema_migrations where version='20261105044404'",

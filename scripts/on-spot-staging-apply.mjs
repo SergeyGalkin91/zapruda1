@@ -17,12 +17,11 @@ if (digest(source) !== migrationHash || digest(rollback) !== rollbackHash) {
   throw new Error("Migration or shutdown script differs from the reviewed bytes");
 }
 
-const sql = source.toString("utf8");
-if (sql.includes("$zapruda_reviewed_source$") || sql.includes("$zapruda_apply_social$")) {
-  throw new Error("Unexpected migration delimiter");
-}
+// PostgreSQL's Base64 decoder ignores LF, CRLF and whitespace between payload characters.
+const payload = source.toString("base64").replace(/.{76}(?=.)/g, "$&\n");
 
 process.stdout.write(`-- ZAPRUDA ON SPOT+ | STAGING project ${project} only
+-- SQL Editor bundle v2 | Windows LF and CRLF supported
 -- Run the entire file once in that project's SQL Editor after operator review.
 -- Source ${version}_${name}.sql
 -- Source SHA-256 ${migrationHash}
@@ -36,7 +35,10 @@ set local search_path = pg_catalog;
 
 do $zapruda_apply_social$
 declare
-  migration_sql constant text := $zapruda_reviewed_source$${sql}$zapruda_reviewed_source$;
+  migration_bytes constant bytea := decode($zapruda_reviewed_base64$
+${payload}
+$zapruda_reviewed_base64$, 'base64');
+  migration_sql text;
   private_tables constant text[] := array[
     'preferences','presences','closed_presence_sessions','blocks','invitations',
     'announcements','deliveries','photo_shares','photo_consents','abuse_reports','events'
@@ -112,10 +114,11 @@ begin
     ) then
     raise exception 'Expected Auth, membership and DM prerequisites';
   end if;
-  if encode(sha256(convert_to(migration_sql, 'UTF8')), 'hex') <> '${migrationHash}' then
+  if encode(sha256(migration_bytes), 'hex') <> '${migrationHash}' then
     raise exception 'Reviewed migration SHA-256 does not match this script';
   end if;
 
+  migration_sql := convert_from(migration_bytes, 'UTF8');
   execute migration_sql;
 
   if (select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace
