@@ -12,11 +12,11 @@ const spot = "10000000-0000-4000-8000-000000000001",
 const files = JSON.parse(
   readFileSync("supabase/tests/unit/spot-sql-files.json", "utf8"),
 ) as string[];
-const names = readdirSync("supabase/migrations").filter((n) =>
-  n.endsWith("_v076_owned_spot_progress.sql"),
+const names = readdirSync("supabase/staging").filter((n) =>
+  /^\d{14}_v076_owned_spot_progress\.sql$/.test(n),
 );
 if (names.length !== 1) throw new Error("Expected exactly one new owned progress delta");
-const delta = readFileSync("supabase/migrations/" + names[0], "utf8");
+const delta = readFileSync("supabase/staging/" + names[0], "utf8");
 let db: PGlite;
 async function act(id: string | null) {
   await db.exec("reset role");
@@ -68,6 +68,13 @@ afterAll(async () => {
   await db?.close();
 });
 describe("owner progress on isolated PostgreSQL, not genuine evidence/JWT E2E", () => {
+  it("keeps this STAGING-only delta outside automatic production migrations", () => {
+    expect(
+      readdirSync("supabase/migrations").some((name) =>
+        name.endsWith("_v076_owned_spot_progress.sql"),
+      ),
+    ).toBe(false);
+  });
   it("does not award a profile crown for a pending catch", async () => {
     await act(owner);
     const value = await progress();

@@ -36,5 +36,7 @@ All56 legacy IDs/8 modules/7 KING and OSP-01…09 remain obligations. This archi
 - Applied only new STAGING RPC migration `20261105000601_v076_owned_spot_progress`; isolated SQL/rollback9 PASS. No table grants or RLS changes.
 - Deployed only STAGING `zapruda-spot-records` v12 with verify_jwt=true; corrected URL shadowing, strict owned preview origins and STAGING-only project fence. Legacy v11 source was captured before replacement.
 - Added `/on-spot` entry and links without false membership/presence implementation. Full OSP-01…09 remain P0 open.
-- Local TypeScript, build, Deno exact gateway imports and482 Vitest tests PASS. ESLint has no errors; baseline fast-refresh warnings remain. Ordinary CI and protected real JWT/browser evidence for the published candidate are pending until actual runs complete.
+- Local TypeScript, build, Deno exact gateway imports and483 Vitest tests PASS. ESLint has no errors; baseline fast-refresh warnings remain. Ordinary CI and protected real JWT/browser evidence for the published candidate are pending until actual runs complete.
 - New scoped protected architecture workflow reuses existing live SPOT and browser suites; excludes pre-existing feedback fixture set and does not consume model quotas. Positive KING remains blocked by genuine prerequisites.
+
+STAGING isolation: the new SQL delta is stored in `supabase/staging/20261105000601_v076_owned_spot_progress.sql`, outside automatic Production migrations. An isolated regression checks that no copy exists in `supabase/migrations`; the already deployed RPC body and Edge sources are unchanged.

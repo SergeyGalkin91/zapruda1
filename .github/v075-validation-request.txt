@@ -3,3 +3,4 @@ PR93 final acceptance including preserved subsequent STAGING migrations and roll
 2026-11-05 architecture route consolidation: refresh ordinary exact-candidate checks; no production release.
 Final candidate: clear obsolete fish handoff on successful no-catch report; validate real numeric input strings in browser acceptance.
 Final UI candidate: use existing themed field utility with 48px fish-selector target; preserve both themes.
+STAGING RPC SQL lives only in supabase/staging, outside automatic production migrations; source and deployed RPC body unchanged.
