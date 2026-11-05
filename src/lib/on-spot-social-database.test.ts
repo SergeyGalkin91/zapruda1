@@ -22,6 +22,16 @@ const identities = [...members, users.outsider];
 const sessions = new Map(identities.map((id) => [id, randomUUID()]));
 let db: PGlite;
 let windowsApplyResult: unknown;
+let managementApplyResult: unknown;
+const stagingReadback = execFileSync(
+  process.execPath,
+  [
+    "--input-type=module",
+    "-e",
+    'import { stagingReadback } from "./scripts/on-spot-staging-migration.mjs"; process.stdout.write(stagingReadback);',
+  ],
+  { encoding: "utf8" },
+);
 async function as(id: string, role = "authenticated") {
   await actAsFixture(db, id, role);
   await db.query("select set_config('test.session_id',$1,true)", [sessions.get(id) ?? ""]);
@@ -141,6 +151,11 @@ beforeAll(async () => {
     encoding: "utf8",
   });
   const windowsApply = manualApply.replace(/\n/g, "\r\n");
+  const managementApply = execFileSync(
+    process.execPath,
+    ["scripts/on-spot-staging-apply.mjs", "--management-api"],
+    { encoding: "utf8" },
+  );
   await db.exec(`
     create schema supabase_migrations;
     create table supabase_migrations.schema_migrations (
@@ -189,9 +204,21 @@ beforeAll(async () => {
   await expectStage2Absent();
   await expectApplyFailure("test_reject_stage2_history", windowsApply);
   await expectStage2Absent();
+  // Use the prepared query path used for one SQL statement, including an implicit rollback.
+  await expect(db.query(managementApply)).rejects.toThrow("test_reject_stage2_history");
+  await expectStage2Absent();
   await db.exec(`
     alter table supabase_migrations.schema_migrations drop constraint test_reject_stage2_history;
   `);
+
+  await db.exec("begin");
+  try {
+    await db.query(managementApply);
+    managementApplyResult = (await db.query(stagingReadback)).rows;
+  } finally {
+    await db.exec("rollback");
+  }
+  await expectStage2Absent();
 
   windowsApplyResult = (await db.exec(windowsApply)).at(-1)?.rows;
   await expectApplyFailure("Social privacy history or schema already exists", windowsApply);
@@ -247,28 +274,20 @@ afterAll(async () => {
 });
 
 describe("ON SPOT+ social privacy and consent (isolated PostgreSQL)", () => {
-  it("checks the exact migration ledger, restrictive policies and RLS used by the deploy workflow", async () => {
-    const sql = execFileSync(
-      process.execPath,
-      [
-        "--input-type=module",
-        "-e",
-        'import { stagingReadback } from "./scripts/on-spot-staging-migration.mjs"; process.stdout.write(stagingReadback);',
-      ],
-      { encoding: "utf8" },
-    );
-    expect((await db.query(sql)).rows).toEqual([
-      {
-        staging_fingerprint: true,
-        ledger_count: 1,
-        exact_ledger: true,
-        private_count: 11,
-        private_rls_count: 11,
-        restrictive_count: 3,
-        rpc_present: true,
-        rpc_acl_ok: true,
-        community_present: true,
-      },
+  it("applies the API bundle as one prepared statement and reads back its exact ledger and RLS", async () => {
+    const applied = {
+      staging_fingerprint: true,
+      ledger_count: 1,
+      exact_ledger: true,
+      private_count: 11,
+      private_rls_count: 11,
+      restrictive_count: 3,
+      rpc_present: true,
+      rpc_acl_ok: true,
+    };
+    expect(managementApplyResult).toEqual([{ ...applied, community_present: false }]);
+    expect((await db.query(stagingReadback)).rows).toEqual([
+      { ...applied, community_present: true },
     ]);
   });
   it("executes the full Windows CRLF SQL and verifies its migration SHA-256 in PostgreSQL", () => {

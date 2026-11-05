@@ -102,10 +102,10 @@ test("sends the generated guarded SQL once, between independent readbacks of STA
   }
   assert.equal(calls[0].body.query, stagingReadback);
   assert.equal(calls[2].body.query, stagingReadback);
-  assert.match(calls[1].body.query, /SQL Editor bundle v2/);
+  assert.match(calls[1].body.query, /Management API bundle \| one atomic statement/);
   assert.match(calls[1].body.query, /sha256\(migration_bytes\)/);
   assert.match(calls[1].body.query, /insert into supabase_migrations\.schema_migrations/);
-  assert.match(calls[1].body.query, /\ncommit;\n/);
+  assert.doesNotMatch(calls[1].body.query, /^begin;|^commit;/m);
 });
 
 test("never writes on partial installation, a conflicting history or the wrong fingerprint", async () => {

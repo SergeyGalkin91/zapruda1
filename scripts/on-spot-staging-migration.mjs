@@ -142,7 +142,10 @@ export async function applyOnSpotStagingMigration({ env, request, transport = fe
   }
 
   const generator = fileURLToPath(new URL("./on-spot-staging-apply.mjs", import.meta.url));
-  const guardedSql = execFileSync(process.execPath, [generator], { encoding: "utf8", env: {} });
+  const guardedSql = execFileSync(process.execPath, [generator, "--management-api"], {
+    encoding: "utf8",
+    env: {},
+  });
   await query(guardedSql, false);
 
   const after = await query(stagingReadback, true);

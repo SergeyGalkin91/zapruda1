@@ -20,7 +20,10 @@ if (digest(source) !== migrationHash || digest(rollback) !== rollbackHash) {
 // PostgreSQL's Base64 decoder ignores LF, CRLF and whitespace between payload characters.
 const payload = source.toString("base64").replace(/.{76}(?=.)/g, "$&\n");
 
-process.stdout.write(`-- ZAPRUDA ON SPOT+ | STAGING project ${project} only
+const managementApi = process.argv[2] === "--management-api";
+const transactionStart = managementApi
+  ? "-- Supabase Management API bundle | one atomic statement\n"
+  : `-- ZAPRUDA ON SPOT+ | STAGING project ${project} only
 -- SQL Editor bundle v2 | Windows LF and CRLF supported
 -- Run the entire file once in that project's SQL Editor after operator review.
 -- Source ${version}_${name}.sql
@@ -33,9 +36,27 @@ set local lock_timeout = '5s';
 set local statement_timeout = '60s';
 set local search_path = pg_catalog;
 
-do $zapruda_apply_social$
+`;
+const blockSetup = managementApi
+  ? `  perform pg_catalog.set_config('lock_timeout', '5s', true);
+  perform pg_catalog.set_config('search_path', 'pg_catalog', true);
+
+`
+  : "";
+const transactionEnd = managementApi
+  ? ""
+  : `
+commit;
+
+select 'STAGING_APPLIED' as status, version, name,
+       encode(sha256(convert_to(statements[1], 'UTF8')), 'hex') as sha256
+from supabase_migrations.schema_migrations
+where version = '${version}' and name = '${name}';
+`;
+
+process.stdout.write(`${transactionStart}do $zapruda_apply_social$
 declare
-  migration_bytes constant bytea := decode($zapruda_reviewed_base64$
+  migration_bytes constant bytea := ${managementApi ? "pg_catalog.decode" : "decode"}($zapruda_reviewed_base64$
 ${payload}
 $zapruda_reviewed_base64$, 'base64');
   migration_sql text;
@@ -45,8 +66,8 @@ $zapruda_reviewed_base64$, 'base64');
   ];
   missing_dependency text;
 begin
-  if current_database() <> 'postgres' or current_user <> 'postgres' then
-    raise exception 'Expected the STAGING SQL Editor postgres role';
+${blockSetup}  if current_database() <> 'postgres' or current_user <> 'postgres' then
+    raise exception 'Expected the STAGING ${managementApi ? "" : "SQL Editor "}postgres role';
   end if;
 
   lock table supabase_migrations.schema_migrations in share row exclusive mode;
@@ -138,11 +159,4 @@ begin
   values ('${version}', '${name}', array[migration_sql]);
 end
 $zapruda_apply_social$;
-
-commit;
-
-select 'STAGING_APPLIED' as status, version, name,
-       encode(sha256(convert_to(statements[1], 'UTF8')), 'hex') as sha256
-from supabase_migrations.schema_migrations
-where version = '${version}' and name = '${name}';
-`);
+${transactionEnd}`);
