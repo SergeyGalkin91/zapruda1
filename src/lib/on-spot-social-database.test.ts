@@ -247,6 +247,30 @@ afterAll(async () => {
 });
 
 describe("ON SPOT+ social privacy and consent (isolated PostgreSQL)", () => {
+  it("checks the exact migration ledger, restrictive policies and RLS used by the deploy workflow", async () => {
+    const sql = execFileSync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        'import { stagingReadback } from "./scripts/on-spot-staging-migration.mjs"; process.stdout.write(stagingReadback);',
+      ],
+      { encoding: "utf8" },
+    );
+    expect((await db.query(sql)).rows).toEqual([
+      {
+        staging_fingerprint: true,
+        ledger_count: 1,
+        exact_ledger: true,
+        private_count: 11,
+        private_rls_count: 11,
+        restrictive_count: 3,
+        rpc_present: true,
+        rpc_acl_ok: true,
+        community_present: true,
+      },
+    ]);
+  });
   it("executes the full Windows CRLF SQL and verifies its migration SHA-256 in PostgreSQL", () => {
     expect(windowsApplyResult).toEqual([
       {
