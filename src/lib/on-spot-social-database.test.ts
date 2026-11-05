@@ -485,8 +485,7 @@ describe("ON SPOT+ community-zone approval (isolated PostgreSQL)", () => {
     ]);
   const catalog = () =>
     db.query<{ zone_id: string; is_member: boolean }>("select * from public.zc_osp_catalog()");
-  const join = () =>
-    db.query<{ room: string }>("select public.zc_osp_join($1) room", [localZone]);
+  const join = () => db.query<{ room: string }>("select public.zc_osp_join($1) room", [localZone]);
   const messages = () =>
     db.query("select id from public.chat_messages where place_id=$1", [localRoom]);
   const send = (id: string, sender: string) =>
@@ -591,10 +590,10 @@ describe("ON SPOT+ community-zone approval (isolated PostgreSQL)", () => {
     await db.exec("reset role");
     await review(false, "FixtureWithdraw");
     await review(false, "FixtureWithdraw");
-    expect(
-      (await db.query("select user_id from zc_osp_internal.presences where zone_id=$1", [localZone]))
-        .rows,
-    ).toEqual([]);
+    const active = await db.query("select user_id from zc_osp_internal.presences where zone_id=$1", [
+      localZone,
+    ]);
+    expect(active.rows).toEqual([]);
     await deny(() => review(true, "FixtureApprove"), "55000");
     await as(users.captain);
     expect((await messages()).rows).toEqual([]);
@@ -608,7 +607,10 @@ describe("ON SPOT+ community-zone approval (isolated PostgreSQL)", () => {
     await enroll(users.owner);
     await db.exec("reset role");
     await deny(
-      () => db.query("update zc_osp_internal.zones set area_label='Different area' where id=$1", [localZone]),
+      () =>
+        db.query("update zc_osp_internal.zones set area_label='Different area' where id=$1", [
+          localZone,
+        ]),
       "23514",
     );
     await db.query("update public.chat_places set name='Different area' where id=$1", [localRoom]);
@@ -637,10 +639,11 @@ describe("ON SPOT+ community-zone approval (isolated PostgreSQL)", () => {
     await db.exec("reset role");
     await applySqlFile(db, "staging/rollback_v076_on_spot_community_zone_approval.sql");
     await deny(() => review(true, "FixtureApprove"), "23514");
-    expect(
-      (await db.query("select zone_id from zc_osp_internal.community_zone_reviews where zone_id=$1", [localZone]))
-        .rows,
-    ).toEqual([{ zone_id: localZone }]);
+    const audit = await db.query(
+      "select zone_id from zc_osp_internal.community_zone_reviews where zone_id=$1",
+      [localZone],
+    );
+    expect(audit.rows).toEqual([{ zone_id: localZone }]);
     await as(users.owner);
     expect((await catalog()).rows.some((item) => item.zone_id === zone)).toBe(true);
     expect((await catalog()).rows.some((item) => item.zone_id === localZone)).toBe(false);
