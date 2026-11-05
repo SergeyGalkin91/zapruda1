@@ -2,6 +2,31 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 import { createReportPhotoAccessHandler } from "./handler.ts";
 
+type ReadTable<Row> = {
+  Row: Row;
+  Insert: Record<string, never>;
+  Update: Record<string, never>;
+  Relationships: [];
+};
+
+type PhotoAccessDatabase = {
+  public: {
+    Tables: {
+      report_photos: ReadTable<{
+        id: string;
+        report_id: string;
+        user_id: string;
+        storage_path: string;
+        sanitized_path: string | null;
+        sanitized_at: string | null;
+      }>;
+      fishing_reports: ReadTable<{ id: string; user_id: string; is_public: boolean }>;
+    };
+    Views: Record<string, never>;
+    Functions: { zc_osp_shared_photo_access: { Args: { p_photo: string }; Returns: boolean } };
+  };
+};
+
 const url = Deno.env.get("SUPABASE_URL") ?? "";
 const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -12,8 +37,8 @@ const bucket = "report-photo-derivatives";
 Deno.serve(async (request: Request) => {
   let callerId: string | null = null;
   let initialized = false;
-  let caller: ReturnType<typeof createClient> | undefined;
-  let writer: ReturnType<typeof createClient> | undefined;
+  let caller: ReturnType<typeof createClient<PhotoAccessDatabase>> | undefined;
+  let writer: ReturnType<typeof createClient<PhotoAccessDatabase>> | undefined;
   const server = () => {
     if (!writer) throw new Error("Backend unavailable");
     return writer;
@@ -22,7 +47,7 @@ Deno.serve(async (request: Request) => {
     resolve: async (photoId, jwt) => {
       if (!url || !anonKey || !serviceKey) throw new Error("Backend unavailable");
       if (!initialized) {
-        caller = createClient(url, anonKey, {
+        caller = createClient<PhotoAccessDatabase>(url, anonKey, {
           auth: { persistSession: false, autoRefreshToken: false },
           ...(jwt ? { global: { headers: { Authorization: `Bearer ${jwt}` } } } : {}),
         });
@@ -32,7 +57,7 @@ Deno.serve(async (request: Request) => {
             return null;
           callerId = data.user.id;
         }
-        writer = createClient(url, serviceKey, {
+        writer = createClient<PhotoAccessDatabase>(url, serviceKey, {
           auth: { persistSession: false, autoRefreshToken: false },
         });
         initialized = true;
@@ -51,16 +76,21 @@ Deno.serve(async (request: Request) => {
         .eq("id", photo.report_id)
         .maybeSingle();
       if (
-        reportError ||
-        !report ||
-        report.user_id !== photo.user_id ||
-        (!report.is_public && report.user_id !== callerId) ||
+        (report && report.user_id !== photo.user_id) ||
         path !== `${photo.user_id}/${photo.report_id}/${photo.id}.jpg`
       )
         return null;
+      const ordinary = !reportError && report && (report.is_public || report.user_id === callerId);
+      if (!ordinary) {
+        // A named participant can view a sanitized shared photo without access to the private report.
+        // The caller JWT and consent RPC remain authoritative; never issue a Storage URL.
+        if (!callerId || !photo.sanitized_path || !photo.sanitized_at) return null;
+        const access = await caller.rpc("zc_osp_shared_photo_access", { p_photo: photo.id });
+        if (access.error || access.data !== true) return null;
+      }
       return {
         path,
-        owner: report.user_id === callerId,
+        owner: Boolean(ordinary && report.user_id === callerId),
         ready: Boolean(photo.sanitized_path && photo.sanitized_at),
       };
     },

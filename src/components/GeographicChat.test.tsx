@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   rows: [] as Array<{ id: string; user_id: string; body: string; created_at: string }>,
   photos: [] as Array<{ id: string; message_id: string }>,
   place: "10000000-0000-4000-8000-000000000081",
+  placeAvailable: true,
 }));
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (options: object) => ({
@@ -65,6 +66,7 @@ const firstMessage = {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.place = "10000000-0000-4000-8000-000000000081";
+  mocks.placeAvailable = true;
   mocks.callbacks.clear();
   mocks.subscriptions.length = 0;
   mocks.rows = [firstMessage];
@@ -94,12 +96,24 @@ beforeEach(() => {
       data:
         table === "chat_places"
           ? [
+              ...(mocks.placeAvailable
+                ? [
+                    {
+                      id: mocks.place,
+                      parent_id: null,
+                      level: "country",
+                      country_code: "RU",
+                      name: "Россия",
+                      created_by: null,
+                    },
+                  ]
+                : []),
               {
-                id: mocks.place,
+                id: "00000000-0000-4000-8000-000000000001",
                 parent_id: null,
-                level: "country",
-                country_code: "RU",
-                name: "Россия",
+                level: "global",
+                country_code: null,
+                name: "Вся ZAPRUDA",
                 created_by: null,
               },
             ]
@@ -137,6 +151,15 @@ async function open() {
   return { ...view, composer };
 }
 describe("Geographic chat (offline component regressions, not real JWT)", () => {
+  it("never falls back to global chat for an inaccessible explicit room", async () => {
+    mocks.placeAvailable = false;
+    render(<GeographicChat />);
+    await screen.findByRole("heading", { name: "Чат недоступен" });
+    expect(screen.queryByLabelText("Сообщение для выбранной ветки")).not.toBeInTheDocument();
+    expect(mocks.from.mock.calls.some(([table]) => table === "chat_messages")).toBe(false);
+    expect(mocks.callbacks.size).toBe(0);
+    expect(mocks.getSession).not.toHaveBeenCalled();
+  });
   it("does not enable sending after login until the selected room has loaded", async () => {
     mocks.place = "00000000-0000-4000-8000-000000000001";
     let release!: (value: unknown) => void;

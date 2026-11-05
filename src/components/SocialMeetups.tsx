@@ -466,7 +466,11 @@ export function SocialMeetups() {
           const mine = membership(p.id),
             owner = p.owner_id === userId;
           return (
-            <article key={p.id} className="rounded-xl border border-white/15 bg-black/20 p-4">
+            <article
+              id={"meetup-" + p.id}
+              key={p.id}
+              className="scroll-mt-24 rounded-xl border border-white/15 bg-black/20 p-4"
+            >
               <div className="flex justify-between gap-2">
                 <h3 className="font-bold text-white">{p.title}</h3>
                 <span className="text-[#D7FF35]">{count === undefined ? "—" : count}/3</span>

@@ -1,5 +1,6 @@
 import type { Database as ExistingDatabase } from "./types";
 import type { Database as StagingDatabase } from "./staging.types";
+import type { OnSpotFunctions } from "./on-spot.types";
 
 type ExistingSchema = ExistingDatabase["public"];
 type StagingSchema = StagingDatabase["public"];
@@ -27,8 +28,10 @@ export type AppDatabase = Omit<ExistingDatabase, "public"> & {
     [Kind in keyof ExistingSchema]: Kind extends "Tables"
       ? Omit<AddMissing<ExistingSchema[Kind], StagingSchema["Tables"]>, keyof PrivacyTables> &
           PrivacyTables
-      : Kind extends keyof StagingSchema
-        ? AddMissing<ExistingSchema[Kind], StagingSchema[Kind]>
-        : ExistingSchema[Kind];
+      : Kind extends "Functions"
+        ? AddMissing<ExistingSchema[Kind], StagingSchema["Functions"] & OnSpotFunctions>
+        : Kind extends keyof StagingSchema
+          ? AddMissing<ExistingSchema[Kind], StagingSchema[Kind]>
+          : ExistingSchema[Kind];
   };
 };

@@ -1,4 +1,5 @@
 import { ChatRoomThumbnail } from "@/components/ChatRoomThumbnail";
+import { OnSpotMessageActions } from "@/components/OnSpotMessageActions";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
@@ -21,7 +22,7 @@ import { countries } from "@/lib/geo";
 import { chatPhotoError, shouldCreateChatMessage } from "@/lib/chat-media";
 
 type ChatTopic = "general" | "reports" | "waters" | "partners" | "gear" | "tips";
-type Level = "global" | "country" | "region" | "city";
+type Level = "global" | "country" | "region" | "city" | "spot-zone";
 type Place = {
   id: string;
   parent_id: string | null;
@@ -193,13 +194,13 @@ export function GeographicChat() {
   }, []);
 
   const map = useMemo(() => new Map(places.map((p) => [p.id, p])), [places]);
-  const selectedPlace =
-    map.get(search.place) ||
-    (search.country
-      ? places.find((p) => p.level === "country" && p.country_code === search.country)
-      : undefined) ||
-    map.get(GLOBAL_ID);
-  const placeId = selectedPlace?.id || GLOBAL_ID;
+  // An explicit inaccessible room must never silently send/read in a public room.
+  const selectedPlace = search.place
+    ? map.get(search.place)
+    : (search.country
+        ? places.find((p) => p.level === "country" && p.country_code === search.country)
+        : undefined) || map.get(GLOBAL_ID);
+  const placeId = selectedPlace?.id ?? "";
   const topic = search.topic;
   const canCompose = Boolean(uid && selectedPlace && threadOpen && !loading && !chatLoading);
   const crumbs = useMemo(() => {
@@ -228,7 +229,7 @@ export function GeographicChat() {
   const currentTopic = TOPICS.find((t) => t.key === topic) ?? TOPICS[0]!;
 
   useEffect(() => {
-    if (!uid) {
+    if (!uid || !placeId) {
       setReadSummary({});
       return;
     }
@@ -272,7 +273,7 @@ export function GeographicChat() {
   // Read-only last-message previews for the selected geographic scope.
   // No invented unread counts or mock messages; errors leave the descriptive fallback.
   useEffect(() => {
-    if (!uid || threadOpen) {
+    if (!uid || !placeId || threadOpen) {
       setRoomLastMessages({});
       return;
     }
@@ -468,7 +469,13 @@ export function GeographicChat() {
   }, [uid, selectedPlace, placeId, topic, refreshIndex, threadOpen]);
 
   useEffect(() => {
-    if (!uid || !threadOpen || !messages.length || typeof IntersectionObserver === "undefined")
+    if (
+      !uid ||
+      !placeId ||
+      !threadOpen ||
+      !messages.length ||
+      typeof IntersectionObserver === "undefined"
+    )
       return;
     const last = messages.at(-1)!;
     const node = document.querySelector('[data-chat-message="' + last.id + '"]');
@@ -681,6 +688,36 @@ export function GeographicChat() {
     } finally {
       if (alive.current) setBusy(false);
     }
+  }
+
+  if (uid && !loading && search.place && !selectedPlace) {
+    return (
+      <Shell>
+        <section className="z-premium-card p-5 sm:p-7">
+          <h1 className="text-xl font-bold">Чат недоступен</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Комната закрыта или у тебя нет доступа. Сообщения не перенаправляются в другой чат.
+          </p>
+          {error && (
+            <p role="alert" className="mt-3 text-sm text-red-300">
+              {error}
+            </p>
+          )}
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link className="btn-primary" to="/on-spot">
+              Локальные зоны ON SPOT+
+            </Link>
+            <Link
+              className="btn-ghost"
+              to="/chat"
+              search={{ place: "", country: "", topic: "general" }}
+            >
+              Все чаты
+            </Link>
+          </div>
+        </section>
+      </Shell>
+    );
   }
 
   return (
@@ -1108,15 +1145,22 @@ export function GeographicChat() {
                         {selectedPlace?.name || "Вся ZAPRUDA"}
                       </h2>
                       <p className="mt-1 text-xs text-zinc-400">
-                        {selectedPlace?.level === "city"
-                          ? "Городской чат"
-                          : selectedPlace?.level === "region"
-                            ? "Чат региона"
-                            : selectedPlace?.level === "country"
-                              ? "Чат страны"
-                              : "Общий чат сообщества"}
+                        {selectedPlace?.level === "spot-zone"
+                          ? "Локальный чат ON SPOT+"
+                          : selectedPlace?.level === "city"
+                            ? "Городской чат"
+                            : selectedPlace?.level === "region"
+                              ? "Чат региона"
+                              : selectedPlace?.level === "country"
+                                ? "Чат страны"
+                                : "Общий чат сообщества"}
                         {" · отдельная переписка для каждого раздела"}
                       </p>
+                      {selectedPlace?.level === "spot-zone" && (
+                        <Link className="btn-ghost mt-2 min-h-11 text-sm" to="/on-spot">
+                          Люди и встречи зоны
+                        </Link>
+                      )}
                     </div>
                     <button
                       type="button"
@@ -1241,6 +1285,15 @@ export function GeographicChat() {
                           </a>
                         )}
                       </div>
+                      {selectedPlace?.level === "spot-zone" && uid && message.user_id !== uid && (
+                        <OnSpotMessageActions
+                          actor={uid}
+                          place={placeId}
+                          id={message.id}
+                          peer={message.user_id}
+                          onBlock={() => setRefreshIndex((i) => i + 1)}
+                        />
+                      )}
                       <div className="flex flex-wrap items-center gap-1.5">
                         {REACTION_EMOJI.map((emoji) => {
                           const likes = reactions.filter(

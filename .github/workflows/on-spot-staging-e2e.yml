@@ -1,0 +1,93 @@
+name: ON SPOT+ real STAGING JWT (protected)
+on:
+  pull_request:
+    paths:
+      - .github/workflows/on-spot-staging-e2e.yml
+      - supabase/functions/report-photo-access/**
+      - scripts/e2e/on-spot-live.mjs
+  push:
+    branches: [work/v076-on-spot-plus-stage1-20261105]
+    paths: [.github/on-spot-e2e-request.txt]
+permissions:
+  contents: read
+concurrency:
+  group: on-spot-staging-e2e
+  cancel-in-progress: false
+jobs:
+  edge-typecheck:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check --node-modules-dir=auto supabase/functions/report-photo-access/index.ts supabase/functions/zapruda-spot-records/index.ts
+  real-on-spot:
+    if: github.event_name == 'push'
+    needs: edge-typecheck
+    runs-on: ubuntu-24.04
+    environment: staging-e2e
+    timeout-minutes: 35
+    env:
+      ZAPRUDA_E2E_STAGING_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+      ZAPRUDA_E2E_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+      ZAPRUDA_E2E_OWNER_EMAIL: ${{ secrets.ZAPRUDA_E2E_OWNER_EMAIL }}
+      ZAPRUDA_E2E_OWNER_PASSWORD: ${{ secrets.ZAPRUDA_E2E_OWNER_PASSWORD }}
+      ZAPRUDA_E2E_SEATED_EMAIL: ${{ secrets.ZAPRUDA_E2E_SEATED_EMAIL }}
+      ZAPRUDA_E2E_SEATED_PASSWORD: ${{ secrets.ZAPRUDA_E2E_SEATED_PASSWORD }}
+      ZAPRUDA_E2E_RACER_A_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_A_EMAIL }}
+      ZAPRUDA_E2E_RACER_A_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_A_PASSWORD }}
+      ZAPRUDA_E2E_RACER_B_EMAIL: ${{ secrets.ZAPRUDA_E2E_RACER_B_EMAIL }}
+      ZAPRUDA_E2E_RACER_B_PASSWORD: ${{ secrets.ZAPRUDA_E2E_RACER_B_PASSWORD }}
+      ZAPRUDA_OSP_E2E_ZONE_ID: ${{ vars.ZAPRUDA_OSP_E2E_ZONE_ID }}
+      ZAPRUDA_SPOT_E2E_UPLOAD_PROBE: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - name: Real KING negative boundaries, no invented evidence
+        if: ${{ !cancelled() }}
+        run: node scripts/e2e/spot-v075-live.mjs
+      - name: Build exact-source STAGING frontend
+        if: ${{ !cancelled() }}
+        env:
+          VITE_SUPABASE_URL: ${{ vars.ZAPRUDA_E2E_STAGING_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.ZAPRUDA_E2E_PUBLISHABLE_KEY }}
+          NITRO_PRESET: node-server
+        run: bun run build
+      - name: Install the three browser engines
+        if: ${{ !cancelled() }}
+        run: |
+          bun add --dev playwright@1.58.2
+          bunx playwright install --with-deps chromium firefox webkit
+      - name: Real ON SPOT API and signed-in mobile browser
+        if: ${{ !cancelled() }}
+        env:
+          ZAPRUDA_BROWSER_BASE_URL: http://127.0.0.1:3000
+        run: |
+          node .output/server/index.mjs > /tmp/osp-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/auth -o /dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/e2e/on-spot-live.mjs
+      - name: Require actual positive local chat acceptance
+        if: ${{ !cancelled() }}
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; const r=JSON.parse(fs.readFileSync("qa/on-spot-live/result.json")); if(!r.passed||!r.cleanup||r.positive!=="PASS"){console.error("ON SPOT+: "+r.positive+"; phase="+(r.failurePhase??"completed negative checks"));process.exitCode=1;}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: on-spot-staging-safe-results
+          path: |
+            qa/on-spot-live/
+            qa/architecture-live/
+          retention-days: 7
