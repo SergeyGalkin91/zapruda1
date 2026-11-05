@@ -111,3 +111,7 @@ ID / дата / точная формулировка владельца / за�
 По прямому заданию владельца разобран41941541992: strict-mode конфликт двух Matte Black контролов. Код37eb39aa92e55607e58234f264da0470c973fe10 исправляет semantic locator и добавляет Settings regression без отключения тестов. Защищённый41957327094 после owner review целиком SUCCESS,13 обычных workflow SUCCESS,484 Vitest,292 авторизованных PNG, cleanup=true. Это не положительная KING-модерация:0 lawful reviewed SPOT/0 разрешённых независимых модераторов; заявка/реальный титул BLOCKED. Hosted Netlify37eb status success, но Google device approval и проверка самой страницы не завершены.
 
 ON SPOT+ продолжается в отдельном PR114, f8eae65e7dd2b8572ece1d475ef43afe7c69a897: named catalog, own opt-in/leave, private membership/bans и reuse chat/RLS.520 offline Vitest, новая delta/rollback только supabase/staging и ещё не применены. OSP-01/02 PARTIAL; полноценные OSP-03…09 не приняты и не вынесены из P0. Это запись исполнения, не новое разрешение main/Production/version/release. [Точный отчёт](ZAPRUDA_E2E_FINAL_ACCEPTANCE_20261105.md).
+
+## D25 — STAGING-срез ON SPOT+, 05.11.2026
+
+Первая дельта членства применена в STAGING под версией `20261105043101`. В PR #114 сохранены функции следующего среза и изолированные проверки на `9c38c085baf16573f5b6fe7897d4343708934ac2`. Подтверждение второй дельты истекло. Реальная приёмка OSP-01…09 и семи KING остаётся открытой. Владелец сохраняет отдельное решение о релизе. [Технические результаты и условия разблокировки](ZAPRUDA_ON_SPOT_STAGING_ACCEPTANCE_20261105.md)

@@ -1,7 +1,7 @@
 # ZAPRUDA COMMUNITY — ON SPOT+ release contract
 **Owner decision:** 05.11.2026 — «Давай добавим ее сейчас в релиз 0.7.6 KING FINISH ON SPOT+. Только доработай ее сначала, думаю это важно».
 **Target release:** `0.7.6 KING FINISH ON SPOT+` (owner-approved target name and P0 scope).
-**Status:** APPROVED PRODUCT SCOPE, **PARTIAL IMPLEMENTATION / NOT ACCEPTED / RELEASE NO-GO**. Первый code slice: [PR114](https://github.com/SergeyGalkin91/zapruda1/pull/114), каталог/явное участие/access guards; новая дельта не применена, реальные OSP gates не закрыты. Все OSP-01…09 по-прежнему P0. No change to actual technical version `0.7.5`, package.json, tags, releases, main or Production.
+**Status:** APPROVED PRODUCT SCOPE, **PARTIAL IMPLEMENTATION / NOT ACCEPTED / RELEASE NO-GO**. В STAGING применена дельта членства. Вторая дельта и её тесты находятся в PR #114. Реальная приёмка всех OSP-01…09 остаётся P0. Техническая версия `0.7.5`. [Текущий отчёт](ZAPRUDA_ON_SPOT_STAGING_ACCEPTANCE_20261105.md) · [PR #114](https://github.com/SergeyGalkin91/zapruda1/pull/114)
 This later scope decision **supersedes** the earlier D21 backlog-only classification; historical D21 remains for audit.
 
 ## 1. Definition and positioning
