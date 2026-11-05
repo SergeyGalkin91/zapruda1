@@ -3,6 +3,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { PGlite } from "@electric-sql/pglite";
 import { randomUUID } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { actAsFixture, applySqlFile, fixtureUsers as users } from "../test/isolated-postgres";
 import { createIsolatedOnSpotPostgres, ospDelta } from "../test/on-spot-postgres";
 
@@ -134,7 +136,56 @@ beforeAll(async () => {
     );
     await db.query("insert into auth.sessions(id,user_id) values($1,$2)", [sessions.get(id), id]);
   }
-  await applySqlFile(db, ospDelta("v076_on_spot_social_privacy"));
+  const manualApply = execFileSync(process.execPath, ["scripts/on-spot-staging-apply.mjs"], {
+    encoding: "utf8",
+  });
+  await db.exec(`
+    create schema supabase_migrations;
+    create table supabase_migrations.schema_migrations (
+      version text primary key,
+      name text,
+      statements text[]
+    );
+  `);
+
+  const expectApplyFailure = async (message: string) => {
+    await expect(db.exec(manualApply)).rejects.toThrow(message);
+    await db.exec("rollback");
+  };
+  await expectApplyFailure("Expected STAGING membership fingerprint is missing");
+  await db.query(
+    "insert into supabase_migrations.schema_migrations values ('20261105043101',$1,array[$2::text])",
+    [
+      "v076_on_spot_zone_membership",
+      readFileSync("supabase/" + ospDelta("v076_on_spot_zone_membership"), "utf8"),
+    ],
+  );
+
+  // Force a failure after the DDL, at the migration ledger write.
+  await db.exec(`
+    alter table supabase_migrations.schema_migrations
+      add constraint test_reject_stage2_history check (version <> '20261105044404');
+  `);
+  await expectApplyFailure("test_reject_stage2_history");
+  const failed = await db.query(`
+    select to_regclass('zc_osp_internal.presences') as presence,
+      to_regprocedure('public.zc_osp_social(text,uuid,jsonb)') as rpc
+  `);
+  expect(failed.rows).toEqual([{ presence: null, rpc: null }]);
+  await db.exec(`
+    alter table supabase_migrations.schema_migrations drop constraint test_reject_stage2_history;
+  `);
+
+  const applied = await db.exec(manualApply);
+  expect(applied.at(-1)?.rows).toEqual([
+    {
+      status: "STAGING_APPLIED",
+      version: "20261105044404",
+      name: "v076_on_spot_social_privacy",
+      sha256: "194e9b0606071a674cd15b44631c062d21aab657af0cb639e1f3459b2c57e16e",
+    },
+  ]);
+  await expectApplyFailure("Social privacy history or schema already exists");
   await applySqlFile(db, "staging/DRAFT_v076_on_spot_community_zone_approval.sql");
 }, 30000);
 beforeEach(async () => {
@@ -187,6 +238,16 @@ afterAll(async () => {
 });
 
 describe("ON SPOT+ social privacy and consent (isolated PostgreSQL)", () => {
+  it("records the reviewed stage 2 source exactly once through the manual STAGING transaction", async () => {
+    const history = await db.query(
+      "select statements from supabase_migrations.schema_migrations where version='20261105044404'",
+    );
+    expect(history.rows).toEqual([
+      {
+        statements: [readFileSync("supabase/" + ospDelta("v076_on_spot_social_privacy"), "utf8")],
+      },
+    ]);
+  });
   it("denies outsiders, anonymous sessions, and direct private schema reads", async () => {
     await as(users.outsider);
     await deny(() => snapshot());
