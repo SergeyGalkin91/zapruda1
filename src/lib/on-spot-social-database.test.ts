@@ -590,9 +590,10 @@ describe("ON SPOT+ community-zone approval (isolated PostgreSQL)", () => {
     await db.exec("reset role");
     await review(false, "FixtureWithdraw");
     await review(false, "FixtureWithdraw");
-    const active = await db.query("select user_id from zc_osp_internal.presences where zone_id=$1", [
-      localZone,
-    ]);
+    const active = await db.query(
+      "select user_id from zc_osp_internal.presences where zone_id=$1",
+      [localZone],
+    );
     expect(active.rows).toEqual([]);
     await deny(() => review(true, "FixtureApprove"), "55000");
     await as(users.captain);
