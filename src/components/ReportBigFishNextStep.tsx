@@ -46,7 +46,7 @@ export function ReportBigFishNextStep() {
       <label className="mt-4 block text-sm">
         Рыба для заявки
         <select
-          className="input mt-2 w-full"
+          className="field mt-2 min-h-12 w-full"
           value={choice}
           onChange={(e) => setChoice(Number(e.target.value))}
         >
