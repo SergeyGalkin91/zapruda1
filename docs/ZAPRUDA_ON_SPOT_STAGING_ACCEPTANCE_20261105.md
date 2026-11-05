@@ -1,8 +1,25 @@
 # ON SPOT+ — реализация и STAGING-приёмка 05.11.2026
 
-## SQL Editor bundle v2 для Windows, 06.11.2026
+## Защищённая автоматизация второй миграции, 06.11.2026
 
-**Готов к подтверждённому применению в STAGING.** PR #114, HEAD `a91178b85170cd4371c010dba00c658b6a455dc5`, проверенное дерево `dc48dbf6773306772037e9790bce75723830d159`. [Коммит](https://github.com/SergeyGalkin91/zapruda1/commit/a91178b85170cd4371c010dba00c658b6a455dc5) · [Генератор](https://github.com/SergeyGalkin91/zapruda1/blob/a91178b85170cd4371c010dba00c658b6a455dc5/scripts/on-spot-staging-apply.mjs)
+**Готов проверенный workflow. Запись в STAGING BLOCKED до подключения проектного секрета.** Кандидат PR #114 `c796194e1cd46502226d9f37df2042821fbcf353`, дерево `6d521010b8d37e360977a7aa32dff8c3ab314e10`. Ручной путь через SQL Editor заменён автоматизацией. Прежние попытки и их контрольные суммы сохранены ниже как история. [Коммит](https://github.com/SergeyGalkin91/zapruda1/commit/c796194e1cd46502226d9f37df2042821fbcf353) · [Workflow](https://github.com/SergeyGalkin91/zapruda1/blob/c796194e1cd46502226d9f37df2042821fbcf353/.github/workflows/on-spot-staging-migration.yml)
+
+- Применение ограничено проектом `yudtbifopfnjtjanaqrd`, версией `20261105044404` и push с отдельным запросом в ветке `work/v076-on-spot-plus-stage1-20261105`. Запуск из PR проверяет код без секрета и пропускает job записи.
+- Окружение `staging-on-spot-migration` сохранено с одной разрешённой веткой, обязательным reviewer `SergeyGalkin91` и выключенным обходом для администратора. Оно пока без секрета. `staging-e2e` остаётся отдельным окружением для пользовательских JWT. [Настройки защиты](https://github.com/SergeyGalkin91/zapruda1/settings/environments/26422924153/edit)
+- Путь записи использует Supabase Management API `database/query` (Beta) и ограниченный токен с правом `Database: Write` только на этот проект. Планируемое имя Environment secret — `ZAPRUDA_STAGING_MIGRATION_TOKEN`. В подключении такой доступ отсутствует. Dashboard перенаправляет на вход в Supabase. [Management API](https://supabase.com/docs/reference/api/v1-run-a-query) · [Область доступа токена](https://supabase.com/docs/reference/api/introduction)
+- Перед записью workflow сверяет отпечаток базы по первой миграции, журнал и отсутствие частичной схемы. Проверенный Base64-пакет применяет исходный SQL и записывает точную версию журнала в одной транзакции. После операции отдельный SELECT требует правильный SHA журнала, 11 приватных таблиц с RLS и закрытыми прямыми ACL, три ограничительные политики и доступ к двум RPC только у разрешённых ролей. При несовпадении или неопределённом ответе автоматического повтора нет.
+- После авторизации оператор подключает ограниченный секрет, ставит один точный запуск в очередь и передаёт ссылку владельцу для `Review deployments → staging-on-spot-migration → Approve and deploy`. До этого шаг записи не запрошен. По завершении требуется независимый SELECT через Supabase и отдельная проверка и установка механизма одобрения зон.
+
+| Проверка | Фактический результат |
+|---|---|
+| Живой SELECT `yudtbifopfnjtjanaqrd`, PostgreSQL 17.11 | Отпечаток подтверждён. `20261105043101` присутствует. Для `20261105044404` строк журнала 0, новых приватных таблиц 0, ограничительных политик 0. RPC и механизм одобрения зон отсутствуют. |
+| SQL и rollback | SHA-256 исходника `194e9b0606071a674cd15b44631c062d21aab657af0cb639e1f3459b2c57e16e`, rollback `a2bf661bf6e7e9666880f2600f2aee3abb472b063393d9a8b2a53272c52b6222`. В изолированной БД подтверждены исполнение CRLF, отказ изменённому SQL, откат при ошибке журнала и точный postflight. |
+| Автоматические проверки | TypeScript PASS. ESLint 0 ошибок, 6 прежних предупреждений. Vitest 547/547, в том числе 44 SQL-проверки. Семь проверок workflow PASS, транспорт API замещён тестовым. [Запуск workflow](https://github.com/SergeyGalkin91/zapruda1/actions/runs/42130311578) |
+| Применение, одобрение зоны, двухпользовательская JWT-приёмка, мобильный Preview | BLOCKED. В этом срезе в живой базе выполнялись только SELECT. |
+
+## Архив проверки SQL Editor bundle v2 для Windows, 06.11.2026
+
+**Исторический кандидат для ручного пути.** PR #114, HEAD `a91178b85170cd4371c010dba00c658b6a455dc5`, проверенное дерево `dc48dbf6773306772037e9790bce75723830d159`. [Коммит](https://github.com/SergeyGalkin91/zapruda1/commit/a91178b85170cd4371c010dba00c658b6a455dc5) · [Генератор](https://github.com/SergeyGalkin91/zapruda1/blob/a91178b85170cd4371c010dba00c658b6a455dc5/scripts/on-spot-staging-apply.mjs)
 
 ### Причина ошибки v1
 
@@ -25,14 +42,9 @@ v2 передаёт исходные байты через ASCII Base64. Postgre
 | [Исходная дельта](https://github.com/SergeyGalkin91/zapruda1/blob/a91178b85170cd4371c010dba00c658b6a455dc5/supabase/staging/20261105044404_v076_on_spot_social_privacy.sql) | `194e9b0606071a674cd15b44631c062d21aab657af0cb639e1f3459b2c57e16e` |
 | [Аварийное отключение](https://github.com/SergeyGalkin91/zapruda1/blob/a91178b85170cd4371c010dba00c658b6a455dc5/supabase/staging/rollback_v076_on_spot_social_privacy.sql) | `a2bf661bf6e7e9666880f2600f2aee3abb472b063393d9a8b2a53272c52b6222` |
 
-### Действие оператора в Windows
+### Результат ручной попытки
 
-1. Скачать v2 и сверить SHA-256 командой PowerShell `Get-FileHash -Algorithm SHA256 -LiteralPath ".\\ZAPRUDA-STAGING-apply-20261105044404-v2.sql"` из папки файла. Воспроизведение из точного коммита — `node scripts/on-spot-staging-apply.mjs > ZAPRUDA-STAGING-apply-20261105044404-v2.sql`.
-2. Открыть файл в Блокноте, скопировать весь текст через **Ctrl+A**, **Ctrl+C**. В первой части файла указан `SQL Editor bundle v2`.
-3. В [SQL Editor STAGING](https://supabase.com/dashboard/project/yudtbifopfnjtjanaqrd/sql/new) выбрать **New query**, роль `postgres` и проверить `yudtbifopfnjtjanaqrd` в адресе. Вставить весь текст и нажать **Run** один раз.
-4. Ожидаемый результат — `STAGING_APPLIED` с версией `20261105044404`. При ошибке передать её текст для read-only сверки.
-
-Запуск в живой STAGING ожидает владельца. После подтверждения сверяются SHA журнала и схема, затем продолжаются приёмка одобряемых зон, реальный JWT E2E и мобильный Preview.
+После v2 владелец получил `trailing junk after numeric literal` возле `08bc87e3…`. PostgreSQL воспроизводит такую синтаксическую ошибку на непомеченном литерале SHA-256. Текст, фактически поступивший из SQL Editor, не наблюдался. В живой схеме подтверждено отсутствие изменений. Порядок ручной попытки сохранён в [архивном коммите](https://github.com/SergeyGalkin91/zapruda1/blob/16389b56b8558f9ccd47c327f78d03ad4db2c718/docs/ZAPRUDA_ON_SPOT_STAGING_ACCEPTANCE_20261105.md).
 
 ## Подтверждение Supabase после настройки GitHub, 05.11.2026
 
