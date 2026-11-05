@@ -224,7 +224,12 @@ try {
   );
   diagnosticPage = a;
   phase = "wizard-private-publication";
-  for (const withFish of [false, true]) {
+  const spotBeforeReport = await A.c.functions.invoke("zapruda-spot-records", {
+    body: { action: "progress" },
+  });
+  if (spotBeforeReport.error || !spotBeforeReport.data?.progress)
+    throw Error("OWN_PROGRESS_API_FAILED");
+  for (const withFish of [true, false]) {
     await a.goto(base + "/reports/new");
     await expect(
       a.getByRole("button", { name: "Перенести Street-сессию", exact: true }),
@@ -338,16 +343,19 @@ try {
         .getByRole("button", { name: "Передать одну рыбу в BIG FISH", exact: true })
         .click();
       await a.waitForURL(base + "/big-fish");
-      await expect(a.getByLabel("Вес одной рыбы, г")).toHaveValue(100);
-      await expect(a.getByLabel("Длина, мм")).toHaveValue(200);
+      await expect(a.getByLabel("Вес одной рыбы, г")).toHaveValue("100");
+      await expect(a.getByLabel("Длина, мм")).toHaveValue("200");
       await a.reload();
-      await expect(a.getByLabel("Вес одной рыбы, г")).toHaveValue(100);
+      await expect(a.getByLabel("Вес одной рыбы, г")).toHaveValue("100");
       const actual = await A.c.functions.invoke("zapruda-spot-records", {
         body: { action: "progress" },
       });
       if (actual.error || !actual.data?.progress) throw Error("OWN_PROGRESS_API_FAILED");
       // No fabricated approved SPOT, proof, catch or crown is created by this navigation.
-      if (actual.data.progress.catches.some((c) => c.catch_id === rows[0].id))
+      if (
+        JSON.stringify(actual.data.progress.catches.map((c) => c.catch_id).sort()) !==
+        JSON.stringify(spotBeforeReport.data.progress.catches.map((c) => c.catch_id).sort())
+      )
         throw Error("REPORT_AUTO_SUBMITTED_TO_SPOT");
       await a.getByRole("link", { name: "Титулы в моём профиле", exact: true }).click();
       await expect(a.locator("#verified-titles")).toBeVisible();
@@ -360,10 +368,12 @@ try {
         throw Error("PROFILE_CROWN_NOT_AUTHORITATIVE");
       await shot(a, "390-big-fish-authoritative-profile");
       await b.goto(base + "/big-fish");
-      await expect(b.getByLabel("Вес одной рыбы, г")).toHaveValue(null);
+      await expect(b.getByLabel("Вес одной рыбы, г")).toHaveValue("");
       result.checks.push(
         "real private report → explicit one-fish transfer → reload → authoritative profile; no automatic SPOT submit; foreign browser sees no handoff",
       );
+    } else {
+      await expect(a.getByRole("region", { name: "Следующий шаг после отчёта" })).toHaveCount(0);
     }
   }
   result.checks.push(
