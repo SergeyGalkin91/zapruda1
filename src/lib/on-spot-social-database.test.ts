@@ -135,6 +135,7 @@ beforeAll(async () => {
     await db.query("insert into auth.sessions(id,user_id) values($1,$2)", [sessions.get(id), id]);
   }
   await applySqlFile(db, ospDelta("v076_on_spot_social_privacy"));
+  await applySqlFile(db, "staging/DRAFT_v076_on_spot_community_zone_approval.sql");
 }, 30000);
 beforeEach(async () => {
   await db.exec("begin; reset role");
@@ -469,5 +470,183 @@ describe("ON SPOT+ social privacy and consent (isolated PostgreSQL)", () => {
     ).toEqual([{ id: peerMessage }]);
     await as(users.owner);
     expect((await visiblePhoto()).rows).toEqual([{ id: photo }]);
+  });
+});
+
+describe("ON SPOT+ community-zone approval (isolated PostgreSQL)", () => {
+  const localZone = randomUUID();
+  const localRoom = randomUUID();
+  const localName = "Offline community area";
+  const review = (approved: boolean, reference: string) =>
+    db.query("select zc_osp_internal.review_community_zone($1,$2,$3)", [
+      localZone,
+      approved,
+      reference,
+    ]);
+  const catalog = () =>
+    db.query<{ zone_id: string; is_member: boolean }>("select * from public.zc_osp_catalog()");
+  const join = () =>
+    db.query<{ room: string }>("select public.zc_osp_join($1) room", [localZone]);
+  const messages = () =>
+    db.query("select id from public.chat_messages where place_id=$1", [localRoom]);
+  const send = (id: string, sender: string) =>
+    db.query(
+      "insert into public.chat_messages(id,user_id,body,place_id) values($1,$2,'Offline local chat',$3)",
+      [id, sender, localRoom],
+    );
+  const enroll = async (id: string) => {
+    await as(id);
+    expect((await join()).rows).toEqual([{ room: localRoom }]);
+  };
+
+  beforeEach(async () => {
+    await db.query(
+      "insert into public.chat_places(id,parent_id,level,country_code,name) select $1,id,'spot-zone','RU',$2 from public.chat_places where level='country' and country_code='RU'",
+      [localRoom, localName],
+    );
+    await db.query(
+      "insert into zc_osp_internal.zones(id,chat_place_id,zone_kind,name,area_label,country_code) values($1,$2,'community',$3,'Coarse offline area','RU')",
+      [localZone, localRoom, localName],
+    );
+  });
+
+  it("requires private operator review for a community zone without a record spot", async () => {
+    await as(users.owner);
+    const rows = (await catalog()).rows;
+    expect(rows.some((item) => item.zone_id === zone)).toBe(true);
+    expect(rows.some((item) => item.zone_id === localZone)).toBe(false);
+    await deny(() => join());
+    await deny(() => review(true, "FixtureApprove"));
+    await deny(() => db.query("select * from zc_osp_internal.community_zone_reviews"));
+    await as(users.owner, "anon");
+    await deny(() => catalog());
+    await as(users.owner, "service_role");
+    await deny(() => review(true, "FixtureApprove"));
+    await deny(() => db.query("select * from zc_osp_internal.community_zone_reviews"));
+    await deny(
+      () => db.query("update zc_osp_internal.zones set approved=true where id=$1", [localZone]),
+      "23514",
+    );
+    await db.exec("reset role");
+    await deny(() => review(true, "invalid reference"), "22023");
+    await review(true, "FixtureApprove");
+    await review(true, "FixtureApprove");
+    await as(users.owner);
+    expect((await catalog()).rows.find((item) => item.zone_id === localZone)).toEqual({
+      zone_id: localZone,
+      chat_place_id: localRoom,
+      name: localName,
+      area_label: "Coarse offline area",
+      country_code: "RU",
+      is_member: false,
+    });
+  });
+
+  it("allows only voluntary members to exchange messages and closes access after leave or ban", async () => {
+    await review(true, "FixtureApprove");
+    const messageId = randomUUID();
+    await enroll(users.owner);
+    await send(messageId, users.owner);
+    await as(users.captain);
+    expect((await messages()).rows).toEqual([]);
+    await deny(() => send(randomUUID(), users.captain));
+    await enroll(users.captain);
+    expect((await messages()).rows).toEqual([{ id: messageId }]);
+    await db.query("select public.zc_osp_leave($1)", [localZone]);
+    expect((await messages()).rows).toEqual([]);
+    await deny(() => send(randomUUID(), users.captain));
+    await db.exec("reset role");
+    await db.query("insert into zc_osp_internal.bans(zone_id,user_id) values($1,$2)", [
+      localZone,
+      users.captain,
+    ]);
+    await as(users.captain);
+    expect((await catalog()).rows.some((item) => item.zone_id === localZone)).toBe(false);
+    await deny(() => join());
+  });
+
+  it("reuses consent scopes and closes chat, presence, announcements and photo access on withdrawal", async () => {
+    await review(true, "FixtureApprove");
+    await enroll(users.captain);
+    const localPeerMessage = randomUUID();
+    await send(localPeerMessage, users.captain);
+    await action("preferences", { invites: true, announcements: true }, localZone);
+    await enroll(users.owner);
+    await action("presence_on", { minutes: 30 }, localZone);
+    const invite = await action<{ id: string }>(
+      "invite",
+      { peer: users.captain, id: localPeerMessage },
+      localZone,
+    );
+    await action("announce", { body: "Offline local inbox" }, localZone);
+    await as(users.captain);
+    expect((await snapshot(localZone)).inbox[0]?.body).toBe("Offline local inbox");
+    await action("invite_reply", { id: invite.id, decision: "accepted" }, localZone);
+    await as(users.owner);
+    await action("link_trip", { id: invite.id, meetup, report }, localZone);
+    await action("photo_request", { id: photo, peers: [users.captain], consent: true }, localZone);
+    await as(users.captain);
+    await action("photo_preview", { id: photo }, localZone);
+    expect((await shareAccess()).rows[0]?.allowed).toBe(true);
+    await db.exec("reset role");
+    await review(false, "FixtureWithdraw");
+    await review(false, "FixtureWithdraw");
+    expect(
+      (await db.query("select user_id from zc_osp_internal.presences where zone_id=$1", [localZone]))
+        .rows,
+    ).toEqual([]);
+    await deny(() => review(true, "FixtureApprove"), "55000");
+    await as(users.captain);
+    expect((await messages()).rows).toEqual([]);
+    expect((await shareAccess()).rows[0]?.allowed).toBe(false);
+    await deny(() => snapshot(localZone));
+    await deny(() => join());
+  });
+
+  it("fails closed after a room changes and still permits withdrawal", async () => {
+    await review(true, "FixtureApprove");
+    await enroll(users.owner);
+    await db.exec("reset role");
+    await deny(
+      () => db.query("update zc_osp_internal.zones set area_label='Different area' where id=$1", [localZone]),
+      "23514",
+    );
+    await db.query("update public.chat_places set name='Different area' where id=$1", [localRoom]);
+    await as(users.owner);
+    expect((await catalog()).rows.some((item) => item.zone_id === localZone)).toBe(false);
+    await deny(() => join());
+    await db.exec("reset role");
+    await review(false, "FixtureWithdraw");
+    await db.query("update public.chat_places set name=$2 where id=$1", [localRoom, localName]);
+    await as(users.owner);
+    await deny(() => join());
+  });
+
+  it("denies an expired or closed session even to a confirmed account", async () => {
+    await review(true, "FixtureApprove");
+    await enroll(users.owner);
+    await action("clear_session", {}, localZone);
+    await deny(() => catalog());
+    await deny(() => join());
+  });
+
+  it("shuts down community zones on rollback and preserves reviewed record zones", async () => {
+    await review(true, "FixtureApprove");
+    await enroll(users.owner);
+    await action("presence_on", { minutes: 30 }, localZone);
+    await db.exec("reset role");
+    await applySqlFile(db, "staging/rollback_v076_on_spot_community_zone_approval.sql");
+    await deny(() => review(true, "FixtureApprove"), "23514");
+    expect(
+      (await db.query("select zone_id from zc_osp_internal.community_zone_reviews where zone_id=$1", [localZone]))
+        .rows,
+    ).toEqual([{ zone_id: localZone }]);
+    await as(users.owner);
+    expect((await catalog()).rows.some((item) => item.zone_id === zone)).toBe(true);
+    expect((await catalog()).rows.some((item) => item.zone_id === localZone)).toBe(false);
+    await deny(() => snapshot(localZone));
+    expect(
+      (await db.query("select id from public.chat_messages where id=$1", [peerMessage])).rows,
+    ).toEqual([{ id: peerMessage }]);
   });
 });
