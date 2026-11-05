@@ -1,29 +1,38 @@
 # ON SPOT+ — реализация и STAGING-приёмка 05.11.2026
 
-## Ручное применение второй дельты через SQL Editor, 05.11.2026
+## SQL Editor bundle v2 для Windows, 06.11.2026
 
-**Файл для подтверждения готов. Живое применение ожидает оператора.** PR #114, HEAD `238394c63401327931dd9ad42148583e5e8d51eb`, проверенное дерево `7c782c4701cd5aeb85d8d13b61d3ab68050e75fb`. Генератор читает проверенные файлы из репозитория и печатает один SQL для STAGING. [Коммит](https://github.com/SergeyGalkin91/zapruda1/commit/238394c63401327931dd9ad42148583e5e8d51eb) · [Генератор](https://github.com/SergeyGalkin91/zapruda1/blob/238394c63401327931dd9ad42148583e5e8d51eb/scripts/on-spot-staging-apply.mjs)
+**Готов к подтверждённому применению в STAGING.** PR #114, HEAD `a91178b85170cd4371c010dba00c658b6a455dc5`, проверенное дерево `dc48dbf6773306772037e9790bce75723830d159`. [Коммит](https://github.com/SergeyGalkin91/zapruda1/commit/a91178b85170cd4371c010dba00c658b6a455dc5) · [Генератор](https://github.com/SergeyGalkin91/zapruda1/blob/a91178b85170cd4371c010dba00c658b6a455dc5/scripts/on-spot-staging-apply.mjs)
 
-| Проверено | Результат |
+### Причина ошибки v1
+
+Скачанный v1 совпадал с исходным хешем `02102c35bb07d42f1c23ea59a67bb32fab141ad9ee8cea11494c3849148eabc3`. Генератор вкладывал UTF-8 текст миграции в dollar-quoted строку и сравнивал SHA-256 этого текста на сервере. PostgreSQL сохраняет переводы строк внутри такой строки. Преобразование LF в CRLF добавляет 645 байт CR. Полный v1 с CRLF воспроизвёл `P0001` в `inline_code_block line 725 at RAISE`. Исходная строка занимает 42 039 байт, её версия с CRLF — 42 684 байта с SHA-256 `4eb8e83e8618d1f913113940213a705a41581024d0a9ea7f1b0bdcfdcdc1aaac`. Точный шаг преобразования в пользовательском редакторе не наблюдался. Сервер STAGING использует UTF8. [Dollar quoting](https://www.postgresql.org/docs/current/sql-syntax-lexical.html) · [Форматы буфера Windows](https://learn.microsoft.com/en-us/windows/win32/dataxchg/standard-clipboard-formats)
+
+v2 передаёт исходные байты через ASCII Base64. PostgreSQL декодирует их в `bytea`, сверяет SHA-256 и только затем превращает их в UTF-8 SQL. Переводы строк, пробелы и табуляция в Base64 не меняют декодированные байты. Сохранены проверка отпечатка STAGING, блокировка журнала, проверка зависимостей, RLS и ACL, атомарная запись и запрет повторного применения. [PostgreSQL decode](https://www.postgresql.org/docs/current/functions-binarystring.html)
+
+| Проверка | Результат |
 |---|---|
-| Фактический журнал STAGING | Из ON SPOT+ применена первая дельта `20261105043101`. Версия `20261105044404` и имя `v076_on_spot_social_privacy` свободны. 67 записей при сверке |
-| Зависимости | Все нужные таблицы и столбцы сверены. Пять RLS-предпосылок включены, на паре участников DM есть нужное ограничение UNIQUE, `auth.jwt()` и проверка подтверждённого пользователя существуют |
-| SHA-256 исходника | `194e9b0606071a674cd15b44631c062d21aab657af0cb639e1f3459b2c57e16e` |
-| SHA-256 аварийного отключения | `a2bf661bf6e7e9666880f2600f2aee3abb472b063393d9a8b2a53272c52b6222` |
-| SHA-256 готового файла | `02102c35bb07d42f1c23ea59a67bb32fab141ad9ee8cea11494c3849148eabc3`, `ZAPRUDA-STAGING-apply-20261105044404.sql`, 47 892 байта |
-| Изолированные проверки | 545 Vitest / 46 файлов, в том числе 42 сценария ON SPOT+ в двух PostgreSQL-наборах. TypeScript и lint изменённых файлов PASS |
+| Изолированный PostgreSQL | PASS. Выполнен весь v2 с CRLF. Журнал сохранил точный исходный SQL и канонический SHA |
+| Изменение полезной нагрузки | PASS. Подмена символа в корректном Base64 вызвала отказ по хешу до DDL |
+| Ошибка записи журнала | PASS. DDL откатился на LF и CRLF. Схема и запись версии отсутствовали после отказа |
+| Повторное применение | PASS. Повтор отвергнут |
+| Полный локальный прогон | PASS. 546 Vitest / 46 файлов, из них 43 в двух SQL-наборах. TypeScript и lint изменённых файлов PASS |
+| Живой STAGING | По read-only сверке только первая дельта `20261105043101`. Версия `20261105044404`, `zc_osp_social`, `presences` и механизм одобрения зон отсутствуют |
 
-Транзакция блокирует запись в журнал на время проверки и сверяет точный отпечаток первой дельты. Затем проверяет отсутствие версии, имени и частичной схемы, ключевые зависимости и SHA-256 встроенного исходника. После DDL проверяет RLS и права 11 служебных таблиц и двух RPC. При успехе записывает исходные байты в `supabase_migrations.schema_migrations` под канонической версией. Изолированный прогон доказал отказ при отсутствии отпечатка, откат DDL при ошибке записи журнала и отказ при повторном запуске.
+| Файл | SHA-256 |
+|---|---|
+| `ZAPRUDA-STAGING-apply-20261105044404-v2.sql`, 62783 байт | `08bc87e3fc5f4d659044aa3c1151a60f79e36ef4ff76d3884f22efefc5c3eda5` |
+| [Исходная дельта](https://github.com/SergeyGalkin91/zapruda1/blob/a91178b85170cd4371c010dba00c658b6a455dc5/supabase/staging/20261105044404_v076_on_spot_social_privacy.sql) | `194e9b0606071a674cd15b44631c062d21aab657af0cb639e1f3459b2c57e16e` |
+| [Аварийное отключение](https://github.com/SergeyGalkin91/zapruda1/blob/a91178b85170cd4371c010dba00c658b6a455dc5/supabase/staging/rollback_v076_on_spot_social_privacy.sql) | `a2bf661bf6e7e9666880f2600f2aee3abb472b063393d9a8b2a53272c52b6222` |
 
-Аварийный rollback закрывает RPC и выдачу совместных фото, сохраняя барьеры согласия и данные. Он проверен отдельно и хранится как процедура отключения. [Rollback](https://github.com/SergeyGalkin91/zapruda1/blob/238394c63401327931dd9ad42148583e5e8d51eb/supabase/staging/rollback_v076_on_spot_social_privacy.sql)
+### Действие оператора в Windows
 
-### Действие оператора
+1. Скачать v2 и сверить SHA-256 командой PowerShell `Get-FileHash -Algorithm SHA256 -LiteralPath ".\\ZAPRUDA-STAGING-apply-20261105044404-v2.sql"` из папки файла. Воспроизведение из точного коммита — `node scripts/on-spot-staging-apply.mjs > ZAPRUDA-STAGING-apply-20261105044404-v2.sql`.
+2. Открыть файл в Блокноте, скопировать весь текст через **Ctrl+A**, **Ctrl+C**. В первой части файла указан `SQL Editor bundle v2`.
+3. В [SQL Editor STAGING](https://supabase.com/dashboard/project/yudtbifopfnjtjanaqrd/sql/new) выбрать **New query**, роль `postgres` и проверить `yudtbifopfnjtjanaqrd` в адресе. Вставить весь текст и нажать **Run** один раз.
+4. Ожидаемый результат — `STAGING_APPLIED` с версией `20261105044404`. При ошибке передать её текст для read-only сверки.
 
-1. Открыть **SQL Editor → New query** в STAGING `yudtbifopfnjtjanaqrd`, выбрать роль `postgres`.
-2. Вставить весь проверенный файл `ZAPRUDA-STAGING-apply-20261105044404.sql` и нажать **Run** один раз. Воспроизведение из точного коммита — `node scripts/on-spot-staging-apply.mjs > ZAPRUDA-STAGING-apply-20261105044404.sql`.
-3. Дождаться строки `STAGING_APPLIED` с версией `20261105044404`. При ошибке передать её текст для сверки журнала и схемы.
-
-После подтверждённого результата отдельно применяются одобрение зон и обновление обработчика фото, создаётся разрешённая зона и запускается защищённый двухпользовательский E2E. Первый живой ON SPOT+ и новый мобильный Preview остаются BLOCKED.
+Запуск в живой STAGING ожидает владельца. После подтверждения сверяются SHA журнала и схема, затем продолжаются приёмка одобряемых зон, реальный JWT E2E и мобильный Preview.
 
 ## Подтверждение Supabase после настройки GitHub, 05.11.2026
 
