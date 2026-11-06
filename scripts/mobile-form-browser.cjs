@@ -84,12 +84,31 @@ async function run() {
         });
         await page.locator('[data-z-keyboard-open="true"]').waitFor();
         assert.equal(await username.evaluate((field) => field === document.activeElement), true);
-        assert.equal(
-          await page
-            .locator(".z-sticky-form-actions")
-            .evaluate((bar) => getComputedStyle(bar).bottom),
-          "280px",
-        );
+        try {
+          await page.waitForFunction(
+            () => {
+              const shell = document.querySelector(".z-app-shell");
+              const bar = shell?.querySelector(".z-sticky-form-actions");
+              return bar && getComputedStyle(bar).bottom === "280px";
+            },
+            undefined,
+            { timeout: 4_000 },
+          );
+        } catch {
+          const geometry = await page.locator(".z-sticky-form-actions").evaluate((bar) => {
+            const shell = bar.closest(".z-app-shell");
+            return {
+              bottom: getComputedStyle(bar).bottom,
+              keyboard: shell.dataset.zKeyboardOpen,
+              cssInset: getComputedStyle(bar).getPropertyValue("--z-form-bottom"),
+              height: window.visualViewport.height,
+              offsetTop: window.visualViewport.offsetTop,
+              innerHeight: window.innerHeight,
+              inline: shell.style.getPropertyValue("--z-form-bottom"),
+            };
+          });
+          assert.fail("Keyboard action bar: " + JSON.stringify(geometry));
+        }
         await page.evaluate(() => {
           delete window.visualViewport.height;
           delete window.visualViewport.offsetTop;

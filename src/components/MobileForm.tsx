@@ -1,4 +1,4 @@
-import { cloneElement, useId, type ReactElement, type ReactNode } from "react";
+import { cloneElement, useId, useState, type ReactElement, type ReactNode } from "react";
 
 type FieldControl = {
   id?: string;
@@ -24,6 +24,8 @@ export function MobileField({
   className?: string;
 }) {
   const generatedId = useId();
+  const [nativeError, setNativeError] = useState("");
+  const message = error || nativeError;
   const id = children.props.id ?? generatedId;
   const floating =
     children.type === "textarea" ||
@@ -34,12 +36,24 @@ export function MobileField({
   const describedBy = [
     children.props["aria-describedby"],
     hint && id + "-hint",
-    error && id + "-error",
+    message && id + "-error",
   ]
     .filter(Boolean)
     .join(" ");
   return (
-    <div className={["z-mobile-field", className].filter(Boolean).join(" ")}>
+    <div
+      className={["z-mobile-field", className].filter(Boolean).join(" ")}
+      onInvalid={(event) => {
+        const control = event.target;
+        if (
+          control instanceof HTMLInputElement ||
+          control instanceof HTMLSelectElement ||
+          control instanceof HTMLTextAreaElement
+        )
+          setNativeError(control.validationMessage);
+      }}
+      onInput={() => setNativeError("")}
+    >
       <div
         className="z-mobile-field-body"
         data-floating={floating || undefined}
@@ -47,7 +61,7 @@ export function MobileField({
       >
         {cloneElement(children, {
           id,
-          "aria-invalid": error ? true : children.props["aria-invalid"],
+          "aria-invalid": message ? true : children.props["aria-invalid"],
           "aria-describedby": describedBy || undefined,
           ...(floating ? { placeholder: " " } : {}),
         })}
@@ -59,9 +73,9 @@ export function MobileField({
           {hint}
         </p>
       )}
-      {error && (
+      {message && (
         <p className="z-mobile-field-error" id={id + "-error"} role="alert">
-          {error}
+          {message}
         </p>
       )}
     </div>

@@ -239,13 +239,6 @@ function Auth() {
             className="space-y-3"
             aria-busy={busy}
             onSubmit={submit}
-            onInvalid={(event) => {
-              const field = event.target;
-              if (field instanceof HTMLInputElement)
-                setFieldError(
-                  (current) => current ?? { name: field.name, text: field.validationMessage },
-                );
-            }}
             onInput={() => setFieldError(null)}
           >
             {mode === "up" && (

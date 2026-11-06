@@ -1034,14 +1034,11 @@ body {
   .z-sticky-form-actions {
     position: sticky;
     z-index: 30;
-    bottom: max(var(--z-mobile-nav-height, 0px), var(--z-keyboard-inset, 0px));
+    bottom: var(--z-form-bottom, var(--z-mobile-nav-height, 0px));
     padding: 0.5rem;
     border: 1px solid var(--premium-edge);
     border-radius: 0.875rem;
     background: var(--premium-panel);
-  }
-  .z-app-shell[data-z-keyboard-open="true"] .z-sticky-form-actions {
-    bottom: var(--z-keyboard-inset);
   }
   .z-app-shell[data-z-keyboard-open="true"]:has(.z-sticky-form-actions) > .z-shell-header {
     position: relative;

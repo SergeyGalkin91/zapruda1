@@ -230,7 +230,9 @@ export function Shell({
     <div
       data-z-screen={screen}
       data-z-keyboard-open={keyboardInset > 0 || undefined}
-      style={{ "--z-keyboard-inset": keyboardInset + "px" } as CSSProperties}
+      style={
+        keyboardInset ? ({ "--z-form-bottom": keyboardInset + "px" } as CSSProperties) : undefined
+      }
       data-z-admin-nav={isAdmin || undefined}
       className="z-app-shell overflow-x-clip"
     >
