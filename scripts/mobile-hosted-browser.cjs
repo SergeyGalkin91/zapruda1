@@ -3,7 +3,12 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { setTimeout: delay } = require("node:timers/promises");
 const engines = require("playwright");
-const { assertShellBounds, assertMobileNav, mobileRoutes } = require("./browser-shell-bounds.cjs");
+const {
+  assertShellBounds,
+  assertMobileNav,
+  waitForMobileRoute,
+  mobileRoutes,
+} = require("./browser-shell-bounds.cjs");
 
 const scope = process.env.MOBILE_BROWSER_SCOPE || "netlify";
 const base =
@@ -186,13 +191,7 @@ async function run() {
           const links = await assertMobileNav(page);
           await links.nth(index).click();
           await page.waitForURL((url) => url.origin === base && url.pathname === route);
-          await page.waitForFunction(
-            (i) =>
-              document
-                .querySelectorAll(".z-mobile-nav-items a")
-                [i]?.getAttribute("aria-current") === "page",
-            index,
-          );
+          await waitForMobileRoute(page, index);
         }
         if (width === 390) await checkFeedStates(page, context);
         assert.deepEqual(errors, [], engine + " page errors");

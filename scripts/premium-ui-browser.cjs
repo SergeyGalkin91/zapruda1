@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const engines = require("playwright");
-const { assertShellBounds, assertMobileNav, mobileRoutes } = require("./browser-shell-bounds.cjs");
+const { assertShellBounds, assertMobileNav, waitForMobileRoute, mobileRoutes } = require("./browser-shell-bounds.cjs");
 const { appThemeButton } = require("./browser-appearance-controls.cjs");
 const engine = process.env.VISUAL_BROWSER || "chromium";
 const base = process.env.VISUAL_BASE_URL || "http://127.0.0.1:3000";
@@ -53,8 +53,7 @@ fs.mkdirSync(out, { recursive: true });
             const links = await assertMobileNav(page);
             await links.nth(index).click();
             await page.waitForURL(url => url.pathname === route);
-            await page.waitForFunction(i =>
-              document.querySelectorAll(".z-mobile-nav-items a")[i]?.getAttribute("aria-current") === "page", index);
+            await waitForMobileRoute(page, index);
           }
           const menu = page.getByLabel("Открыть список разделов");
           await menu.click();

@@ -1,5 +1,6 @@
 const assert = require("node:assert/strict");
 const mobileRoutes = ["/", "/communities", "/reports/new", "/partners", "/chat"];
+const mobileScreens = ["feed", "communities", "create", "trips", "chat"];
 
 /** Check essential controls themselves: overflow-x:clip can conceal a broken header. */
 async function assertShellBounds(page) {
@@ -52,18 +53,29 @@ async function assertShellBounds(page) {
 async function assertMobileNav(page) {
   const nav = page.getByRole("navigation", { name: "Мобильная навигация" });
   const links = nav.locator("a");
-  const boxes = await links.evaluateAll((elements) =>
-    elements.map((element) => {
-      const box = element.getBoundingClientRect();
-      const atCenter = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
-      return {
-        route: element.getAttribute("href")?.split("?")[0],
-        width: box.width,
-        height: box.height,
-        reachable: element.contains(atCenter),
-      };
-    }),
+  // A client route or the initial session event can remount Shell during navigation.
+  // Query and measure the live links in the same browser frame.
+  const measurement = await page.waitForFunction(
+    (expectedLinks) => {
+      const boxes = Array.from(document.querySelectorAll(".z-mobile-nav-items a"), (element) => {
+        const box = element.getBoundingClientRect();
+        const atCenter = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+        return {
+          route: element.getAttribute("href")?.split("?")[0],
+          width: box.width,
+          height: box.height,
+          reachable: element.contains(atCenter),
+        };
+      });
+      return boxes.length === expectedLinks && boxes.every(({ width, height }) => width && height)
+        ? boxes
+        : false;
+    },
+    mobileRoutes.length,
+    { timeout: 8_000 },
   );
+  const boxes = await measurement.jsonValue();
+  await measurement.dispose();
   assert.deepEqual(
     boxes.map(({ route }) => route),
     mobileRoutes,
@@ -75,4 +87,10 @@ async function assertMobileNav(page) {
   return links;
 }
 
-module.exports = { assertShellBounds, assertMobileNav, mobileRoutes };
+async function waitForMobileRoute(page, index) {
+  const shell = page.locator('[data-z-screen="' + mobileScreens[index] + '"]');
+  const links = shell.locator(".z-mobile-nav-items a");
+  await links.nth(index).and(shell.locator('a[aria-current="page"]')).waitFor();
+}
+
+module.exports = { assertShellBounds, assertMobileNav, waitForMobileRoute, mobileRoutes };
