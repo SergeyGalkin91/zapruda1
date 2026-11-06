@@ -44,14 +44,14 @@ jobs:
           test -f .output/server/index.mjs
       - name: Install the matching Playwright package
         run: bun add --dev playwright@1.58.2
-      - name: Check both themes across mobile and desktop widths in three engines
+      - name: Start the isolated browser test server
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p appearance-evidence
+          install -d -o pwuser -g pwuser appearance-evidence
           node .output/server/index.mjs > appearance-evidence/server.log 2>&1 &
           SERVER_PID=$!
-          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          printf '%s\n' "$SERVER_PID" > "$RUNNER_TEMP/zapruda-visual.pid"
           READY=0
           for i in $(seq 1 40); do
             if curl -fsS http://127.0.0.1:3000/settings -o /dev/null; then READY=1; break; fi
@@ -67,14 +67,35 @@ jobs:
             cat appearance-evidence/server.log
             exit 1
           fi
+      - name: Check mobile forms and recovery in three engines
+        shell: bash
+        run: |
+          for engine in chromium webkit firefox; do
+            runuser -u pwuser -- env VISUAL_BROWSER="$engine" node scripts/mobile-form-browser.cjs
+          done
+      - name: Upload mobile form screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-form-acceptance
+          path: appearance-evidence/mobile-forms/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Check both themes across mobile and desktop widths in three engines
+        shell: bash
+        run: |
           for engine in chromium webkit firefox; do
             echo "Checking appearance in $engine"
-            VISUAL_BROWSER="$engine" node scripts/mobile-form-browser.cjs
-            VISUAL_BROWSER="$engine" node scripts/visual-theme-smoke.cjs
-            VISUAL_BROWSER="$engine" node scripts/premium-ui-browser.cjs
+            runuser -u pwuser -- env VISUAL_BROWSER="$engine" node scripts/visual-theme-smoke.cjs
+            runuser -u pwuser -- env VISUAL_BROWSER="$engine" node scripts/premium-ui-browser.cjs
           done
           # Verify actual CSS colors; previous screenshots revealed green hardcoded surfaces.
-          node scripts/issue76-no-green-audit.cjs
+          runuser -u pwuser -- node scripts/issue76-no-green-audit.cjs
+      - name: Stop the isolated browser test server
+        if: always()
+        run: |
+          pid_file="$RUNNER_TEMP/zapruda-visual.pid"
+          if test -s "$pid_file"; then kill "$(cat "$pid_file")" 2>/dev/null || true; fi
       - name: Upload viewport screenshots and metrics
         if: always()
         uses: actions/upload-artifact@v4
