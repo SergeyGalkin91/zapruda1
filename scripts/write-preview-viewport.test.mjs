@@ -22,12 +22,13 @@ async function fixture(t) {
   return root;
 }
 
-test("only PR93 STAGING gets the hosted page and exact build SHA", async (t) => {
+test("PR93 STAGING gets the hosted page and exact build SHA", async (t) => {
   const root = await fixture(t);
   assert.deepEqual(await writePreviewViewport(root, env), { enabled: true, sha: env.COMMIT_REF });
   const html = await readFile(join(root, "dist/__qa/viewport.html"), "utf8");
   assert.ok(html.includes(env.COMMIT_REF));
   assert.ok(!html.includes("__DEPLOYED_SHA__"));
+  assert.ok(!html.includes("__REVIEW_ID__"));
   assert.ok(html.includes("deploy-preview-93--zapruda1.netlify.app"));
   assert.ok(!html.includes("sonvniuwtvzzyuglscah"));
   assert.ok(!/localStorage|sessionStorage|document\.cookie|access_token|Authorization/.test(html));
@@ -38,6 +39,23 @@ test("only PR93 STAGING gets the hosted page and exact build SHA", async (t) => 
   assert.ok(
     !/localStorage|sessionStorage|document\.cookie|access_token|Authorization/.test(gallery),
   );
+});
+
+test("mobile-first STAGING preview uses only its own review host", async (t) => {
+  const root = await fixture(t);
+  const mobile = { ...env, HEAD: "work/mobile-first-premium-20261106", REVIEW_ID: "201" };
+  assert.deepEqual(await writePreviewViewport(root, mobile), {
+    enabled: true,
+    sha: env.COMMIT_REF,
+  });
+  for (const page of ["viewport.html", "premium.html"]) {
+    const html = await readFile(join(root, "dist/__qa", page), "utf8");
+    assert.ok(html.includes("deploy-preview-201--zapruda1.netlify.app"));
+    assert.ok(!html.includes("deploy-preview-93--zapruda1.netlify.app"));
+  }
+  assert.deepEqual(await writePreviewViewport(root, { ...mobile, REVIEW_ID: "201<script>" }), {
+    enabled: false,
+  });
 });
 
 test("production, branch deploys and other PRs remove stale QA output", async (t) => {

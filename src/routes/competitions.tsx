@@ -6,6 +6,8 @@ import { Wordmark } from "@/components/Wordmark";
 import { ZaprudaPublicSpotAtlas } from "@/components/ZaprudaPublicSpotAtlas";
 import { SpotCatchFlow } from "@/components/SpotCatchFlow";
 import { SpotLeaderboards } from "@/components/SpotLeaderboards";
+import { ScreenSectionNav } from "@/components/ScreenSectionNav";
+import { ScreenState } from "@/components/ScreenState";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/competitions")({
@@ -27,6 +29,12 @@ type Competition = {
   max_teams: number;
 };
 
+const spotSections = [
+  { id: "approved-spot-map", label: "Карта" },
+  { id: "spot-tournaments", label: "Турниры" },
+  { id: "spot-records", label: "KING" },
+] as const;
+
 function CompetitionsPage() {
   const [uid, setUid] = useState("");
   const [items, setItems] = useState<Competition[]>([]);
@@ -35,20 +43,23 @@ function CompetitionsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data: auth } = await supabase.auth.getUser();
-    setUid(auth.user?.id ?? "");
-    const { data, error: qErr } = await supabase
-      .from("competitions")
-      .select("id,title,area_label,status,starts_at,max_teams")
-      .in("status", ["open", "live", "finished"])
-      .order("starts_at", { ascending: true })
-      .limit(50);
-    if (qErr) setError(qErr.message);
-    else {
-      setError("");
+    setError("");
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      setUid(auth.user?.id ?? "");
+      const { data, error: qErr } = await supabase
+        .from("competitions")
+        .select("id,title,area_label,status,starts_at,max_teams")
+        .in("status", ["open", "live", "finished"])
+        .order("starts_at", { ascending: true })
+        .limit(50);
+      if (qErr) throw qErr;
       setItems((data ?? []) as Competition[]);
+    } catch {
+      setError("Не удалось загрузить турниры.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -66,25 +77,19 @@ function CompetitionsPage() {
       <p className="z-screen-description">
         Открывай проверенные споты. Сохраняй свою воду. Участвуй честно.
       </p>
-      <nav className="z-segments" aria-label="Разделы SPOT">
-        <a href="#approved-spot-map" aria-current="page">
-          Карта
-        </a>
-        <a href="#spot-tournaments">Турниры</a>
-        <a href="#spot-records">KING</a>
-      </nav>
+      <ScreenSectionNav route="/competitions" label="Разделы SPOT" sections={spotSections} />
+      <ZaprudaPublicSpotAtlas />
       <nav aria-label="Связанные сценарии SPOT" className="z-catch-journey">
         <a href="/big-fish">BIG FISH · подать улов</a>
         <a href="/big-fish#my-catches">Мои заявки и проверка</a>
         <a href="/profile#verified-titles">Мои KING-титулы</a>
         <a href="/on-spot">ON SPOT+ · рыбаки рядом</a>
       </nav>
-      <ZaprudaPublicSpotAtlas />
       <header id="spot-tournaments" className="z-premium-card mt-8 p-5 sm:p-7">
         <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">
           <Trophy className="size-5" /> ZAPRUDA / СОРЕВНОВАНИЯ
         </p>
-        <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">Командные турниры</h1>
+        <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Командные турниры</h2>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">
           Регистрация команд с серверным лимитом слотов. Результаты принимает капитан; модерирует
           организатор.
@@ -100,14 +105,20 @@ function CompetitionsPage() {
           .
         </p>
       )}
-      {error && <p className="mt-4 text-sm text-red-300">{error}</p>}
-      {loading && <p className="mt-4 text-sm text-zinc-400">Загрузка…</p>}
+      {error && (
+        <ScreenState kind="error" className="mt-4" onRetry={() => void load()}>
+          {error}
+        </ScreenState>
+      )}
+      {loading && (
+        <ScreenState kind="loading" className="mt-4">
+          Загружаем турниры…
+        </ScreenState>
+      )}
 
       <div className="mt-6 grid gap-3">
-        {!loading && !items.length && (
-          <div className="rounded-2xl border border-white/10 bg-[var(--premium-panel)] p-5 text-sm text-zinc-400">
-            Открытых турниров пока нет.
-          </div>
+        {!loading && !error && !items.length && (
+          <ScreenState kind="empty">Открытых турниров пока нет.</ScreenState>
         )}
         {items.map((c) => (
           <article

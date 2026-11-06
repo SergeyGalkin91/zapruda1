@@ -1,23 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
 import { MapPinned, ShieldCheck } from "lucide-react";
 import { BrandFish } from "@/components/Wordmark";
+import { ScreenState } from "@/components/ScreenState";
 import { supabase } from "@/integrations/supabase/client";
 import { approvedMapUrl, isApprovedPublicSpot, type PublicSpot } from "@/lib/approved-spot-map";
 
 /** Public-only ZAPRUDA SPOT atlas. No user coordinates, no paid/private location lookups. */
 export function ZaprudaPublicSpotAtlas() {
   const stagingOnly =
-    import.meta.env["VITE_SUPABASE_URL"] === "https://yudtbifopfnjtjanaqrd.supabase.co" ||
-    (typeof window !== "undefined" &&
-      /^deploy-preview-[0-9]+--zapruda1[.]netlify[.]app$/.test(window.location.hostname));
+    import.meta.env["VITE_SUPABASE_URL"] === "https://yudtbifopfnjtjanaqrd.supabase.co";
   const [spots, setSpots] = useState<PublicSpot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!stagingOnly) return;
     let active = true;
+    setLoading(true);
+    setError("");
+    const fail = () => {
+      if (!active) return;
+      setSpots([]);
+      setSelected(null);
+      setError("Не удалось загрузить проверенные споты.");
+      setLoading(false);
+    };
     void supabase
       .from("zc_public_spots")
       .select(
@@ -28,14 +37,17 @@ export function ZaprudaPublicSpotAtlas() {
       .limit(100)
       .then(({ data, error: queryError }) => {
         if (!active) return;
+        if (queryError) {
+          fail();
+          return;
+        }
         setSpots((data ?? []).filter(isApprovedPublicSpot));
-        if (queryError) setError("Не удалось загрузить проверенные споты.");
         setLoading(false);
-      });
+      }, fail);
     return () => {
       active = false;
     };
-  }, [stagingOnly]);
+  }, [stagingOnly, attempt]);
 
   const mapUrl = useMemo(
     () => approvedMapUrl(selected ? spots.filter((spot) => spot.id === selected) : spots),
@@ -66,10 +78,20 @@ export function ZaprudaPublicSpotAtlas() {
           </p>
         </div>
         <span className="inline-flex items-center gap-2 rounded-full border border-[#D7FF35]/30 px-3 py-1 text-xs text-[#D7FF35]">
-          <ShieldCheck className="size-4" aria-hidden="true" /> {spots.length} проверено
+          <ShieldCheck className="size-4" aria-hidden="true" />
+          {loading
+            ? "Проверяем каталог"
+            : error
+              ? "Каталог недоступен"
+              : `${spots.length} проверено`}
         </span>
       </div>
 
+      {error && (
+        <ScreenState kind="error" className="mt-4" onRetry={() => setAttempt((n) => n + 1)}>
+          {error}
+        </ScreenState>
+      )}
       <div className="z-spot-map mt-5">
         <iframe
           title="Карта проверенных публичных спотов ZAPRUDA"
@@ -78,9 +100,14 @@ export function ZaprudaPublicSpotAtlas() {
           referrerPolicy="strict-origin-when-cross-origin"
         />
         <span className="z-spot-map-badge">
-          SPOT / {spots.length ? "Проверенные точки" : "Общая карта · без точек"}
+          SPOT /{" "}
+          {loading || error
+            ? "Общая карта"
+            : spots.length
+              ? "Проверенные точки"
+              : "Общая карта · без точек"}
         </span>
-        {!spots.length && (
+        {!loading && !error && !spots.length && (
           <p className="z-spot-map-note">
             Только настоящие места после проверки. Неподтверждённые точки не показаны.
           </p>
@@ -96,20 +123,15 @@ export function ZaprudaPublicSpotAtlas() {
       </a>
 
       {loading && (
-        <p className="mt-5 text-sm text-zinc-400" role="status">
+        <ScreenState kind="loading" className="mt-5">
           Проверяем каталог…
-        </p>
-      )}
-      {error && (
-        <p role="alert" className="mt-5 text-sm text-red-300">
-          {error}
-        </p>
+        </ScreenState>
       )}
       {!loading && !error && !spots.length && (
-        <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-zinc-300">
+        <ScreenState kind="empty" className="mt-5">
           Проверенных спотов пока нет. Здесь появятся настоящие карточки после независимой
           модерации.
-        </div>
+        </ScreenState>
       )}
       {!loading && !error && mapUrl && (
         <>

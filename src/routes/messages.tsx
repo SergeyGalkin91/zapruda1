@@ -421,7 +421,7 @@ function Messages() {
   }
 
   return (
-    <Shell>
+    <Shell screen="chat">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">

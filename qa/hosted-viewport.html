@@ -63,7 +63,7 @@
   </head>
   <body>
     <header>
-      <h1>Авторизованный hosted QA · PR #93</h1>
+      <h1>Мобильная проверка STAGING · PR #__REVIEW_ID__</h1>
       <p id="sha">Deployed SHA: __DEPLOYED_SHA__</p>
       <p>
         Настоящее приложение в CSS viewport фрейма. Вход и тема — через интерфейс приложения. Этот
@@ -74,6 +74,7 @@
         <select id="width" aria-label="Ширина viewport">
           <option>320</option>
           <option selected>390</option>
+          <option>430</option>
           <option>768</option>
           <option>1440</option>
         </select></label
@@ -102,6 +103,7 @@
           <option value="/settings">Настройки</option>
           <option value="/atlas">Atlas / SPOT</option>
           <option value="/competitions">ZARUBA / KING</option>
+          <option value="/on-spot">ON SPOT+</option>
           <option value="/assistant">ИИ-рыболов</option>
           <option value="/auth?mode=in">Вход</option>
           <option value="/auth?mode=up">Регистрация</option>
@@ -121,9 +123,9 @@
       const metrics = document.getElementById("metrics");
       const stageHost = "yudtbifopfnjtjanaqrd.supabase.co";
       const allowed =
-        location.hostname === "deploy-preview-93--zapruda1.netlify.app" ||
+        location.hostname === "deploy-preview-__REVIEW_ID__--zapruda1.netlify.app" ||
         /^[a-f0-9]{24}--zapruda1\.netlify\.app$/.test(location.hostname);
-      const widths = new Set(["320", "390", "768", "1440"]);
+      const widths = new Set(["320", "390", "430", "768", "1440"]);
       const heights = new Set(["568", "640", "844", "936"]);
       const routes = new Set(Array.from(route.options, (o) => o.value));
       function measure() {
@@ -231,7 +233,7 @@
       if (allowed) {
         frame.style.height = height.value + "px";
         frame.src = "/";
-      } else state.textContent = "Недоступно вне canonical Netlify Preview #93";
+      } else state.textContent = "Доступно в Netlify Deploy Preview #__REVIEW_ID__";
     </script>
   </body>
 </html>

@@ -30,7 +30,7 @@ function Welcome() {
         </p>
         <div className="z-welcome-actions">
           <Link to="/auth" search={{ mode: "in" }} className="btn-primary">
-            Войти в ZAPRUDA <ArrowRight className="size-4" />
+            Войти в ZAPRUDA <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
           <Link to="/" className="btn-ghost">
             Смотреть ленту
@@ -38,10 +38,10 @@ function Welcome() {
         </div>
         <div className="z-welcome-links">
           <Link to="/communities">
-            <Compass className="size-4" /> Найти сообщество
+            <Compass className="size-4" aria-hidden="true" /> Найти сообщество
           </Link>
           <Link to="/settings">
-            <Settings2 className="size-4" /> Оформление
+            <Settings2 className="size-4" aria-hidden="true" /> Оформление
           </Link>
         </div>
         <p className="z-welcome-footnote">SPINNING / FEEDER / CARP / WINTER / BOAT</p>

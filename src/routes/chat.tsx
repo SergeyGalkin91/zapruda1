@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { ScreenState } from "@/components/ScreenState";
 import { Wordmark } from "@/components/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
 import { prepareReportPhoto } from "@/lib/report-photo";
@@ -684,7 +685,7 @@ export function GeographicChat() {
   }
 
   return (
-    <Shell>
+    <Shell screen="chat">
       {!threadOpen && (
         <header className="mb-5 rounded-[26px] border border-[#273247] bg-[#070B10] px-4 pb-6 pt-6 shadow-[0_18px_50px_rgba(0,0,0,.32)] sm:px-7 sm:pt-7">
           <div className="mb-6 flex items-center justify-between gap-3">
@@ -781,14 +782,15 @@ export function GeographicChat() {
           {readError}
         </p>
       )}
-      {loading && <p className="mb-5 text-sm text-zinc-400">Загружаем разделы чатов…</p>}
+      {loading && (
+        <ScreenState kind="loading" className="mb-5">
+          Загружаем разделы чатов…
+        </ScreenState>
+      )}
       {error && (
-        <p
-          role="alert"
-          className="mb-4 rounded-xl border border-red-400/30 bg-red-950/20 p-4 text-sm text-red-200"
-        >
+        <ScreenState kind="error" className="mb-4">
           {error}
-        </p>
+        </ScreenState>
       )}
       {!loading && !uid && (
         <p className="mb-5 rounded-xl border border-white/15 p-4 text-sm text-zinc-300">
@@ -1156,22 +1158,31 @@ export function GeographicChat() {
                   aria-live="polite"
                 >
                   {chatLoading && (
-                    <p className="text-sm text-zinc-400">Загружаем сообщения ветки…</p>
+                    <ScreenState kind="loading">Загружаем сообщения ветки…</ScreenState>
                   )}
                   {chatError && (
-                    <p
-                      role="alert"
-                      className="rounded-xl border border-red-400/30 bg-red-950/15 p-3 text-sm text-red-200"
+                    <ScreenState
+                      kind="error"
+                      onRetry={
+                        chatError.startsWith("Не удалось открыть ветку:")
+                          ? () => setRefreshIndex((index) => index + 1)
+                          : undefined
+                      }
                     >
                       {chatError}
-                    </p>
+                    </ScreenState>
                   )}
-                  {!chatLoading && !chatError && !messages.length && (
-                    <p className="rounded-xl border border-dashed border-white/15 p-5 text-sm text-zinc-400">
-                      Здесь ещё нет сообщений. Начни обсуждение в ветке «{currentTopic.label}» для «
-                      {selectedPlace?.name || "Вся ZAPRUDA"}»!
-                    </p>
-                  )}
+                  {uid &&
+                    selectedPlace &&
+                    !loading &&
+                    !chatLoading &&
+                    !chatError &&
+                    !messages.length && (
+                      <ScreenState kind="empty">
+                        Здесь ещё нет сообщений. Начни обсуждение в ветке «{currentTopic.label}» для
+                        «{selectedPlace?.name || "Вся ZAPRUDA"}»!
+                      </ScreenState>
+                    )}
                   {messages.map((message) => (
                     <article
                       key={message.id}
@@ -1335,8 +1346,10 @@ export function GeographicChat() {
                     </p>
                   )}
                   <div className="flex flex-wrap items-center gap-2">
-                    <label className="inline-flex cursor-pointer items-center rounded-lg border border-white/20 px-3 py-2 text-xs text-zinc-200 hover:border-[#D7FF35]">
-                      📷 {photo ? photo.name : "Прикрепить фото"}
+                    <label className="inline-flex min-h-11 min-w-0 max-w-full cursor-pointer items-center rounded-lg border border-white/20 px-3 py-2 text-xs text-zinc-200 hover:border-[#D7FF35] focus-within:outline-2 focus-within:outline-primary">
+                      <span className="[overflow-wrap:anywhere]">
+                        📷 {photo ? photo.name : "Прикрепить фото"}
+                      </span>
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
@@ -1358,7 +1371,7 @@ export function GeographicChat() {
                     {photo && !pendingPhotoMessageId && (
                       <button
                         type="button"
-                        className="text-xs text-[#D7FF35]"
+                        className="min-h-11 text-xs text-[#D7FF35]"
                         onClick={() => setPhoto(null)}
                       >
                         Убрать фото
@@ -1368,7 +1381,7 @@ export function GeographicChat() {
                       <button
                         type="button"
                         disabled={busy}
-                        className="text-xs text-amber-200 underline"
+                        className="min-h-11 text-xs text-amber-200 underline"
                         onClick={abandonPendingPhoto}
                       >
                         Оставить сообщение без фото

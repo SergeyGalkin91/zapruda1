@@ -74,3 +74,33 @@ jobs:
           path: appearance-evidence/
           if-no-files-found: ignore
           retention-days: 14
+  hosted-mobile:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'work/mobile-first-premium-20261106'
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      NETLIFY_MOBILE_PREVIEW: https://deploy-preview-${{ github.event.number }}--zapruda1.netlify.app
+      EXPECTED_PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - name: Install browser QA dependencies
+        run: |
+          bun install --frozen-lockfile
+          bun add --dev playwright@1.58.2
+          bunx playwright install --with-deps chromium webkit
+      - name: Verify the exact Netlify STAGING SHA and test mobile screens
+        run: |
+          VISUAL_BROWSER=chromium node scripts/mobile-hosted-browser.cjs
+          VISUAL_BROWSER=webkit node scripts/mobile-hosted-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-first-hosted-staging-evidence
+          path: appearance-evidence/hosted-mobile/
+          if-no-files-found: ignore
+          retention-days: 14

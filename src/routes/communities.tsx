@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight,
   Globe2,
   MessageCircle,
+  MapPin,
   Search,
   Send,
   ShieldCheck,
@@ -13,6 +14,7 @@ import { Shell } from "@/components/Shell";
 import { SocialGroups } from "@/components/SocialGroups";
 import { SocialMeetups } from "@/components/SocialMeetups";
 import { VerifiedGuideDirectory } from "@/components/VerifiedGuideDirectory";
+import { ScreenSectionNav } from "@/components/ScreenSectionNav";
 import { countries } from "@/lib/geo";
 
 export const Route = createFileRoute("/communities")({
@@ -26,14 +28,28 @@ export const Route = createFileRoute("/communities")({
   component: Communities,
 });
 
+const communitySections = [
+  { id: "community-geography", label: "География" },
+  { id: "community-clubs", label: "Клубы" },
+  { id: "community-meetups", label: "СХОДКИ" },
+] as const;
+
 function Communities() {
   const [country, setCountry] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const selectedCountry = useRef<HTMLDivElement>(null);
   const visible = countries.filter(
     (c) =>
       c.group === "cis" && c.name.toLocaleLowerCase("ru").includes(search.toLocaleLowerCase("ru")),
   );
   const selected = countries.find((c) => c.code === country);
+
+  useEffect(() => {
+    if (country && window.matchMedia("(max-width: 639px)").matches) {
+      selectedCountry.current?.scrollIntoView({ block: "nearest" });
+    }
+  }, [country]);
+
   return (
     <Shell screen="communities">
       <header className="z-screen-heading">
@@ -53,14 +69,11 @@ function Communities() {
       <p className="z-screen-description">
         Выбирай свою географию. Находи напарников, клубы и новые истории.
       </p>
-      <nav className="z-segments" aria-label="Каталог сообществ">
-        <a href="#community-geography" aria-current="page">
-          География
-        </a>
-        <a href="#community-clubs">Клубы</a>
-        <a href="#community-meetups">СХОДКИ</a>
-        <a href="/on-spot">ON SPOT+</a>
-      </nav>
+      <ScreenSectionNav
+        route="/communities"
+        label="Каталог сообществ"
+        sections={communitySections}
+      />
       <section
         id="community-geography"
         className="z-communities-geo"
@@ -104,7 +117,7 @@ function Communities() {
             Такой страны пока нет в каталоге. Попробуй другое название.
           </p>
         )}
-        <div id="zapruda-selected-country" aria-live="polite">
+        <div ref={selectedCountry} id="zapruda-selected-country" aria-live="polite">
           {selected && (
             <section aria-label="Выбранная страна" className="z-premium-card mt-4 p-5">
               <p className="font-bold">
@@ -144,6 +157,18 @@ function Communities() {
           </span>
         </span>
         <ArrowUpRight className="size-4 text-[#D7FF35]" />
+      </Link>
+      <Link to="/on-spot" className="z-premium-card mt-3 flex items-center gap-4 p-5">
+        <span className="z-round-action">
+          <MapPin className="size-5" aria-hidden="true" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <strong className="block text-sm">ON SPOT+ · Рыбаки рядом</strong>
+          <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+            Проверить доступность локальных зон общения.
+          </span>
+        </span>
+        <ArrowUpRight className="size-4 shrink-0 text-[#D7FF35]" aria-hidden="true" />
       </Link>
       <div id="community-meetups" className="z-community-section">
         <SocialMeetups />

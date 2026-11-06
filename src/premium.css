@@ -54,21 +54,111 @@ body {
   text-rendering: optimizeLegibility;
 }
 .z-app-shell {
+  --z-header-content-height: 72px;
+  --z-mobile-nav-content-height: 76px;
+  --z-mobile-admin-height: 0px;
+  --z-header-gutter: 12px;
+  --z-content-gutter: 16px;
+  --z-safe-top: env(safe-area-inset-top, 0px);
+  --z-safe-right: env(safe-area-inset-right, 0px);
+  --z-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --z-safe-left: env(safe-area-inset-left, 0px);
+  --z-mobile-nav-height: calc(
+    var(--z-mobile-nav-content-height) + var(--z-mobile-admin-height) + var(--z-safe-bottom) + 1px
+  );
   position: relative;
   isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-bottom: calc(var(--z-mobile-nav-height) + 16px);
   color: #f2f2f2;
 }
-.z-app-shell > header.sticky,
-.z-app-shell > nav[aria-label="Мобильная навигация"] {
+.z-app-shell[data-z-admin-nav="true"] {
+  --z-mobile-admin-height: 52px;
+}
+.z-app-shell > .z-shell-header,
+.z-app-shell > .z-mobile-nav {
   background: var(--premium-header);
   border-color: var(--premium-edge);
 }
-.z-app-shell nav[aria-label="Остальные разделы"] {
+.z-shell-header {
+  padding-top: var(--z-safe-top);
+}
+.z-shell-header-inner {
+  height: var(--z-header-content-height);
+  padding-left: calc(var(--z-header-gutter) + var(--z-safe-left));
+  padding-right: calc(var(--z-header-gutter) + var(--z-safe-right));
+}
+.z-shell-content {
+  padding-left: calc(var(--z-content-gutter) + var(--z-safe-left));
+  padding-right: calc(var(--z-content-gutter) + var(--z-safe-right));
+}
+.z-shell-menu {
+  width: min(320px, calc(100vw - 24px - var(--z-safe-left) - var(--z-safe-right)));
+  max-height: calc(
+    100dvh - var(--z-header-content-height) - var(--z-safe-top) - var(--z-mobile-nav-height) - 16px
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--premium-panel);
   border-color: var(--premium-edge);
 }
-.z-app-shell > header > div {
-  height: 72px;
+.z-mobile-nav {
+  padding-bottom: var(--z-safe-bottom);
+  padding-left: var(--z-safe-left);
+  padding-right: var(--z-safe-right);
+}
+.z-mobile-nav-items {
+  padding-inline: 8px;
+}
+.z-mobile-nav-link {
+  display: flex;
+  min-width: 0;
+  min-height: var(--z-mobile-nav-content-height);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 12px;
+  color: var(--premium-muted);
+  font-size: clamp(9px, 2.57vw, 11px);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+.z-mobile-nav-link > span:first-child {
+  min-height: 44px;
+}
+.z-mobile-nav-link:hover,
+.z-mobile-nav-link:focus-visible {
+  color: #d7ff35;
+}
+.z-mobile-nav-link[aria-current="page"] {
+  background: rgba(215, 255, 53, 0.1);
+  color: #d7ff35;
+  font-weight: 700;
+}
+.z-mobile-nav-link:focus-visible {
+  outline-offset: -2px;
+}
+.z-app-shell[data-z-keyboard-open="true"] > .z-mobile-nav {
+  visibility: hidden;
+}
+@media (min-width: 640px) {
+  .z-app-shell {
+    --z-header-gutter: 24px;
+    --z-content-gutter: 24px;
+  }
+}
+@media (min-width: 1280px) {
+  .z-app-shell {
+    --z-mobile-nav-height: var(--z-safe-bottom);
+    padding-bottom: var(--z-safe-bottom);
+  }
 }
 .z-brand {
   display: inline-flex;
@@ -175,6 +265,9 @@ body {
   align-items: center;
   gap: 16px;
 }
+.z-screen-heading > div {
+  min-width: 0;
+}
 .z-screen-heading h1 {
   font-size: clamp(26px, 4vw, 42px);
   margin-top: 9px;
@@ -222,7 +315,7 @@ body {
   color: var(--premium-muted);
   text-align: center;
 }
-.z-segments [aria-current="page"],
+.z-segments [aria-current],
 .z-segments [aria-pressed="true"] {
   background: #d7ff35;
   color: #0b0d0e;
@@ -233,7 +326,10 @@ body {
     [data-z-screen="communities"],
     [data-z-screen="spot"],
     [data-z-screen="profile"],
-    [data-z-screen="settings"]
+    [data-z-screen="settings"],
+    [data-z-screen="create"],
+    [data-z-screen="trips"],
+    [data-z-screen="chat"]
   )
   :is(.panel, .z-underground) {
   background: var(--premium-panel);
@@ -252,6 +348,7 @@ body {
 .z-feed-shortcuts > a {
   display: flex;
   min-width: 0;
+  min-height: 44px;
   align-items: center;
   gap: 9px;
   padding: 12px;
@@ -266,6 +363,7 @@ body {
   color: #f2f2f2;
   font-size: 12px;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 .z-feed-shortcuts small {
   display: block;
@@ -285,6 +383,9 @@ body {
   text-transform: none;
   letter-spacing: -0.02em;
 }
+.z-feed-card :is(h2, p) {
+  overflow-wrap: anywhere;
+}
 .z-feed-empty {
   position: relative;
   padding: 38px 24px;
@@ -302,7 +403,9 @@ body {
 }
 .z-communities-geo {
   margin: 22px 0;
-  scroll-margin-top: 95px;
+}
+#zapruda-selected-country {
+  scroll-margin-bottom: calc(var(--z-mobile-nav-height) + 12px);
 }
 .z-country-grid {
   display: grid;
@@ -346,8 +449,19 @@ body {
 .z-community-telegram > p:last-child {
   font-size: 12px;
 }
-.z-community-section {
-  scroll-margin-top: 94px;
+.z-app-shell
+  :is(
+    .z-communities-geo,
+    .z-community-section,
+    #approved-spot-map,
+    #spot-tournaments,
+    #spot-records,
+    #my-gear-sets,
+    #angler-progress,
+    #profile-details,
+    #verified-titles
+  ) {
+  scroll-margin-top: calc(var(--z-header-content-height) + var(--z-safe-top) + 16px);
 }
 .z-spot-map {
   position: relative;
@@ -511,7 +625,7 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-height: calc(100svh - 220px);
+  min-height: calc(100svh - 220px - var(--z-safe-top) - var(--z-safe-bottom));
   justify-content: center;
   padding: 30px 12px;
   overflow: hidden;
@@ -531,6 +645,7 @@ body {
   pointer-events: none;
 }
 .z-welcome-brand {
+  max-width: 100%;
   margin: 44px 0 48px;
 }
 .z-welcome h1 {
@@ -655,9 +770,6 @@ body {
   }
 }
 @media (max-width: 480px) {
-  .z-app-shell > main {
-    padding: 20px 16px;
-  }
   .z-feed-shortcuts {
     grid-template-columns: 1fr;
   }
@@ -706,10 +818,110 @@ body {
     margin: 36px 0;
   }
 }
+@media (max-width: 359px) {
+  .z-mobile-nav-items {
+    padding-inline: 6px;
+  }
+  .z-segments :is(a, button) {
+    padding-inline: 6px;
+    font-size: 12px;
+  }
+  .z-welcome {
+    padding-inline: 8px;
+  }
+  .z-welcome-brand {
+    margin-block: 28px;
+  }
+  .z-welcome-actions {
+    margin-top: 24px;
+  }
+}
+@media (max-width: 639px) {
+  .z-shell-content
+    :is(
+      textarea,
+      select,
+      input:not([type]),
+      input:is(
+        [type="text"],
+        [type="search"],
+        [type="email"],
+        [type="password"],
+        [type="tel"],
+        [type="url"],
+        [type="number"],
+        [type="date"],
+        [type="datetime-local"]
+      )
+    ) {
+    max-width: 100%;
+    font-size: 16px;
+  }
+}
+.z-mobile-dialog {
+  max-height: calc(
+    100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.z-mobile-dialog.z-photo-lightbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  overflow: hidden;
+  padding: calc(56px + env(safe-area-inset-top, 0px)) calc(12px + env(safe-area-inset-right, 0px))
+    calc(56px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px));
+  border: 0;
+  border-radius: 0;
+  background: #080a09;
+}
+.z-photo-frame {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  touch-action: pan-y pinch-zoom;
+}
+.z-photo-lightbox .z-dialog-close {
+  top: calc(8px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  color: #f2f2f2;
+}
+.z-photo-previous {
+  left: calc(12px + env(safe-area-inset-left, 0px));
+}
+.z-photo-next {
+  right: calc(12px + env(safe-area-inset-right, 0px));
+}
+.z-photo-count {
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+}
+@media (max-width: 639px) {
+  .z-mobile-dialog {
+    width: calc(100% - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+    border-color: var(--premium-edge);
+    border-radius: 20px;
+    background: var(--premium-panel);
+    padding: 20px 16px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .z-wallpaper,
-  .z-app-shell * {
+  .z-app-shell *,
+  .z-mobile-dialog,
+  .z-mobile-dialog-overlay {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .z-mobile-dialog,
+  .z-mobile-dialog-overlay {
+    animation-duration: 0.01ms !important;
   }
 }

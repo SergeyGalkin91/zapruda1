@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ArrowUpRight,
   BrainCircuit,
@@ -19,6 +19,7 @@ import {
   ChartNoAxesCombined,
   ShieldCheck,
   Trophy,
+  WifiOff,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { BrandWallpaper } from "@/components/BrandWallpaper";
@@ -58,22 +59,86 @@ export function Shell({
   screen = "default",
 }: {
   children: ReactNode;
-  screen?: "default" | "feed" | "communities" | "spot" | "profile" | "welcome" | "settings";
+  screen?:
+    | "default"
+    | "feed"
+    | "communities"
+    | "spot"
+    | "profile"
+    | "welcome"
+    | "settings"
+    | "create"
+    | "trips"
+    | "chat";
 }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isNetlifyStagingPreview, setIsNetlifyStagingPreview] = useState(false);
   const [authError, setAuthError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [offline, setOffline] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const menuRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     applyAppearance(loadAppearance());
   }, []);
   useEffect(() => {
     setIsNetlifyStagingPreview(
-      /^deploy-preview-[0-9]+--zapruda1[.]netlify[.]app$/.test(window.location.hostname) ||
-        (/^[a-f0-9]{24}--zapruda1[.]netlify[.]app$/.test(window.location.hostname) &&
-          import.meta.env["VITE_SUPABASE_URL"] === "https://yudtbifopfnjtjanaqrd.supabase.co"),
+      import.meta.env["VITE_SUPABASE_URL"] === "https://yudtbifopfnjtjanaqrd.supabase.co" &&
+        /^(deploy-preview-[0-9]+|[a-f0-9]{24})--zapruda1[.]netlify[.]app$/.test(
+          window.location.hostname,
+        ),
     );
+  }, []);
+
+  useEffect(() => {
+    const syncConnection = () => setOffline(!navigator.onLine);
+    window.addEventListener("online", syncConnection);
+    window.addEventListener("offline", syncConnection);
+    syncConnection();
+    return () => {
+      window.removeEventListener("online", syncConnection);
+      window.removeEventListener("offline", syncConnection);
+    };
+  }, []);
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const updateKeyboard = () => {
+      const field = document.activeElement;
+      const isTyping =
+        field instanceof HTMLElement &&
+        (field.isContentEditable ||
+          field.matches(
+            "textarea, input:not([type]), input:is([type=text], [type=search], [type=email], [type=password], [type=tel], [type=url], [type=number])",
+          ));
+      setKeyboardOpen(
+        isTyping && viewport.scale === 1 && window.innerHeight - viewport.height > 120,
+      );
+    };
+    const closeKeyboard = () => setKeyboardOpen(false);
+    viewport.addEventListener("resize", updateKeyboard);
+    document.addEventListener("focusin", updateKeyboard);
+    document.addEventListener("focusout", closeKeyboard);
+    updateKeyboard();
+    return () => {
+      viewport.removeEventListener("resize", updateKeyboard);
+      document.removeEventListener("focusin", updateKeyboard);
+      document.removeEventListener("focusout", closeKeyboard);
+    };
+  }, []);
+
+  useEffect(() => {
+    const closeOutside = (event: PointerEvent) => {
+      const menu = menuRef.current;
+      if (menu?.open && event.target instanceof Node && !menu.contains(event.target)) {
+        menu.open = false;
+      }
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    return () => document.removeEventListener("pointerdown", closeOutside);
   }, []);
 
   // Always render a usable login link while the browser session initializes.
@@ -148,12 +213,14 @@ export function Shell({
   return (
     <div
       data-z-screen={screen}
-      className="z-app-shell min-h-screen overflow-x-clip pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-0"
+      data-z-keyboard-open={keyboardOpen || undefined}
+      data-z-admin-nav={isAdmin || undefined}
+      className="z-app-shell overflow-x-clip"
     >
       <BrandWallpaper />
       <ActivityTracker />
-      <header className="sticky top-0 z-50 border-b border-white/[0.09] z-electric-shell-header bg-[#0D100C]/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6">
+      <header className="z-shell-header z-electric-shell-header sticky top-0 z-50 border-b backdrop-blur-xl">
+        <div className="z-shell-header-inner mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-3">
           <div className="flex min-w-0 flex-col items-start sm:flex-row sm:items-center sm:gap-3">
             <Link
               to="/"
@@ -211,7 +278,16 @@ export function Shell({
                 <span className="hidden sm:inline">Войти</span>
               </Link>
             )}
-            <details className="relative group">
+            <details
+              ref={menuRef}
+              className="relative group"
+              onKeyDown={(event) => {
+                if (event.key !== "Escape" || !event.currentTarget.open) return;
+                event.preventDefault();
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector("summary")?.focus();
+              }}
+            >
               <summary
                 aria-label="Открыть список разделов"
                 aria-controls="zapruda-extra-nav"
@@ -223,7 +299,16 @@ export function Shell({
               <nav
                 id="zapruda-extra-nav"
                 aria-label="Остальные разделы"
-                className="absolute right-0 top-[calc(100%+8px)] z-50 w-[min(320px,calc(100vw-2rem))] space-y-1 rounded-2xl border border-white/15 bg-[#171C14] z-electric-shell-menu p-2 shadow-2xl shadow-black/70"
+                className="z-shell-menu z-electric-shell-menu absolute right-0 top-[calc(100%+8px)] z-50 space-y-1 rounded-2xl border p-2 shadow-2xl shadow-black/70"
+                onClick={(event) => {
+                  if (
+                    event.target instanceof Element &&
+                    event.target.closest("a") &&
+                    menuRef.current
+                  ) {
+                    menuRef.current.open = false;
+                  }
+                }}
               >
                 <div className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.19em] text-[#D7FF35]">
                   ZAPRUDA / Разделы
@@ -306,8 +391,16 @@ export function Shell({
         )}
       </header>
 
-      <main className="mx-auto min-w-0 max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
-      <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-white/10 px-4 py-5 text-xs text-zinc-500 sm:px-6">
+      <main className="z-shell-content mx-auto min-w-0 max-w-6xl py-5 sm:py-8">
+        {offline && (
+          <div role="status" className="z-premium-card mb-4 flex items-center gap-3 p-3 text-sm">
+            <WifiOff className="size-5 shrink-0 text-primary" aria-hidden="true" />
+            <span>Нет подключения к интернету. После восстановления связи повтори действие.</span>
+          </div>
+        )}
+        {children}
+      </main>
+      <footer className="z-shell-content mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-white/10 py-5 text-xs text-zinc-500">
         <span>ZAPRUDA COMMUNITY · Свои на одной волне</span>
         <div className="flex flex-wrap items-center gap-4">
           <a
@@ -323,47 +416,39 @@ export function Shell({
 
       <nav
         aria-label="Мобильная навигация"
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 z-electric-mobile-nav bg-[#080A09]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden"
+        className="z-mobile-nav z-electric-mobile-nav fixed inset-x-0 bottom-0 z-50 border-t shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden"
       >
-        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
-          {mobileNav.map(({ to, label, Icon }) => {
-            const target = to;
-            const shownLabel = label;
-            const ShownIcon = Icon;
-            return (
-              <Link
-                key={target}
-                to={target}
-                activeOptions={{ exact: true }}
-                className="flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
-                activeProps={{
-                  className:
-                    "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]",
-                }}
+        <div className="z-mobile-nav-items mx-auto grid max-w-xl grid-cols-5 gap-1">
+          {mobileNav.map(({ to, label, Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              activeOptions={{ exact: true, includeSearch: false }}
+              className="z-mobile-nav-link"
+              activeProps={{ "aria-current": "page" }}
+            >
+              <span
+                className={
+                  to === "/reports/new"
+                    ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]"
+                    : "flex size-8 items-center justify-center"
+                }
               >
-                <span
-                  className={
-                    to === "/reports/new"
-                      ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]"
-                      : "flex size-8 items-center justify-center"
-                  }
-                >
-                  <ShownIcon
-                    className={to === "/reports/new" ? "size-6" : "size-[21px]"}
-                    strokeWidth={to === "/reports/new" ? 2.5 : 1.9}
-                    aria-hidden="true"
-                  />
-                </span>
-                <span className="truncate">{shownLabel}</span>
-              </Link>
-            );
-          })}
+                <Icon
+                  className={to === "/reports/new" ? "size-6" : "size-[21px]"}
+                  strokeWidth={to === "/reports/new" ? 2.5 : 1.9}
+                  aria-hidden="true"
+                />
+              </span>
+              <span>{label}</span>
+            </Link>
+          ))}
         </div>
         {isAdmin && (
           <div className="mx-auto max-w-xl px-3 pb-2">
             <Link
               to="/admin"
-              className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#A99AD9]/40 bg-[#171527] text-xs font-black text-[#D7FF35]"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#A99AD9]/40 bg-[#171527] text-xs font-black text-[#D7FF35]"
             >
               <ShieldCheck className="size-4" /> Админ-панель
             </Link>

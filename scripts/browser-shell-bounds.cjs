@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const mobileRoutes = ["/", "/communities", "/reports/new", "/partners", "/chat"];
 
 /** Check essential controls themselves: overflow-x:clip can conceal a broken header. */
 async function assertShellBounds(page) {
@@ -48,4 +49,30 @@ async function assertShellBounds(page) {
   return metrics;
 }
 
-module.exports = { assertShellBounds };
+async function assertMobileNav(page) {
+  const nav = page.getByRole("navigation", { name: "Мобильная навигация" });
+  const links = nav.locator("a");
+  const boxes = await links.evaluateAll((elements) =>
+    elements.map((element) => {
+      const box = element.getBoundingClientRect();
+      const atCenter = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+      return {
+        route: element.getAttribute("href")?.split("?")[0],
+        width: box.width,
+        height: box.height,
+        reachable: element.contains(atCenter),
+      };
+    }),
+  );
+  assert.deepEqual(
+    boxes.map(({ route }) => route),
+    mobileRoutes,
+  );
+  assert.ok(
+    boxes.every((box) => box.width >= 43.5 && box.height >= 43.5 && box.reachable),
+    "A mobile nav target is too small or covered: " + JSON.stringify(boxes),
+  );
+  return links;
+}
+
+module.exports = { assertShellBounds, assertMobileNav, mobileRoutes };

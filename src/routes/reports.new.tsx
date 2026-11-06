@@ -709,7 +709,7 @@ export function NewReport() {
     setStep((current) => Math.min(3, current + 1));
   }
   return (
-    <Shell>
+    <Shell screen="create">
       <h1 className="mb-4 text-2xl font-bold">Новый отчёт</h1>
       <ol className="mb-5 grid grid-cols-3 gap-2 text-xs" aria-label="Шаги отчёта">
         {["Где и когда", "Улов и история", "Проверка и публикация"].map((label, i) => (
@@ -742,7 +742,7 @@ export function NewReport() {
             type="button"
             onClick={importStreetSession}
             disabled={!draftReady || saving}
-            className="rounded-xl border border-[#D7FF35]/60 px-4 py-2 text-xs font-black text-[#D7FF35] disabled:opacity-40"
+            className="min-h-11 rounded-xl border border-[#D7FF35]/60 px-4 py-2 text-xs font-black text-[#D7FF35] disabled:opacity-40"
           >
             Перенести Street-сессию
           </button>
@@ -770,7 +770,7 @@ export function NewReport() {
           <button
             type="button"
             onClick={clearLocalDraft}
-            className="font-bold text-[#D7FF35] hover:underline"
+            className="min-h-11 font-bold text-[#D7FF35] hover:underline"
           >
             Очистить черновик
           </button>

@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Images } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { PremiumFeedHeader } from "@/components/PremiumFeedHeader";
 import { ReportBigFishNextStep } from "@/components/ReportBigFishNextStep";
 import { BrandFish } from "@/components/Wordmark";
 import { ReactionBar } from "@/components/ReactionBar";
 import { DailyFishingBrief } from "@/components/DailyFishingBrief";
+import { ScreenState } from "@/components/ScreenState";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { loadPublicReportPhotos } from "@/lib/public-report-photos";
 
@@ -66,23 +68,16 @@ function ReportPhotoGallery({
   onPhotoError: () => void;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (activeIndex === null) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setActiveIndex(null);
-      if (event.key === "ArrowRight")
-        setActiveIndex((i) => (i === null ? null : (i + 1) % photos.length));
-      if (event.key === "ArrowLeft")
-        setActiveIndex((i) => (i === null ? null : (i - 1 + photos.length) % photos.length));
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeIndex, photos.length]);
+  const opener = useRef<HTMLButtonElement>(null);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   if (!photos.length) return null;
+  const index = activeIndex === null ? null : Math.min(activeIndex, photos.length - 1);
+  const move = (step: number) => {
+    if (index !== null) setActiveIndex((index + step + photos.length) % photos.length);
+  };
   return (
-    <>
+    <Dialog open={index !== null} onOpenChange={(open) => !open && setActiveIndex(null)}>
       <div
         className={`grid gap-1.5 overflow-hidden rounded-[20px] border border-white/10 ${photos.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
       >
@@ -91,7 +86,10 @@ function ReportPhotoGallery({
             key={index}
             type="button"
             className={`group relative overflow-hidden bg-zinc-900 text-left ${photos.length === 3 && index === 0 ? "col-span-2" : ""}`}
-            onClick={() => setActiveIndex(index)}
+            onClick={(event) => {
+              opener.current = event.currentTarget;
+              setActiveIndex(index);
+            }}
             aria-label={`Открыть фото ${index + 1} из ${photos.length}: ${title}`}
           >
             <img
@@ -109,59 +107,84 @@ function ReportPhotoGallery({
           </button>
         ))}
       </div>
-      {activeIndex !== null && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Фотографии: ${title}`}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-3 sm:p-10"
+      {index !== null && (
+        <DialogContent
+          className="z-photo-lightbox"
+          onCloseAutoFocus={(event) => {
+            if (!opener.current?.isConnected) return;
+            event.preventDefault();
+            opener.current.focus();
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+            event.preventDefault();
+            move(event.key === "ArrowRight" ? 1 : -1);
+          }}
         >
-          <button
-            type="button"
-            className="absolute inset-0"
-            aria-label="Закрыть просмотр"
-            onClick={() => setActiveIndex(null)}
-          />
-          <img
-            src={photos[activeIndex]}
-            onError={onPhotoError}
-            alt={`${title} — фото ${activeIndex + 1}`}
-            className="pointer-events-none relative max-h-[85vh] max-w-[95vw] object-contain"
-          />
-          <button
-            type="button"
-            className="absolute right-4 top-4 z-10 rounded-full border border-white/20 bg-black/80 p-3 text-white transition hover:border-lime-300"
-            aria-label="Закрыть"
-            onClick={() => setActiveIndex(null)}
+          <DialogTitle className="sr-only">Фотографии: {title}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Просматривай фото свайпом, кнопками или стрелками клавиатуры.
+          </DialogDescription>
+          <div
+            className="z-photo-frame"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setActiveIndex(null);
+            }}
+            onTouchStart={(event) => {
+              const touch = event.touches.length === 1 ? event.touches[0] : undefined;
+              touchStart.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+            }}
+            onTouchCancel={() => {
+              touchStart.current = null;
+            }}
+            onTouchEnd={(event) => {
+              const start = touchStart.current;
+              const end = event.changedTouches[0];
+              touchStart.current = null;
+              if (!start || !end || photos.length < 2) return;
+              const dx = end.clientX - start.x;
+              if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(end.clientY - start.y)) {
+                move(dx < 0 ? 1 : -1);
+              }
+            }}
           >
-            <X className="size-5" />
-          </button>
+            <img
+              src={photos[index]}
+              onError={onPhotoError}
+              alt={`${title} — фото ${index + 1}`}
+              draggable={false}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
           {photos.length > 1 && (
             <>
               <button
                 type="button"
-                className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/80 p-3 text-white hover:text-lime-300"
+                className="z-photo-previous absolute top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/80 p-3 text-white hover:text-lime-300"
                 aria-label="Предыдущее фото"
-                onClick={() => setActiveIndex((activeIndex - 1 + photos.length) % photos.length)}
+                onClick={() => move(-1)}
               >
                 <ChevronLeft className="size-6" />
               </button>
               <button
                 type="button"
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/80 p-3 text-white hover:text-lime-300"
+                className="z-photo-next absolute top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/80 p-3 text-white hover:text-lime-300"
                 aria-label="Следующее фото"
-                onClick={() => setActiveIndex((activeIndex + 1) % photos.length)}
+                onClick={() => move(1)}
               >
                 <ChevronRight className="size-6" />
               </button>
             </>
           )}
-          <span className="pointer-events-none absolute bottom-5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/75 px-3 py-1 text-xs text-zinc-200">
-            {activeIndex + 1} / {photos.length}
+          <span
+            role="status"
+            className="z-photo-count pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/75 px-3 py-1 text-xs text-zinc-200"
+          >
+            {index + 1} / {photos.length}
           </span>
-        </div>
+        </DialogContent>
       )}
-    </>
+    </Dialog>
   );
 }
 
@@ -282,7 +305,7 @@ function Feed() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<{ message: string; firstPage: boolean } | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const requestRef = useRef(false);
   const initialPageRequested = useRef(false);
@@ -308,6 +331,7 @@ function Feed() {
     async (reset = false) => {
       if (requestRef.current || (!reset && (!hasMore || loadingMore))) return;
       requestRef.current = true;
+      setError(null);
       if (reset) {
         setLoading(true);
         setHasMore(true);
@@ -328,7 +352,7 @@ function Feed() {
           .range(from, from + PAGE_SIZE - 1);
 
         if (queryError) {
-          setError("Не удалось загрузить отчёты: " + queryError.message);
+          setError({ message: "Не удалось загрузить отчёты.", firstPage: reset });
         } else {
           const page = (data ?? []) as unknown as Report[];
           setReports((current) =>
@@ -349,13 +373,9 @@ function Feed() {
               // The gallery remains optional; never fall back to an original file.
             }
           }
-          setError("");
         }
-      } catch (cause) {
-        setError(
-          "Не удалось загрузить отчёты: " +
-            (cause instanceof Error ? cause.message : "ошибка сети"),
-        );
+      } catch {
+        setError({ message: "Не удалось загрузить отчёты.", firstPage: reset });
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -405,24 +425,14 @@ function Feed() {
     <Shell screen="feed">
       <PremiumFeedHeader />
       <ReportBigFishNextStep />
-      {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
-      {error && (
-        <div
-          role="alert"
-          className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive"
-        >
-          <p>{error}</p>
-          <button
-            type="button"
-            className="btn-ghost mt-3 text-white"
-            onClick={() => void loadPage(true)}
-          >
-            Попробовать снова
-          </button>
-        </div>
+      {loading && <ScreenState kind="loading">Загружаем отчёты…</ScreenState>}
+      {error?.firstPage && (
+        <ScreenState kind="error" className="mb-4" onRetry={() => void loadPage(true)}>
+          {error.message}
+        </ScreenState>
       )}
       {!loading && !error && reports.length === 0 && (
-        <div className="panel z-feed-empty text-center">
+        <div className="panel z-feed-empty text-center" role="status">
           <BrandFish className="z-empty-fish" />
           <h2 className="mt-3 font-semibold">Пока тихо, как на бесклёвье</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -528,24 +538,16 @@ function Feed() {
             );
           })}
           <div ref={sentinelRef} className="h-4" aria-hidden="true" />
-          {loadingMore && (
-            <div className="py-5 text-center text-sm text-muted-foreground">
-              Подтягиваем следующие отчёты…
-            </div>
-          )}
+          {loadingMore && <ScreenState kind="loading">Подтягиваем следующие отчёты…</ScreenState>}
           {!loading && !loadingMore && !hasMore && reports.length > 0 && (
             <p className="py-6 text-center text-xs text-muted-foreground">
               Ты в курсе всех отчётов на данный момент 🎣
             </p>
           )}
-          {error && !loading && (
-            <button
-              type="button"
-              className="btn-ghost mt-3"
-              onClick={() => void loadPage(reports.length === 0)}
-            >
-              Повторить загрузку
-            </button>
+          {error && !error.firstPage && (
+            <ScreenState kind="error" onRetry={() => void loadPage(false)}>
+              {error.message}
+            </ScreenState>
           )}
         </div>
         <aside className="hidden space-y-4 lg:block">

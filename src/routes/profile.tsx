@@ -24,6 +24,7 @@ import {
   MessageSquareText,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { ScreenState } from "@/components/ScreenState";
 import { SpotVerifiedProgress } from "@/components/SpotVerifiedProgress";
 import { FishingProgressTree } from "@/components/FishingProgressTree";
 import { FishingDisciplineTree } from "@/components/FishingDisciplineTree";
@@ -368,144 +369,154 @@ export function Profile() {
     const isCurrent = () => mountedRef.current && sequence === loadSequence.current;
     setLoading(true);
     setError("");
-    const { data: auth, error: authError } = await supabase.auth.getUser();
-    if (!isCurrent()) return;
-    if (authError || !auth.user) {
-      setLoading(false);
-      setUserId(null);
-      setError("Чтобы заполнить профиль, войди в аккаунт ZAPRUDA.");
-      return;
-    }
-    setUserId(auth.user.id);
-    setEmail(auth.user.email ?? "");
-    void loadFeaturedGear(auth.user.id);
-
-    const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all([
-      // Adopt PR #101: private bio is readable only through the own-profile RPC
-      // in STAGING. Keep compatibility with the legacy schema only when that
-      // RPC is absent; never fall back after an authorization/network failure.
-      (async () => {
-        const secured = await supabase.rpc("my_profile_full").maybeSingle();
-        if (!secured.error || !["PGRST202", "42883"].includes(secured.error.code ?? ""))
-          return secured;
-        return supabase
-          .from("profiles")
-          .select("username,display_name,bio,avatar_url,chat_city")
-          .eq("id", auth.user.id)
-          .maybeSingle();
-      })(),
-      supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
-      supabase.rpc("my_fishing_progress"),
-      supabase.rpc("my_fishing_specializations_v2"),
-    ]);
-
-    if (!isCurrent()) return;
-    if (profileResult.error) {
-      setError("Не удалось загрузить профиль: " + profileResult.error.message);
-    } else if (profileResult.data) {
-      const meta = auth.user.user_metadata ?? {};
-      const providerName = [meta["full_name"], meta["name"], meta["display_name"]]
-        .find((value): value is string => typeof value === "string" && value.trim().length > 0)
-        ?.trim();
-      const providerAvatar =
-        [meta["avatar_url"], meta["picture"]].find(
-          (value): value is string => typeof value === "string" && /^https:\/\//i.test(value),
-        ) ?? null;
-      const emailPrefix = auth.user.email?.split("@")[0] ?? "";
-      const currentName = profileResult.data.display_name?.trim() ?? "";
-      const canFillName =
-        !!providerName && (!currentName || currentName === emailPrefix || currentName === "angler");
-      const canFillAvatar = !!providerAvatar && !profileResult.data.avatar_url;
-      const additions: { display_name?: string; avatar_url?: string } = {};
-      if (canFillName) additions.display_name = providerName;
-      if (canFillAvatar && providerAvatar) additions.avatar_url = providerAvatar;
-      if (Object.keys(additions).length) {
-        const { error: syncError } = await supabase
-          .from("profiles")
-          .update(additions)
-          .eq("id", auth.user.id);
-        if (!isCurrent()) return;
-        if (syncError) console.warn("OAuth profile import skipped:", syncError.message);
-        else profileResult.data = { ...profileResult.data, ...additions };
+    try {
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (!isCurrent()) return;
+      if (authError || !auth.user) {
+        setUserId(null);
+        if (authError && authError.name !== "AuthSessionMissingError") {
+          setError("Не удалось проверить вход в профиль.");
+        }
+        return;
       }
-      setUsername(profileResult.data.username ?? "");
-      setDisplayName(profileResult.data.display_name ?? "");
-      setBio(profileResult.data.bio ?? "");
-      setAvatarUrl(profileResult.data.avatar_url);
-      setShareChatCity(Boolean(profileResult.data.chat_city));
-    }
+      setUserId(auth.user.id);
+      setEmail(auth.user.email ?? "");
+      void loadFeaturedGear(auth.user.id);
 
-    if (prefsResult.error) {
-      setError(
-        (prev) => prev + " Не удалось загрузить рыболовную анкету: " + prefsResult.error.message,
+      const [profileResult, prefsResult, progressResult, specializationsResult] = await Promise.all(
+        [
+          // Adopt PR #101: private bio is readable only through the own-profile RPC
+          // in STAGING. Keep compatibility with the legacy schema only when that
+          // RPC is absent; never fall back after an authorization/network failure.
+          (async () => {
+            const secured = await supabase.rpc("my_profile_full").maybeSingle();
+            if (!secured.error || !["PGRST202", "42883"].includes(secured.error.code ?? ""))
+              return secured;
+            return supabase
+              .from("profiles")
+              .select("username,display_name,bio,avatar_url,chat_city")
+              .eq("id", auth.user.id)
+              .maybeSingle();
+          })(),
+          supabase.from("angler_preferences").select("*").eq("user_id", auth.user.id).maybeSingle(),
+          supabase.rpc("my_fishing_progress"),
+          supabase.rpc("my_fishing_specializations_v2"),
+        ],
       );
-    } else if (prefsResult.data) {
-      const row = prefsResult.data;
-      setPreferences({
-        home_city: row.home_city,
-        home_region: row.home_region,
-        main_technique: row.main_technique,
-        fishing_methods: Array.from(
-          new Set(
-            [row.main_technique, ...((row.fishing_methods ?? []) as string[])].filter(Boolean),
+
+      if (!isCurrent()) return;
+      if (profileResult.error) {
+        setError("Не удалось загрузить профиль: " + profileResult.error.message);
+      } else if (profileResult.data) {
+        const meta = auth.user.user_metadata ?? {};
+        const providerName = [meta["full_name"], meta["name"], meta["display_name"]]
+          .find((value): value is string => typeof value === "string" && value.trim().length > 0)
+          ?.trim();
+        const providerAvatar =
+          [meta["avatar_url"], meta["picture"]].find(
+            (value): value is string => typeof value === "string" && /^https:\/\//i.test(value),
+          ) ?? null;
+        const emailPrefix = auth.user.email?.split("@")[0] ?? "";
+        const currentName = profileResult.data.display_name?.trim() ?? "";
+        const canFillName =
+          !!providerName &&
+          (!currentName || currentName === emailPrefix || currentName === "angler");
+        const canFillAvatar = !!providerAvatar && !profileResult.data.avatar_url;
+        const additions: { display_name?: string; avatar_url?: string } = {};
+        if (canFillName) additions.display_name = providerName;
+        if (canFillAvatar && providerAvatar) additions.avatar_url = providerAvatar;
+        if (Object.keys(additions).length) {
+          const { error: syncError } = await supabase
+            .from("profiles")
+            .update(additions)
+            .eq("id", auth.user.id);
+          if (!isCurrent()) return;
+          if (syncError) console.warn("OAuth profile import skipped:", syncError.message);
+          else profileResult.data = { ...profileResult.data, ...additions };
+        }
+        setUsername(profileResult.data.username ?? "");
+        setDisplayName(profileResult.data.display_name ?? "");
+        setBio(profileResult.data.bio ?? "");
+        setAvatarUrl(profileResult.data.avatar_url);
+        setShareChatCity(Boolean(profileResult.data.chat_city));
+      }
+
+      if (prefsResult.error) {
+        setError(
+          (prev) => prev + " Не удалось загрузить рыболовную анкету: " + prefsResult.error.message,
+        );
+      } else if (prefsResult.data) {
+        const row = prefsResult.data;
+        setPreferences({
+          home_city: row.home_city,
+          home_region: row.home_region,
+          main_technique: row.main_technique,
+          fishing_methods: Array.from(
+            new Set(
+              [row.main_technique, ...((row.fishing_methods ?? []) as string[])].filter(Boolean),
+            ),
           ),
-        ),
-        target_species: row.target_species,
-        fishing_access: row.fishing_access,
-        transport: row.transport,
-        favorite_lures: row.favorite_lures,
-        tackle_text: row.tackle_text,
-        preferred_water: row.preferred_water,
-        fishing_notes: row.fishing_notes,
-        search_radius_km: row.search_radius_km,
-      });
-    }
+          target_species: row.target_species,
+          fishing_access: row.fishing_access,
+          transport: row.transport,
+          favorite_lures: row.favorite_lures,
+          tackle_text: row.tackle_text,
+          preferred_water: row.preferred_water,
+          fishing_notes: row.fishing_notes,
+          search_radius_km: row.search_radius_km,
+        });
+      }
 
-    if (progressResult.error) {
-      setProgress(null);
-      setError(
-        (prev) => prev + " Не удалось рассчитать достижения: " + progressResult.error.message,
-      );
-    } else {
-      const raw = progressResult.data?.[0];
-      setProgress(
-        raw
-          ? {
-              report_count: Number(raw.report_count),
-              catches_count: Number(raw.catches_count),
-              photo_count: Number(raw.photo_count),
-              photo_reports: Number(raw.photo_reports),
-              reactions_received: Number(raw.reactions_received),
-              trips_organized: Number(raw.trips_organized),
-              heaviest_catch_kg:
-                raw.heaviest_catch_kg == null ? null : Number(raw.heaviest_catch_kg),
-            }
-          : EMPTY_PROGRESS,
-      );
+      if (progressResult.error) {
+        setProgress(null);
+        setError(
+          (prev) => prev + " Не удалось рассчитать достижения: " + progressResult.error.message,
+        );
+      } else {
+        const raw = progressResult.data?.[0];
+        setProgress(
+          raw
+            ? {
+                report_count: Number(raw.report_count),
+                catches_count: Number(raw.catches_count),
+                photo_count: Number(raw.photo_count),
+                photo_reports: Number(raw.photo_reports),
+                reactions_received: Number(raw.reactions_received),
+                trips_organized: Number(raw.trips_organized),
+                heaviest_catch_kg:
+                  raw.heaviest_catch_kg == null ? null : Number(raw.heaviest_catch_kg),
+              }
+            : EMPTY_PROGRESS,
+        );
+      }
+      if (specializationsResult.error) {
+        setError(
+          (prev) =>
+            prev + " Не удалось загрузить дисциплины: " + specializationsResult.error.message,
+        );
+        setSpecializations([]);
+      } else {
+        setSpecializations(
+          (specializationsResult.data ?? []).map((row) => ({
+            fishing_method: row.fishing_method,
+            report_count: Number(row.report_count),
+            credited_reports: Number(row.credited_reports),
+            catches_count: Number(row.catches_count),
+            credited_catches: Number(row.credited_catches),
+            photo_reports: Number(row.photo_reports),
+            credited_photo_reports: Number(row.credited_photo_reports),
+            distinct_waters: Number(row.distinct_waters),
+            active_days: Number(row.active_days),
+            distinct_species: Number(row.distinct_species),
+            heaviest_catch_kg: row.heaviest_catch_kg == null ? null : Number(row.heaviest_catch_kg),
+          })),
+        );
+      }
+    } catch {
+      if (isCurrent()) setError("Не удалось загрузить профиль.");
+    } finally {
+      if (isCurrent()) setLoading(false);
     }
-    if (specializationsResult.error) {
-      setError(
-        (prev) => prev + " Не удалось загрузить дисциплины: " + specializationsResult.error.message,
-      );
-      setSpecializations([]);
-    } else {
-      setSpecializations(
-        (specializationsResult.data ?? []).map((row) => ({
-          fishing_method: row.fishing_method,
-          report_count: Number(row.report_count),
-          credited_reports: Number(row.credited_reports),
-          catches_count: Number(row.catches_count),
-          credited_catches: Number(row.credited_catches),
-          photo_reports: Number(row.photo_reports),
-          credited_photo_reports: Number(row.credited_photo_reports),
-          distinct_waters: Number(row.distinct_waters),
-          active_days: Number(row.active_days),
-          distinct_species: Number(row.distinct_species),
-          heaviest_catch_kg: row.heaviest_catch_kg == null ? null : Number(row.heaviest_catch_kg),
-        })),
-      );
-    }
-    setLoading(false);
   }, [loadFeaturedGear]);
 
   useEffect(() => {
@@ -723,8 +734,6 @@ export function Profile() {
         </div>
       </section>
 
-      <SpotVerifiedProgress />
-
       {userId && (
         <nav className="z-profile-section-links" aria-label="Разделы профиля">
           <a href="#my-gear-sets">
@@ -742,15 +751,16 @@ export function Profile() {
         </nav>
       )}
       {loading && (
-        <div className="panel p-6 text-zinc-400">Загружаем рыболовный профиль и достижения…</div>
+        <ScreenState kind="loading">Загружаем рыболовный профиль и достижения…</ScreenState>
       )}
       {error && (
-        <div
-          role="alert"
-          className="mb-4 rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200"
+        <ScreenState
+          kind="error"
+          className="mb-4"
+          onRetry={editing ? undefined : () => void loadProfile()}
         >
           {error}
-        </div>
+        </ScreenState>
       )}
       {notice && (
         <div
@@ -761,6 +771,8 @@ export function Profile() {
           {notice}
         </div>
       )}
+
+      <SpotVerifiedProgress />
 
       {!loading && userId && (
         <>
@@ -1267,7 +1279,7 @@ export function Profile() {
           </section>
         </>
       )}
-      {!loading && !userId && (
+      {!loading && !userId && !error && (
         <div className="panel p-7 text-center">
           <Settings2 className="mx-auto size-9 text-[#D7FF35]" />
           <h2 className="mt-4 text-lg font-bold">Войди, чтобы прокачивать рыболова</h2>
