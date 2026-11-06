@@ -14,6 +14,9 @@ permissions:
 jobs:
   visual-appearance:
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.58.2@sha256:6446946a1d9fd62d9ae501312a2d76a43ee688542b21622056a372959b65d63d
+      options: --ipc=host
     timeout-minutes: 30
     env:
       NITRO_PRESET: node-server
@@ -23,6 +26,8 @@ jobs:
       HOST: "127.0.0.1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
@@ -32,10 +37,8 @@ jobs:
         run: |
           bun run build
           test -f .output/server/index.mjs
-      - name: Install Chromium, Firefox, WebKit and Playwright
-        run: |
-          bun add --dev playwright@1.58.2
-          bunx playwright install --with-deps chromium firefox webkit
+      - name: Install the matching Playwright package
+        run: bun add --dev playwright@1.58.2
       - name: Check both themes across mobile and desktop widths in three engines
         shell: bash
         run: |
@@ -78,6 +81,9 @@ jobs:
   hosted-mobile:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'work/mobile-first-premium-20261106'
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.58.2@sha256:6446946a1d9fd62d9ae501312a2d76a43ee688542b21622056a372959b65d63d
+      options: --ipc=host
     timeout-minutes: 22
     env:
       NETLIFY_MOBILE_PREVIEW: https://deploy-preview-${{ github.event.number }}--zapruda1.netlify.app
@@ -92,11 +98,10 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
-      - name: Install browser QA dependencies
+      - name: Install application and matching Playwright package
         run: |
           bun install --frozen-lockfile
           bun add --dev playwright@1.58.2
-          bunx playwright install --with-deps chromium webkit
       - name: Check the exact Git SHA against live STAGING and save mobile screenshots
         shell: bash
         run: |
