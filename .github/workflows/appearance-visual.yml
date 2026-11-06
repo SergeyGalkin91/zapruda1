@@ -28,6 +28,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install unzip for Bun setup
+        timeout-minutes: 3
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends unzip
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
@@ -95,10 +100,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+      - name: Install unzip for Bun setup
+        timeout-minutes: 3
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends unzip
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
       - name: Install application and matching Playwright package
+        id: hosted-deps
         run: |
           bun install --frozen-lockfile
           bun add --dev playwright@1.58.2
@@ -139,7 +150,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
       - name: Verify the exact Netlify STAGING SHA and test mobile screens
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.hosted-deps.conclusion == 'success' }}
         run: |
           VISUAL_BROWSER=chromium node scripts/mobile-hosted-browser.cjs
           VISUAL_BROWSER=webkit node scripts/mobile-hosted-browser.cjs

@@ -160,6 +160,7 @@ function Auth() {
       const message = err instanceof Error ? err.message : "Не удалось выполнить запрос.";
       const normalized = message.toLowerCase();
       if (
+        (err instanceof Error && err.name === "AuthRetryableFetchError") ||
         normalized.includes("failed to fetch") ||
         normalized.includes("network") ||
         normalized.includes("connection") ||
