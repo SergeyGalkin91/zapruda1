@@ -5,11 +5,13 @@ const { setTimeout: delay } = require("node:timers/promises");
 const engines = require("playwright");
 const { assertShellBounds, assertMobileNav, mobileRoutes } = require("./browser-shell-bounds.cjs");
 
-const base = process.env.NETLIFY_MOBILE_PREVIEW;
+const scope = process.env.MOBILE_BROWSER_SCOPE || "netlify";
+const base =
+  scope === "local-staging" ? "http://127.0.0.1:3000" : process.env.NETLIFY_MOBILE_PREVIEW;
 const sha = process.env.EXPECTED_PREVIEW_SHA;
 const engine = process.env.VISUAL_BROWSER || "chromium";
 const staging = "yudtbifopfnjtjanaqrd.supabase.co";
-const output = path.resolve("appearance-evidence", "hosted-mobile", engine);
+const output = path.resolve("appearance-evidence", "mobile-staging", scope, engine);
 const screens = [
   { name: "welcome", route: "/welcome" },
   { name: "feed", route: "/" },
@@ -24,16 +26,16 @@ const feedResult = ".z-feed-card, .z-feed-empty, [data-z-screen=feed] main [role
 
 async function waitForExactPreview() {
   assert.match(base || "", /^https:\/\/deploy-preview-[1-9][0-9]*--zapruda1\.netlify\.app$/);
-  assert.match(sha || "", /^[a-f0-9]{40}$/);
-  assert(["chromium", "webkit"].includes(engine));
   let outcome = "pending";
   for (let attempt = 0; attempt < 48; attempt += 1) {
+    let redirect = null;
     try {
       const response = await fetch(base + "/__qa/premium.html", {
-        redirect: "error",
+        redirect: "manual",
         cache: "no-store",
         signal: AbortSignal.timeout(8_000),
       });
+      redirect = response.headers.get("location");
       outcome = "HTTP " + response.status;
       if (response.ok) {
         const html = await response.text();
@@ -42,6 +44,15 @@ async function waitForExactPreview() {
       }
     } catch {
       outcome = "connection unavailable";
+    }
+    if (redirect) {
+      const destination = new URL(redirect, base);
+      if (
+        destination.origin === "https://app.netlify.com" &&
+        destination.pathname === "/edge-access"
+      ) {
+        throw new Error("NETLIFY_TEAM_PROTECTION: Preview requires an invited Netlify session.");
+      }
     }
     if (attempt < 47) await delay(7_500);
   }
@@ -87,7 +98,10 @@ async function checkFeedStates(page, context) {
 }
 
 async function run() {
-  await waitForExactPreview();
+  assert(["netlify", "local-staging"].includes(scope));
+  assert.match(sha || "", /^[a-f0-9]{40}$/);
+  assert(["chromium", "webkit"].includes(engine));
+  if (scope === "netlify") await waitForExactPreview();
   await fs.mkdir(output, { recursive: true });
   const browser = await engines[engine].launch({ headless: true });
   const observations = [];
@@ -141,6 +155,12 @@ async function run() {
             await page
               .getByText("Проверяем каталог…", { exact: true })
               .waitFor({ state: "hidden" });
+            assert.ok(
+              backend.some(
+                ({ path, status }) => path === "/rest/v1/zc_public_spots" && status < 300,
+              ),
+              "No successful approved SPOT catalog read from STAGING",
+            );
           }
           if (screen.name === "profile") {
             await page.getByText("Войди, чтобы прокачивать рыболова", { exact: true }).waitFor();
@@ -189,7 +209,10 @@ async function run() {
     engine,
     sha,
     base,
-    scope: "Hosted mobile viewport, real public STAGING data, guest session",
+    scope:
+      scope === "netlify"
+        ? "Verified Netlify Deploy Preview SHA, live public STAGING reads, guest session"
+        : "Exact Git SHA built on Node SSR, live public STAGING reads, guest session",
     faultInjection:
       "Report read delayed and aborted for the error path, then retried against STAGING",
     navigation: mobileRoutes,

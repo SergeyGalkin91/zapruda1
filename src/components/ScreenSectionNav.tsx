@@ -19,8 +19,7 @@ export function ScreenSectionNav({
           to={route}
           hash={id}
           activeOptions={{ includeHash: true }}
-          activeProps={{ "aria-current": "location" }}
-          aria-current={current === id ? "location" : undefined}
+          aria-current={current === id ? "page" : undefined}
         >
           {sectionLabel}
         </Link>

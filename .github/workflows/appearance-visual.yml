@@ -36,7 +36,7 @@ jobs:
         run: |
           bun add --dev playwright@1.58.2
           bunx playwright install --with-deps chromium firefox webkit
-      - name: Check both themes at 320/390/768/1440px in three engines; save screenshots
+      - name: Check both themes across mobile and desktop widths in three engines
         shell: bash
         run: |
           set -euo pipefail
@@ -81,6 +81,9 @@ jobs:
     env:
       NETLIFY_MOBILE_PREVIEW: https://deploy-preview-${{ github.event.number }}--zapruda1.netlify.app
       EXPECTED_PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+      NITRO_PRESET: node-server
+      HOST: "127.0.0.1"
+      PORT: "3000"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -93,14 +96,38 @@ jobs:
           bun install --frozen-lockfile
           bun add --dev playwright@1.58.2
           bunx playwright install --with-deps chromium webkit
+      - name: Check the exact Git SHA against live STAGING and save mobile screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_PREVIEW_SHA"
+          export VITE_SUPABASE_URL="$(sed -n '/^\[context.deploy-preview.environment\]/,$ s/^VITE_SUPABASE_URL = "\(.*\)"$/\1/p' netlify.toml)"
+          export VITE_SUPABASE_PUBLISHABLE_KEY="$(sed -n '/^\[context.deploy-preview.environment\]/,$ s/^VITE_SUPABASE_PUBLISHABLE_KEY = "\(.*\)"$/\1/p' netlify.toml)"
+          test "$VITE_SUPABASE_URL" = "https://yudtbifopfnjtjanaqrd.supabase.co"
+          [[ "$VITE_SUPABASE_PUBLISHABLE_KEY" == sb_publishable_* ]]
+          bun run build
+          test -f .output/server/index.mjs
+          node .output/server/index.mjs > "$RUNNER_TEMP/mobile-staging.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3000/settings -o /dev/null; then break; fi
+            kill -0 "$SERVER_PID"
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:3000/settings -o /dev/null
+          for engine in chromium webkit; do
+            MOBILE_BROWSER_SCOPE=local-staging VISUAL_BROWSER="$engine" node scripts/mobile-hosted-browser.cjs
+          done
       - name: Verify the exact Netlify STAGING SHA and test mobile screens
+        if: ${{ !cancelled() }}
         run: |
           VISUAL_BROWSER=chromium node scripts/mobile-hosted-browser.cjs
           VISUAL_BROWSER=webkit node scripts/mobile-hosted-browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mobile-first-hosted-staging-evidence
-          path: appearance-evidence/hosted-mobile/
+          name: mobile-first-staging-evidence
+          path: appearance-evidence/mobile-staging/
           if-no-files-found: ignore
           retention-days: 14
