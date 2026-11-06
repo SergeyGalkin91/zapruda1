@@ -123,6 +123,7 @@ async function assertAction(button, inset = 0) {
 
 async function simulateKeyboard(page, field, button) {
   await field.focus();
+  await expect(field).toBeFocused();
   await page.evaluate(() => {
     const viewport = window.visualViewport;
     if (!viewport) throw new Error("VisualViewport missing");
@@ -213,6 +214,7 @@ async function profile(page, width, writes) {
 
 async function report(page, width, writes) {
   await page.goto(origin + "/reports/new", { waitUntil: "load" });
+  const heading = page.getByRole("heading", { name: "Новый отчёт", exact: true });
   const title = page.getByLabel(/Название отчёта/);
   const next = page.getByRole("button", { name: "Далее", exact: true });
   await next.click();
@@ -221,6 +223,7 @@ async function report(page, width, writes) {
   await page.getByLabel(/Вид рыбалки для достижений/).selectOption({ index: 1 });
   await simulateKeyboard(page, title, next);
   await next.click();
+  await expect(heading).toBeFocused();
   await resetKeyboard(page);
   const species = page.getByLabel("Вид рыбы", { exact: true });
   const catchCount = await species.count();
@@ -233,10 +236,12 @@ async function report(page, width, writes) {
   await back.click();
   await expect(title).toHaveValue("Мобильный черновик");
   await next.click();
+  await expect(heading).toBeFocused();
   await expect(newCatch).toHaveValue("Окунь");
   await simulateKeyboard(page, newCatch, next);
   if (width === 390) await page.screenshot({ path: evidence + "/" + engine + "-report-catch.png" });
   await next.click();
+  await expect(heading).toBeFocused();
   await resetKeyboard(page);
   const publish = page.getByRole("button", { name: "Опубликовать отчёт", exact: true });
   await assertAction(publish);
