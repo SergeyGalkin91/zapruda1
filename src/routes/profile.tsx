@@ -1081,13 +1081,18 @@ export function Profile() {
                       type="checkbox"
                       checked={shareChatCity}
                       onChange={(e) => setShareChatCity(e.target.checked)}
-                      className="mt-1 size-4 accent-[#D7FF35]"
+                      aria-labelledby="profile-city-visibility-label"
+                      aria-describedby="profile-city-visibility-help"
+                      className="mt-0.5 size-5 shrink-0 accent-[#D7FF35]"
                     />
                     <span>
-                      <strong className="block text-zinc-100">
+                      <strong id="profile-city-visibility-label" className="block text-zinc-100">
                         Показывать мой город в общем чате
                       </strong>
-                      <span className="mt-1 block text-xs leading-5 text-zinc-400">
+                      <span
+                        id="profile-city-visibility-help"
+                        className="mt-1 block text-xs leading-5 text-zinc-400"
+                      >
                         Например: «river_hunter (Нижний Новгород)». Только название города будет
                         публичным. Рыболовные места, метки и остальная анкета останутся приватными.
                         Можно отключить в любой момент.

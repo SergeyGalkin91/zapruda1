@@ -39,7 +39,10 @@ async function interceptLocalBackend(context) {
     ".offline-invalid-signature";
   await context.addInitScript(
     ({ origin, user, token, expiresAt }) => {
-      if (location.origin !== origin || !["/profile", "/reports/new"].includes(location.pathname))
+      if (
+        location.origin !== origin ||
+        !["/profile", "/reports/new", "/communities"].includes(location.pathname)
+      )
         return;
       localStorage.setItem(
         "sb-ci-placeholder-auth-token",
@@ -133,7 +136,13 @@ async function simulateKeyboard(page, field, button) {
     });
     viewport.dispatchEvent(new Event("resize"));
   });
-  await expect(page.locator(".z-sticky-form-actions")).toHaveCSS("bottom", "280px");
+  await expect
+    .poll(() =>
+      button.evaluate(
+        (element) => getComputedStyle(element.closest(".z-sticky-form-actions")).bottom,
+      ),
+    )
+    .toBe("280px");
   await expect(field).toBeFocused();
   await assertAction(button, 280);
   await expect(field).toBeFocused();
@@ -210,6 +219,12 @@ async function profile(page, width, writes) {
   await expect(name).toHaveValue("Мобильный профиль");
   await sections.getByRole("button", { name: "Рыбалка", exact: true }).click();
   await expect(city).toHaveValue("Тестовый город");
+  await sections.getByRole("button", { name: "Приватность", exact: true }).click();
+  await expect(
+    page.getByRole("checkbox", { name: "Показывать мой город в общем чате" }),
+  ).toHaveAccessibleDescription(/Только название города/);
+  await page.getByLabel("Модель", { exact: true }).fill("Тестовая модель");
+  await assertAction(page.getByRole("button", { name: "Добавить снасть", exact: true }));
 }
 
 async function report(page, width, writes) {
@@ -256,6 +271,18 @@ async function report(page, width, writes) {
   await expect(title).toHaveValue("Мобильный черновик");
 }
 
+async function communities(page, width) {
+  if (![320, 390, 430].includes(width)) return;
+  await page.goto(origin + "/communities", { waitUntil: "load" });
+  await page.getByLabel("Название клуба", { exact: true }).fill("Мобильный клуб");
+  await assertAction(page.getByRole("button", { name: "Оставить заявку на клуб" }));
+  await page.getByLabel("Страна (код)", { exact: true }).fill("RU");
+  await page.getByLabel("Регион", { exact: true }).fill("Тестовый регион");
+  await page.getByLabel("Город", { exact: true }).fill("Тестовый город");
+  await page.getByLabel("Заголовок сходки", { exact: true }).fill("Мобильная сходка");
+  await assertAction(page.getByRole("button", { name: "Опубликовать", exact: true }));
+}
+
 async function run() {
   await fs.mkdir(evidence, { recursive: true });
   const browser = await playwright[engine].launch();
@@ -268,7 +295,7 @@ async function run() {
       });
       try {
         const writes = await interceptLocalBackend(context);
-        for (const scenario of [registration, profile, report]) {
+        for (const scenario of [registration, profile, report, communities]) {
           const page = await context.newPage();
           try {
             await scenario(page, width, writes);

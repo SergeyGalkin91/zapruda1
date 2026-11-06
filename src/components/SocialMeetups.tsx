@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, useRef, type FormEvent } from "react";
 import { MapPin, Plus, Users, MessageCircle } from "lucide-react";
+import { MobileField, StickyFormActions } from "@/components/MobileForm";
 import { supabase } from "@/integrations/supabase/client";
 import { localDateTimeToIso, toLocalDateTimeInput } from "@/lib/meetup-datetime";
 
@@ -399,60 +400,61 @@ export function SocialMeetups() {
         <p className="text-sm text-zinc-300">Войдите, чтобы создавать объявления и откликаться.</p>
       )}
       <div className="grid gap-2 sm:grid-cols-3">
-        <label className="text-xs text-zinc-300">
-          Страна (код)
+        <MobileField label="Страна (код)">
           <input
             value={country}
             maxLength={3}
             onChange={(e) => setCountry(e.target.value)}
             placeholder="RU"
-            className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 p-3 text-white"
+            className="field"
           />
-        </label>
-        <label className="text-xs text-zinc-300">
-          Регион
+        </MobileField>
+        <MobileField label="Регион">
           <input
             value={region}
             onChange={(e) => setRegion(e.target.value)}
             placeholder="Московская область"
-            className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 p-3 text-white"
+            className="field"
           />
-        </label>
-        <label className="text-xs text-zinc-300">
-          Город
+        </MobileField>
+        <MobileField label="Город">
           <input
             value={city}
             onChange={(e) => setCity(e.target.value)}
             placeholder="Москва"
-            className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 p-3 text-white"
+            className="field"
           />
-        </label>
+        </MobileField>
       </div>
       {userId && (
         <form onSubmit={create} className="grid gap-3 rounded-xl border border-[#D7FF35]/25 p-3">
           <h3 className="font-bold">+ Создать объявление</h3>
-          <input
-            required
-            minLength={4}
-            maxLength={100}
-            placeholder="Заголовок сходки"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-lg border border-white/20 bg-black/40 p-3"
-          />
-          <textarea
-            maxLength={1500}
-            placeholder="Что планируете ловить?"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-lg border border-white/20 bg-black/40 p-3"
-          />
-          <button
-            disabled={busy || !country || !region || !city}
-            className="btn-primary inline-flex items-center justify-center gap-2"
-          >
-            <Plus size={16} /> Опубликовать
-          </button>
+          <MobileField label="Заголовок сходки">
+            <input
+              required
+              minLength={4}
+              maxLength={100}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="field"
+            />
+          </MobileField>
+          <MobileField label="Описание сходки" hint="Что планируете ловить?">
+            <textarea
+              maxLength={1500}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="field"
+            />
+          </MobileField>
+          <StickyFormActions>
+            <button
+              disabled={busy || !country || !region || !city}
+              className="btn-primary inline-flex items-center justify-center gap-2"
+            >
+              <Plus size={16} /> Опубликовать
+            </button>
+          </StickyFormActions>
         </form>
       )}
       {(!country.trim() || !region.trim() || !city.trim()) && (
@@ -563,15 +565,16 @@ export function SocialMeetups() {
             ))}
           </div>
           <div className="flex gap-2">
-            <input
-              required
-              maxLength={1500}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              className="min-w-0 flex-1 rounded-lg border border-white/20 bg-black/40 p-3"
-              placeholder="Сообщение"
-            />
-            <button disabled={busy} className="btn-primary">
+            <MobileField label="Сообщение" className="min-w-0 flex-1">
+              <input
+                required
+                maxLength={1500}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                className="field"
+              />
+            </MobileField>
+            <button disabled={busy} className="btn-primary min-h-11 self-end">
               Отправить
             </button>
           </div>
@@ -583,22 +586,27 @@ export function SocialMeetups() {
         posts.find((p) => p.id === active)?.owner_id === userId && (
           <form onSubmit={saveDetails} className="space-y-2 rounded-xl border border-white/10 p-4">
             <h3 className="font-bold">Приватные детали для участников</h3>
-            <input
-              maxLength={500}
-              value={privatePlace}
-              onChange={(e) => setPrivatePlace(e.target.value)}
-              placeholder="Точное место встречи"
-              className="w-full rounded-lg border border-white/20 bg-black/40 p-3"
-            />
-            <input
-              type="datetime-local"
-              value={meetingAt}
-              onChange={(e) => setMeetingAt(e.target.value)}
-              className="w-full rounded-lg border border-white/20 bg-black/40 p-3"
-            />
-            <button disabled={busy} className="btn-primary">
-              Сохранить место и время
-            </button>
+            <MobileField label="Точное место встречи" hint="Место видят принятые участники сходки.">
+              <input
+                maxLength={500}
+                value={privatePlace}
+                onChange={(e) => setPrivatePlace(e.target.value)}
+                className="field"
+              />
+            </MobileField>
+            <MobileField label="Дата и время встречи">
+              <input
+                type="datetime-local"
+                value={meetingAt}
+                onChange={(e) => setMeetingAt(e.target.value)}
+                className="field"
+              />
+            </MobileField>
+            <StickyFormActions>
+              <button disabled={busy} className="btn-primary">
+                Сохранить место и время
+              </button>
+            </StickyFormActions>
           </form>
         )}
     </section>

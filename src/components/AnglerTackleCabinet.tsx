@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import type { FormEvent } from "react";
 import { Check, ListPlus, RotateCw, Trash2 } from "lucide-react";
+import { MobileField, StickyFormActions } from "@/components/MobileForm";
 import { supabase } from "@/integrations/supabase/client";
 import {
   formatTackleItem,
@@ -154,8 +155,7 @@ export function AnglerTackleCabinet({
         className="space-y-4 rounded-[22px] border border-[#A78BFA]/20 bg-[#17151E] p-4 sm:p-5"
       >
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block space-y-1.5 text-xs font-bold text-zinc-300">
-            <span>Тип снасти</span>
+          <MobileField label="Тип снасти">
             <select
               className="field"
               value={gearType}
@@ -167,9 +167,8 @@ export function AnglerTackleCabinet({
                 </option>
               ))}
             </select>
-          </label>
-          <label className="block space-y-1.5 text-xs font-bold text-zinc-300">
-            <span>Бренд</span>
+          </MobileField>
+          <MobileField label="Бренд">
             <select
               className="field"
               value={brand}
@@ -182,10 +181,9 @@ export function AnglerTackleCabinet({
                 <option key={candidate}>{candidate}</option>
               ))}
             </select>
-          </label>
+          </MobileField>
           {brand === "Другой бренд" && (
-            <label className="block space-y-1.5 text-xs font-bold text-zinc-300 sm:col-span-2">
-              <span>Введи бренд вручную</span>
+            <MobileField label="Введи бренд вручную" className="sm:col-span-2">
               <input
                 className="field"
                 required
@@ -194,10 +192,9 @@ export function AnglerTackleCabinet({
                 onChange={(e) => setCustomBrand(e.target.value)}
                 placeholder="Название производителя"
               />
-            </label>
+            </MobileField>
           )}
-          <label className="block space-y-1.5 text-xs font-bold text-zinc-300">
-            <span>Модель</span>
+          <MobileField label="Модель" hint="Можно выбрать подсказку или ввести любое название.">
             <input
               className="field"
               list={modelListId}
@@ -207,25 +204,23 @@ export function AnglerTackleCabinet({
               onChange={(e) => setModel(e.target.value)}
               placeholder={gearType === "reel" ? "Например, Legalis LT" : "Например, Euphoria"}
             />
-            <datalist id={modelListId}>
-              {suggestions.map((name) => (
-                <option key={name} value={name} />
-              ))}
-            </datalist>
-            <span className="block text-[11px] leading-4 font-normal text-zinc-500">
-              Можно выбрать подсказку или ввести любое название.
-            </span>
-          </label>
-          <label className="block space-y-1.5 text-xs font-bold text-zinc-300">
-            <span>
-              {gearType === "reel"
+          </MobileField>
+          <datalist id={modelListId}>
+            {suggestions.map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
+          <MobileField
+            label={
+              gearType === "reel"
                 ? "Размер катушки"
                 : gearType === "rod"
                   ? "Тест, длина / модификация"
                   : gearType === "line"
                     ? "PE / диаметр / размотка"
-                    : "Размер / вес / версия"}
-            </span>
+                    : "Размер / вес / версия"
+            }
+          >
             {gearType === "reel" ? (
               <select
                 className="field"
@@ -247,9 +242,8 @@ export function AnglerTackleCabinet({
                 placeholder={gearType === "line" ? "PE #1.2, 150 м" : "Например, 7–28 г"}
               />
             )}
-          </label>
-          <label className="block space-y-1.5 text-xs font-bold text-zinc-300 sm:col-span-2">
-            <span>Заметки (необязательно)</span>
+          </MobileField>
+          <MobileField label="Заметки (необязательно)" className="sm:col-span-2">
             <input
               className="field"
               maxLength={500}
@@ -257,17 +251,17 @@ export function AnglerTackleCabinet({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Например, основной комплект на Оке, шнур #1.2"
             />
-          </label>
+          </MobileField>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-zinc-400">
+        <StickyFormActions>
+          <p className="w-full text-xs text-zinc-400">
             Пример: <strong className="text-[#D7FF35]">Daiwa → Legalis LT → 2500</strong>
           </p>
           <button type="submit" className="btn-primary" disabled={working}>
             <ListPlus className="size-4" />
             {working ? "Добавляем…" : "Добавить снасть"}
           </button>
-        </div>
+        </StickyFormActions>
       </form>
 
       <div className="space-y-3">

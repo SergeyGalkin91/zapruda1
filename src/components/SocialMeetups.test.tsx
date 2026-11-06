@@ -245,7 +245,7 @@ describe("meetup chat regression", () => {
     await setup();
     open("a");
     await screen.findByText("Вы: сообщение-150");
-    fireEvent.change(screen.getByPlaceholderText("Точное место встречи"), {
+    fireEvent.change(screen.getByLabelText("Точное место встречи"), {
       target: { value: "Несохранённое уточнение" },
     });
     rows.meetup_messages.push({
@@ -259,9 +259,7 @@ describe("meetup chat regression", () => {
       tick!();
     });
     await screen.findByText("Участник: Уже на месте");
-    expect(screen.getByPlaceholderText("Точное место встречи")).toHaveValue(
-      "Несохранённое уточнение",
-    );
+    expect(screen.getByLabelText("Точное место встречи")).toHaveValue("Несохранённое уточнение");
   });
   it("does not apply details from a previous meetup after switching", async () => {
     await setup();
@@ -275,10 +273,10 @@ describe("meetup chat regression", () => {
     open("a");
     open("b");
     await waitFor(() =>
-      expect(screen.getByPlaceholderText("Точное место встречи")).toHaveValue("Место b"),
+      expect(screen.getByLabelText("Точное место встречи")).toHaveValue("Место b"),
     );
     await act(async () => resolve({ data: rows.meetup_private_details[0] ?? null, error: null }));
-    expect(screen.getByPlaceholderText("Точное место встречи")).toHaveValue("Место b");
+    expect(screen.getByLabelText("Точное место встречи")).toHaveValue("Место b");
     expect(screen.queryByText("Вы: сообщение-150")).toBeNull();
   });
   it("clears cached private details and messages if membership is revoked", async () => {
@@ -292,21 +290,21 @@ describe("meetup chat regression", () => {
     await screen.findByText(/Доступ к чату сходки больше не подтверждён/);
     expect(screen.queryByText("Место a")).toBeNull();
     expect(screen.queryByText("Вы: сообщение-150")).toBeNull();
-    expect(screen.queryByPlaceholderText("Точное место встречи")).toBeNull();
+    expect(screen.queryByLabelText("Точное место встречи")).toBeNull();
   });
   it("sends a new message without overwriting unsaved private details", async () => {
     await setup();
     open("a");
     await screen.findByText("Вы: сообщение-150");
-    fireEvent.change(screen.getByPlaceholderText("Точное место встречи"), {
+    fireEvent.change(screen.getByLabelText("Точное место встречи"), {
       target: { value: "Мой черновик места" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Сообщение"), {
+    fireEvent.change(screen.getByLabelText("Сообщение"), {
       target: { value: "Новое сообщение" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Отправить" }));
     await screen.findByText("Вы: Новое сообщение");
-    expect(screen.getByPlaceholderText("Точное место встречи")).toHaveValue("Мой черновик места");
+    expect(screen.getByLabelText("Точное место встречи")).toHaveValue("Мой черновик места");
   });
   it("preserves the original UTC instant when the organizer saves unchanged details", async () => {
     await setup();
