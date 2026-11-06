@@ -116,18 +116,24 @@ async function run() {
         });
         await page.locator('[data-z-keyboard-open="true"]').waitFor({ state: "detached" });
 
-        await page.goto(origin + "/reports/new", { waitUntil: "domcontentloaded" });
+        await page.goto(origin + "/reports/new", { waitUntil: "load" });
         const title = page.getByLabel(/Название отчёта/);
+        const next = page.getByRole("button", { name: "Далее", exact: true });
+        await next.click();
+        await page.getByRole("alert").filter({ hasText: "Укажи название отчёта." }).waitFor();
         await title.fill("Мобильный черновик");
         await page.getByLabel(/Вид рыбалки для достижений/).selectOption({ index: 1 });
-        await page.getByRole("button", { name: "Далее", exact: true }).click();
+        await next.click();
+        const species = page.getByLabel("Вид рыбы", { exact: true });
+        const catchCount = await species.count();
         await page.getByRole("button", { name: "+ Рыба" }).click();
-        await page.getByLabel("Вид рыбы", { exact: true }).fill("Окунь");
-        await page.getByLabel("Вес, кг", { exact: true }).fill("0.4");
+        const newCatch = species.nth(catchCount);
+        await newCatch.fill("Окунь");
+        await page.getByLabel("Вес, кг", { exact: true }).nth(catchCount).fill("0.4");
         await page.getByRole("button", { name: "Назад", exact: true }).click();
         assert.equal(await title.inputValue(), "Мобильный черновик");
-        await page.getByRole("button", { name: "Далее", exact: true }).click();
-        assert.equal(await page.getByLabel("Вид рыбы", { exact: true }).inputValue(), "Окунь");
+        await next.click();
+        assert.equal(await newCatch.inputValue(), "Окунь");
         await hasNoHorizontalOverflow(page);
         await page.screenshot({ path: evidence + "/" + engine + "-report-catch.png" });
       } finally {
