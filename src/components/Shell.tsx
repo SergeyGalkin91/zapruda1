@@ -126,7 +126,9 @@ export function Shell({
         field.closest(".z-mobile-field") &&
         window.innerWidth < 768
       ) {
-        const bottom = viewport.offsetTop + viewport.height - 72;
+        const actions = field.closest("form")?.querySelector(".z-sticky-form-actions");
+        const actionHeight = actions?.getBoundingClientRect().height ?? 0;
+        const bottom = viewport.offsetTop + viewport.height - actionHeight - 12;
         const control = field.getBoundingClientRect();
         if (control.bottom > bottom && control.top >= viewport.offsetTop)
           window.scrollBy(0, Math.ceil(control.bottom - bottom));

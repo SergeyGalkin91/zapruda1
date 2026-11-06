@@ -146,6 +146,13 @@ async function simulateKeyboard(page, field, button) {
   await expect(field).toBeFocused();
   await assertAction(button, 280);
   await expect(field).toBeFocused();
+  const clearOfActions = await field.evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    const actions = element.closest("form").querySelector(".z-sticky-form-actions");
+    const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+    return box.top >= 0 && box.bottom <= actions.getBoundingClientRect().top + 1 && hit === element;
+  });
+  assert.ok(clearOfActions, `${engine}: focused field must stay clear of the sticky actions`);
 }
 
 async function resetKeyboard(page) {
