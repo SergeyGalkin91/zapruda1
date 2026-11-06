@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   visual-appearance:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       NITRO_PRESET: node-server
@@ -34,7 +34,7 @@ jobs:
           test -f .output/server/index.mjs
       - name: Install Chromium, Firefox, WebKit and Playwright
         run: |
-          bun add --dev playwright
+          bun add --dev playwright@1.58.2
           bunx playwright install --with-deps chromium firefox webkit
       - name: Check both themes at 320/390/768/1440px in three engines; save screenshots
         shell: bash
@@ -76,7 +76,7 @@ jobs:
           retention-days: 14
   hosted-mobile:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'work/mobile-first-premium-20261106'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 22
     env:
       NETLIFY_MOBILE_PREVIEW: https://deploy-preview-${{ github.event.number }}--zapruda1.netlify.app
