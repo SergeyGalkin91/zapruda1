@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { Crown, Fish, ShieldCheck } from "lucide-react";
+import { MobileField, StickyFormActions } from "@/components/MobileForm";
 import { supabase } from "@/integrations/supabase/client";
 import { isSpotStaging, spotAction, spotToken } from "@/lib/spot-api";
 import { clearReportHandoff, readReportHandoff } from "@/lib/report-big-fish-handoff";
@@ -36,6 +37,10 @@ export function SpotCatchFlow({ allowReportHandoff = false }: { allowReportHando
   const [weight, setWeight] = useState("");
   const [length, setLength] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
+  const [reviewing, setReviewing] = useState(false);
+  const formHeading = useRef<HTMLHeadingElement>(null);
+  const photoField = useRef<HTMLInputElement>(null);
+  const submitting = useRef(false);
   const [capturedAt, setCapturedAt] = useState("");
   const [reviewChecked, setReviewChecked] = useState<Record<string, boolean>>({});
   const [microWelfareChecked, setMicroWelfareChecked] = useState<Record<string, boolean>>({});
@@ -73,6 +78,10 @@ export function SpotCatchFlow({ allowReportHandoff = false }: { allowReportHando
         setRevokeChecked({});
         setRevokeReasons({});
         setPhoto(null);
+        setReviewing(false);
+        submitting.current = false;
+        setLeague("street");
+        setSpecies("pike");
         setWeight("");
         setLength("");
         setCapturedAt("");
@@ -153,14 +162,25 @@ export function SpotCatchFlow({ allowReportHandoff = false }: { allowReportHando
     }
   }
 
+  function changeStep(next: boolean) {
+    setReviewing(next);
+    requestAnimationFrame(() => formHeading.current?.focus());
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!photo || !spotId || busy) return;
+    if (!spotId || busy || submitting.current) return;
+    if (!reviewing) {
+      changeStep(true);
+      return;
+    }
+    if (!photo) return;
     const actor = identity.current,
       version = generation.current;
     if (!actor) return;
     const current = () =>
       mounted.current && identity.current === actor && generation.current === version;
+    submitting.current = true;
     setBusy(true);
     setMessage("");
     try {
@@ -185,13 +205,18 @@ export function SpotCatchFlow({ allowReportHandoff = false }: { allowReportHando
       if (error || data?.error) throw new Error("Заявка не принята сервером.");
       setMessage("Улов отправлен на проверку. Корона присваивается только после модерации.");
       setPhoto(null);
+      if (photoField.current) photoField.current.value = "";
+      setReviewing(false);
       clearReportHandoff(actor);
       await refreshOwn();
       window.dispatchEvent(new Event("zapruda:spot-progress-changed"));
     } catch (err) {
       if (current()) setMessage(err instanceof Error ? err.message : "Не удалось отправить улов.");
     } finally {
-      if (current()) setBusy(false);
+      if (current()) {
+        submitting.current = false;
+        setBusy(false);
+      }
     }
   }
 
@@ -260,112 +285,145 @@ export function SpotCatchFlow({ allowReportHandoff = false }: { allowReportHando
         <p className="text-sm text-zinc-300">Для подачи заявки войди в подтверждённый аккаунт.</p>
       ) : (
         <>
-          <form onSubmit={(event) => void submit(event)} className="grid gap-3 sm:grid-cols-2">
-            <label className="text-sm text-zinc-300">
-              Дисциплина
-              <select
-                value={league}
-                onChange={(event) => {
-                  setLeague(event.target.value as "street" | "ultralight");
-                  setSpotId("");
-                }}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
-              >
-                <option value="street">STREET FISHING</option>
-                <option value="ultralight">ULTRALIGHT / MICROJIG</option>
-              </select>
-            </label>
-            <label className="text-sm text-zinc-300">
-              Проверенный спот
-              <select
-                value={spotId}
-                required
-                onChange={(event) => setSpotId(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
-              >
-                <option value="">Выбрать спот</option>
-                {eligible.map((spot) => (
-                  <option key={spot.id} value={spot.id}>
-                    {spot.name} · {spot.city}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="text-sm text-zinc-300">
-              Вид рыбы
-              <select
-                value={species}
-                onChange={(event) => setSpecies(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
-              >
-                <option value="pike">Щука</option>
-                <option value="zander">Судак</option>
-                <option value="perch">Окунь</option>
-                <option value="asp">Жерех</option>
-                <option value="chub">Голавль</option>
-              </select>
-            </label>
-            <label className="text-sm text-zinc-300">
-              Вес одной рыбы, г
-              <input
-                required
-                min="1"
-                max="200000"
-                type="number"
-                value={weight}
-                onChange={(event) => setWeight(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
-              />
-            </label>
-            <label className="text-sm text-zinc-300">
-              Длина, мм
-              <input
-                required
-                min="1"
-                max="4000"
-                type="number"
-                value={length}
-                onChange={(event) => setLength(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
-              />
-            </label>
-            <label className="text-sm text-zinc-300">
-              Фото рыбы и измерения (макс. 12 МБ)
-              <input
-                required
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(event) => setPhoto(event.target.files?.[0] ?? null)}
-                className="mt-1 block w-full text-xs"
-              />
-            </label>
-            <label className="text-sm text-zinc-300">
-              Дата и время поимки
-              <input
-                type="datetime-local"
-                required
-                value={capturedAt}
-                onChange={(event) => setCapturedAt(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-[#141923] p-3"
-              />
-            </label>
-            <button
-              type="submit"
-              disabled={busy || !eligible.length || !spotId || !photo || !capturedAt}
-              className="rounded-xl bg-[#D7FF35] p-3 font-black text-black disabled:opacity-40"
+          <form
+            key={uid}
+            onSubmit={(event) => void submit(event)}
+            aria-busy={busy}
+            className="space-y-4"
+          >
+            <h3 ref={formHeading} tabIndex={-1} className="scroll-mt-24 text-base font-bold">
+              {reviewing ? "2 / Фото и подтверждение" : "1 / Данные улова"}
+            </h3>
+            <fieldset hidden={reviewing} disabled={busy || reviewing} className="min-w-0">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <MobileField label="Дисциплина">
+                  <select
+                    value={league}
+                    onChange={(event) => {
+                      setLeague(event.target.value as "street" | "ultralight");
+                      setSpotId("");
+                    }}
+                    className="field"
+                  >
+                    <option value="street">STREET FISHING</option>
+                    <option value="ultralight">ULTRALIGHT / MICROJIG</option>
+                  </select>
+                </MobileField>
+                <MobileField label="Проверенный спот">
+                  <select
+                    value={spotId}
+                    required
+                    onChange={(event) => setSpotId(event.target.value)}
+                    className="field"
+                  >
+                    <option value="">Выбрать спот</option>
+                    {eligible.map((spot) => (
+                      <option key={spot.id} value={spot.id}>
+                        {spot.name} · {spot.city}
+                      </option>
+                    ))}
+                  </select>
+                </MobileField>
+                <MobileField label="Вид рыбы">
+                  <select
+                    value={species}
+                    onChange={(event) => setSpecies(event.target.value)}
+                    className="field"
+                  >
+                    <option value="pike">Щука</option>
+                    <option value="zander">Судак</option>
+                    <option value="perch">Окунь</option>
+                    <option value="asp">Жерех</option>
+                    <option value="chub">Голавль</option>
+                  </select>
+                </MobileField>
+                <MobileField label="Вес одной рыбы, г">
+                  <input
+                    required
+                    min="1"
+                    max="200000"
+                    type="number"
+                    inputMode="numeric"
+                    value={weight}
+                    onChange={(event) => setWeight(event.target.value)}
+                    className="field"
+                  />
+                </MobileField>
+                <MobileField label="Длина, мм">
+                  <input
+                    required
+                    min="1"
+                    max="4000"
+                    type="number"
+                    inputMode="numeric"
+                    value={length}
+                    onChange={(event) => setLength(event.target.value)}
+                    className="field"
+                  />
+                </MobileField>
+                <MobileField label="Дата и время поимки">
+                  <input
+                    type="datetime-local"
+                    required
+                    value={capturedAt}
+                    onChange={(event) => setCapturedAt(event.target.value)}
+                    className="field"
+                  />
+                </MobileField>
+              </div>
+            </fieldset>
+            <fieldset
+              hidden={!reviewing}
+              disabled={busy || !reviewing}
+              className="min-w-0 space-y-3"
             >
-              <Fish className="mr-2 inline size-4" aria-hidden="true" />
-              Отправить на проверку
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void refreshOwn()}
-              className="rounded-xl border border-white/20 p-3 text-sm font-bold"
-            >
-              Мои уловы и уведомления
-            </button>
+              <p className="text-sm text-zinc-300 [overflow-wrap:anywhere]">
+                {eligible.find((spot) => spot.id === spotId)?.name} · {weight} г · {length} мм
+              </p>
+              <MobileField label="Фото рыбы и измерения (макс. 12 МБ)">
+                <input
+                  required
+                  ref={photoField}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) => setPhoto(event.target.files?.[0] ?? null)}
+                  className="mt-1 block w-full text-xs"
+                />
+              </MobileField>
+
+              <p className="text-xs text-zinc-400">
+                Фото отправится в закрытое хранилище. Решение по заявке принимает модератор.
+              </p>
+            </fieldset>
+            <StickyFormActions>
+              {reviewing && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  className="btn-ghost"
+                  onClick={() => changeStep(false)}
+                >
+                  Назад
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={busy || !eligible.length || (reviewing && !photo)}
+                className="btn-primary"
+              >
+                <Fish className="mr-2 inline size-4" aria-hidden="true" />
+                {busy ? "Отправляем…" : reviewing ? "Отправить на проверку" : "Далее"}
+              </button>
+            </StickyFormActions>
           </form>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void refreshOwn()}
+            className="btn-ghost min-h-11"
+          >
+            Мои уловы и уведомления
+          </button>
           {!eligible.length && (
             <p className="text-xs text-zinc-400">
               Пока нет юридически проверенных спотов для этой дисциплины.

@@ -938,3 +938,132 @@ body {
     animation-duration: 0.01ms !important;
   }
 }
+
+.z-mobile-field,
+.z-mobile-field-body {
+  min-width: 0;
+}
+.z-mobile-field-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.z-mobile-field-body > label {
+  order: -1;
+  margin-bottom: 0.375rem;
+  color: var(--premium-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.z-mobile-field-body > :is(input, textarea, select) {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 3.5rem;
+  font-size: 1rem;
+  scroll-margin-block: 0.75rem;
+}
+.z-mobile-field-body[data-floating] > :is(input, textarea) {
+  padding-top: 1.35rem;
+  padding-bottom: 0.4rem;
+}
+.z-mobile-field-body[data-floating] > label {
+  position: absolute;
+  inset: 1rem 0.8rem auto;
+  margin: 0;
+  width: fit-content;
+  max-width: calc(100% - 1.6rem);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: text;
+  font-size: 0.9375rem;
+  transition:
+    top 140ms ease,
+    font-size 140ms ease;
+}
+.z-mobile-field-body[data-floating]
+  > :is(input, textarea):is(:focus, :not(:placeholder-shown))
+  + label {
+  top: 0.35rem;
+  font-size: 0.6875rem;
+}
+.z-mobile-field-body[data-action] > input {
+  padding-right: 3.35rem;
+}
+.z-mobile-field-body[data-action] > label {
+  max-width: calc(100% - 4rem);
+}
+.z-mobile-field-action {
+  position: absolute;
+  inset: 0 0.125rem 0 auto;
+  display: grid;
+  place-items: center;
+}
+.z-mobile-field-action > button {
+  display: grid;
+  min-width: 44px;
+  min-height: 44px;
+  place-items: center;
+}
+.z-mobile-field-hint,
+.z-mobile-field-error {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.z-mobile-field-hint {
+  color: var(--premium-muted);
+}
+.z-mobile-field-error {
+  color: var(--color-destructive);
+}
+.z-mobile-field-body > [aria-invalid="true"] {
+  border-color: var(--color-destructive);
+}
+.z-sticky-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.z-sticky-form-actions > button {
+  flex: 1 1 auto;
+  min-height: 44px;
+}
+@media (max-width: 767px) {
+  .z-sticky-form-actions {
+    position: sticky;
+    z-index: 30;
+    bottom: max(var(--z-mobile-nav-height, 0px), var(--z-keyboard-inset, 0px));
+    padding: 0.5rem;
+    border: 1px solid var(--premium-edge);
+    border-radius: 0.875rem;
+    background: var(--premium-panel);
+  }
+  .z-app-shell[data-z-keyboard-open="true"] .z-sticky-form-actions {
+    bottom: var(--z-keyboard-inset);
+  }
+  .z-app-shell[data-z-keyboard-open="true"]:has(.z-sticky-form-actions) > .z-shell-header {
+    position: relative;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .z-mobile-field-body[data-floating] > label {
+    transition: none;
+  }
+}
+
+.z-form-sections {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.z-form-sections > button {
+  min-height: 44px;
+  min-width: 0;
+  white-space: normal;
+}
+.z-form-sections > button[aria-pressed="true"] {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}

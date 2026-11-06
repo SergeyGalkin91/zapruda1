@@ -1,7 +1,8 @@
 import { streetStorageKey } from "@/lib/street-storage";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { cloneElement, isValidElement, useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, ImagePlus, Trash2, Sparkles } from "lucide-react";
+import { MobileField, StickyFormActions } from "@/components/MobileForm";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
@@ -29,25 +30,6 @@ type Catch = { species: string; weight: string; length: string };
 type CatalogWater = { id: string; name: string; region: string; country_code: string };
 type CatalogFish = { id: string; name: string };
 type CatalogMapping = { waterbody_id: string; species_id: string };
-
-function Label({ t, children }: { t: string; children: React.ReactNode }) {
-  const captionId = useId();
-  return (
-    <label className="block space-y-1.5">
-      <span
-        id={captionId}
-        className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-      >
-        {t}
-      </span>
-      {isValidElement(children)
-        ? cloneElement(children as React.ReactElement<{ "aria-labelledby"?: string }>, {
-            "aria-labelledby": captionId,
-          })
-        : children}
-    </label>
-  );
-}
 
 export function NewReport() {
   const navigate = useNavigate();
@@ -82,6 +64,8 @@ export function NewReport() {
   const alive = useRef(true);
   const photoUploadIds = useRef(new Map<File, string>());
   const [step, setStep] = useState(1);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  const [titleError, setTitleError] = useState("");
   const [fishedOn, setFishedOn] = useState("");
   const [tackle, setTackle] = useState("");
   const [draftWarning, setDraftWarning] = useState("");
@@ -704,13 +688,27 @@ export function NewReport() {
     }
   }
 
+  function changeStep(next: number) {
+    setError("");
+    setStep(next);
+    requestAnimationFrame(() => stepHeading.current?.focus());
+  }
+
   function nextStep(form: HTMLFormElement) {
     if (!form.reportValidity()) return;
-    setStep((current) => Math.min(3, current + 1));
+    if (step === 1 && !title.trim()) {
+      setTitleError("Укажи название отчёта.");
+      const titleField = form.elements.namedItem("reportTitle");
+      if (titleField instanceof HTMLInputElement) titleField.focus();
+      return;
+    }
+    changeStep(Math.min(3, step + 1));
   }
   return (
     <Shell screen="create">
-      <h1 className="mb-4 text-2xl font-bold">Новый отчёт</h1>
+      <h1 ref={stepHeading} tabIndex={-1} className="mb-4 scroll-mt-24 text-2xl font-bold">
+        Новый отчёт
+      </h1>
       <ol className="mb-5 grid grid-cols-3 gap-2 text-xs" aria-label="Шаги отчёта">
         {["Где и когда", "Улов и история", "Проверка и публикация"].map((label, i) => (
           <li
@@ -776,7 +774,15 @@ export function NewReport() {
           </button>
         )}
       </div>
-      <form className="space-y-6" onSubmit={publish}>
+      <form
+        className="space-y-6"
+        onSubmit={publish}
+        onInvalid={(event) => {
+          if (event.target instanceof HTMLInputElement && event.target.name === "reportTitle") {
+            setTitleError("Укажи название отчёта.");
+          }
+        }}
+      >
         <fieldset disabled={Boolean(savedReportId)} className="min-w-0 space-y-6">
           <fieldset
             hidden={step !== 1}
@@ -784,27 +790,30 @@ export function NewReport() {
             disabled={step !== 1}
             className="panel grid gap-4 p-5 md:grid-cols-2"
           >
-            <Label t="Дата рыбалки">
+            <MobileField label="Дата рыбалки">
               <input
                 className="field"
                 type="date"
                 value={fishedOn}
                 onChange={(e) => setFishedOn(e.target.value)}
               />
-            </Label>
+            </MobileField>
             <div className="md:col-span-2">
-              <Label t="Название отчёта *">
+              <MobileField label="Название отчёта *" error={titleError}>
                 <input
                   className="field"
-                  placeholder="Например, утро на Кудьме"
+                  name="reportTitle"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    setTitleError("");
+                  }}
                   maxLength={120}
                   required
                 />
-              </Label>
+              </MobileField>
             </div>
-            <Label t="Вид рыбалки для достижений *">
+            <MobileField label="Вид рыбалки для достижений *">
               <select
                 className="field"
                 value={fishingMethod}
@@ -820,8 +829,8 @@ export function NewReport() {
                   </option>
                 ))}
               </select>
-            </Label>
-            <Label t="Водоём из Атласа (по желанию)">
+            </MobileField>
+            <MobileField label="Водоём из Атласа (по желанию)">
               <select
                 className="field"
                 value={selectedWaterbody}
@@ -839,28 +848,28 @@ export function NewReport() {
                   </option>
                 ))}
               </select>
-            </Label>
-            <Label t="Место (без точных координат)">
+            </MobileField>
+            <MobileField label="Место (без точных координат)">
               <input
                 className="field"
                 placeholder="Например, Волга у Нижнего"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
-            </Label>
+            </MobileField>
             <p className="md:col-span-2 text-xs leading-5 text-zinc-400">
               Для ачивки выбери водоём, укажи пойманный вид и приложи фото ниже. Заявка отправится
               автоматически после публикации. GPS и отдельные анкеты не нужны.
             </p>
-            <Label t="Погода">
+            <MobileField label="Погода">
               <input
                 className="field"
                 placeholder="Пасмурно, небольшой дождь"
                 value={weather}
                 onChange={(e) => setWeather(e.target.value)}
               />
-            </Label>
-            <Label t="Температура, °C">
+            </MobileField>
+            <MobileField label="Температура, °C">
               <input
                 className="field"
                 type="number"
@@ -869,8 +878,8 @@ export function NewReport() {
                 value={temperature}
                 onChange={(e) => setTemperature(e.target.value)}
               />
-            </Label>
-            <Label t="Давление, мм рт. ст.">
+            </MobileField>
+            <MobileField label="Давление, мм рт. ст.">
               <input
                 className="field"
                 type="number"
@@ -879,16 +888,16 @@ export function NewReport() {
                 value={pressure}
                 onChange={(e) => setPressure(e.target.value)}
               />
-            </Label>
-            <Label t="Направление ветра">
+            </MobileField>
+            <MobileField label="Направление ветра">
               <input
                 className="field"
                 placeholder="СЗ"
                 value={windDirection}
                 onChange={(e) => setWindDirection(e.target.value)}
               />
-            </Label>
-            <Label t="Ветер, м/с">
+            </MobileField>
+            <MobileField label="Ветер, м/с">
               <input
                 className="field"
                 type="number"
@@ -898,7 +907,7 @@ export function NewReport() {
                 value={windSpeed}
                 onChange={(e) => setWindSpeed(e.target.value)}
               />
-            </Label>
+            </MobileField>
           </fieldset>
           <fieldset
             hidden={step !== 2}
@@ -906,39 +915,39 @@ export function NewReport() {
             disabled={step !== 2}
             className="panel grid gap-4 p-5 md:grid-cols-2"
           >
-            <Label t="Снасти">
+            <MobileField label="Снасти">
               <input
                 className="field"
                 value={tackle}
                 maxLength={300}
                 onChange={(e) => setTackle(e.target.value)}
               />
-            </Label>
-            <Label t="Техника ловли">
+            </MobileField>
+            <MobileField label="Техника ловли">
               <input
                 className="field"
                 placeholder="Джиг, ступенька"
                 value={technique}
                 onChange={(e) => setTechnique(e.target.value)}
               />
-            </Label>
-            <Label t="Приманки">
+            </MobileField>
+            <MobileField label="Приманки">
               <input
                 className="field"
                 placeholder="Виброхвост 3”, колебалка 10 г"
                 value={lures}
                 onChange={(e) => setLures(e.target.value)}
               />
-            </Label>
+            </MobileField>
             <div className="md:col-span-2">
-              <Label t="Рассказ">
+              <MobileField label="Рассказ">
                 <textarea
                   className="field min-h-28"
                   placeholder="Как прошла рыбалка? Где стоял, что пробовал, были ли поклёвки?"
                   value={story}
                   onChange={(e) => setStory(e.target.value)}
                 />
-              </Label>
+              </MobileField>
             </div>
           </fieldset>
           <fieldset
@@ -946,7 +955,7 @@ export function NewReport() {
             style={{ display: step === 2 ? undefined : "none" }}
             disabled={step !== 2}
           >
-            <section className="panel space-y-4 p-5">
+            <section className="panel min-w-0 space-y-4 p-5 [overflow-wrap:anywhere]">
               <div className="flex items-center gap-3">
                 <div className="flex size-10 items-center justify-center rounded-xl border border-lime-300/30 bg-lime-300/10 text-lime-300">
                   <Camera className="size-5" aria-hidden="true" />
@@ -1049,36 +1058,42 @@ export function NewReport() {
               {catches.map((c, i) => (
                 <div
                   key={i}
-                  className="grid grid-cols-[1fr_auto] gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-[2fr_1fr_1fr_auto]"
+                  className="grid grid-cols-2 gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
                 >
-                  <input
-                    className="field col-span-2 sm:col-span-1"
-                    list="zapruda-atlas-species"
-                    placeholder="Вид (щука, окунь…)"
-                    value={c.species}
-                    onChange={(e) => upd(i, "species", e.target.value)}
-                  />
-                  <input
-                    className="field"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="Вес, кг"
-                    value={c.weight}
-                    onChange={(e) => upd(i, "weight", e.target.value)}
-                  />
-                  <input
-                    className="field"
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    placeholder="Длина, см"
-                    value={c.length}
-                    onChange={(e) => upd(i, "length", e.target.value)}
-                  />
+                  <MobileField label="Вид рыбы" className="col-span-2 sm:col-span-1">
+                    <input
+                      className="field"
+                      list="zapruda-atlas-species"
+                      placeholder="Вид (щука, окунь…)"
+                      value={c.species}
+                      onChange={(e) => upd(i, "species", e.target.value)}
+                    />
+                  </MobileField>
+                  <MobileField label="Вес, кг">
+                    <input
+                      className="field"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="Вес, кг"
+                      value={c.weight}
+                      onChange={(e) => upd(i, "weight", e.target.value)}
+                    />
+                  </MobileField>
+                  <MobileField label="Длина, см">
+                    <input
+                      className="field"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      placeholder="Длина, см"
+                      value={c.length}
+                      onChange={(e) => upd(i, "length", e.target.value)}
+                    />
+                  </MobileField>
                   <button
                     type="button"
-                    className="btn-ghost"
+                    className="btn-ghost col-span-2 min-h-11 justify-self-end sm:col-span-1"
                     aria-label="Удалить"
                     onClick={() => setCatches((x) => x.filter((_, j) => j !== i))}
                   >
@@ -1092,7 +1107,7 @@ export function NewReport() {
             hidden={step !== 3}
             style={{ display: step === 3 ? undefined : "none" }}
             disabled={step !== 3}
-            className="panel space-y-4 p-5"
+            className="panel min-w-0 space-y-4 p-5 [overflow-wrap:anywhere]"
           >
             <h2 className="text-lg font-bold">Проверь отчёт</h2>
             <h3 className="font-bold">{title}</h3>
@@ -1139,13 +1154,13 @@ export function NewReport() {
             {error}
           </p>
         )}
-        <div className="flex flex-wrap items-center gap-3">
+        <StickyFormActions>
           {step > 1 && !savedReportId && (
             <button
               type="button"
               className="btn-ghost"
               disabled={saving}
-              onClick={() => setStep(step - 1)}
+              onClick={() => changeStep(step - 1)}
             >
               Назад
             </button>
@@ -1176,7 +1191,7 @@ export function NewReport() {
               {progress}
             </span>
           )}
-        </div>
+        </StickyFormActions>
       </form>
     </Shell>
   );

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   ArrowUpRight,
   BrainCircuit,
@@ -76,7 +76,7 @@ export function Shell({
   const [authError, setAuthError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [offline, setOffline] = useState(false);
-  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [keyboardInset, setKeyboardInset] = useState(0);
   const menuRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
@@ -114,17 +114,33 @@ export function Shell({
           field.matches(
             "textarea, input:not([type]), input:is([type=text], [type=search], [type=email], [type=password], [type=tel], [type=url], [type=number])",
           ));
-      setKeyboardOpen(
-        isTyping && viewport.scale === 1 && window.innerHeight - viewport.height > 120,
-      );
+      const obscured = window.innerHeight - viewport.height;
+      const inset =
+        isTyping && viewport.scale === 1 && obscured > 120
+          ? Math.max(0, Math.round(obscured - viewport.offsetTop))
+          : 0;
+      setKeyboardInset(inset);
+      if (
+        inset &&
+        field instanceof HTMLElement &&
+        field.closest(".z-mobile-field") &&
+        window.innerWidth < 768
+      ) {
+        const bottom = viewport.offsetTop + viewport.height - 72;
+        const control = field.getBoundingClientRect();
+        if (control.bottom > bottom && control.top >= viewport.offsetTop)
+          window.scrollBy(0, Math.ceil(control.bottom - bottom));
+      }
     };
-    const closeKeyboard = () => setKeyboardOpen(false);
+    const closeKeyboard = () => setKeyboardInset(0);
     viewport.addEventListener("resize", updateKeyboard);
+    viewport.addEventListener("scroll", updateKeyboard);
     document.addEventListener("focusin", updateKeyboard);
     document.addEventListener("focusout", closeKeyboard);
     updateKeyboard();
     return () => {
       viewport.removeEventListener("resize", updateKeyboard);
+      viewport.removeEventListener("scroll", updateKeyboard);
       document.removeEventListener("focusin", updateKeyboard);
       document.removeEventListener("focusout", closeKeyboard);
     };
@@ -213,7 +229,8 @@ export function Shell({
   return (
     <div
       data-z-screen={screen}
-      data-z-keyboard-open={keyboardOpen || undefined}
+      data-z-keyboard-open={keyboardInset > 0 || undefined}
+      style={{ "--z-keyboard-inset": keyboardInset + "px" } as CSSProperties}
       data-z-admin-nav={isAdmin || undefined}
       className="z-app-shell overflow-x-clip"
     >

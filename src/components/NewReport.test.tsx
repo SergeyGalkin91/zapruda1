@@ -206,7 +206,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
         ? { select: () => ({ limit: async () => ({ data: [], error: null }) }) }
         : original(table),
     );
-    fireEvent.change(screen.getByPlaceholderText("Вид (щука, окунь…)"), {
+    fireEvent.change(screen.getByLabelText("Вид рыбы"), {
       target: { value: "Окунь" },
     });
     submitReport(form);
@@ -225,7 +225,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
         ? { select: () => ({ limit: async () => ({ data: [], error: null }) }) }
         : original(table),
     );
-    fireEvent.change(screen.getByPlaceholderText("Вид (щука, окунь…)"), {
+    fireEvent.change(screen.getByLabelText("Вид рыбы"), {
       target: { value: "Окунь" },
     });
     submitReport(view.form);
@@ -269,7 +269,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
   });
   it("does not create a partial report when the required catch store is unavailable", async () => {
     const { form } = await fillReport();
-    fireEvent.change(screen.getByPlaceholderText("Вид (щука, окунь…)"), {
+    fireEvent.change(screen.getByLabelText("Вид рыбы"), {
       target: { value: "Окунь" },
     });
     submitReport(form);

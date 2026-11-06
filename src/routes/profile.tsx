@@ -23,6 +23,7 @@ import {
   X,
   MessageSquareText,
 } from "lucide-react";
+import { MobileField, StickyFormActions } from "@/components/MobileForm";
 import { Shell } from "@/components/Shell";
 import { ScreenState } from "@/components/ScreenState";
 import { SpotVerifiedProgress } from "@/components/SpotVerifiedProgress";
@@ -94,23 +95,13 @@ const SPECIES = [
   "Карась",
 ] as const;
 
-function Label({
-  name,
-  children,
-  hint,
-}: {
-  name: string;
-  children: React.ReactNode;
-  hint?: string;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">{name}</span>
-      {children}
-      {hint && <span className="block text-xs text-zinc-500">{hint}</span>}
-    </label>
-  );
-}
+const PROFILE_SECTIONS = [
+  { id: "personal", label: "Личные данные" },
+  { id: "fishing", label: "Рыбалка" },
+  { id: "gear", label: "Снасти и заметки" },
+  { id: "privacy", label: "Приватность" },
+] as const;
+type ProfileSection = (typeof PROFILE_SECTIONS)[number]["id"];
 
 function ProfileDetail({ label, value }: { label: string; value?: string | number | null }) {
   return (
@@ -288,6 +279,8 @@ export function Profile() {
   const [saving, setSaving] = useState(false);
   const saveInFlight = useRef(false);
   const [editing, setEditing] = useState(false);
+  const [editSection, setEditSection] = useState<ProfileSection>("personal");
+  const [usernameError, setUsernameError] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [signingOut, setSigningOut] = useState(false);
@@ -542,6 +535,8 @@ export function Profile() {
 
   function cancelEditing() {
     setEditing(false);
+    setEditSection("personal");
+    setUsernameError("");
     setNotice("");
     setError("");
     void loadProfile();
@@ -565,17 +560,22 @@ export function Profile() {
     loadSequence.current += 1;
     const requestedUsername = username.trim();
     if (requestedUsername && !/^[a-zA-Z0-9_.-]{3,30}$/.test(requestedUsername)) {
-      setError(
+      setEditSection("personal");
+      setUsernameError(
         "Никнейм: от 3 до 30 символов, латинские буквы, цифры, точка, дефис или подчёркивание.",
       );
+      requestAnimationFrame(() => document.getElementById("profile-edit-username")?.focus());
       return;
     }
     if (!preferences.fishing_methods.length) {
+      setEditSection("fishing");
       setError("Выбери хотя бы один способ ловли.");
       return;
     }
     if (shareChatCity && preferences.home_city.trim().length < 2) {
+      setEditSection("fishing");
       setError("Чтобы показывать город в общем чате, сначала укажи город рыбалки.");
+      requestAnimationFrame(() => document.getElementById("profile-edit-city")?.focus());
       return;
     }
     saveInFlight.current = true;
@@ -730,7 +730,14 @@ export function Profile() {
         </div>
         <div className="z-profile-actions">
           {userId ? (
-            <a href="#profile-details" className="btn-ghost" onClick={() => setEditing(true)}>
+            <a
+              href="#profile-details"
+              className="btn-ghost"
+              onClick={() => {
+                setEditSection("personal");
+                setEditing(true);
+              }}
+            >
               Редактировать профиль
             </a>
           ) : (
@@ -828,43 +835,247 @@ export function Profile() {
 
             {editing ? (
               <form onSubmit={saveProfile} aria-busy={saving} className="space-y-5">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Label name="Никнейм">
-                    <input
-                      className="field"
-                      maxLength={30}
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="например, zaprudafish"
-                    />
-                  </Label>
-                  <Label name="Отображаемое имя">
-                    <input
-                      className="field"
-                      maxLength={100}
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Как тебя называть?"
-                    />
-                  </Label>
-                  <Label name="Город рыбалки">
-                    <input
-                      className="field"
-                      maxLength={100}
-                      value={preferences.home_city}
-                      onChange={(e) => update("home_city", e.target.value)}
-                      placeholder="Нижний Новгород"
-                    />
-                  </Label>
-                  <Label name="Регион">
-                    <input
-                      className="field"
-                      maxLength={120}
-                      value={preferences.home_region}
-                      onChange={(e) => update("home_region", e.target.value)}
-                      placeholder="Нижегородская область"
-                    />
-                  </Label>
+                <div role="group" aria-label="Разделы редактирования" className="z-form-sections">
+                  {PROFILE_SECTIONS.map(({ id, label }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-pressed={editSection === id}
+                      disabled={saving}
+                      className="btn-ghost"
+                      onClick={() => setEditSection(id)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <fieldset
+                  disabled={saving}
+                  hidden={editSection !== "personal"}
+                  className="min-w-0 space-y-4"
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <MobileField label="Никнейм" hint="Например, zaprudafish" error={usernameError}>
+                      <input
+                        className="field"
+                        id="profile-edit-username"
+                        maxLength={30}
+                        value={username}
+                        autoComplete="username"
+                        autoCapitalize="none"
+                        onChange={(e) => {
+                          setUsername(e.target.value);
+                          setUsernameError("");
+                        }}
+                        placeholder="например, zaprudafish"
+                      />
+                    </MobileField>
+                    <MobileField label="Отображаемое имя">
+                      <input
+                        className="field"
+                        maxLength={100}
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Как тебя называть?"
+                      />
+                    </MobileField>
+                    <MobileField label="О себе">
+                      <textarea
+                        className="field min-h-20"
+                        maxLength={400}
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                        placeholder="Несколько слов для других рыбаков"
+                      />
+                    </MobileField>
+                  </div>
+                </fieldset>
+                <fieldset
+                  disabled={saving}
+                  hidden={editSection !== "fishing"}
+                  className="min-w-0 space-y-4"
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <MobileField label="Город рыбалки">
+                      <input
+                        className="field"
+                        id="profile-edit-city"
+                        maxLength={100}
+                        value={preferences.home_city}
+                        onChange={(e) => update("home_city", e.target.value)}
+                        placeholder="Нижний Новгород"
+                      />
+                    </MobileField>
+                    <MobileField label="Регион">
+                      <input
+                        className="field"
+                        maxLength={120}
+                        value={preferences.home_region}
+                        onChange={(e) => update("home_region", e.target.value)}
+                        placeholder="Нижегородская область"
+                      />
+                    </MobileField>
+                    <div className="space-y-2 sm:col-span-2">
+                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">
+                        Мои способы ловли · можно выбрать несколько
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {FISHING_DISCIPLINES.map((item) => {
+                          const selected = preferences.fishing_methods.includes(item.code);
+                          return (
+                            <button
+                              key={item.code}
+                              type="button"
+                              aria-pressed={selected}
+                              onClick={() => toggleMethod(item.code)}
+                              className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}
+                            >
+                              {selected ? "✓ " : ""}
+                              {item.icon} {item.title}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <p className="text-xs text-zinc-500">
+                        Например, Спиннинг + Фидер. Выбранные способы появятся в шапке профиля.
+                        Минимум один.
+                      </p>
+                    </div>
+                    <MobileField label="Основной способ для ИИ-советника">
+                      <select
+                        className="field"
+                        value={preferences.main_technique}
+                        onChange={(e) => update("main_technique", e.target.value)}
+                      >
+                        {preferences.fishing_methods.map((method) => (
+                          <option key={method} value={method}>
+                            {FISHING_DISCIPLINES.find((x) => x.code === method)?.title ?? method}
+                          </option>
+                        ))}
+                      </select>
+                    </MobileField>
+                    <MobileField label="С берега или с лодки">
+                      <select
+                        className="field"
+                        value={preferences.fishing_access}
+                        onChange={(e) => update("fishing_access", e.target.value)}
+                      >
+                        {["Берег", "Лодка", "Берег и лодка"].map((item) => (
+                          <option key={item}>{item}</option>
+                        ))}
+                      </select>
+                    </MobileField>
+                    <MobileField label="Транспорт">
+                      <select
+                        className="field"
+                        value={preferences.transport}
+                        onChange={(e) => update("transport", e.target.value)}
+                      >
+                        {["Без машины", "Есть машина", "Общественный транспорт", "Любой"].map(
+                          (item) => (
+                            <option key={item}>{item}</option>
+                          ),
+                        )}
+                      </select>
+                    </MobileField>
+                    <MobileField
+                      label="Радиус поиска, км"
+                      hint="Фильтрация по расстоянию появится после подключения геокодирования и координат водоёмов."
+                    >
+                      <input
+                        className="field"
+                        type="number"
+                        min={1}
+                        max={300}
+                        value={preferences.search_radius_km}
+                        onChange={(e) =>
+                          update(
+                            "search_radius_km",
+                            Math.max(1, Math.min(300, Number(e.target.value) || 1)),
+                          )
+                        }
+                      />
+                    </MobileField>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">
+                      Какую рыбу хочешь ловить
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {SPECIES.map((species) => {
+                        const selected = preferences.target_species.includes(species);
+                        return (
+                          <button
+                            key={species}
+                            type="button"
+                            aria-pressed={selected}
+                            onClick={() => toggleSpecies(species)}
+                            className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}
+                          >
+                            {selected ? "✓ " : ""}
+                            {species}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </fieldset>
+                <fieldset
+                  disabled={saving}
+                  hidden={editSection !== "gear"}
+                  className="min-w-0 space-y-4"
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <MobileField
+                      label="Заметки о снастях"
+                      hint="Для выбора брендов, моделей и размеров используй каталог ниже."
+                    >
+                      <textarea
+                        className="field min-h-32"
+                        maxLength={1600}
+                        value={preferences.tackle_text}
+                        onChange={(e) => update("tackle_text", e.target.value)}
+                        placeholder={"Narval Euphoria 10–42 г\nDaiwa Prorex LT 3000\nШнур PE #1.2"}
+                      />
+                    </MobileField>
+                    <MobileField
+                      label="Любимые приманки"
+                      hint="Важен вес и тип: поможет подобрать технику."
+                    >
+                      <textarea
+                        className="field min-h-32"
+                        maxLength={800}
+                        value={preferences.favorite_lures}
+                        onChange={(e) => update("favorite_lures", e.target.value)}
+                        placeholder="Джиг 10–22 г, силикон 4–6”, колебалки, пилькеры…"
+                      />
+                    </MobileField>
+                    <MobileField label="Любимые водоёмы">
+                      <textarea
+                        className="field min-h-24"
+                        maxLength={500}
+                        value={preferences.preferred_water}
+                        onChange={(e) => update("preferred_water", e.target.value)}
+                        placeholder="Ока, Волга, малые реки, озёра…"
+                      />
+                    </MobileField>
+                    <MobileField label="Пожелания для ИИ">
+                      <textarea
+                        className="field min-h-24"
+                        maxLength={800}
+                        value={preferences.fishing_notes}
+                        onChange={(e) => update("fishing_notes", e.target.value)}
+                        placeholder="Например: только с берега, люблю рассвет, интересует судак…"
+                      />
+                    </MobileField>
+                  </div>
+                </fieldset>
+                <fieldset
+                  disabled={saving}
+                  hidden={editSection !== "privacy"}
+                  className="min-w-0 space-y-4"
+                >
                   <label className="flex items-start gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 p-3 text-sm sm:col-span-2">
                     <input
                       type="checkbox"
@@ -883,163 +1094,8 @@ export function Profile() {
                       </span>
                     </span>
                   </label>
-                  <div className="space-y-2 sm:col-span-2">
-                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">
-                      Мои способы ловли · можно выбрать несколько
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {FISHING_DISCIPLINES.map((item) => {
-                        const selected = preferences.fishing_methods.includes(item.code);
-                        return (
-                          <button
-                            key={item.code}
-                            type="button"
-                            aria-pressed={selected}
-                            onClick={() => toggleMethod(item.code)}
-                            className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}
-                          >
-                            {selected ? "✓ " : ""}
-                            {item.icon} {item.title}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <p className="text-xs text-zinc-500">
-                      Например, Спиннинг + Фидер. Выбранные способы появятся в шапке профиля.
-                      Минимум один.
-                    </p>
-                  </div>
-                  <Label name="Основной способ для ИИ-советника">
-                    <select
-                      className="field"
-                      value={preferences.main_technique}
-                      onChange={(e) => update("main_technique", e.target.value)}
-                    >
-                      {preferences.fishing_methods.map((method) => (
-                        <option key={method} value={method}>
-                          {FISHING_DISCIPLINES.find((x) => x.code === method)?.title ?? method}
-                        </option>
-                      ))}
-                    </select>
-                  </Label>
-                  <Label name="С берега или с лодки">
-                    <select
-                      className="field"
-                      value={preferences.fishing_access}
-                      onChange={(e) => update("fishing_access", e.target.value)}
-                    >
-                      {["Берег", "Лодка", "Берег и лодка"].map((item) => (
-                        <option key={item}>{item}</option>
-                      ))}
-                    </select>
-                  </Label>
-                  <Label name="Транспорт">
-                    <select
-                      className="field"
-                      value={preferences.transport}
-                      onChange={(e) => update("transport", e.target.value)}
-                    >
-                      {["Без машины", "Есть машина", "Общественный транспорт", "Любой"].map(
-                        (item) => (
-                          <option key={item}>{item}</option>
-                        ),
-                      )}
-                    </select>
-                  </Label>
-                  <Label
-                    name="Радиус поиска, км"
-                    hint="Фильтрация по расстоянию появится после подключения геокодирования и координат водоёмов."
-                  >
-                    <input
-                      className="field"
-                      type="number"
-                      min={1}
-                      max={300}
-                      value={preferences.search_radius_km}
-                      onChange={(e) =>
-                        update(
-                          "search_radius_km",
-                          Math.max(1, Math.min(300, Number(e.target.value) || 1)),
-                        )
-                      }
-                    />
-                  </Label>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#B6BFB1]">
-                    Какую рыбу хочешь ловить
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {SPECIES.map((species) => {
-                      const selected = preferences.target_species.includes(species);
-                      return (
-                        <button
-                          key={species}
-                          type="button"
-                          aria-pressed={selected}
-                          onClick={() => toggleSpecies(species)}
-                          className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}
-                        >
-                          {selected ? "✓ " : ""}
-                          {species}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Label
-                    name="Дополнительные заметки о снастях"
-                    hint="Для выбора брендов, моделей и размеров используй каталог ниже."
-                  >
-                    <textarea
-                      className="field min-h-32"
-                      maxLength={1600}
-                      value={preferences.tackle_text}
-                      onChange={(e) => update("tackle_text", e.target.value)}
-                      placeholder={"Narval Euphoria 10–42 г\nDaiwa Prorex LT 3000\nШнур PE #1.2"}
-                    />
-                  </Label>
-                  <Label name="Любимые приманки" hint="Важен вес и тип: поможет подобрать технику.">
-                    <textarea
-                      className="field min-h-32"
-                      maxLength={800}
-                      value={preferences.favorite_lures}
-                      onChange={(e) => update("favorite_lures", e.target.value)}
-                      placeholder="Джиг 10–22 г, силикон 4–6”, колебалки, пилькеры…"
-                    />
-                  </Label>
-                  <Label name="Любимые водоёмы">
-                    <textarea
-                      className="field min-h-24"
-                      maxLength={500}
-                      value={preferences.preferred_water}
-                      onChange={(e) => update("preferred_water", e.target.value)}
-                      placeholder="Ока, Волга, малые реки, озёра…"
-                    />
-                  </Label>
-                  <Label name="Пожелания для ИИ">
-                    <textarea
-                      className="field min-h-24"
-                      maxLength={800}
-                      value={preferences.fishing_notes}
-                      onChange={(e) => update("fishing_notes", e.target.value)}
-                      placeholder="Например: только с берега, люблю рассвет, интересует судак…"
-                    />
-                  </Label>
-                </div>
-                <Label name="О себе">
-                  <textarea
-                    className="field min-h-20"
-                    maxLength={400}
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Несколько слов для других рыбаков"
-                  />
-                </Label>
-                <div className="mt-7 space-y-4 border-t border-[#D7FF35]/25 pt-6">
+                </fieldset>
+                <div className="space-y-4 border-t border-[#D7FF35]/25 pt-4">
                   <div className="flex items-start gap-2 text-xs leading-5 text-zinc-400">
                     <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#D7FF35]" />
                     После сохранения откроется готовая анкета. Снасти и личные предпочтения
@@ -1053,26 +1109,26 @@ export function Profile() {
                       {error}
                     </p>
                   )}
-                  <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
-                    <button
-                      className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 px-5"
-                      type="button"
-                      onClick={cancelEditing}
-                      disabled={saving}
-                    >
-                      <X className="size-4" /> Отмена
-                    </button>
-                    <button
-                      className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold"
-                      type="submit"
-                      disabled={saving}
-                      aria-label="Сохранить редактирование профиля"
-                    >
-                      <Save className="size-5" />{" "}
-                      {saving ? "Сохраняем изменения…" : "Сохранить редактирование профиля"}
-                    </button>
-                  </div>
                 </div>
+                <StickyFormActions>
+                  <button
+                    className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 px-5"
+                    type="button"
+                    onClick={cancelEditing}
+                    disabled={saving}
+                  >
+                    <X className="size-4" /> Отмена
+                  </button>
+                  <button
+                    className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 py-3 text-sm font-extrabold"
+                    type="submit"
+                    disabled={saving}
+                    aria-label="Сохранить редактирование профиля"
+                  >
+                    <Save className="size-5" />
+                    {saving ? "Сохраняем изменения…" : "Сохранить редактирование профиля"}
+                  </button>
+                </StickyFormActions>
               </form>
             ) : (
               <dl className="space-y-5">

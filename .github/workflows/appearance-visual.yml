@@ -61,6 +61,7 @@ jobs:
           fi
           for engine in chromium webkit firefox; do
             echo "Checking appearance in $engine"
+            VISUAL_BROWSER="$engine" node scripts/mobile-form-browser.cjs
             VISUAL_BROWSER="$engine" node scripts/visual-theme-smoke.cjs
             VISUAL_BROWSER="$engine" node scripts/premium-ui-browser.cjs
           done

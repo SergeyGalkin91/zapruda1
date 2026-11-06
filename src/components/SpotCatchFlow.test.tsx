@@ -60,6 +60,35 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 describe("SPOT personal-state boundaries (offline component tests, not signed-JWT E2E)", () => {
+  it("keeps catch data and the chosen photo when stepping back before submission", async () => {
+    mocks.limit.mockResolvedValue({
+      data: [
+        { id: "approved-fixture", name: "Offline fixture", city: "", disciplines: ["street"] },
+      ],
+      error: null,
+    });
+    render(<SpotCatchFlow />);
+    await screen.findByRole("option", { name: /Offline fixture/ });
+    fireEvent.change(screen.getByLabelText("Проверенный спот"), {
+      target: { value: "approved-fixture" },
+    });
+    fireEvent.change(screen.getByLabelText("Вес одной рыбы, г"), { target: { value: "620" } });
+    fireEvent.change(screen.getByLabelText("Длина, мм"), { target: { value: "380" } });
+    fireEvent.change(screen.getByLabelText("Дата и время поимки"), {
+      target: { value: "2026-11-05T16:30" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    await screen.findByRole("heading", { name: /Фото и подтверждение/ });
+    const photo = screen.getByLabelText(/Фото рыбы и измерения/);
+    const proof = new File(["offline fixture"], "proof.jpg", { type: "image/jpeg" });
+    fireEvent.change(photo, { target: { files: [proof] } });
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
+    expect(screen.getByLabelText("Вес одной рыбы, г")).toHaveValue(620);
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    expect(screen.getByLabelText(/Фото рыбы и измерения/)).toBe(photo);
+    expect(screen.getByRole("button", { name: "Отправить на проверку" })).toBeEnabled();
+    expect(mocks.invoke).not.toHaveBeenCalled();
+  });
   it("clears private inbox and proof state when the account signs out", async () => {
     render(<SpotCatchFlow />);
     fireEvent.click(await screen.findByRole("button", { name: "Мои уловы и уведомления" }));
