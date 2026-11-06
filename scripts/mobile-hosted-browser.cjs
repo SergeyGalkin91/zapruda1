@@ -12,7 +12,7 @@ const {
 
 const scope = process.env.MOBILE_BROWSER_SCOPE || "netlify";
 const base =
-  scope === "local-staging" ? "http://127.0.0.1:3000" : process.env.NETLIFY_MOBILE_PREVIEW;
+  scope === "local-staging" ? "https://127.0.0.1:3000" : process.env.NETLIFY_MOBILE_PREVIEW;
 const sha = process.env.EXPECTED_PREVIEW_SHA;
 const engine = process.env.VISUAL_BROWSER || "chromium";
 const staging = "yudtbifopfnjtjanaqrd.supabase.co";
@@ -52,6 +52,11 @@ async function waitForExactPreview() {
       }
     } catch {
       outcome = "connection unavailable";
+    }
+    if (outcome === "HTTP 401") {
+      throw new Error(
+        "NETLIFY_TEAM_PROTECTION: Preview requires an invited Netlify session (401).",
+      );
     }
     if (redirect) {
       const destination = new URL(redirect, base);
@@ -129,6 +134,22 @@ async function checkSpotStates(page) {
   await alert.waitFor({ state: "hidden" });
 }
 
+async function mapFrameState(page) {
+  const embed = page.locator("#approved-spot-map iframe");
+  assert.equal(new URL(await embed.getAttribute("src")).origin, "https://yandex.ru");
+  const isMap = (frame) => frame.url().startsWith("https://yandex.ru/map-widget/v1/");
+  try {
+    const frame =
+      page.frames().find(isMap) ??
+      (await page.waitForEvent("framenavigated", { predicate: isMap, timeout: 6_000 }));
+    await frame.waitForLoadState("load", { timeout: 6_000 });
+    return "loaded";
+  } catch (error) {
+    if (!(error instanceof engines.errors.TimeoutError)) throw error;
+    return "provider pending";
+  }
+}
+
 async function run() {
   assert(["netlify", "local-staging"].includes(scope));
   assert.match(sha || "", /^[a-f0-9]{40}$/);
@@ -138,6 +159,7 @@ async function run() {
   const browser = await engines[engine].launch({ headless: true });
   const observations = [];
   const foreignBackend = [];
+  const mapFrameAccessWarnings = [];
   let feedReadOk = false;
   try {
     for (const width of [320, 390, 430]) {
@@ -146,6 +168,8 @@ async function run() {
         deviceScaleFactor: 1,
         isMobile: true,
         hasTouch: true,
+        // The CI server uses an ephemeral loopback certificate. Hosted TLS stays verified.
+        ignoreHTTPSErrors: scope === "local-staging",
         locale: "ru-RU",
         reducedMotion: "reduce",
       });
@@ -165,7 +189,17 @@ async function run() {
           backend.push({ path: url.pathname, status: response.status() });
           if (reportRead.test(response.url()) && response.ok()) feedReadOk = true;
         });
-        page.on("pageerror", (error) => errors.push(error.message));
+        page.on("pageerror", (error) => {
+          if (
+            engine === "webkit" &&
+            error.message.includes('/yandex.ru"') &&
+            error.message.includes('from accessing a frame with origin "' + base + '"')
+          ) {
+            mapFrameAccessWarnings.push({ width, message: error.message.trim() });
+          } else {
+            errors.push(error.message);
+          }
+        });
         await page.goto(base + "/settings", { waitUntil: "domcontentloaded" });
         await page.locator('[data-appearance-ready="true"]').waitFor();
         await page
@@ -178,6 +212,7 @@ async function run() {
 
         for (const screen of screens) {
           backend = [];
+          let mapFrame;
           const response = await page.goto(base + screen.route, { waitUntil: "domcontentloaded" });
           assert.ok(response?.ok() && new URL(page.url()).origin === base, screen.name);
           await page.locator("main h1").first().waitFor();
@@ -212,6 +247,9 @@ async function run() {
               ),
               "No successful approved SPOT catalog read from STAGING",
             );
+            await page.getByRole("link", { name: "войди в аккаунт", exact: true }).waitFor();
+            assert.ok(!backend.some(({ path }) => path === "/rest/v1/competitions"));
+            if (width === 390) mapFrame = await mapFrameState(page);
           }
           if (screen.name === "profile") {
             await page.getByText("Войди, чтобы прокачивать рыболова", { exact: true }).waitFor();
@@ -232,7 +270,7 @@ async function run() {
           assert.deepEqual(dimensions.viewport, [width, 844], screen.name + " viewport");
           assert.ok(dimensions.scroll <= dimensions.client, screen.name + " horizontal scroll");
           assert.equal(dimensions.wallpaper, "carbon");
-          observations.push({ ...screen, url: page.url(), ...dimensions, backend });
+          observations.push({ ...screen, url: page.url(), ...dimensions, backend, mapFrame });
           if (width === 390)
             await page.screenshot({ path: path.join(output, screen.name + "-390x844.png") });
         }
@@ -264,15 +302,23 @@ async function run() {
     scope:
       scope === "netlify"
         ? "Verified Netlify Deploy Preview SHA, live public STAGING reads, guest session"
-        : "Exact Git SHA built on Node SSR, live public STAGING reads, guest session",
+        : "Exact Git SHA built on HTTPS loopback Node SSR, live public STAGING reads, guest session",
     faultInjection:
       "Feed and public SPOT reads delayed and aborted for error paths, then retried against STAGING",
     navigation: mobileRoutes,
+    mapFrameAccessWarnings,
     observations,
   };
   await fs.writeFile(path.join(output, "summary.json"), JSON.stringify(result, null, 2));
   console.log(
-    JSON.stringify({ sha, engine, base, observations: observations.length, passed: true }),
+    JSON.stringify({
+      sha,
+      engine,
+      base,
+      observations: observations.length,
+      mapFrameAccessWarnings: mapFrameAccessWarnings.length,
+      passed: true,
+    }),
   );
 }
 

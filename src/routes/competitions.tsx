@@ -45,8 +45,14 @@ function CompetitionsPage() {
     setLoading(true);
     setError("");
     try {
-      const { data: auth } = await supabase.auth.getUser();
-      setUid(auth.user?.id ?? "");
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (authError && authError.name !== "AuthSessionMissingError") throw authError;
+      const userId = auth.user?.id ?? "";
+      setUid(userId);
+      if (!userId) {
+        setItems([]);
+        return;
+      }
       const { data, error: qErr } = await supabase
         .from("competitions")
         .select("id,title,area_label,status,starts_at,max_teams")
@@ -96,7 +102,7 @@ function CompetitionsPage() {
         </p>
       </header>
 
-      {!uid && (
+      {!uid && !loading && !error && (
         <p className="panel mt-5 p-5 text-sm">
           Чтобы участвовать,{" "}
           <Link to="/auth" search={{ mode: "in" }} className="text-[#D7FF35] underline">
@@ -117,7 +123,7 @@ function CompetitionsPage() {
       )}
 
       <div className="mt-6 grid gap-3">
-        {!loading && !error && !items.length && (
+        {uid && !loading && !error && !items.length && (
           <ScreenState kind="empty">Открытых турниров пока нет.</ScreenState>
         )}
         {items.map((c) => (

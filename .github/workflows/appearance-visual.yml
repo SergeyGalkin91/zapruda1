@@ -107,15 +107,20 @@ jobs:
           [[ "$VITE_SUPABASE_PUBLISHABLE_KEY" == sb_publishable_* ]]
           bun run build
           test -f .output/server/index.mjs
-          node .output/server/index.mjs > "$RUNNER_TEMP/mobile-staging.log" 2>&1 &
+          tls_dir="$(mktemp -d "$RUNNER_TEMP/mobile-staging-tls.XXXXXX")"
+          openssl req -x509 -nodes -newkey rsa:2048 -days 1 -subj '/CN=127.0.0.1' \
+            -addext 'subjectAltName=IP:127.0.0.1' -keyout "$tls_dir/key.pem" \
+            -out "$tls_dir/cert.pem" >/dev/null 2>&1
+          NITRO_SSL_CERT="$(cat "$tls_dir/cert.pem")" NITRO_SSL_KEY="$(cat "$tls_dir/key.pem")" \
+            node .output/server/index.mjs > "$RUNNER_TEMP/mobile-staging.log" 2>&1 &
           SERVER_PID=$!
-          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          trap 'kill "$SERVER_PID" 2>/dev/null || true; rm -f "$tls_dir/key.pem" "$tls_dir/cert.pem"' EXIT
           for attempt in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:3000/settings -o /dev/null; then break; fi
+            if curl -fsS --cacert "$tls_dir/cert.pem" https://127.0.0.1:3000/settings -o /dev/null; then break; fi
             kill -0 "$SERVER_PID"
             sleep 2
           done
-          curl -fsS http://127.0.0.1:3000/settings -o /dev/null
+          curl -fsS --cacert "$tls_dir/cert.pem" https://127.0.0.1:3000/settings -o /dev/null
           for engine in chromium webkit; do
             MOBILE_BROWSER_SCOPE=local-staging VISUAL_BROWSER="$engine" node scripts/mobile-hosted-browser.cjs
           done

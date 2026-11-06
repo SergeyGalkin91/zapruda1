@@ -476,6 +476,8 @@ body {
   height: 390px;
   width: 100%;
   border: 0;
+  background: var(--premium-raised);
+  color-scheme: dark;
   filter: grayscale(0.8) brightness(0.72);
 }
 .z-spot-map-badge {
