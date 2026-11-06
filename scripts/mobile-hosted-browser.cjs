@@ -27,12 +27,15 @@ const screens = [
 const reportRead = new RegExp(
   "^https://" + staging.replaceAll(".", "\\.") + "/rest/v1/fishing_reports(?:\\?|$)",
 );
+const spotRead = new RegExp(
+  "^https://" + staging.replaceAll(".", "\\.") + "/rest/v1/zc_public_spots(?:\\?|$)",
+);
 const feedResult = ".z-feed-card, .z-feed-empty, [data-z-screen=feed] main [role=alert]";
 
 async function waitForExactPreview() {
   assert.match(base || "", /^https:\/\/deploy-preview-[1-9][0-9]*--zapruda1\.netlify\.app$/);
   let outcome = "pending";
-  for (let attempt = 0; attempt < 48; attempt += 1) {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
     let redirect = null;
     try {
       const response = await fetch(base + "/__qa/premium.html", {
@@ -59,7 +62,7 @@ async function waitForExactPreview() {
         throw new Error("NETLIFY_TEAM_PROTECTION: Preview requires an invited Netlify session.");
       }
     }
-    if (attempt < 47) await delay(7_500);
+    if (attempt < 11) await delay(7_500);
   }
   throw new Error("Exact Netlify STAGING Preview unavailable: " + outcome);
 }
@@ -69,21 +72,26 @@ async function waitForFeed(page) {
   assert.equal(await page.getByText("Не удалось загрузить отчёты.", { exact: true }).count(), 0);
 }
 
-async function checkFeedStates(page, context) {
+async function failAfterLoading(page, route, read, loading) {
   let release;
   const hold = new Promise((resolve) => {
     release = resolve;
   });
-  await page.route(reportRead, async (route) => {
+  await page.route(read, async (request) => {
     await hold;
-    await route.abort("failed");
+    await request.abort("failed");
   });
   try {
-    await page.goto(base + "/", { waitUntil: "domcontentloaded" });
-    await page.getByRole("status").filter({ hasText: "Загружаем отчёты…" }).waitFor();
+    await page.goto(base + route, { waitUntil: "domcontentloaded" });
+    await loading.waitFor();
   } finally {
     release();
   }
+}
+
+async function checkFeedStates(page, context) {
+  const loading = page.getByRole("status").filter({ hasText: "Загружаем отчёты…" });
+  await failAfterLoading(page, "/", reportRead, loading);
   await page.getByRole("alert").filter({ hasText: "Не удалось загрузить отчёты." }).waitFor();
   assert.equal(await page.locator(".z-feed-empty").count(), 0, "Error masquerades as empty feed");
   await page.unroute(reportRead);
@@ -100,6 +108,25 @@ async function checkFeedStates(page, context) {
     .getByRole("status")
     .filter({ hasText: "Нет подключения к интернету." })
     .waitFor({ state: "hidden" });
+}
+
+async function checkSpotStates(page) {
+  const atlas = page.locator("#approved-spot-map");
+  const loading = atlas.getByText("Проверяем каталог…", { exact: true });
+  await failAfterLoading(page, "/competitions", spotRead, loading);
+  const alert = atlas
+    .getByRole("alert")
+    .filter({ hasText: "Не удалось загрузить проверенные споты." });
+  await alert.waitFor();
+  assert.equal(await atlas.getByText("Проверенных спотов пока нет.", { exact: false }).count(), 0);
+  await page.unroute(spotRead);
+  const retryRead = page.waitForResponse(
+    (response) => spotRead.test(response.url()) && response.ok(),
+  );
+  await alert.getByRole("button", { name: "Попробовать снова", exact: true }).click();
+  await retryRead;
+  await loading.waitFor({ state: "hidden" });
+  await alert.waitFor({ state: "hidden" });
 }
 
 async function run() {
@@ -155,6 +182,25 @@ async function run() {
           assert.ok(response?.ok() && new URL(page.url()).origin === base, screen.name);
           await page.locator("main h1").first().waitFor();
           if (screen.name === "feed") await waitForFeed(page);
+          if (screen.name === "communities" && width === 320) {
+            const labels = page.locator(".z-country-card > span:nth-child(2)");
+            await labels.first().waitFor();
+            const wrapped = await labels.evaluateAll((elements) =>
+              elements
+                .filter((element) => {
+                  const range = document.createRange();
+                  range.selectNodeContents(element);
+                  return range.getClientRects().length > 1;
+                })
+                .map((element) => element.textContent),
+            );
+            assert.deepEqual(wrapped, [], "Country names wrap at 320px");
+            const search = page.getByRole("searchbox", { name: "Поиск страны" });
+            await search.fill("неизвестная страна");
+            await page.getByText("Такой страны пока нет в каталоге.", { exact: false }).waitFor();
+            await search.clear();
+            await labels.first().waitFor();
+          }
           if (screen.name === "spot") {
             await page.locator("#approved-spot-map").waitFor();
             await page
@@ -169,6 +215,10 @@ async function run() {
           }
           if (screen.name === "profile") {
             await page.getByText("Войди, чтобы прокачивать рыболова", { exact: true }).waitFor();
+            assert.equal(
+              await page.getByRole("group", { name: "Сохранённые способы ловли" }).count(),
+              0,
+            );
           }
           await assertShellBounds(page);
           await assertMobileNav(page);
@@ -193,7 +243,10 @@ async function run() {
           await page.waitForURL((url) => url.origin === base && url.pathname === route);
           await waitForMobileRoute(page, index);
         }
-        if (width === 390) await checkFeedStates(page, context);
+        if (width === 390) {
+          await checkFeedStates(page, context);
+          await checkSpotStates(page);
+        }
         assert.deepEqual(errors, [], engine + " page errors");
       } finally {
         await context.close();
@@ -213,7 +266,7 @@ async function run() {
         ? "Verified Netlify Deploy Preview SHA, live public STAGING reads, guest session"
         : "Exact Git SHA built on Node SSR, live public STAGING reads, guest session",
     faultInjection:
-      "Report read delayed and aborted for the error path, then retried against STAGING",
+      "Feed and public SPOT reads delayed and aborted for error paths, then retried against STAGING",
     navigation: mobileRoutes,
     observations,
   };

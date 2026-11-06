@@ -822,6 +822,17 @@ body {
   .z-mobile-nav-items {
     padding-inline: 6px;
   }
+  .z-country-card {
+    gap: 7px;
+    padding-inline: 8px;
+  }
+  .z-country-card > span:first-child {
+    width: 24px;
+    font-size: 17px;
+  }
+  .z-country-card > svg {
+    display: none;
+  }
   .z-segments :is(a, button) {
     padding-inline: 6px;
     font-size: 12px;

@@ -281,6 +281,7 @@ export function Profile() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [featuredGear, setFeaturedGear] = useState<FeaturedGear | null>(null);
   const [preferences, setPreferences] = useState<AnglerForm>(EMPTY_FORM);
+  const [hasSavedPreferences, setHasSavedPreferences] = useState(false);
   const [progress, setProgress] = useState<FishingProgress | null>(null);
   const [specializations, setSpecializations] = useState<FishingSpecialization[]>([]);
   const [loading, setLoading] = useState(true);
@@ -374,6 +375,7 @@ export function Profile() {
       if (!isCurrent()) return;
       if (authError || !auth.user) {
         setUserId(null);
+        setHasSavedPreferences(false);
         if (authError && authError.name !== "AuthSessionMissingError") {
           setError("Не удалось проверить вход в профиль.");
         }
@@ -441,6 +443,7 @@ export function Profile() {
         setShareChatCity(Boolean(profileResult.data.chat_city));
       }
 
+      setHasSavedPreferences(Boolean(prefsResult.data && !prefsResult.error));
       if (prefsResult.error) {
         setError(
           (prev) => prev + " Не удалось загрузить рыболовную анкету: " + prefsResult.error.message,
@@ -614,6 +617,7 @@ export function Profile() {
       } else if (result.status === "network-error") {
         setError(profileSaveNetworkError(result.profileSaved, result.cause));
       } else {
+        setHasSavedPreferences(true);
         setNotice(PROFILE_SAVE_SUCCESS);
         setEditing(false);
       }
@@ -656,19 +660,25 @@ export function Profile() {
             </p>
           </div>
           <div className="flex max-w-full flex-col items-start gap-3 sm:items-end">
-            <div className="flex max-w-full flex-wrap gap-2 sm:justify-end">
-              {preferences.fishing_methods.map((method) => {
-                const item = FISHING_DISCIPLINES.find((entry) => entry.code === method);
-                return (
-                  <span
-                    key={method}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]"
-                  >
-                    {item?.icon ?? "🎣"} {item?.title ?? method}
-                  </span>
-                );
-              })}
-            </div>
+            {hasSavedPreferences && preferences.fishing_methods.length > 0 && (
+              <div
+                role="group"
+                aria-label="Сохранённые способы ловли"
+                className="flex max-w-full flex-wrap gap-2 sm:justify-end"
+              >
+                {preferences.fishing_methods.map((method) => {
+                  const item = FISHING_DISCIPLINES.find((entry) => entry.code === method);
+                  return (
+                    <span
+                      key={method}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/25 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]"
+                    >
+                      {item?.icon ?? "🎣"} {item?.title ?? method}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
             {userId && (
               <a
                 href="#my-gear-sets"
@@ -1071,11 +1081,17 @@ export function Profile() {
                   <ProfileDetail label="Отображаемое имя" value={displayName} />
                   <ProfileDetail label="Город рыбалки" value={preferences.home_city} />
                   <ProfileDetail label="Регион" value={preferences.home_region} />
-                  <ProfileDetail label="С берега или с лодки" value={preferences.fishing_access} />
-                  <ProfileDetail label="Транспорт" value={preferences.transport} />
+                  <ProfileDetail
+                    label="С берега или с лодки"
+                    value={hasSavedPreferences ? preferences.fishing_access : null}
+                  />
+                  <ProfileDetail
+                    label="Транспорт"
+                    value={hasSavedPreferences ? preferences.transport : null}
+                  />
                   <ProfileDetail
                     label="Радиус поиска"
-                    value={preferences.search_radius_km + " км"}
+                    value={hasSavedPreferences ? preferences.search_radius_km + " км" : null}
                   />
                   <ProfileDetail
                     label="Город в общем чате"
@@ -1087,15 +1103,17 @@ export function Profile() {
                     Мои способы ловли
                   </dt>
                   <dd className="flex flex-wrap gap-2">
-                    {preferences.fishing_methods.map((method) => (
-                      <span
-                        key={method}
-                        className="rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]"
-                      >
-                        {FISHING_DISCIPLINES.find((x) => x.code === method)?.icon ?? "🎣"} {method}
-                        {method === preferences.main_technique ? " · основной" : ""}
-                      </span>
-                    ))}
+                    {hasSavedPreferences &&
+                      preferences.fishing_methods.map((method) => (
+                        <span
+                          key={method}
+                          className="rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-2 text-xs font-bold text-[#D7FF35]"
+                        >
+                          {FISHING_DISCIPLINES.find((x) => x.code === method)?.icon ?? "🎣"}{" "}
+                          {method}
+                          {method === preferences.main_technique ? " · основной" : ""}
+                        </span>
+                      ))}
                   </dd>
                 </div>
                 <div>

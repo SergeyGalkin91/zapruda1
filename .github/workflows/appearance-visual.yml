@@ -119,6 +119,14 @@ jobs:
           for engine in chromium webkit; do
             MOBILE_BROWSER_SCOPE=local-staging VISUAL_BROWSER="$engine" node scripts/mobile-hosted-browser.cjs
           done
+      - name: Upload the live STAGING screenshots
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: mobile-first-staging-evidence
+          path: appearance-evidence/mobile-staging/local-staging/
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Verify the exact Netlify STAGING SHA and test mobile screens
         if: ${{ !cancelled() }}
         run: |
@@ -127,7 +135,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mobile-first-staging-evidence
-          path: appearance-evidence/mobile-staging/
+          name: mobile-first-netlify-evidence
+          path: appearance-evidence/mobile-staging/netlify/
           if-no-files-found: ignore
           retention-days: 14
