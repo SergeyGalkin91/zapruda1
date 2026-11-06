@@ -174,22 +174,15 @@ async function run() {
         reducedMotion: "reduce",
       });
       try {
-        const page = await context.newPage();
         const errors = [];
-        let backend = [];
         await context.route(/\.supabase\.co\//, (route) => {
           const url = new URL(route.request().url());
           if (url.hostname === staging) return route.continue();
           foreignBackend.push(url.hostname);
           return route.abort("blockedbyclient");
         });
-        page.on("response", (response) => {
-          const url = new URL(response.url());
-          if (url.hostname !== staging) return;
-          backend.push({ path: url.pathname, status: response.status() });
-          if (reportRead.test(response.url()) && response.ok()) feedReadOk = true;
-        });
-        page.on("pageerror", (error) => {
+        context.on("weberror", (event) => {
+          const error = event.error();
           if (
             engine === "webkit" &&
             error.message.includes('/yandex.ru"') &&
@@ -200,21 +193,31 @@ async function run() {
             errors.push(error.message);
           }
         });
-        await page.goto(base + "/settings", { waitUntil: "domcontentloaded" });
-        await page.locator('[data-appearance-ready="true"]').waitFor();
-        await page
+        const settings = await context.newPage();
+        await settings.goto(base + "/settings", { waitUntil: "domcontentloaded" });
+        await settings.locator('[data-appearance-ready="true"]').waitFor();
+        await settings
           .locator('section[aria-labelledby="wallpaper-title"]')
           .getByRole("button", { name: /^Carbon/ })
           .click();
-        await page.waitForFunction(
+        await settings.waitForFunction(
           () => document.documentElement.dataset.zaprudaWallpaper === "carbon",
         );
+        await settings.close();
 
         for (const screen of screens) {
-          backend = [];
+          const page = await context.newPage();
+          const backend = [];
+          page.on("response", (response) => {
+            const url = new URL(response.url());
+            if (url.hostname !== staging) return;
+            backend.push({ path: url.pathname, status: response.status() });
+            if (reportRead.test(response.url()) && response.ok()) feedReadOk = true;
+          });
           let mapFrame;
           const response = await page.goto(base + screen.route, { waitUntil: "domcontentloaded" });
-          assert.ok(response?.ok() && new URL(page.url()).origin === base, screen.name);
+          assert.ok(response?.ok(), screen.name + " response");
+          assert.equal(page.url(), base + screen.route, screen.name + " URL");
           await page.locator("main h1").first().waitFor();
           if (screen.name === "feed") await waitForFeed(page);
           if (screen.name === "communities" && width === 320) {
@@ -273,17 +276,25 @@ async function run() {
           observations.push({ ...screen, url: page.url(), ...dimensions, backend, mapFrame });
           if (width === 390)
             await page.screenshot({ path: path.join(output, screen.name + "-390x844.png") });
+          await page.close();
         }
 
+        const page = await context.newPage();
+        await page.goto(base + "/welcome", { waitUntil: "domcontentloaded" });
         for (const [index, route] of mobileRoutes.entries()) {
           const links = await assertMobileNav(page);
           await links.nth(index).click();
           await page.waitForURL((url) => url.origin === base && url.pathname === route);
           await waitForMobileRoute(page, index);
         }
+        await page.close();
         if (width === 390) {
-          await checkFeedStates(page, context);
-          await checkSpotStates(page);
+          const feed = await context.newPage();
+          await checkFeedStates(feed, context);
+          await feed.close();
+          const spot = await context.newPage();
+          await checkSpotStates(spot);
+          await spot.close();
         }
         assert.deepEqual(errors, [], engine + " page errors");
       } finally {
