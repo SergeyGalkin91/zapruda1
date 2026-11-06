@@ -17,6 +17,13 @@
 | Автоматические проверки | TypeScript PASS. ESLint 0 ошибок, 6 прежних предупреждений. Vitest 547/547, в том числе 44 SQL-проверки. Семь проверок workflow PASS, транспорт API замещён тестовым. [Запуск workflow](https://github.com/SergeyGalkin91/zapruda1/actions/runs/42132554979) |
 | Применение, одобрение зоны, двухпользовательская JWT-приёмка, мобильный Preview | BLOCKED. В живой базе выполнялись только SELECT. Повторная независимая сверка после прерывания входа подтвердила отсутствие второй дельты и её объектов. |
 
+### Сверка доступа и готовности STAGING
+
+- В GitHub подтверждены пустой список Environment secrets, обязательный reviewer и одна разрешённая ветка PR #114. Страница Access Tokens требует входа в Supabase. Запуск записи отсутствует. [Окружение миграции](https://github.com/SergeyGalkin91/zapruda1/settings/environments/26422924153/edit)
+- Журнал STAGING снова показал `20261105043101` и отсутствие `20261105044404`. У `public.chat_messages` включён RLS, таблица входит в `supabase_realtime`. ON SPOT+ зон нет. В `chat_places` есть корневой узел RU, городских узлов RU нет. RPC социального слоя и журнал одобрения зон отсутствуют.
+- На `f45c343244b5f2edf24946234ce4dbc1de08bdac` завершились 24 успешных запуска Actions для двух открытых PR с общей рабочей веткой. Job `real-on-spot` пропущен. Ни commit statuses, ни check runs не подтверждают Netlify Preview для этого SHA. [Защищённый JWT workflow](https://github.com/SergeyGalkin91/zapruda1/actions/runs/42132554912)
+
+
 ## Архив проверки SQL Editor bundle v2 для Windows, 06.11.2026
 
 **Исторический кандидат для ручного пути.** PR #114, HEAD `a91178b85170cd4371c010dba00c658b6a455dc5`, проверенное дерево `dc48dbf6773306772037e9790bce75723830d159`. [Коммит](https://github.com/SergeyGalkin91/zapruda1/commit/a91178b85170cd4371c010dba00c658b6a455dc5) · [Генератор](https://github.com/SergeyGalkin91/zapruda1/blob/a91178b85170cd4371c010dba00c658b6a455dc5/scripts/on-spot-staging-apply.mjs)
