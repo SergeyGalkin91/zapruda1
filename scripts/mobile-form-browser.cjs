@@ -22,20 +22,21 @@ async function hasNoHorizontalOverflow(page) {
   assert.ok(dims.scroll <= dims.viewport, JSON.stringify(dims));
 }
 
-async function checkLabel(field, lifted) {
-  const handle = await field.elementHandle();
-  assert.ok(handle);
-  try {
-    await field.page().waitForFunction(
-      ({ input, lifted }) => {
-        const label = input.labels?.[0];
-        return label && parseFloat(getComputedStyle(label).top) < 12 === lifted;
-      },
-      { input: handle, lifted },
-    );
-  } finally {
-    await handle.dispose();
-  }
+async function checkLabel(page, name, lifted) {
+  // The root auth boundary can replace the server-rendered field during hydration.
+  const actual = await page.waitForFunction(
+    ({ name, lifted }) => {
+      const input = document.querySelector("input[name=" + name + "]");
+      const label = input?.labels?.[0];
+      if (!label) return false;
+      const style = getComputedStyle(label);
+      if (style.position !== "absolute") return false;
+      const top = parseFloat(style.top);
+      return Number.isFinite(top) && top < 12 === lifted;
+    },
+    { name, lifted },
+  );
+  await actual.dispose();
 }
 
 async function run() {
@@ -53,15 +54,15 @@ async function run() {
           route.fulfill({ json: [], headers: { "access-control-allow-origin": "*" } }),
         );
         const page = await context.newPage();
-        await page.goto(origin + "/auth?mode=up", { waitUntil: "domcontentloaded" });
+        await page.goto(origin + "/auth?mode=up", { waitUntil: "load" });
         const username = page.getByRole("textbox", { name: "Никнейм" });
         const email = page.getByRole("textbox", { name: "Email" });
-        await checkLabel(email, false);
+        await checkLabel(page, "email", false);
         await email.focus();
-        await checkLabel(email, true);
+        await checkLabel(page, "email", true);
         await email.fill("mobile-qa@example.test");
         await username.fill("!!!!");
-        await checkLabel(email, true);
+        await checkLabel(page, "email", true);
         await page.locator("input[name=password]").fill("isolated-qa-value");
         await page.getByRole("button", { name: /Зарегистрироваться/ }).click();
         await page.getByRole("alert").filter({ hasText: "3–24 символа" }).waitFor();
