@@ -1040,6 +1040,9 @@ body {
     border-radius: 0.875rem;
     background: var(--premium-panel);
   }
+  .z-sticky-form-actions > button {
+    scroll-margin-bottom: calc(var(--z-form-bottom, var(--z-mobile-nav-height, 0px)) + 12px);
+  }
   .z-app-shell[data-z-keyboard-open="true"]:has(.z-sticky-form-actions) > .z-shell-header {
     position: relative;
   }

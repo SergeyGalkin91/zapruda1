@@ -76,7 +76,7 @@ export function Shell({
   const [authError, setAuthError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [offline, setOffline] = useState(false);
-  const [keyboardInset, setKeyboardInset] = useState(0);
+  const [keyboardInset, setKeyboardInset] = useState<number | null>(null);
   const menuRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
@@ -118,10 +118,10 @@ export function Shell({
       const inset =
         isTyping && viewport.scale === 1 && obscured > 120
           ? Math.max(0, Math.round(obscured - viewport.offsetTop))
-          : 0;
+          : null;
       setKeyboardInset(inset);
       if (
-        inset &&
+        inset !== null &&
         field instanceof HTMLElement &&
         field.closest(".z-mobile-field") &&
         window.innerWidth < 768
@@ -132,7 +132,7 @@ export function Shell({
           window.scrollBy(0, Math.ceil(control.bottom - bottom));
       }
     };
-    const closeKeyboard = () => setKeyboardInset(0);
+    const closeKeyboard = () => setKeyboardInset(null);
     viewport.addEventListener("resize", updateKeyboard);
     viewport.addEventListener("scroll", updateKeyboard);
     document.addEventListener("focusin", updateKeyboard);
@@ -229,9 +229,11 @@ export function Shell({
   return (
     <div
       data-z-screen={screen}
-      data-z-keyboard-open={keyboardInset > 0 || undefined}
+      data-z-keyboard-open={keyboardInset !== null || undefined}
       style={
-        keyboardInset ? ({ "--z-form-bottom": keyboardInset + "px" } as CSSProperties) : undefined
+        keyboardInset !== null
+          ? ({ "--z-form-bottom": keyboardInset + "px" } as CSSProperties)
+          : undefined
       }
       data-z-admin-nav={isAdmin || undefined}
       className="z-app-shell overflow-x-clip"
