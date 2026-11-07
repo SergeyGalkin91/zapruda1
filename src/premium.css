@@ -1595,3 +1595,59 @@ body {
   height: 1.15rem;
   accent-color: var(--color-primary);
 }
+
+/* Shared decoration for existing selection semantics. */
+:has(> .z-active-selection),
+:has(> .z-active-selection-mark) {
+  position: relative;
+  isolation: isolate;
+}
+.z-active-selection {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+.z-active-selection > .z-liquid-indicator {
+  inset: auto;
+}
+.z-active-selection > .z-liquid-indicator[hidden] {
+  display: none;
+}
+.z-active-selection-mark {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: clip;
+  pointer-events: none;
+}
+.z-active-selection .z-liquid-art,
+.z-active-selection-mark .z-liquid-art {
+  inset: 1px 2px;
+}
+:has(> .z-active-selection) > :is(a, button, label) {
+  position: relative;
+  z-index: 1;
+}
+:has(> .z-active-selection)
+  > :is(a, button, label):is(
+    [aria-current="page"],
+    [aria-selected="true"],
+    [aria-pressed="true"],
+    [data-selection-active="true"]
+  ):not([data-selection-plain]),
+:has(> .z-active-selection-mark) {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  color: #f2f2f2 !important;
+  text-shadow: 0 1px 3px #080b0a;
+}
+.z-mobile-nav-link[aria-current="page"]:not([data-selection-plain]) {
+  font-weight: 600;
+}
+:has(> .z-active-selection) > :is(a, button):focus-visible,
+:has(> .z-active-selection-mark):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}

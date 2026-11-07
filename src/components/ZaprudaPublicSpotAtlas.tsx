@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { ActiveSelectionMark } from "@/components/ActiveSelectionIndicator";
 import { MapPinned, ShieldCheck } from "lucide-react";
 import { BrandFish } from "@/components/Wordmark";
 import { ScreenState } from "@/components/ScreenState";
@@ -144,6 +145,7 @@ export function ZaprudaPublicSpotAtlas() {
                   aria-pressed={selected === spot.id}
                   onClick={() => setSelected((current) => (current === spot.id ? null : spot.id))}
                 >
+                  <ActiveSelectionMark selected={selected === spot.id} />
                   <span className="z-spot-pin" aria-hidden="true">
                     <BrandFish />
                   </span>

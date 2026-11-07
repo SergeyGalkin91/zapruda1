@@ -11,7 +11,7 @@ import {
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
-import { LiquidDrop } from "@/components/LiquidDrop";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
 import { prepareReportPhoto } from "@/lib/report-photo";
 import {
   clearReportHandoff,
@@ -895,14 +895,9 @@ export function NewReport() {
         <legend>Вид рыбалки для достижений *</legend>
         <div className="z-liquid-category-scroll">
           <div className="z-liquid-category-grid">
-            {fishingMethod && FISHING_DISCIPLINES.some((item) => item.code === fishingMethod) && (
-              <LiquidDrop
-                active={FISHING_DISCIPLINES.findIndex((item) => item.code === fishingMethod)}
-                columns={2}
-              />
-            )}
-            {FISHING_DISCIPLINES.map((item, index) => (
-              <label key={item.code} data-liquid-choice={index}>
+            <ActiveSelectionIndicator />
+            {FISHING_DISCIPLINES.map((item) => (
+              <label key={item.code} data-selection-active={fishingMethod === item.code}>
                 <input
                   type="radio"
                   name="fishingMethod"

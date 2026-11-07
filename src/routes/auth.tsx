@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import {
@@ -372,9 +373,11 @@ function Auth() {
             </>
           )}
           <div className={`z-segments grid grid-cols-2 ${mode === "up" ? "mb-3" : "my-4"}`}>
+            <ActiveSelectionIndicator />
             <Link
               to="/auth"
               search={{ mode: "in" }}
+              activeOptions={{ exact: true, explicitUndefined: true }}
               onClick={() => {
                 setMode("in");
                 setFieldError(null);
@@ -389,6 +392,7 @@ function Auth() {
             <Link
               to="/auth"
               search={{ mode: "up" }}
+              activeOptions={{ exact: true, explicitUndefined: true }}
               onClick={() => {
                 setMode("up");
                 setFieldError(null);

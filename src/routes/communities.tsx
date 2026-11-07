@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight,
@@ -102,6 +103,7 @@ function Communities() {
           />
         </label>
         <div className="z-country-grid">
+          <ActiveSelectionIndicator />
           {visible.map((c) => (
             <button
               type="button"

@@ -43,6 +43,9 @@
         padding: 8px;
         font: inherit;
       }
+      .frame-scroll {
+        overflow: auto;
+      }
       #viewport {
         display: block;
         width: 390px;
@@ -73,6 +76,7 @@
         >Ширина
         <select id="width" aria-label="Ширина viewport">
           <option>320</option>
+          <option>375</option>
           <option selected>390</option>
           <option>430</option>
           <option>768</option>
@@ -83,8 +87,8 @@
         >Высота
         <select id="height" aria-label="Высота viewport">
           <option>568</option>
-          <option selected>640</option>
-          <option>844</option>
+          <option>640</option>
+          <option selected>844</option>
           <option>936</option>
         </select></label
       >
@@ -102,7 +106,7 @@
           <option value="/profile">Профиль</option>
           <option value="/settings">Настройки</option>
           <option value="/atlas">Atlas / SPOT</option>
-          <option value="/competitions">ZARUBA / KING</option>
+          <option value="/competitions">SPOT / ZARUBA / KING</option>
           <option value="/on-spot">ON SPOT+</option>
           <option value="/assistant">ИИ-рыболов</option>
           <option value="/auth?mode=in">Вход</option>
@@ -112,7 +116,9 @@
       <button id="measure" type="button">Обновить показатели</button>
       <p id="state" role="status">Ожидание приложения</p>
     </header>
-    <iframe id="viewport" title="Размещённое приложение ZAPRUDA" src="about:blank"></iframe>
+    <div class="frame-scroll">
+      <iframe id="viewport" title="Размещённое приложение ZAPRUDA" src="about:blank"></iframe>
+    </div>
     <pre id="metrics" aria-label="Показатели размещённого приложения"></pre>
     <script>
       const frame = document.getElementById("viewport");
@@ -125,7 +131,7 @@
       const allowed =
         location.hostname === "deploy-preview-__REVIEW_ID__--zapruda1.netlify.app" ||
         /^[a-f0-9]{24}--zapruda1\.netlify\.app$/.test(location.hostname);
-      const widths = new Set(["320", "390", "430", "768", "1440"]);
+      const widths = new Set(["320", "375", "390", "430", "768", "1440"]);
       const heights = new Set(["568", "640", "844", "936"]);
       const routes = new Set(Array.from(route.options, (o) => o.value));
       function measure() {

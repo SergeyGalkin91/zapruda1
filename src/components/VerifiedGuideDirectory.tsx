@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
 import { Link } from "@tanstack/react-router";
 import { BadgeCheck, Ship, Waves } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,6 +71,7 @@ export function VerifiedGuideDirectory() {
         подтверждения документов анкета не попадает в список.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
+        <ActiveSelectionIndicator />
         {(
           [
             { key: "all", label: "Все гиды" },

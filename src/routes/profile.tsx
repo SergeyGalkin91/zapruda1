@@ -1,4 +1,8 @@
 import {
+  ActiveSelectionIndicator,
+  ActiveSelectionMark,
+} from "@/components/ActiveSelectionIndicator";
+import {
   PROFILE_SAVE_SUCCESS,
   profileSaveNetworkError,
   performProfileSave,
@@ -836,6 +840,7 @@ export function Profile() {
             {editing ? (
               <form onSubmit={saveProfile} aria-busy={saving} className="space-y-5">
                 <div role="group" aria-label="Разделы редактирования" className="z-form-sections">
+                  <ActiveSelectionIndicator />
                   {PROFILE_SECTIONS.map(({ id, label }) => (
                     <button
                       key={id}
@@ -930,7 +935,7 @@ export function Profile() {
                               onClick={() => toggleMethod(item.code)}
                               className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}
                             >
-                              {selected ? "✓ " : ""}
+                              <ActiveSelectionMark selected={selected} />
                               {item.icon} {item.title}
                             </button>
                           );
@@ -1013,7 +1018,7 @@ export function Profile() {
                             onClick={() => toggleSpecies(species)}
                             className={`rounded-xl border px-3 py-2 text-xs font-bold transition ${selected ? "border-[#D7FF35] bg-[#D7FF35] text-[#0D100C]" : "border-white/10 bg-[#0E120E] text-zinc-300 hover:border-[#D7FF35]/40"}`}
                           >
-                            {selected ? "✓ " : ""}
+                            <ActiveSelectionMark selected={selected} />
                             {species}
                           </button>
                         );

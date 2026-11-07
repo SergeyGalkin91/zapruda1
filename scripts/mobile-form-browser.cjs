@@ -496,7 +496,8 @@ async function liquidDrop(page, width) {
     window.liquidMovements = 0;
     const animate = Element.prototype.animate;
     Element.prototype.animate = function (...args) {
-      if (this.matches(".z-liquid-indicator")) window.liquidMovements++;
+      if (this.matches(".z-liquid-indicator") && this.closest(".z-liquid-track"))
+        window.liquidMovements++;
       return animate.apply(this, args);
     };
   });
@@ -555,6 +556,93 @@ async function liquidDrop(page, width) {
   await expect.poll(moves).toBe(2);
 }
 
+async function globalNavigation(page, width) {
+  if (![320, 375, 390, 430].includes(width)) return;
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto(origin + "/", { waitUntil: "load" });
+  const bottom = page.getByRole("navigation", { name: "Мобильная навигация" });
+  const top = page.getByRole("navigation", { name: "Основная навигация" });
+  const state = async (nav, label) => {
+    const link = nav.getByRole("link", { name: label, exact: true });
+    await expect(nav).toBeVisible();
+    await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+    await expect(link).toHaveAttribute("aria-current", "page");
+    await expect(nav.locator(".z-liquid-indicator")).toBeVisible();
+    await expect
+      .poll(async () => {
+        const [tile, drop] = await Promise.all([
+          link.boundingBox(),
+          nav.locator(".z-liquid-indicator").boundingBox(),
+        ]);
+        return !!(
+          tile &&
+          drop &&
+          ["x", "y", "width", "height"].every((k) => Math.abs(tile[k] - drop[k]) < 1)
+        );
+      })
+      .toBe(true);
+    assert.equal(await link.evaluate((node) => getComputedStyle(node).color), "rgb(242, 242, 242)");
+    await link.click({ trial: true });
+  };
+  const screenshot = async (name) => {
+    if (width === 390)
+      await page.screenshot({ path: evidence + "/" + engine + "-global-" + name + ".png" });
+  };
+  await state(bottom, "Лента");
+  assert.equal(await top.isVisible(), false);
+  await screenshot("feed-390");
+  const fixed = await bottom.boundingBox();
+  await bottom.getByRole("link", { name: "Комьюнити", exact: true }).click();
+  await page.getByRole("heading", { name: "Сообщества", exact: true }).waitFor();
+  await state(bottom, "Комьюнити");
+  assert.deepEqual(await bottom.boundingBox(), fixed);
+  const community = page.getByRole("navigation", { name: "Каталог сообществ" });
+  await expect(community.locator('[aria-current="page"]')).toHaveCount(1);
+  await expect(community.locator(".z-liquid-indicator")).toBeVisible();
+  await screenshot("communities-390");
+  await community.getByRole("link", { name: "Клубы", exact: true }).click();
+  await expect(community.getByRole("link", { name: "Клубы", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect(community.locator('[aria-current="page"]')).toHaveCount(1);
+  await page.reload();
+  await expect(community.getByRole("link", { name: "Клубы", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+
+  await page
+    .getByRole("navigation", { name: "Разделы сообщества" })
+    .getByRole("link", { name: "SPOT" })
+    .click();
+  await page.getByRole("heading", { name: "Места, которые объединяют.", exact: true }).waitFor();
+  await state(bottom, "Комьюнити");
+  await screenshot("spot-390");
+  await page.goBack();
+  await state(bottom, "Комьюнити");
+  await bottom.getByRole("link", { name: "Выезды", exact: true }).click();
+  await state(bottom, "Выезды");
+  await screenshot("bottom-390");
+  assert.equal(
+    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
+    true,
+  );
+  if (width !== 390) return;
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await state(top, "Выезды");
+  assert.equal(await bottom.isVisible(), false);
+  await top.getByRole("link", { name: "SPOT", exact: true }).click();
+  await state(top, "SPOT");
+  await screenshot("top-1440");
+  await page.goto(origin + "/settings#liquid-drop");
+  await page.locator('[data-appearance-ready="true"]').waitFor();
+  await page.locator("#liquid-drop").evaluate((node) => node.scrollIntoView({ block: "center" }));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator("#liquid-drop").evaluate((node) => node.scrollIntoView({ block: "center" }));
+  await screenshot("settings-390");
+}
+
 async function communities(page, width) {
   if (![320, 390, 430].includes(width)) return;
   await page.goto(origin + "/communities", { waitUntil: "load" });
@@ -587,7 +675,14 @@ async function run() {
       });
       try {
         const writes = await interceptLocalBackend(context);
-        for (const scenario of [registration, profile, report, communities, liquidDrop]) {
+        for (const scenario of [
+          registration,
+          profile,
+          report,
+          communities,
+          liquidDrop,
+          globalNavigation,
+        ]) {
           const page = await context.newPage();
           try {
             await scenario(page, width, writes);

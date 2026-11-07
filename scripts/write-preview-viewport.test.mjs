@@ -27,6 +27,9 @@ test("PR93 STAGING gets the hosted page and exact build SHA", async (t) => {
   assert.deepEqual(await writePreviewViewport(root, env), { enabled: true, sha: env.COMMIT_REF });
   const html = await readFile(join(root, "dist/__qa/viewport.html"), "utf8");
   assert.ok(html.includes(env.COMMIT_REF));
+  assert.ok(html.includes("<option>375</option>"));
+  assert.ok(html.includes("<option selected>390</option>"));
+  assert.ok(html.includes("<option selected>844</option>"));
   assert.ok(!html.includes("__DEPLOYED_SHA__"));
   assert.ok(!html.includes("__REVIEW_ID__"));
   assert.ok(html.includes("deploy-preview-93--zapruda1.netlify.app"));

@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   ArrowUpRight,
@@ -21,6 +21,10 @@ import {
   Trophy,
   WifiOff,
 } from "lucide-react";
+import {
+  ActiveSelectionIndicator,
+  ActiveSelectionMark,
+} from "@/components/ActiveSelectionIndicator";
 import { Wordmark } from "@/components/Wordmark";
 import { LiquidSectionNav, type LiquidSectionRoute } from "@/components/LiquidDrop";
 import { BrandWallpaper } from "@/components/BrandWallpaper";
@@ -34,6 +38,7 @@ const desktopNav = [
   { to: "/partners", label: "Выезды", Icon: Users },
   { to: "/communities", label: "Комьюнити", Icon: Compass },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
+  { to: "/competitions", label: "SPOT", Icon: Trophy },
   { to: "/messages", label: "Личные", Icon: MessageCircle },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
 ] as const;
@@ -74,6 +79,13 @@ export function Shell({
     | "trips"
     | "chat";
 }) {
+  const path = useLocation({ select: (location) => location.pathname.replace(/\/$/, "") || "/" });
+  const mobileCurrent =
+    path === "/messages"
+      ? "/chat"
+      : ["/competitions", "/big-fish", "/atlas", "/on-spot"].includes(path)
+        ? "/communities"
+        : path;
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isNetlifyStagingPreview, setIsNetlifyStagingPreview] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -265,16 +277,14 @@ export function Shell({
             )}
           </div>
           <nav aria-label="Основная навигация" className="hidden items-center gap-1 xl:flex">
+            <ActiveSelectionIndicator routeGroup="shell-desktop" />
             {desktopNav.map(({ to, label, Icon }) => (
               <Link
                 key={to}
                 to={to}
-                activeOptions={{ exact: true }}
+                activeOptions={{ exact: true, includeSearch: false }}
+                aria-current={path === to ? "page" : undefined}
                 className="group relative inline-flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[13px] font-semibold text-[#A5ADA1] transition hover:bg-white/[0.05] hover:text-white"
-                activeProps={{
-                  className:
-                    "group relative inline-flex items-center gap-1.5 rounded-xl bg-[#D7FF35]/10 px-2.5 py-2 text-[13px] font-bold text-[#D7FF35]",
-                }}
               >
                 <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />
                 {label}
@@ -287,8 +297,10 @@ export function Shell({
                 <a
                   href="/profile"
                   aria-label="Профиль"
+                  aria-current={path === "/profile" ? "page" : undefined}
                   className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3"
                 >
+                  <ActiveSelectionMark selected={path === "/profile"} />
                   <UserRound className="size-4" aria-hidden="true" />
                   <span className="hidden sm:inline">Профиль</span>
                 </a>
@@ -398,11 +410,21 @@ export function Shell({
                     <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
                   </Link>
                 )}
+                {isNetlifyStagingPreview && (
+                  <a
+                    href="/__qa/viewport.html"
+                    className="hidden min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-zinc-200 hover:bg-white/5 md:flex"
+                  >
+                    Мобильный предпросмотр
+                    <ArrowUpRight className="ml-auto size-4" aria-hidden="true" />
+                  </a>
+                )}
                 <div className="my-2 border-t border-white/10" />
                 <Link
                   to="/settings"
                   className="flex items-center gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 px-3 py-3 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/10"
                 >
+                  <ActiveSelectionMark selected={path === "/settings"} />
                   <Settings2 className="size-4" aria-hidden="true" /> Настройки
                   <ArrowUpRight className="ml-auto size-3.5" aria-hidden="true" />
                 </Link>
@@ -446,13 +468,15 @@ export function Shell({
         className="z-mobile-nav z-electric-mobile-nav fixed inset-x-0 bottom-0 z-50 border-t shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden"
       >
         <div className="z-mobile-nav-items mx-auto grid max-w-xl grid-cols-5 gap-1">
+          <ActiveSelectionIndicator routeGroup="shell-mobile" />
           {mobileNav.map(({ to, label, Icon }) => (
             <Link
               key={to}
               to={to}
               activeOptions={{ exact: true, includeSearch: false }}
               className="z-mobile-nav-link"
-              activeProps={{ "aria-current": "page" }}
+              aria-current={mobileCurrent === to ? "page" : undefined}
+              data-selection-plain={to === "/reports/new" ? "" : undefined}
             >
               <span
                 className={

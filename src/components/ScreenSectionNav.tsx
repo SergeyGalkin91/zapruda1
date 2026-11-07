@@ -1,4 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
+import { ActiveSelectionIndicator } from "./ActiveSelectionIndicator";
 
 export function ScreenSectionNav({
   route,
@@ -13,6 +14,7 @@ export function ScreenSectionNav({
   const current = sections.find(({ id }) => id === hash)?.id ?? sections[0]?.id;
   return (
     <nav className="z-segments" aria-label={label}>
+      <ActiveSelectionIndicator />
       {sections.map(({ id, label: sectionLabel }) => (
         <Link
           key={id}

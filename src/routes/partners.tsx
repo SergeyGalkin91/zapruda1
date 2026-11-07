@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import {
@@ -615,6 +616,7 @@ function Partners() {
         role="tablist"
         aria-label="Разделы поиска напарников"
       >
+        <ActiveSelectionIndicator />
         {(
           [
             ["discover", "Найти выезд"],
@@ -627,7 +629,7 @@ function Partners() {
             role="tab"
             aria-selected={view === id}
             onClick={() => setView(id)}
-            className={`rounded-xl px-4 py-2.5 text-sm font-bold transition ${view === id ? "bg-lime-300 text-[#10120c]" : "border border-white/10 bg-white/[0.025] text-zinc-400 hover:text-white"}`}
+            className="rounded-xl border border-white/10 bg-white/[0.025] px-4 py-2.5 text-sm font-bold text-zinc-400 transition hover:text-white"
           >
             {label}
           </button>

@@ -1,4 +1,8 @@
 import { ChatRoomThumbnail } from "@/components/ChatRoomThumbnail";
+import {
+  ActiveSelectionIndicator,
+  ActiveSelectionMark,
+} from "@/components/ActiveSelectionIndicator";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
@@ -752,6 +756,7 @@ export function GeographicChat() {
             СВОИ НА СВЯЗИ
           </h1>
           <div className="mt-6 grid grid-cols-3 gap-2" role="group" aria-label="Фильтр чатов">
+            <ActiveSelectionIndicator />
             {[
               ["all", "Все"],
               ["mine", "Мои чаты"],
@@ -866,6 +871,7 @@ export function GeographicChat() {
                         (topic === t.key && search.place ? "bg-[#171528]" : "bg-transparent")
                       }
                     >
+                      <ActiveSelectionMark selected={topic === t.key} />
                       <ChatRoomThumbnail src={ROOM_PHOTOS[t.key]} fallback={t.icon} />
                       <span className="min-w-0">
                         <span className="block truncate text-base font-black text-white">
@@ -910,6 +916,7 @@ export function GeographicChat() {
                     : "border-white/10 hover:border-[#D7FF35]/30")
                 }
               >
+                <ActiveSelectionMark selected={placeId === GLOBAL_ID} />
                 <Globe2 className="size-5" /> Вся ZAPRUDA
               </button>
               <div>
@@ -932,6 +939,7 @@ export function GeographicChat() {
                             : "border-white/10 bg-black/10 text-zinc-300 hover:border-white/30")
                         }
                       >
+                        <ActiveSelectionMark selected={country?.id === p.id} />
                         <span className="text-base" aria-hidden="true">
                           {info?.flag || "🌍"}
                         </span>
@@ -957,6 +965,7 @@ export function GeographicChat() {
                         : "border-white/10 text-zinc-300")
                     }
                   >
+                    <ActiveSelectionMark selected={placeId === country.id} />
                     Общий чат страны
                   </button>
                   <div className="max-h-56 space-y-1 overflow-y-auto">
@@ -973,6 +982,7 @@ export function GeographicChat() {
                             : "border-white/10 text-zinc-300 hover:border-white/30")
                         }
                       >
+                        <ActiveSelectionMark selected={region?.id === p.id} />
                         <span>{p.name}</span>
                         <ChevronRight className="size-3.5 shrink-0" />
                       </button>
@@ -1020,6 +1030,7 @@ export function GeographicChat() {
                         : "border-white/10 text-zinc-300")
                     }
                   >
+                    <ActiveSelectionMark selected={placeId === region.id} />
                     Общий чат региона
                   </button>
                   <div className="max-h-48 space-y-1 overflow-y-auto">
@@ -1036,6 +1047,7 @@ export function GeographicChat() {
                             : "border-white/10 text-zinc-300 hover:border-white/30")
                         }
                       >
+                        <ActiveSelectionMark selected={city?.id === p.id} />
                         <MapPin className="size-3.5 shrink-0" />
                         {p.name}
                       </button>
@@ -1129,6 +1141,7 @@ export function GeographicChat() {
                     </button>
                   </div>
                   <div aria-label="Тематические ветки" className="mt-4 flex flex-wrap gap-1.5">
+                    <ActiveSelectionIndicator />
                     {TOPICS.map((t) => (
                       <button
                         type="button"

@@ -1,14 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
 import { useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  Check,
-  MessageCircle,
-  Monitor,
-  RotateCcw,
-  Settings2,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft, MessageCircle, Monitor, RotateCcw, Settings2, ShieldCheck } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { LiquidDropPreview } from "@/components/LiquidDrop";
 import { LiquidDropArtwork } from "@/components/LiquidDropArtwork";
@@ -127,6 +120,7 @@ function SettingsPage() {
             входа.
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <ActiveSelectionIndicator />
             {selectableBackgrounds.map((item) => {
               const selected = appearance.background === item.value;
               return (
@@ -162,11 +156,6 @@ function SettingsPage() {
                         />
                       </span>
                     )}
-                    {selected && (
-                      <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-[#D7FF35] text-black">
-                        <Check className="size-4" />
-                      </span>
-                    )}
                   </span>
                   <span className="mt-3 block text-sm font-bold text-white">{item.title}</span>
                   <span className="mt-1 block text-xs text-zinc-400">{item.description}</span>
@@ -187,8 +176,9 @@ function SettingsPage() {
           <fieldset disabled={!appearanceReady} className="z-liquid-options">
             <legend>Стиль выделения</legend>
             <div>
+              <ActiveSelectionIndicator />
               {LIQUID_DROP_STYLES.map(({ value, title }) => (
-                <label key={value}>
+                <label key={value} data-selection-active={liquidDrop.style === value}>
                   <input
                     type="radio"
                     name="liquidDropStyle"
@@ -220,6 +210,7 @@ function SettingsPage() {
             />
           </div>
           <div className="z-liquid-presets" role="group" aria-label="Быстрый выбор интенсивности">
+            <ActiveSelectionIndicator />
             {[20, 40, 70, 100].map((intensity) => (
               <button
                 key={intensity}
@@ -257,6 +248,7 @@ function SettingsPage() {
             устройстве.
           </p>
           <div className="z-wallpaper-options">
+            <ActiveSelectionIndicator />
             {APP_WALLPAPERS.map((item) => {
               const selected = (appearance.wallpaper ?? "matte-black") === item.value;
               return (
@@ -271,9 +263,7 @@ function SettingsPage() {
                   <span
                     className={"z-wallpaper-swatch z-wallpaper-swatch-" + item.value}
                     aria-hidden="true"
-                  >
-                    {selected && <Check className="size-5" />}
-                  </span>
+                  ></span>
                   <strong>{item.title}</strong>
                   <span>{item.description}</span>
                 </button>
@@ -311,6 +301,7 @@ function SettingsPage() {
                 : "mt-5 grid gap-3 sm:grid-cols-2"
             }
           >
+            <ActiveSelectionIndicator />
             {CHAT_BACKGROUNDS.map((item) => {
               const selected = appearance.chat === item.value;
               return (
@@ -337,11 +328,6 @@ function SettingsPage() {
                     <span className="absolute bottom-3 right-3 rounded-lg border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[10px] text-[#D7FF35]">
                       Отлично! 🎣
                     </span>
-                    {selected && (
-                      <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-[#D7FF35] text-black">
-                        <Check className="size-4" />
-                      </span>
-                    )}
                   </span>
                   <span className="mt-3 block text-sm font-bold text-white">{item.title}</span>
                   <span className="mt-1 block text-xs text-zinc-400">{item.description}</span>

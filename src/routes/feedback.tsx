@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Bug, CheckCircle2, Handshake, Lightbulb, Send, ShieldCheck } from "lucide-react";
@@ -138,6 +139,7 @@ export function FeedbackPage() {
         <section className="rounded-3xl border border-white/10 bg-[#151A14] p-5 sm:p-7">
           <h2 className="text-lg font-black text-white">Написать команде</h2>
           <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <ActiveSelectionIndicator />
             {(
               [
                 ["improvement", "Предложить улучшение", Lightbulb],
