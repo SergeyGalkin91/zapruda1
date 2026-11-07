@@ -80,10 +80,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 function next() {
-  fireEvent.click(screen.getByRole("button", { name: "Далее", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Далее" }));
 }
 function skip() {
-  fireEvent.click(screen.getByRole("button", { name: "Пропустить", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Пропустить" }));
 }
 function selectDiscipline() {
   const select = screen.getByLabelText(/Вид рыбалки для достижений/) as HTMLSelectElement;
@@ -119,7 +119,7 @@ function reachReview() {
 }
 function submitReport() {
   reachReview();
-  fireEvent.click(screen.getByRole("button", { name: "Опубликовать отчёт", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Опубликовать отчёт" }));
 }
 describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
   it("imports STREET notes and catches with real line breaks into a private unpublished draft", async () => {
@@ -237,13 +237,11 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
   it("returns to a skipped question and edits it from review without submitting", async () => {
     await fillReport();
     reachReview();
-    fireEvent.click(screen.getByRole("button", { name: "Изменить: Место", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Изменить: Место" }));
     expect(screen.getByLabelText("Водоём или место")).toHaveValue("");
     fireEvent.change(screen.getByLabelText("Водоём или место"), { target: { value: "Волга" } });
-    fireEvent.click(screen.getByRole("button", { name: "Готово", exact: true }));
-    expect(screen.getByRole("button", { name: "Изменить: Место", exact: true })).toHaveTextContent(
-      "Волга",
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Готово" }));
+    expect(screen.getByRole("button", { name: "Изменить: Место" })).toHaveTextContent("Волга");
     expect(screen.getByRole("heading", { name: "Private offline draft" })).toBeVisible();
     expect(mocks.insert).not.toHaveBeenCalled();
   });
