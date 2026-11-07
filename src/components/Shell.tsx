@@ -80,6 +80,12 @@ export function Shell({
     | "chat";
 }) {
   const path = useLocation({ select: (location) => location.pathname.replace(/\/$/, "") || "/" });
+  const desktopCurrent =
+    path === "/atlas" || path === "/big-fish"
+      ? "/competitions"
+      : path === "/on-spot"
+        ? "/communities"
+        : path;
   const mobileCurrent =
     path === "/messages"
       ? "/chat"
@@ -283,7 +289,7 @@ export function Shell({
                 key={to}
                 to={to}
                 activeOptions={{ exact: true, includeSearch: false }}
-                aria-current={path === to ? "page" : undefined}
+                aria-current={desktopCurrent === to ? "page" : undefined}
                 className="group relative inline-flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[13px] font-semibold text-[#A5ADA1] transition hover:bg-white/[0.05] hover:text-white"
               >
                 <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />

@@ -18,13 +18,22 @@ assert.deepEqual(
 );
 const registered = new Set(actual.map((r) => normalize(r.path)));
 const errors = [];
+const previewViewport = "/__qa/viewport.html";
+const hasPreviewViewport =
+  read("scripts/write-preview-viewport.mjs").includes('"dist' + previewViewport + '"') &&
+  read("qa/hosted-viewport.html").includes("__DEPLOYED_SHA__");
 function walk(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const file = join(dir, entry.name);
     if (entry.isDirectory()) walk(file);
     else if (file.endsWith(".tsx") && !file.includes(".test.")) {
-      for (const m of read(file).matchAll(/(?:href|to)=["'](\/[^"']*)["']/g))
-        if (!registered.has(normalize(m[1]))) errors.push(file + " → " + m[1]);
+      for (const m of read(file).matchAll(/(?:href|to)=["'](\/[^"']*)["']/g)) {
+        const target = normalize(m[1]);
+        // Only the STAGING shell links to the build-generated viewport document.
+        const generatedPreview =
+          file === "src/components/Shell.tsx" && target === previewViewport && hasPreviewViewport;
+        if (!registered.has(target) && !generatedPreview) errors.push(file + " → " + m[1]);
+      }
     }
   }
 }
