@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Check, MessageCircle, Plus, Send, UserPlus, Users, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { MobileField, StickyFormActions } from "@/components/MobileForm";
 import { supabase } from "@/integrations/supabase/client";
 
 type Group = { id: string; name: string; description: string; city: string; owner_id: string };
@@ -381,36 +382,44 @@ export function SocialGroups() {
                 а не подписка. <strong>Оплата пока не подключена.</strong> Сейчас можно оставить
                 заявку без списания денег.
               </p>
-              <input
-                className="field"
-                minLength={3}
-                maxLength={80}
-                required
-                placeholder="Название клуба"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-              />
-              <input
-                className="field"
-                maxLength={100}
-                placeholder="Город"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-              <textarea
-                className="field min-h-20"
-                maxLength={500}
-                placeholder="Что будете обсуждать? Например: стритфишинг на Оке, рыбалка с лодки и эхолотом"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-              <button
-                type="submit"
-                disabled={busy || newName.trim().length < 3}
-                className="btn-primary inline-flex"
+              <MobileField label="Название клуба">
+                <input
+                  className="field"
+                  minLength={3}
+                  maxLength={80}
+                  required
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                />
+              </MobileField>
+              <MobileField label="Город клуба">
+                <input
+                  className="field"
+                  maxLength={100}
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+              </MobileField>
+              <MobileField
+                label="Описание клуба"
+                hint="Например, стритфишинг на Оке или рыбалка с лодки."
               >
-                <Plus className="size-4" /> Оставить заявку на клуб
-              </button>
+                <textarea
+                  className="field"
+                  maxLength={500}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </MobileField>
+              <StickyFormActions>
+                <button
+                  type="submit"
+                  disabled={busy || newName.trim().length < 3}
+                  className="btn-primary inline-flex"
+                >
+                  <Plus className="size-4" /> Оставить заявку на клуб
+                </button>
+              </StickyFormActions>
               {requests.map((r) => (
                 <div
                   key={r.id}
@@ -516,15 +525,16 @@ export function SocialGroups() {
                 ))}
               </div>
               <form className="flex gap-2" onSubmit={send}>
-                <input
-                  className="field min-w-0 flex-1"
-                  maxLength={2000}
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  placeholder="Сообщение только участникам клуба…"
-                />
+                <MobileField label="Сообщение в клуб" className="min-w-0 flex-1">
+                  <input
+                    className="field"
+                    maxLength={2000}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                  />
+                </MobileField>
                 <button
-                  className="btn-primary inline-flex"
+                  className="btn-primary inline-flex min-h-11 self-end"
                   type="submit"
                   disabled={!draft.trim() || busy}
                 >

@@ -1,24 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
 import { useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  Check,
-  MessageCircle,
-  Monitor,
-  RotateCcw,
-  Settings2,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft, MessageCircle, Monitor, RotateCcw, Settings2, ShieldCheck } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { LiquidDropPreview } from "@/components/LiquidDrop";
+import { LiquidDropArtwork } from "@/components/LiquidDropArtwork";
 import { supabase } from "@/integrations/supabase/client";
 import {
   APP_BACKGROUNDS,
+  APP_WALLPAPERS,
   CHAT_BACKGROUNDS,
   DEFAULT_APPEARANCE,
+  DEFAULT_LIQUID_DROP,
+  LIQUID_DROP_STYLES,
   loadAppearance,
   applyAppearance,
   saveAppearance,
   type Appearance,
+  type LiquidDropAppearance,
 } from "@/lib/appearance";
 
 export const Route = createFileRoute("/settings")({
@@ -33,6 +32,7 @@ export const Route = createFileRoute("/settings")({
 
 function SettingsPage() {
   const [appearance, setAppearance] = useState<Appearance>(DEFAULT_APPEARANCE);
+  const [appearanceReady, setAppearanceReady] = useState(false);
   const [notice, setNotice] = useState("");
   const [developer, setDeveloper] = useState(false);
   const [yandexKey, setYandexKey] = useState("");
@@ -44,6 +44,7 @@ function SettingsPage() {
     const saved = loadAppearance();
     setAppearance(saved);
     applyAppearance(saved);
+    setAppearanceReady(true);
     try {
       setYandexKey(localStorage.getItem("zapruda.yandex_maps_api_key") || "");
     } catch {
@@ -61,6 +62,7 @@ function SettingsPage() {
   }, []);
 
   function change(next: Appearance) {
+    if (!appearanceReady) return;
     setAppearance(next);
     const persisted = saveAppearance(next);
     setNotice(
@@ -70,9 +72,17 @@ function SettingsPage() {
     );
   }
 
+  const liquidDrop = appearance.liquidDrop ?? DEFAULT_LIQUID_DROP;
+  const changeLiquidDrop = (patch: Partial<LiquidDropAppearance>) =>
+    change({ ...appearance, liquidDrop: { ...liquidDrop, ...patch } });
+
   return (
-    <Shell>
-      <div className="mx-auto max-w-4xl space-y-6">
+    <Shell screen="settings">
+      <div
+        className="mx-auto max-w-4xl space-y-6"
+        data-appearance-ready={appearanceReady ? "true" : "false"}
+        aria-busy={!appearanceReady}
+      >
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-sm text-zinc-400 transition hover:text-[#D7FF35]"
@@ -92,15 +102,17 @@ function SettingsPage() {
           </p>
         </header>
 
+        {!appearanceReady && <p role="status">Загружаем оформление…</p>}
+
         <section
           aria-labelledby="app-background-title"
-          className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7"
+          className="rounded-3xl border border-white/10 bg-[var(--premium-panel)] z-electric-settings-panel p-5 sm:p-7"
         >
           <h2
             id="app-background-title"
             className="flex items-center gap-2 text-lg font-black text-white"
           >
-            <Monitor className="size-5 text-[#D7FF35]" /> Фон приложения
+            <Monitor className="size-5 text-[#D7FF35]" /> Цветовая тема
           </h2>
           <p className="mt-2 text-sm text-zinc-400">
             Matte Black остаётся основным. Electric Blue — яркий синий фон с лаймовыми и
@@ -108,6 +120,7 @@ function SettingsPage() {
             входа.
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <ActiveSelectionIndicator />
             {selectableBackgrounds.map((item) => {
               const selected = appearance.background === item.value;
               return (
@@ -115,6 +128,7 @@ function SettingsPage() {
                   key={item.value}
                   type="button"
                   aria-pressed={selected}
+                  disabled={!appearanceReady}
                   onClick={() => change({ ...appearance, background: item.value })}
                   className={
                     "rounded-2xl border p-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35] " +
@@ -142,11 +156,6 @@ function SettingsPage() {
                         />
                       </span>
                     )}
-                    {selected && (
-                      <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-[#D7FF35] text-black">
-                        <Check className="size-4" />
-                      </span>
-                    )}
                   </span>
                   <span className="mt-3 block text-sm font-bold text-white">{item.title}</span>
                   <span className="mt-1 block text-xs text-zinc-400">{item.description}</span>
@@ -157,8 +166,115 @@ function SettingsPage() {
         </section>
 
         <section
+          id="liquid-drop"
+          aria-labelledby="liquid-drop-title"
+          className="z-premium-card z-liquid-settings p-5 sm:p-7"
+        >
+          <h2 id="liquid-drop-title" className="text-lg font-bold">
+            Liquid Drop
+          </h2>
+          <fieldset disabled={!appearanceReady} className="z-liquid-options">
+            <legend>Стиль выделения</legend>
+            <div>
+              <ActiveSelectionIndicator />
+              {LIQUID_DROP_STYLES.map(({ value, title }) => (
+                <label key={value} data-selection-active={liquidDrop.style === value}>
+                  <input
+                    type="radio"
+                    name="liquidDropStyle"
+                    checked={liquidDrop.style === value}
+                    onChange={() => changeLiquidDrop({ style: value })}
+                  />
+                  <span className="z-liquid-swatch" data-zapruda-liquid={value}>
+                    <LiquidDropArtwork />
+                  </span>
+                  <span>{title}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <div className="z-liquid-settings-control">
+            <label htmlFor="liquid-drop-intensity">Интенсивность</label>
+            <output htmlFor="liquid-drop-intensity">{liquidDrop.intensity}%</output>
+            <input
+              id="liquid-drop-intensity"
+              type="range"
+              min="0"
+              max="100"
+              aria-valuetext={liquidDrop.intensity + "%"}
+              value={liquidDrop.intensity}
+              disabled={!appearanceReady}
+              onChange={(event) =>
+                changeLiquidDrop({ intensity: event.currentTarget.valueAsNumber })
+              }
+            />
+          </div>
+          <div className="z-liquid-presets" role="group" aria-label="Быстрый выбор интенсивности">
+            <ActiveSelectionIndicator />
+            {[20, 40, 70, 100].map((intensity) => (
+              <button
+                key={intensity}
+                type="button"
+                disabled={!appearanceReady}
+                aria-pressed={liquidDrop.intensity === intensity}
+                onClick={() => changeLiquidDrop({ intensity })}
+              >
+                {intensity}%
+              </button>
+            ))}
+          </div>
+          <label className="z-liquid-motion-option">
+            <input
+              type="checkbox"
+              checked={liquidDrop.animate}
+              disabled={!appearanceReady}
+              onChange={(event) => changeLiquidDrop({ animate: event.currentTarget.checked })}
+            />
+            Анимация
+          </label>
+          <p className="text-xs text-muted-foreground">
+            Проверь переход между вкладками в предпросмотре.
+          </p>
+          <LiquidDropPreview />
+        </section>
+
+        <section aria-labelledby="wallpaper-title" className="z-premium-card p-5 sm:p-7">
+          <p className="z-eyebrow">ТВОЁ ПРОСТРАНСТВО</p>
+          <h2 id="wallpaper-title" className="mt-2 text-lg font-bold">
+            Фон приложения
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Четыре фактуры для обеих тем. Без анимации и лишней нагрузки. Выбор сохранится на этом
+            устройстве.
+          </p>
+          <div className="z-wallpaper-options">
+            <ActiveSelectionIndicator />
+            {APP_WALLPAPERS.map((item) => {
+              const selected = (appearance.wallpaper ?? "matte-black") === item.value;
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  aria-pressed={selected}
+                  disabled={!appearanceReady}
+                  className="z-wallpaper-option"
+                  onClick={() => change({ ...appearance, wallpaper: item.value })}
+                >
+                  <span
+                    className={"z-wallpaper-swatch z-wallpaper-swatch-" + item.value}
+                    aria-hidden="true"
+                  ></span>
+                  <strong>{item.title}</strong>
+                  <span>{item.description}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section
           aria-labelledby="chat-background-title"
-          className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7"
+          className="rounded-3xl border border-white/10 bg-[var(--premium-panel)] z-electric-settings-panel p-5 sm:p-7"
         >
           <h2
             id="chat-background-title"
@@ -185,6 +301,7 @@ function SettingsPage() {
                 : "mt-5 grid gap-3 sm:grid-cols-2"
             }
           >
+            <ActiveSelectionIndicator />
             {CHAT_BACKGROUNDS.map((item) => {
               const selected = appearance.chat === item.value;
               return (
@@ -192,6 +309,7 @@ function SettingsPage() {
                   key={item.value}
                   type="button"
                   aria-pressed={selected}
+                  disabled={!appearanceReady}
                   onClick={() => change({ ...appearance, chat: item.value })}
                   className={
                     "rounded-2xl border p-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D7FF35] " +
@@ -210,11 +328,6 @@ function SettingsPage() {
                     <span className="absolute bottom-3 right-3 rounded-lg border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-3 py-1.5 text-[10px] text-[#D7FF35]">
                       Отлично! 🎣
                     </span>
-                    {selected && (
-                      <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-[#D7FF35] text-black">
-                        <Check className="size-4" />
-                      </span>
-                    )}
                   </span>
                   <span className="mt-3 block text-sm font-bold text-white">{item.title}</span>
                   <span className="mt-1 block text-xs text-zinc-400">{item.description}</span>
@@ -241,7 +354,7 @@ function SettingsPage() {
         </section>
 
         {developer && (
-          <section className="rounded-3xl border border-white/10 bg-[#141914] z-electric-settings-panel p-5 sm:p-7">
+          <section className="rounded-3xl border border-white/10 bg-[var(--premium-panel)] z-electric-settings-panel p-5 sm:p-7">
             <h2 className="text-lg font-black text-white">Яндекс Карты · API для тестирования</h2>
             <p className="mt-2 text-xs leading-5 text-zinc-400">
               Сейчас в ZAPRUDA работает виджет Яндекс Карт. Чтобы выбирать личные точки кликом,
@@ -312,6 +425,7 @@ function SettingsPage() {
           </p>
           <button
             type="button"
+            disabled={!appearanceReady}
             onClick={() => change({ ...DEFAULT_APPEARANCE })}
             className="btn-ghost inline-flex min-h-11 items-center gap-2"
           >

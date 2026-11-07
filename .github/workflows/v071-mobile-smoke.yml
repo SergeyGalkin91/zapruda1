@@ -2,18 +2,19 @@ name: v0.7.1 Meetup mobile browser smoke
 on:
   pull_request:
     paths:
-      - 'src/components/SocialMeetups.tsx'
-      - 'src/routes/communities.tsx'
-      - 'src/routes/admin*.tsx'
-      - 'src/routes/competitions.tsx'
-      - 'src/routeTree.gen.ts'
-      - '.github/workflows/v071-mobile-smoke.yml'
+      - ".github/v075-validation-request.txt"
+      - "src/components/SocialMeetups.tsx"
+      - "src/routes/communities.tsx"
+      - "src/routes/admin*.tsx"
+      - "src/routes/competitions.tsx"
+      - "src/routeTree.gen.ts"
+      - ".github/workflows/v071-mobile-smoke.yml"
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   mobile:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
       NITRO_PRESET: node-server
@@ -26,7 +27,7 @@ jobs:
           bun-version: 1.4.4
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: bun add --dev playwright
+      - run: bun add --dev playwright@1.58.2
       - run: bunx playwright install --with-deps chromium
       - name: Test mobile and desktop meetup route
         shell: bash

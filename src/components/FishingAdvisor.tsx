@@ -18,7 +18,7 @@ import {
   prepareAdviceInput,
   type FishingPlan,
 } from "@/lib/fishing-plan";
-import { requestOptionalGrok } from "@/lib/optional-grok";
+import { requestOptionalAdvice } from "@/lib/optional-ai";
 
 type Log = {
   id: string;
@@ -67,13 +67,13 @@ export function FishingAdvisor() {
         .limit(14);
       if (!current()) return;
       if (result.error)
-        setHistoryError("Журнал Grok временно недоступен. План по правилам работает.");
+        setHistoryError("Журнал ИИ временно недоступен. План по правилам работает.");
       else {
         setLogs((result.data ?? []) as Log[]);
         setHistoryError("");
       }
     } catch {
-      if (current()) setHistoryError("Журнал Grok временно недоступен. План по правилам работает.");
+      if (current()) setHistoryError("Журнал ИИ временно недоступен. План по правилам работает.");
     } finally {
       if (current()) setHistoryBusy(false);
     }
@@ -183,9 +183,9 @@ export function FishingAdvisor() {
   };
   function submitPlan(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (makePlan()) setNotice("План по правилам готов. Он не расходует дневной совет Grok.");
+    if (makePlan()) setNotice("План по правилам готов. Он не расходует дневной совет ИИ.");
   }
-  async function askGrok() {
+  async function askAdvice() {
     if (busy || !uid || !verified || quotaUsed || failureLimit) return;
     const next = makePlan();
     if (!next) return;
@@ -199,7 +199,7 @@ export function FishingAdvisor() {
       mounted.current && identity.current === userId && requestVersion.current === version;
     try {
       const input = prepareAdviceInput(next.input);
-      const result = await requestOptionalGrok(
+      const result = await requestOptionalAdvice(
         input,
         (body, signal) => supabase.functions.invoke("zapruda-daily-advice", { body, signal }),
         { signal: controller.signal },
@@ -212,21 +212,21 @@ export function FishingAdvisor() {
         });
         setNotice(
           result.alreadyUsed
-            ? "Показан сохранённый совет Grok за сегодня."
-            : "Совет Grok получен и сохранён в журнале.",
+            ? "Показан сохранённый совет ИИ за сегодня."
+            : "Совет ИИ получен и сохранён в журнале.",
         );
       } else if (result.reason !== "cancelled") {
         setNotice(
           result.reason === "signin"
-            ? "Для Grok нужно снова войти в аккаунт. План по правилам готов."
+            ? "Для ИИ нужно снова войти в аккаунт. План по правилам готов."
             : result.reason === "timeout"
-              ? "Grok отвечает дольше обычного. План по правилам готов; результат Grok можно проверить в журнале."
-              : "Grok временно недоступен. План по правилам готов — им можно пользоваться.",
+              ? "ИИ отвечает дольше обычного. План по правилам готов; результат ИИ можно проверить в журнале."
+              : "ИИ временно недоступен. План по правилам готов — им можно пользоваться.",
         );
       }
     } catch {
       if (isCurrent())
-        setNotice("Grok временно недоступен. План по правилам готов — им можно пользоваться.");
+        setNotice("ИИ временно недоступен. План по правилам готов — им можно пользоваться.");
     } finally {
       if (isCurrent()) {
         setBusy(false);
@@ -242,11 +242,9 @@ export function FishingAdvisor() {
         <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">
           <BrainCircuit className="size-5" /> ZAPRUDA / AI-РЫБОЛОВ
         </p>
-        <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">
-          План рыбалки и совет Grok
-        </h1>
+        <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">План рыбалки и совет ИИ</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">
-          Опиши водоём, цель и время. План по правилам готовится сразу. Grok доступен как
+          Опиши водоём, цель и время. План по правилам готовится сразу. ИИ доступен как
           дополнительный ИИ-совет — один успешно полученный ответ за день по Москве.
         </p>
       </header>
@@ -300,16 +298,16 @@ export function FishingAdvisor() {
           )}
           {latestAnswer && (
             <section
-              aria-labelledby="grok-answer-title"
+              aria-labelledby="ai-answer-title"
               className="rounded-2xl border border-[#D7FF35]/35 bg-[#151D14] p-5"
             >
               <h2
-                id="grok-answer-title"
+                id="ai-answer-title"
                 className="flex items-center gap-2 font-black text-[#D7FF35]"
               >
-                <CheckCircle2 className="size-5" /> Совет Grok за сегодня
+                <CheckCircle2 className="size-5" /> Совет ИИ за сегодня
               </h2>
-              <p className="mt-2 text-xs text-zinc-400">Источник: Grok · ИИ-генерация</p>
+              <p className="mt-2 text-xs text-zinc-400">Источник: ИИ · ИИ-генерация</p>
               {latestSummary && (
                 <p className="mt-2 break-words text-xs text-zinc-400">{latestSummary}</p>
               )}
@@ -386,7 +384,7 @@ export function FishingAdvisor() {
             <div className="border-t border-white/10 pt-4">
               <p className="mb-3 flex items-center gap-2 text-xs text-zinc-400">
                 <CalendarDays className="size-4 text-[#D7FF35]" />
-                Grok · {today} ·{" "}
+                ИИ · {today} ·{" "}
                 {quotaUsed ? "совет за день уже получен" : "один успешный ИИ-совет в день"}
               </p>
               {uid && verified ? (
@@ -394,26 +392,26 @@ export function FishingAdvisor() {
                   className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-[#D7FF35]/30 px-4 py-3 text-sm font-bold text-[#D7FF35] disabled:opacity-50"
                   type="button"
                   disabled={busy || quotaUsed || failureLimit || location.trim().length < 2}
-                  onClick={() => void askGrok()}
+                  onClick={() => void askAdvice()}
                 >
                   <Sparkles className="size-5" />
                   {busy
-                    ? "Grok готовит дополнение…"
+                    ? "ИИ готовит дополнение…"
                     : quotaUsed
-                      ? "Совет Grok на сегодня получен"
+                      ? "Совет ИИ на сегодня получен"
                       : failureLimit
-                        ? "Запросы Grok на сегодня приостановлены"
-                        : "Добавить совет Grok"}
+                        ? "Запросы ИИ на сегодня приостановлены"
+                        : "Добавить совет ИИ"}
                 </button>
               ) : (
                 <p className="text-xs text-zinc-400">
                   {!authReady ? (
-                    "Проверяем доступ к Grok. План по правилам уже доступен."
+                    "Проверяем доступ к ИИ. План по правилам уже доступен."
                   ) : uid ? (
-                    "Для Grok подтверди почту. План по правилам уже доступен."
+                    "Для ИИ подтверди почту. План по правилам уже доступен."
                   ) : (
                     <>
-                      Для дополнения от Grok{" "}
+                      Для дополнения от ИИ{" "}
                       <Link
                         search={{ mode: "in" }}
                         to="/auth"
@@ -434,8 +432,8 @@ export function FishingAdvisor() {
             <Clock3 className="size-5 text-[#D7FF35]" /> Журнал ИИ-запросов
           </h2>
           <p className="text-xs text-zinc-400">
-            В журнал попадают запросы к Grok. План по правилам остаётся в этой вкладке и не
-            расходует ИИ-лимит.
+            В журнал попадают запросы к ИИ. План по правилам остаётся в этой вкладке и не расходует
+            ИИ-лимит.
           </p>
           {uid && (
             <button
@@ -454,7 +452,7 @@ export function FishingAdvisor() {
           )}
           {!logs.length && (
             <p className="text-sm text-zinc-500">
-              {uid ? "ИИ-запросов пока нет." : "После входа здесь появится твой журнал Grok."}
+              {uid ? "ИИ-запросов пока нет." : "После входа здесь появится твой журнал ИИ."}
             </p>
           )}
           {logs.map((log) => (
@@ -462,10 +460,10 @@ export function FishingAdvisor() {
               <summary className="cursor-pointer text-xs font-semibold text-zinc-100">
                 {log.advice_day} ·{" "}
                 {log.status === "ready"
-                  ? "Совет Grok выдан"
+                  ? "Совет ИИ выдан"
                   : log.status === "pending"
                     ? "В процессе"
-                    : "Ответ Grok не получен"}
+                    : "Ответ ИИ не получен"}
               </summary>
               <p className="mt-2 break-words text-xs text-zinc-400">
                 {log.prompt_summary || "Запрос без описания"}

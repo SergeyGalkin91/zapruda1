@@ -4,24 +4,15 @@
  * Never use client-supplied owner_id / verified / location claims for authorization.
  */
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
+import { trustedSpotOrigin } from "./origin.ts";
 
-const URL = Deno.env.get("SUPABASE_URL") ?? "";
+const BACKEND_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const ANON = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const BUCKET = "zc-spot-evidence-staging";
 
 function trustedOrigin(origin: string | null): boolean {
-  if (!origin) return true; // mobile/server clients authenticate by JWT
-  try {
-    const parsed = new URL(origin);
-    return (
-      (parsed.hostname === "localhost" && /^http:$/.test(parsed.protocol)) ||
-      (parsed.protocol === "https:" &&
-        /^deploy-preview-[0-9]+--zapruda1\.netlify\.app$/.test(parsed.hostname))
-    );
-  } catch {
-    return false;
-  }
+  return trustedSpotOrigin(origin);
 }
 function respond(body: unknown, status = 200, origin: string | null = null) {
   const headers: Record<string, string> = {
@@ -54,6 +45,8 @@ function validImageBytes(bytes: Uint8Array, mime: string): boolean {
 }
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin");
+  if (BACKEND_URL !== "https://yudtbifopfnjtjanaqrd.supabase.co")
+    return respond({ error: "STAGING gateway only" }, 503, origin);
   if (!trustedOrigin(origin)) return respond({ error: "Origin not allowed" }, 403);
   if (req.method === "OPTIONS")
     return new Response(null, {
@@ -66,12 +59,13 @@ Deno.serve(async (req: Request) => {
       },
     });
   if (req.method !== "POST") return respond({ error: "Method not allowed" }, 405, origin);
-  if (!URL || !ANON || !SERVICE) return respond({ error: "Backend unavailable" }, 503, origin);
+  if (!BACKEND_URL || !ANON || !SERVICE)
+    return respond({ error: "Backend unavailable" }, 503, origin);
   const header = req.headers.get("authorization") ?? "";
   if (!/^Bearer\s+\S+$/.test(header))
     return respond({ error: "Authentication required" }, 401, origin);
   const token = header.replace(/^Bearer\s+/, "");
-  const userClient = createClient(URL, ANON, {
+  const userClient = createClient(BACKEND_URL, ANON, {
     global: { headers: { Authorization: header } },
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -79,10 +73,10 @@ Deno.serve(async (req: Request) => {
     data: { user },
     error: authError,
   } = await userClient.auth.getUser(token);
-  if (authError || !user || !user.email_confirmed_at) {
+  if (authError || !user || user.is_anonymous || !user.email_confirmed_at) {
     return respond({ error: "Confirmed account required" }, 401, origin);
   }
-  const admin = createClient(URL, SERVICE, {
+  const admin = createClient(BACKEND_URL, SERVICE, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   try {
@@ -136,6 +130,12 @@ Deno.serve(async (req: Request) => {
     }
     const body = (await req.json()) as Record<string, unknown>;
     const action = body["action"];
+    if (action === "progress") {
+      const { data, error } = await userClient.rpc("zc_spot_my_progress");
+      return error
+        ? respond({ error: "Cannot read own verified progress" }, 403, origin)
+        : respond({ progress: data }, 200, origin);
+    }
     if (action === "mine") {
       const { data, error } = await userClient.rpc("zc_spot_my_catches");
       return error

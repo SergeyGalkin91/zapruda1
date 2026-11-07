@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { Link, useLocation } from "@tanstack/react-router";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   ArrowUpRight,
   BrainCircuit,
@@ -19,8 +19,15 @@ import {
   ChartNoAxesCombined,
   ShieldCheck,
   Trophy,
+  WifiOff,
 } from "lucide-react";
+import {
+  ActiveSelectionIndicator,
+  ActiveSelectionMark,
+} from "@/components/ActiveSelectionIndicator";
 import { Wordmark } from "@/components/Wordmark";
+import { LiquidSectionNav, type LiquidSectionRoute } from "@/components/LiquidDrop";
+import { BrandWallpaper } from "@/components/BrandWallpaper";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityTracker } from "@/components/ActivityTracker";
 import { applyAppearance, loadAppearance } from "@/lib/appearance";
@@ -31,6 +38,7 @@ const desktopNav = [
   { to: "/partners", label: "Выезды", Icon: Users },
   { to: "/communities", label: "Комьюнити", Icon: Compass },
   { to: "/chat", label: "Чат", Icon: MessageCircle },
+  { to: "/competitions", label: "SPOT", Icon: Trophy },
   { to: "/messages", label: "Личные", Icon: MessageCircle },
   { to: "/assistant", label: "ИИ-рыболов", Icon: BrainCircuit },
 ] as const;
@@ -52,19 +60,124 @@ const otherNav = [
   { to: "/market", label: "Барахолка — скоро", Icon: ShoppingBag },
 ] as const;
 
-export function Shell({ children }: { children: ReactNode }) {
+export function Shell({
+  children,
+  screen = "default",
+  sectionNav,
+}: {
+  children: ReactNode;
+  sectionNav?: LiquidSectionRoute;
+  screen?:
+    | "default"
+    | "feed"
+    | "communities"
+    | "spot"
+    | "profile"
+    | "welcome"
+    | "settings"
+    | "create"
+    | "trips"
+    | "chat";
+}) {
+  const path = useLocation({ select: (location) => location.pathname.replace(/\/$/, "") || "/" });
+  const desktopCurrent =
+    path === "/atlas" || path === "/big-fish"
+      ? "/competitions"
+      : path === "/on-spot"
+        ? "/communities"
+        : path;
+  const mobileCurrent =
+    path === "/messages"
+      ? "/chat"
+      : ["/competitions", "/big-fish", "/atlas", "/on-spot"].includes(path)
+        ? "/communities"
+        : path;
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isNetlifyStagingPreview, setIsNetlifyStagingPreview] = useState(false);
   const [authError, setAuthError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [offline, setOffline] = useState(false);
+  const [keyboardInset, setKeyboardInset] = useState<number | null>(null);
+  const menuRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     applyAppearance(loadAppearance());
   }, []);
   useEffect(() => {
     setIsNetlifyStagingPreview(
-      /^deploy-preview-[0-9]+--zapruda1[.]netlify[.]app$/.test(window.location.hostname),
+      import.meta.env["VITE_SUPABASE_URL"] === "https://yudtbifopfnjtjanaqrd.supabase.co" &&
+        /^(deploy-preview-[0-9]+|[a-f0-9]{24})--zapruda1[.]netlify[.]app$/.test(
+          window.location.hostname,
+        ),
     );
+  }, []);
+
+  useEffect(() => {
+    const syncConnection = () => setOffline(!navigator.onLine);
+    window.addEventListener("online", syncConnection);
+    window.addEventListener("offline", syncConnection);
+    syncConnection();
+    return () => {
+      window.removeEventListener("online", syncConnection);
+      window.removeEventListener("offline", syncConnection);
+    };
+  }, []);
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const updateKeyboard = () => {
+      const field = document.activeElement;
+      const isTyping =
+        field instanceof HTMLElement &&
+        (field.isContentEditable ||
+          field.matches(
+            "textarea, input:not([type]), input:is([type=text], [type=search], [type=email], [type=password], [type=tel], [type=url], [type=number])",
+          ));
+      const obscured = window.innerHeight - viewport.height;
+      const inset =
+        isTyping && viewport.scale === 1 && obscured > 120
+          ? Math.max(0, Math.round(obscured - viewport.offsetTop))
+          : null;
+      setKeyboardInset(inset);
+      if (
+        inset !== null &&
+        field instanceof HTMLElement &&
+        field.closest(".z-mobile-field") &&
+        window.innerWidth < 768
+      ) {
+        const actions = field.closest("form")?.querySelector(".z-sticky-form-actions");
+        const actionHeight = actions?.getBoundingClientRect().height ?? 0;
+        const bottom = viewport.offsetTop + viewport.height - actionHeight - 12;
+        const control = field.getBoundingClientRect();
+        if (control.bottom > bottom && control.top >= viewport.offsetTop)
+          window.scrollBy(0, Math.ceil(control.bottom - bottom));
+      }
+    };
+    const closeKeyboard = () => setKeyboardInset(null);
+    viewport.addEventListener("resize", updateKeyboard);
+    viewport.addEventListener("scroll", updateKeyboard);
+    document.addEventListener("focusin", updateKeyboard);
+    document.addEventListener("focusout", closeKeyboard);
+    updateKeyboard();
+    return () => {
+      viewport.removeEventListener("resize", updateKeyboard);
+      viewport.removeEventListener("scroll", updateKeyboard);
+      document.removeEventListener("focusin", updateKeyboard);
+      document.removeEventListener("focusout", closeKeyboard);
+    };
+  }, []);
+
+  useEffect(() => {
+    const closeOutside = (event: PointerEvent) => {
+      const menu = menuRef.current;
+      if (menu?.open && event.target instanceof Node && !menu.contains(event.target)) {
+        menu.open = false;
+      }
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    return () => document.removeEventListener("pointerdown", closeOutside);
   }, []);
 
   // Always render a usable login link while the browser session initializes.
@@ -137,32 +250,47 @@ export function Shell({ children }: { children: ReactNode }) {
   }, [isSignedIn]);
 
   return (
-    <div className="min-h-screen overflow-x-clip pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-0">
+    <div
+      data-z-screen={screen}
+      data-z-keyboard-open={keyboardInset !== null || undefined}
+      style={
+        keyboardInset !== null
+          ? ({ "--z-form-bottom": keyboardInset + "px" } as CSSProperties)
+          : undefined
+      }
+      data-z-admin-nav={isAdmin || undefined}
+      className="z-app-shell overflow-x-clip"
+    >
+      <BrandWallpaper />
       <ActivityTracker />
-      <header className="sticky top-0 z-50 border-b border-white/[0.09] z-electric-shell-header bg-[#0D100C]/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
-          <Link to="/" aria-label="ZAPRUDA — на главную" className="shrink-0">
-            <Wordmark />
-          </Link>
-          {isNetlifyStagingPreview && (
-            <span
-              className="rounded-lg border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-2 py-1 text-[10px] font-black tracking-wide text-[#D7FF35]"
-              title="Тестовая среда Supabase STAGING"
+      <header className="z-shell-header z-electric-shell-header sticky top-0 z-50 border-b backdrop-blur-xl">
+        <div className="z-shell-header-inner mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-3">
+          <div className="flex min-w-0 flex-col items-start sm:flex-row sm:items-center sm:gap-3">
+            <Link
+              to="/"
+              aria-label="ZAPRUDA — на главную"
+              className="inline-flex min-h-11 shrink-0 items-center"
             >
-              STAGING
-            </span>
-          )}
+              <Wordmark />
+            </Link>
+            {isNetlifyStagingPreview && (
+              <span
+                className="rounded-lg border border-[#D7FF35]/40 bg-[#D7FF35]/10 px-1.5 py-0.5 text-[9px] font-black tracking-wide text-[#D7FF35] sm:px-2 sm:py-1 sm:text-[10px]"
+                title="Тестовая среда Supabase STAGING"
+              >
+                STAGING
+              </span>
+            )}
+          </div>
           <nav aria-label="Основная навигация" className="hidden items-center gap-1 xl:flex">
+            <ActiveSelectionIndicator routeGroup="shell-desktop" />
             {desktopNav.map(({ to, label, Icon }) => (
               <Link
                 key={to}
                 to={to}
-                activeOptions={{ exact: true }}
+                activeOptions={{ exact: true, includeSearch: false }}
+                aria-current={desktopCurrent === to ? "page" : undefined}
                 className="group relative inline-flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[13px] font-semibold text-[#A5ADA1] transition hover:bg-white/[0.05] hover:text-white"
-                activeProps={{
-                  className:
-                    "group relative inline-flex items-center gap-1.5 rounded-xl bg-[#D7FF35]/10 px-2.5 py-2 text-[13px] font-bold text-[#D7FF35]",
-                }}
               >
                 <Icon className="size-4" strokeWidth={1.9} aria-hidden="true" />
                 {label}
@@ -174,26 +302,40 @@ export function Shell({ children }: { children: ReactNode }) {
               <>
                 <a
                   href="/profile"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3"
+                  aria-label="Профиль"
+                  aria-current={path === "/profile" ? "page" : undefined}
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl border border-[#D7FF35]/30 bg-[#D7FF35]/10 px-2.5 py-2 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/15 sm:gap-2 sm:px-3"
                 >
+                  <ActiveSelectionMark selected={path === "/profile"} />
                   <UserRound className="size-4" aria-hidden="true" />
-                  Профиль
+                  <span className="hidden sm:inline">Профиль</span>
                 </a>
               </>
             ) : (
               <Link
                 search={{ mode: "in" }}
                 to="/auth"
-                className="inline-flex rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white"
+                aria-label="Войти"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-zinc-300 transition hover:border-[#D7FF35]/30 hover:text-white"
               >
-                Войти
+                <LogIn className="size-4 sm:hidden" aria-hidden="true" />
+                <span className="hidden sm:inline">Войти</span>
               </Link>
             )}
-            <details className="relative group">
+            <details
+              ref={menuRef}
+              className="relative group"
+              onKeyDown={(event) => {
+                if (event.key !== "Escape" || !event.currentTarget.open) return;
+                event.preventDefault();
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector("summary")?.focus();
+              }}
+            >
               <summary
                 aria-label="Открыть список разделов"
                 aria-controls="zapruda-extra-nav"
-                className="inline-flex size-10 cursor-pointer list-none items-center justify-center rounded-xl border border-white/15 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 [&::-webkit-details-marker]:hidden"
+                className="inline-flex size-11 cursor-pointer list-none items-center justify-center rounded-xl border border-white/15 text-[#D7FF35] transition hover:bg-[#D7FF35]/10 [&::-webkit-details-marker]:hidden"
               >
                 <Menu className="size-5 group-open:hidden" aria-hidden="true" />
                 <X className="hidden size-5 group-open:block" aria-hidden="true" />
@@ -201,11 +343,26 @@ export function Shell({ children }: { children: ReactNode }) {
               <nav
                 id="zapruda-extra-nav"
                 aria-label="Остальные разделы"
-                className="absolute right-0 top-[calc(100%+8px)] z-50 w-[min(320px,calc(100vw-2rem))] space-y-1 rounded-2xl border border-white/15 bg-[#171C14] z-electric-shell-menu p-2 shadow-2xl shadow-black/70"
+                className="z-shell-menu z-electric-shell-menu absolute right-0 top-[calc(100%+8px)] z-50 space-y-1 rounded-2xl border p-2 shadow-2xl shadow-black/70"
+                onClick={(event) => {
+                  if (
+                    event.target instanceof Element &&
+                    event.target.closest("a") &&
+                    menuRef.current
+                  ) {
+                    menuRef.current.open = false;
+                  }
+                }}
               >
                 <div className="px-3 pb-2 pt-2 text-[10px] font-extrabold uppercase tracking-[0.19em] text-[#D7FF35]">
                   ZAPRUDA / Разделы
                 </div>
+                <Link
+                  to="/welcome"
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/[0.07]"
+                >
+                  <Fish className="size-4 text-[#D7FF35]" aria-hidden="true" /> Добро пожаловать
+                </Link>
                 {(isNetlifyStagingPreview ||
                   import.meta.env["VITE_SUPABASE_URL"] ===
                     "https://yudtbifopfnjtjanaqrd.supabase.co") && (
@@ -259,11 +416,21 @@ export function Shell({ children }: { children: ReactNode }) {
                     <ArrowUpRight className="ml-auto size-3.5 text-zinc-500" aria-hidden="true" />
                   </Link>
                 )}
+                {isNetlifyStagingPreview && (
+                  <a
+                    href="/__qa/viewport.html"
+                    className="hidden min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-zinc-200 hover:bg-white/5 md:flex"
+                  >
+                    Мобильный предпросмотр
+                    <ArrowUpRight className="ml-auto size-4" aria-hidden="true" />
+                  </a>
+                )}
                 <div className="my-2 border-t border-white/10" />
                 <Link
                   to="/settings"
                   className="flex items-center gap-3 rounded-xl border border-[#D7FF35]/20 bg-[#D7FF35]/5 px-3 py-3 text-sm font-semibold text-[#D7FF35] transition hover:bg-[#D7FF35]/10"
                 >
+                  <ActiveSelectionMark selected={path === "/settings"} />
                   <Settings2 className="size-4" aria-hidden="true" /> Настройки
                   <ArrowUpRight className="ml-auto size-3.5" aria-hidden="true" />
                 </Link>
@@ -278,8 +445,17 @@ export function Shell({ children }: { children: ReactNode }) {
         )}
       </header>
 
-      <main className="mx-auto min-w-0 max-w-6xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
-      <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-white/10 px-4 py-5 text-xs text-zinc-500 sm:px-6">
+      <main className="z-shell-content mx-auto min-w-0 max-w-6xl py-5 sm:py-8">
+        {offline && (
+          <div role="status" className="z-premium-card mb-4 flex items-center gap-3 p-3 text-sm">
+            <WifiOff className="size-5 shrink-0 text-primary" aria-hidden="true" />
+            <span>Нет подключения к интернету. После восстановления связи повтори действие.</span>
+          </div>
+        )}
+        {sectionNav && <LiquidSectionNav route={sectionNav} />}
+        {children}
+      </main>
+      <footer className="z-shell-content mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-white/10 py-5 text-xs text-zinc-500">
         <span>ZAPRUDA COMMUNITY · Свои на одной волне</span>
         <div className="flex flex-wrap items-center gap-4">
           <a
@@ -295,47 +471,41 @@ export function Shell({ children }: { children: ReactNode }) {
 
       <nav
         aria-label="Мобильная навигация"
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 z-electric-mobile-nav bg-[#080A09]/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden"
+        className="z-mobile-nav z-electric-mobile-nav fixed inset-x-0 bottom-0 z-50 border-t shadow-[0_-12px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl xl:hidden"
       >
-        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2">
-          {mobileNav.map(({ to, label, Icon }) => {
-            const target = to;
-            const shownLabel = label;
-            const ShownIcon = Icon;
-            return (
-              <Link
-                key={target}
-                to={target}
-                activeOptions={{ exact: true }}
-                className="flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-[#949D90] transition hover:text-[#D7FF35] sm:text-[11px]"
-                activeProps={{
-                  className:
-                    "flex min-h-[64px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl bg-[#D7FF35]/10 px-1 py-2 text-[10px] font-bold text-[#D7FF35] sm:text-[11px]",
-                }}
+        <div className="z-mobile-nav-items mx-auto grid max-w-xl grid-cols-5 gap-1">
+          <ActiveSelectionIndicator routeGroup="shell-mobile" />
+          {mobileNav.map(({ to, label, Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              activeOptions={{ exact: true, includeSearch: false }}
+              className="z-mobile-nav-link"
+              aria-current={mobileCurrent === to ? "page" : undefined}
+              data-selection-plain={to === "/reports/new" ? "" : undefined}
+            >
+              <span
+                className={
+                  to === "/reports/new"
+                    ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]"
+                    : "flex size-8 items-center justify-center"
+                }
               >
-                <span
-                  className={
-                    to === "/reports/new"
-                      ? "flex size-11 items-center justify-center rounded-full bg-[#D7FF35] text-black shadow-[0_0_22px_rgba(215,255,53,0.2)]"
-                      : "flex size-8 items-center justify-center"
-                  }
-                >
-                  <ShownIcon
-                    className={to === "/reports/new" ? "size-6" : "size-[21px]"}
-                    strokeWidth={to === "/reports/new" ? 2.5 : 1.9}
-                    aria-hidden="true"
-                  />
-                </span>
-                <span className="truncate">{shownLabel}</span>
-              </Link>
-            );
-          })}
+                <Icon
+                  className={to === "/reports/new" ? "size-6" : "size-[21px]"}
+                  strokeWidth={to === "/reports/new" ? 2.5 : 1.9}
+                  aria-hidden="true"
+                />
+              </span>
+              <span>{label}</span>
+            </Link>
+          ))}
         </div>
         {isAdmin && (
           <div className="mx-auto max-w-xl px-3 pb-2">
             <Link
               to="/admin"
-              className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#A99AD9]/40 bg-[#171527] text-xs font-black text-[#D7FF35]"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#A99AD9]/40 bg-[#171527] text-xs font-black text-[#D7FF35]"
             >
               <ShieldCheck className="size-4" /> Админ-панель
             </Link>

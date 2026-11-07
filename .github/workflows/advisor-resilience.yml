@@ -1,13 +1,14 @@
-name: Advisor availability without Grok
+name: Advisor availability without an AI provider
 on:
   pull_request:
     paths:
-      - 'src/routes/assistant.tsx'
-      - 'src/components/FishingAdvisor*'
-      - 'src/lib/fishing-plan*'
-      - 'src/lib/optional-grok*'
-      - 'scripts/check-advisor-resilience.mjs'
-      - '.github/workflows/advisor-resilience.yml'
+      - ".github/v075-validation-request.txt"
+      - "src/routes/assistant.tsx"
+      - "src/components/FishingAdvisor*"
+      - "src/lib/fishing-plan*"
+      - "src/lib/optional-ai*"
+      - "scripts/check-advisor-resilience.mjs"
+      - ".github/workflows/advisor-resilience.yml"
 permissions:
   contents: read
 jobs:
@@ -30,7 +31,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun add --dev playwright@1.58.2
       - run: bunx playwright install --with-deps ${{ matrix.engine }}
-      - name: Test guest planning and a rejected Grok request
+      - name: Test guest planning and a rejected optional AI request
         shell: bash
         run: |
           set -euo pipefail

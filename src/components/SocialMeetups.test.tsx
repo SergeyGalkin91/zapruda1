@@ -2,9 +2,18 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testi
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SocialMeetups } from "./SocialMeetups";
 
-const mock = vi.hoisted(() => ({ from: vi.fn(), rpc: vi.fn(), getUser: vi.fn() }));
+const mock = vi.hoisted(() => ({
+  from: vi.fn(),
+  rpc: vi.fn(),
+  getUser: vi.fn(),
+  onAuthStateChange: vi.fn(),
+}));
 vi.mock("@/integrations/supabase/client", () => ({
-  supabase: { from: mock.from, rpc: mock.rpc, auth: { getUser: mock.getUser } },
+  supabase: {
+    from: mock.from,
+    rpc: mock.rpc,
+    auth: { getUser: mock.getUser, onAuthStateChange: mock.onAuthStateChange },
+  },
 }));
 
 type Row = Record<string, string | null>;
@@ -50,9 +59,20 @@ class Query implements PromiseLike<Result> {
     this.mutation = { type: "upsert", row };
     return this;
   }
+  update(row: Row) {
+    this.mutation = { type: "update", row };
+    return this;
+  }
   async execute(single = false): Promise<Result> {
     if (this.mutation) {
       const row = this.mutation.row;
+      if (this.mutation.type === "update") {
+        for (const existing of rows[this.table]) {
+          if ([...this.filters].every(([key, value]) => existing[key] === value))
+            Object.assign(existing, row);
+        }
+        return { data: null, error: null };
+      }
       if (this.table === "meetup_messages")
         rows[this.table].push({ ...row, id: "999", created_at: "2026-11-04T12:00:00Z" });
       if (this.table === "meetup_private_details") written.push(row);
@@ -127,6 +147,7 @@ beforeEach(() => {
     })),
   };
   mock.getUser.mockResolvedValue({ data: { user: { id: owner } }, error: null });
+  mock.onAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } });
   mock.from.mockImplementation((table: keyof Tables) => new Query(table));
   mock.rpc.mockResolvedValue({ data: 1, error: null });
   const original = window.setInterval.bind(window);
@@ -157,6 +178,59 @@ function open(id: string) {
 }
 
 describe("meetup chat regression", () => {
+  it("lets an accepted participant leave and clears the private chat immediately", async () => {
+    const participant = "test-participant";
+    mock.getUser.mockResolvedValue({ data: { user: { id: participant } }, error: null });
+    rows.meetup_members.push({
+      post_id: "a",
+      user_id: participant,
+      role: "participant",
+      status: "accepted",
+    });
+    await setup();
+    open("a");
+    await screen.findByText("Участник: сообщение-150");
+    const card = screen.getByRole("heading", { name: "Выезд a" }).closest("article")!;
+    fireEvent.click(within(card).getByRole("button", { name: "Выйти из сходки" }));
+    await waitFor(() =>
+      expect(rows.meetup_members.find((m) => m["user_id"] === participant)?.["status"]).toBe(
+        "declined",
+      ),
+    );
+    await waitFor(() => expect(screen.queryByText("Приватный чат сходки")).toBeNull());
+    expect(screen.queryByText("Место a")).toBeNull();
+    expect(screen.queryByText("Участник: сообщение-150")).toBeNull();
+    expect(within(card).getByRole("button", { name: "Откликнуться" })).toBeVisible();
+    fireEvent.click(within(card).getByRole("button", { name: "Откликнуться" }));
+    await waitFor(() =>
+      expect(rows.meetup_members.find((m) => m["user_id"] === participant)?.["status"]).toBe(
+        "pending",
+      ),
+    );
+  });
+  it("revokes cached chat when the owner cancels the meetup", async () => {
+    await setup();
+    open("a");
+    await screen.findByText("Вы: сообщение-150");
+    const card = screen.getByRole("heading", { name: "Выезд a" }).closest("article")!;
+    fireEvent.click(within(card).getByRole("button", { name: "Отменить сходку" }));
+    await waitFor(() => expect(rows.meetup_posts[0]?.["status"]).toBe("cancelled"));
+    await waitFor(() => expect(screen.queryByText("Приватный чат сходки")).toBeNull());
+    expect(screen.queryByText("Вы: сообщение-150")).toBeNull();
+    expect(within(card).queryByRole("button", { name: "Частный чат" })).toBeNull();
+  });
+  it("clears cached chat when a remote cancellation is observed while membership remains accepted", async () => {
+    await setup();
+    open("a");
+    await screen.findByText("Вы: сообщение-150");
+    rows.meetup_posts[0]!["status"] = "cancelled";
+    await act(async () => {
+      tick!();
+    });
+    await screen.findByText(/Доступ к чату сходки больше не подтверждён/);
+    expect(screen.queryByText("Место a")).toBeNull();
+    expect(screen.queryByText("Вы: сообщение-150")).toBeNull();
+  });
   it("loads the most recent 100 messages and displays them chronologically", async () => {
     await setup();
     open("a");
@@ -171,7 +245,7 @@ describe("meetup chat regression", () => {
     await setup();
     open("a");
     await screen.findByText("Вы: сообщение-150");
-    fireEvent.change(screen.getByPlaceholderText("Точное место встречи"), {
+    fireEvent.change(screen.getByLabelText("Точное место встречи"), {
       target: { value: "Несохранённое уточнение" },
     });
     rows.meetup_messages.push({
@@ -185,9 +259,7 @@ describe("meetup chat regression", () => {
       tick!();
     });
     await screen.findByText("Участник: Уже на месте");
-    expect(screen.getByPlaceholderText("Точное место встречи")).toHaveValue(
-      "Несохранённое уточнение",
-    );
+    expect(screen.getByLabelText("Точное место встречи")).toHaveValue("Несохранённое уточнение");
   });
   it("does not apply details from a previous meetup after switching", async () => {
     await setup();
@@ -201,10 +273,10 @@ describe("meetup chat regression", () => {
     open("a");
     open("b");
     await waitFor(() =>
-      expect(screen.getByPlaceholderText("Точное место встречи")).toHaveValue("Место b"),
+      expect(screen.getByLabelText("Точное место встречи")).toHaveValue("Место b"),
     );
     await act(async () => resolve({ data: rows.meetup_private_details[0] ?? null, error: null }));
-    expect(screen.getByPlaceholderText("Точное место встречи")).toHaveValue("Место b");
+    expect(screen.getByLabelText("Точное место встречи")).toHaveValue("Место b");
     expect(screen.queryByText("Вы: сообщение-150")).toBeNull();
   });
   it("clears cached private details and messages if membership is revoked", async () => {
@@ -218,21 +290,21 @@ describe("meetup chat regression", () => {
     await screen.findByText(/Доступ к чату сходки больше не подтверждён/);
     expect(screen.queryByText("Место a")).toBeNull();
     expect(screen.queryByText("Вы: сообщение-150")).toBeNull();
-    expect(screen.queryByPlaceholderText("Точное место встречи")).toBeNull();
+    expect(screen.queryByLabelText("Точное место встречи")).toBeNull();
   });
   it("sends a new message without overwriting unsaved private details", async () => {
     await setup();
     open("a");
     await screen.findByText("Вы: сообщение-150");
-    fireEvent.change(screen.getByPlaceholderText("Точное место встречи"), {
+    fireEvent.change(screen.getByLabelText("Точное место встречи"), {
       target: { value: "Мой черновик места" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Сообщение"), {
+    fireEvent.change(screen.getByLabelText("Сообщение"), {
       target: { value: "Новое сообщение" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Отправить" }));
     await screen.findByText("Вы: Новое сообщение");
-    expect(screen.getByPlaceholderText("Точное место встречи")).toHaveValue("Мой черновик места");
+    expect(screen.getByLabelText("Точное место встречи")).toHaveValue("Мой черновик места");
   });
   it("preserves the original UTC instant when the organizer saves unchanged details", async () => {
     await setup();

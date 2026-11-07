@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { Check, Pencil, Plus, Save, Star, Trash2, X } from "lucide-react";
+import { MobileField, StickyFormActions } from "@/components/MobileForm";
 import { supabase } from "@/integrations/supabase/client";
 import { formatTackleItem, type TackleItem } from "@/lib/tackleCatalog";
 
@@ -238,10 +239,9 @@ export function AnglerGearSets({
             {editingId ? "Редактировать комплект" : "Собрать новый комплект"}
           </h4>
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-xs font-semibold text-zinc-300">
-              Удилище
+            <MobileField label="Удилище">
               <select
-                className="field mt-1 w-full"
+                className="field"
                 value={selectedRod}
                 onChange={(e) => setSelectedRod(e.target.value)}
                 required
@@ -252,11 +252,10 @@ export function AnglerGearSets({
                   </option>
                 ))}
               </select>
-            </label>
-            <label className="block text-xs font-semibold text-zinc-300">
-              Катушка
+            </MobileField>
+            <MobileField label="Катушка">
               <select
-                className="field mt-1 w-full"
+                className="field"
                 value={selectedReel}
                 onChange={(e) => setSelectedReel(e.target.value)}
                 required
@@ -267,11 +266,10 @@ export function AnglerGearSets({
                   </option>
                 ))}
               </select>
-            </label>
-            <label className="block text-xs font-semibold text-zinc-300">
-              Шнур / леска · необязательно
+            </MobileField>
+            <MobileField label="Шнур / леска · необязательно">
               <select
-                className="field mt-1 w-full"
+                className="field"
                 value={selectedLine}
                 onChange={(e) => setSelectedLine(e.target.value)}
               >
@@ -282,14 +280,9 @@ export function AnglerGearSets({
                   </option>
                 ))}
               </select>
-            </label>
-            <label className="block text-xs font-semibold text-zinc-300">
-              Способ ловли · необязательно
-              <select
-                className="field mt-1 w-full"
-                value={method}
-                onChange={(e) => setMethod(e.target.value)}
-              >
+            </MobileField>
+            <MobileField label="Способ ловли · необязательно">
+              <select className="field" value={method} onChange={(e) => setMethod(e.target.value)}>
                 <option value="">Любой способ ловли</option>
                 {fishingMethods.map((m) => (
                   <option key={m} value={m}>
@@ -297,29 +290,27 @@ export function AnglerGearSets({
                   </option>
                 ))}
               </select>
-            </label>
-            <label className="block text-xs font-semibold text-zinc-300">
-              Название · необязательно
+            </MobileField>
+            <MobileField label="Название · необязательно">
               <input
-                className="field mt-1 w-full"
+                className="field"
                 maxLength={100}
                 placeholder="Например: Ока — джиг"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
-            </label>
-            <label className="block text-xs font-semibold text-zinc-300">
-              Заметка · необязательно
+            </MobileField>
+            <MobileField label="Заметка · необязательно">
               <input
-                className="field mt-1 w-full"
+                className="field"
                 maxLength={500}
                 placeholder="Например: основной комплект на судака"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
-            </label>
+            </MobileField>
           </div>
-          <div className="flex flex-wrap justify-end gap-2">
+          <StickyFormActions>
             {editingId && (
               <button
                 className="btn-ghost inline-flex"
@@ -338,7 +329,7 @@ export function AnglerGearSets({
               {editingId ? <Save className="size-4" /> : <Plus className="size-4" />}
               {busy ? "Сохраняем…" : editingId ? "Сохранить комплект" : "Добавить комплект"}
             </button>
-          </div>
+          </StickyFormActions>
         </form>
       )}
       <div className="space-y-2">

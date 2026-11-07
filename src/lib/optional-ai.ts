@@ -1,5 +1,5 @@
 import type { AdviceInput } from "./fishing-plan";
-export type GrokResult =
+export type AdviceResult =
   | { ok: true; answer: string; alreadyUsed: boolean }
   | { ok: false; reason: "unavailable" | "timeout" | "cancelled" | "signin" };
 type Invoke = (
@@ -8,16 +8,16 @@ type Invoke = (
 ) => PromiseLike<{ data: unknown; error: unknown }>;
 
 /** Optional enrichment always settles; it never manufactures a successful AI answer. */
-export async function requestOptionalGrok(
+export async function requestOptionalAdvice(
   input: AdviceInput,
   invoke: Invoke,
   options: { signal?: AbortSignal; timeoutMs?: number } = {},
-): Promise<GrokResult> {
+): Promise<AdviceResult> {
   if (options.signal?.aborted) return { ok: false, reason: "cancelled" };
   const controller = new AbortController();
   let timedOut = false;
   let onInternalAbort: () => void = () => {};
-  const abort = new Promise<GrokResult>((resolve) => {
+  const abort = new Promise<AdviceResult>((resolve) => {
     onInternalAbort = () => resolve({ ok: false, reason: timedOut ? "timeout" : "cancelled" });
     controller.signal.addEventListener("abort", onInternalAbort, { once: true });
   });
@@ -28,7 +28,7 @@ export async function requestOptionalGrok(
     controller.abort();
   }, options.timeoutMs ?? 45_000);
   try {
-    const result = Promise.resolve().then(async (): Promise<GrokResult> => {
+    const result = Promise.resolve().then(async (): Promise<AdviceResult> => {
       if (controller.signal.aborted) return { ok: false, reason: "cancelled" };
       try {
         const { data, error } = await invoke(input, controller.signal);

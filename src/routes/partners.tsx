@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import {
@@ -24,6 +25,7 @@ import {
   Ban,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { ScreenState } from "@/components/ScreenState";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/partners")({
@@ -185,11 +187,8 @@ function Partners() {
       } else {
         setApplications([]);
       }
-    } catch (caught) {
-      setError(
-        "Не получилось загрузить выезды. Возможно, миграция «Напарники» ещё не применена в Supabase. " +
-          (caught instanceof Error ? caught.message : ""),
-      );
+    } catch {
+      setError("Не получилось загрузить выезды. Проверь подключение и попробуй ещё раз.");
     } finally {
       setLoading(false);
     }
@@ -412,7 +411,7 @@ function Partners() {
     "inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-3 py-2 text-xs font-bold text-zinc-300 transition hover:border-lime-300/40 hover:text-white disabled:opacity-50";
 
   return (
-    <Shell>
+    <Shell screen="trips">
       <section className="z-underground relative overflow-hidden px-5 py-8 sm:px-8 sm:py-11">
         <div className="pointer-events-none absolute -right-10 -top-24 size-72 rounded-full bg-lime-300/[0.09] blur-3xl" />
         <div className="relative">
@@ -617,6 +616,7 @@ function Partners() {
         role="tablist"
         aria-label="Разделы поиска напарников"
       >
+        <ActiveSelectionIndicator />
         {(
           [
             ["discover", "Найти выезд"],
@@ -629,7 +629,7 @@ function Partners() {
             role="tab"
             aria-selected={view === id}
             onClick={() => setView(id)}
-            className={`rounded-xl px-4 py-2.5 text-sm font-bold transition ${view === id ? "bg-lime-300 text-[#10120c]" : "border border-white/10 bg-white/[0.025] text-zinc-400 hover:text-white"}`}
+            className="rounded-xl border border-white/10 bg-white/[0.025] px-4 py-2.5 text-sm font-bold text-zinc-400 transition hover:text-white"
           >
             {label}
           </button>
@@ -697,12 +697,14 @@ function Partners() {
       </div>
 
       {error && (
-        <p
-          role="alert"
-          className="mt-4 rounded-xl border border-red-400/30 bg-red-400/5 p-4 text-sm text-red-200"
+        <ScreenState
+          kind="error"
+          className="mt-4"
+          onRetry={() => void loadData()}
+          retryLabel="Обновить выезды"
         >
           {error}
-        </p>
+        </ScreenState>
       )}
       {notice && (
         <p
@@ -713,12 +715,12 @@ function Partners() {
         </p>
       )}
       {loading && (
-        <p className="mt-6 rounded-2xl border border-white/10 p-6 text-zinc-400">
+        <ScreenState kind="loading" className="mt-6">
           Загружаем выезды…
-        </p>
+        </ScreenState>
       )}
       {!loading && !error && visibleTrips.length === 0 && (
-        <div className="mt-5 rounded-2xl border border-dashed border-lime-300/25 bg-[#151812] p-10 text-center">
+        <div className="z-premium-card mt-5 p-6 text-center" role="status">
           <Fish className="mx-auto size-11 text-lime-300" strokeWidth={1.4} />
           <h2 className="mt-4 text-xl font-bold">
             {view === "discover"

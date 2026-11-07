@@ -1,4 +1,4 @@
-/** Pure helpers for Grok daily advice quota (testable without Edge runtime). */
+/** Provider-independent daily advice quota helpers (testable without Edge runtime). */
 
 export function moscowAdviceDay(now = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {

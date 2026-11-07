@@ -1,9 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Images } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { PremiumFeedHeader } from "@/components/PremiumFeedHeader";
+import { ReportBigFishNextStep } from "@/components/ReportBigFishNextStep";
+import { BrandFish } from "@/components/Wordmark";
 import { ReactionBar } from "@/components/ReactionBar";
 import { DailyFishingBrief } from "@/components/DailyFishingBrief";
+import { ScreenState } from "@/components/ScreenState";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { loadPublicReportPhotos } from "@/lib/public-report-photos";
 
@@ -11,11 +16,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "ZAPRUDA — лента рыболовных отчётов" },
-      { name: "description", content: "Отчёты спиннингистов: водоёмы, приманки, погода и улов." },
+      { name: "description", content: "Отчёты рыбаков: водоёмы, снасти, погода и истории с воды." },
       { property: "og:title", content: "ZAPRUDA — лента рыболовных отчётов" },
       {
         property: "og:description",
-        content: "Отчёты спиннингистов: водоёмы, приманки, погода и улов.",
+        content: "Отчёты рыбаков: водоёмы, снасти, погода и истории с воды.",
       },
     ],
   }),
@@ -63,23 +68,16 @@ function ReportPhotoGallery({
   onPhotoError: () => void;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (activeIndex === null) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setActiveIndex(null);
-      if (event.key === "ArrowRight")
-        setActiveIndex((i) => (i === null ? null : (i + 1) % photos.length));
-      if (event.key === "ArrowLeft")
-        setActiveIndex((i) => (i === null ? null : (i - 1 + photos.length) % photos.length));
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeIndex, photos.length]);
+  const opener = useRef<HTMLButtonElement>(null);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   if (!photos.length) return null;
+  const index = activeIndex === null ? null : Math.min(activeIndex, photos.length - 1);
+  const move = (step: number) => {
+    if (index !== null) setActiveIndex((index + step + photos.length) % photos.length);
+  };
   return (
-    <>
+    <Dialog open={index !== null} onOpenChange={(open) => !open && setActiveIndex(null)}>
       <div
         className={`grid gap-1.5 overflow-hidden rounded-[20px] border border-white/10 ${photos.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
       >
@@ -88,7 +86,10 @@ function ReportPhotoGallery({
             key={index}
             type="button"
             className={`group relative overflow-hidden bg-zinc-900 text-left ${photos.length === 3 && index === 0 ? "col-span-2" : ""}`}
-            onClick={() => setActiveIndex(index)}
+            onClick={(event) => {
+              opener.current = event.currentTarget;
+              setActiveIndex(index);
+            }}
             aria-label={`Открыть фото ${index + 1} из ${photos.length}: ${title}`}
           >
             <img
@@ -106,59 +107,84 @@ function ReportPhotoGallery({
           </button>
         ))}
       </div>
-      {activeIndex !== null && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Фотографии: ${title}`}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-3 sm:p-10"
+      {index !== null && (
+        <DialogContent
+          className="z-photo-lightbox"
+          onCloseAutoFocus={(event) => {
+            if (!opener.current?.isConnected) return;
+            event.preventDefault();
+            opener.current.focus();
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+            event.preventDefault();
+            move(event.key === "ArrowRight" ? 1 : -1);
+          }}
         >
-          <button
-            type="button"
-            className="absolute inset-0"
-            aria-label="Закрыть просмотр"
-            onClick={() => setActiveIndex(null)}
-          />
-          <img
-            src={photos[activeIndex]}
-            onError={onPhotoError}
-            alt={`${title} — фото ${activeIndex + 1}`}
-            className="pointer-events-none relative max-h-[85vh] max-w-[95vw] object-contain"
-          />
-          <button
-            type="button"
-            className="absolute right-4 top-4 z-10 rounded-full border border-white/20 bg-black/80 p-3 text-white transition hover:border-lime-300"
-            aria-label="Закрыть"
-            onClick={() => setActiveIndex(null)}
+          <DialogTitle className="sr-only">Фотографии: {title}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Просматривай фото свайпом, кнопками или стрелками клавиатуры.
+          </DialogDescription>
+          <div
+            className="z-photo-frame"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setActiveIndex(null);
+            }}
+            onTouchStart={(event) => {
+              const touch = event.touches.length === 1 ? event.touches[0] : undefined;
+              touchStart.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+            }}
+            onTouchCancel={() => {
+              touchStart.current = null;
+            }}
+            onTouchEnd={(event) => {
+              const start = touchStart.current;
+              const end = event.changedTouches[0];
+              touchStart.current = null;
+              if (!start || !end || photos.length < 2) return;
+              const dx = end.clientX - start.x;
+              if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(end.clientY - start.y)) {
+                move(dx < 0 ? 1 : -1);
+              }
+            }}
           >
-            <X className="size-5" />
-          </button>
+            <img
+              src={photos[index]}
+              onError={onPhotoError}
+              alt={`${title} — фото ${index + 1}`}
+              draggable={false}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
           {photos.length > 1 && (
             <>
               <button
                 type="button"
-                className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/80 p-3 text-white hover:text-lime-300"
+                className="z-photo-previous absolute top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/80 p-3 text-white hover:text-lime-300"
                 aria-label="Предыдущее фото"
-                onClick={() => setActiveIndex((activeIndex - 1 + photos.length) % photos.length)}
+                onClick={() => move(-1)}
               >
                 <ChevronLeft className="size-6" />
               </button>
               <button
                 type="button"
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/80 p-3 text-white hover:text-lime-300"
+                className="z-photo-next absolute top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/80 p-3 text-white hover:text-lime-300"
                 aria-label="Следующее фото"
-                onClick={() => setActiveIndex((activeIndex + 1) % photos.length)}
+                onClick={() => move(1)}
               >
                 <ChevronRight className="size-6" />
               </button>
             </>
           )}
-          <span className="pointer-events-none absolute bottom-5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/75 px-3 py-1 text-xs text-zinc-200">
-            {activeIndex + 1} / {photos.length}
+          <span
+            role="status"
+            className="z-photo-count pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/75 px-3 py-1 text-xs text-zinc-200"
+          >
+            {index + 1} / {photos.length}
           </span>
-        </div>
+        </DialogContent>
       )}
-    </>
+    </Dialog>
   );
 }
 
@@ -279,7 +305,7 @@ function Feed() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<{ message: string; firstPage: boolean } | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const requestRef = useRef(false);
   const initialPageRequested = useRef(false);
@@ -305,6 +331,7 @@ function Feed() {
     async (reset = false) => {
       if (requestRef.current || (!reset && (!hasMore || loadingMore))) return;
       requestRef.current = true;
+      setError(null);
       if (reset) {
         setLoading(true);
         setHasMore(true);
@@ -325,7 +352,7 @@ function Feed() {
           .range(from, from + PAGE_SIZE - 1);
 
         if (queryError) {
-          setError("Не удалось загрузить отчёты: " + queryError.message);
+          setError({ message: "Не удалось загрузить отчёты.", firstPage: reset });
         } else {
           const page = (data ?? []) as unknown as Report[];
           setReports((current) =>
@@ -346,13 +373,9 @@ function Feed() {
               // The gallery remains optional; never fall back to an original file.
             }
           }
-          setError("");
         }
-      } catch (cause) {
-        setError(
-          "Не удалось загрузить отчёты: " +
-            (cause instanceof Error ? cause.message : "ошибка сети"),
-        );
+      } catch {
+        setError({ message: "Не удалось загрузить отчёты.", firstPage: reset });
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -399,89 +422,18 @@ function Feed() {
   }, [loadPage]);
 
   return (
-    <Shell>
-      <section className="relative mb-7 overflow-hidden rounded-[28px] border border-white/10 bg-[#0B0D0B] z-electric-feed-hero px-5 py-7 sm:px-8 sm:py-9">
-        <div className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#D7FF35]/[0.09] z-electric-hero-glow blur-3xl" />
-        <div className="relative">
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D7FF35]">
-            ZAPRUDA COMMUNITY / CONCEPT 01
-          </p>
-          <h1 className="mt-4 max-w-[880px] text-[clamp(2.6rem,6vw,5.5rem)] font-black uppercase leading-[0.97] tracking-[-0.06em] text-[#F5F7F5]">
-            НЕ ПРОСТО ЛЕНТА.<span className="block text-[#D7FF35]">ТВОЯ ВОДА.</span>
-          </h1>
-          <p className="mt-5 max-w-2xl text-sm leading-6 text-zinc-300">
-            Живые отчёты, трофеи друзей, местные сообщества и свои люди на воде. Рыбалка начинается
-            здесь.
-          </p>
-          <Link
-            to="/street"
-            className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-[#D7FF35]/40 bg-[#121A12] z-electric-street-cta px-5 py-4 transition hover:border-[#D7FF35]"
-          >
-            <span>
-              <strong className="block text-lg font-black uppercase tracking-tight text-[#D7FF35]">
-                ZAPRUDA STREET · Город — твоя акватория
-              </strong>
-              <span className="mt-1 block text-xs text-zinc-300">
-                Street Fishing: начать городскую сессию и записывать уловы
-              </span>
-            </span>
-            <span className="shrink-0 rounded-xl bg-[#D7FF35] px-3 py-2 font-black text-black">
-              STREET
-            </span>
-          </Link>
-          <div className="mt-7 grid gap-3 md:grid-cols-3">
-            <Link
-              to="/assistant"
-              className="group rounded-2xl border border-[#D7FF35]/35 bg-[#D7FF35]/10 z-electric-feed-action p-5 transition hover:border-[#D7FF35] hover:bg-[#D7FF35]/15"
-            >
-              <span className="text-2xl" aria-hidden="true">
-                🎣
-              </span>
-              <span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">
-                Выйти на воду
-              </span>
-              <span className="mt-1 block text-xs text-zinc-400">Подбор места и тактики</span>
-            </Link>
-            <Link
-              to="/reports/new"
-              className="group rounded-2xl border border-white/15 bg-[#141D20] z-electric-feed-action p-5 transition hover:border-[#D7FF35]"
-            >
-              <span className="text-2xl" aria-hidden="true">
-                🐟
-              </span>
-              <span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">
-                Новый трофей
-              </span>
-              <span className="mt-1 block text-xs text-zinc-400">Опубликовать улов</span>
-            </Link>
-            <Link
-              to="/communities"
-              className="group rounded-2xl border border-[#A78BFA]/35 bg-[#141D20] z-electric-feed-eggplant p-5 transition hover:border-[#A78BFA]"
-            >
-              <span className="text-2xl" aria-hidden="true">
-                ⚡
-              </span>
-              <span className="mt-5 block text-lg font-black uppercase tracking-tight text-[#F5F7F5]">
-                Рядом с тобой
-              </span>
-              <span className="mt-1 block text-xs text-zinc-400">Люди, клубы и события</span>
-            </Link>
-          </div>
-          <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-            DARK / ACID / STREET FISHING
-          </p>
-        </div>
-      </section>
-      <DailyFishingBrief />
-      {loading && <div className="panel p-5 text-sm text-muted-foreground">Загружаем отчёты…</div>}
-      {error && (
-        <div className="mb-4 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">
-          {error}
-        </div>
+    <Shell screen="feed" sectionNav="/">
+      <PremiumFeedHeader />
+      <ReportBigFishNextStep />
+      {loading && <ScreenState kind="loading">Загружаем отчёты…</ScreenState>}
+      {error?.firstPage && (
+        <ScreenState kind="error" className="mb-4" onRetry={() => void loadPage(true)}>
+          {error.message}
+        </ScreenState>
       )}
       {!loading && !error && reports.length === 0 && (
-        <div className="panel p-8 text-center">
-          <div className="text-3xl">🎣</div>
+        <div className="panel z-feed-empty text-center" role="status">
+          <BrandFish className="z-empty-fish" />
           <h2 className="mt-3 font-semibold">Пока тихо, как на бесклёвье</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Будь первым — опубликуй отчёт о рыбалке.
@@ -498,7 +450,7 @@ function Feed() {
             return (
               <article
                 key={report.id}
-                className="z-underground mb-5 space-y-4 overflow-hidden p-4 shadow-[0_18px_45px_rgba(0,0,0,0.14)] sm:p-5"
+                className="z-underground z-feed-card mb-5 space-y-4 overflow-hidden p-4 shadow-[0_18px_45px_rgba(0,0,0,0.14)] sm:p-5"
               >
                 <div className="flex items-start gap-3">
                   {report.profiles?.avatar_url ? (
@@ -586,24 +538,16 @@ function Feed() {
             );
           })}
           <div ref={sentinelRef} className="h-4" aria-hidden="true" />
-          {loadingMore && (
-            <div className="py-5 text-center text-sm text-muted-foreground">
-              Подтягиваем следующие отчёты…
-            </div>
-          )}
+          {loadingMore && <ScreenState kind="loading">Подтягиваем следующие отчёты…</ScreenState>}
           {!loading && !loadingMore && !hasMore && reports.length > 0 && (
             <p className="py-6 text-center text-xs text-muted-foreground">
               Ты в курсе всех отчётов на данный момент 🎣
             </p>
           )}
-          {error && !loading && (
-            <button
-              type="button"
-              className="btn-ghost mt-3"
-              onClick={() => void loadPage(reports.length === 0)}
-            >
-              Повторить загрузку
-            </button>
+          {error && !error.firstPage && (
+            <ScreenState kind="error" onRetry={() => void loadPage(false)}>
+              {error.message}
+            </ScreenState>
           )}
         </div>
         <aside className="hidden space-y-4 lg:block">
@@ -631,6 +575,7 @@ function Feed() {
           </div>
         </aside>
       </div>
+      <DailyFishingBrief />
     </Shell>
   );
 }

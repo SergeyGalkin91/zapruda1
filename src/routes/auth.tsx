@@ -1,6 +1,13 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import {
+  MobileField,
+  SingleFieldProgress,
+  SingleFieldStage,
+  StickyFormActions,
+} from "@/components/MobileForm";
 import { Shell } from "@/components/Shell";
 import { Wordmark } from "@/components/Wordmark";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
@@ -21,21 +28,36 @@ export const Route = createFileRoute("/auth")({
   component: Auth,
 });
 
+const signupSteps = ["username", "email", "password", "review"] as const;
+type SignupStep = (typeof signupSteps)[number];
+const validUsername = (value: string) =>
+  /^[a-zA-Z0-9_.-]{3,24}$/.test(value.trim().replace(/^@/, ""));
+const usernameHint =
+  "Никнейм: 3–24 символа, латинские буквы, цифры, точка, дефис или подчёркивание.";
+
 function Auth() {
   const navigate = useNavigate();
   const search = Route.useSearch();
   const [mode, setMode] = useState<"in" | "up" | "forgot" | "new-password">(search.mode);
   const [username, setUsername] = useState("");
+  const [signupStep, setSignupStep] = useState<SignupStep>("username");
+  const [signupReady, setSignupReady] = useState(false);
+  const [signupEditing, setSignupEditing] = useState(false);
+  const [signupReverse, setSignupReverse] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
+  const [fieldError, setFieldError] = useState<{ name: string; text: string } | null>(null);
+  const errorFor = (name: string) => (fieldError?.name === name ? fieldError.text : undefined);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
+    setSignupReady(true);
     // Never forcibly redirect users from registration to profile.
     // Existing sessions are checked after explicit login; password recovery is handled separately.
     const params = new URLSearchParams(window.location.search);
@@ -86,6 +108,15 @@ function Auth() {
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (submitting.current) return;
+    setFieldError(null);
+    const form = e.currentTarget;
+    function rejectField(name: string, text: string) {
+      setFieldError({ name, text });
+      const field = form.elements.namedItem(name);
+      if (field instanceof HTMLInputElement) field.focus();
+    }
+    submitting.current = true;
     setBusy(true);
     setError("");
     setNotice("");
@@ -109,17 +140,19 @@ function Auth() {
         );
       } else if (mode === "new-password") {
         if (password.length < 6) throw new Error("Пароль должен содержать не менее 6 символов.");
-        if (password !== confirmPassword) throw new Error("Пароли не совпадают.");
+        if (password !== confirmPassword) {
+          rejectField("confirmPassword", "Пароли не совпадают.");
+          return;
+        }
         const { error: updateError } = await supabase.auth.updateUser({ password });
         if (updateError) throw updateError;
         setNotice("Пароль изменён. Теперь можно перейти в профиль.");
         await navigate({ to: "/profile" });
       } else {
         const cleanUsername = username.trim().replace(/^@/, "");
-        if (!/^[a-zA-Z0-9_.-]{3,24}$/.test(cleanUsername)) {
-          throw new Error(
-            "Никнейм: 3–24 символа, латинские буквы, цифры, точка, дефис или подчёркивание.",
-          );
+        if (!validUsername(username)) {
+          rejectField("username", usernameHint);
+          return;
         }
         const { data, error: authError } = await supabase.auth.signUp({
           email: email.trim(),
@@ -142,167 +175,313 @@ function Auth() {
       const message = err instanceof Error ? err.message : "Не удалось выполнить запрос.";
       const normalized = message.toLowerCase();
       if (
+        (err instanceof Error && err.name === "AuthRetryableFetchError") ||
         normalized.includes("failed to fetch") ||
         normalized.includes("network") ||
         normalized.includes("connection") ||
         normalized.includes("fetch failed")
       ) {
-        setError(
-          "Не удалось соединиться с сервером авторизации Supabase. Проверь подключение к интернету или VPN и повтори попытку.",
-        );
+        setError("Не удалось связаться с сервером. Проверь подключение и повтори попытку.");
       } else if (normalized.includes("invalid login credentials")) {
-        setError(
-          "Не удалось войти. Alpha использует отдельную тестовую базу: аккаунты предыдущей версии сюда не перенесены. Создай тестовый аккаунт через «Регистрация» или проверь данные нового аккаунта.",
-        );
+        setError("Не удалось войти. Проверь адрес почты и пароль.");
       } else if (normalized.includes("email not confirmed")) {
         setError("Почта ещё не подтверждена. Открой письмо подтверждения и повтори вход.");
       } else {
         setError(message);
       }
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
 
+  const signupPosition = signupSteps.indexOf(signupStep);
+  function openSignupStep(step: SignupStep, reverse = false) {
+    setSignupReverse(reverse);
+    setSignupStep(step);
+    setFieldError(null);
+    setError("");
+    setNotice("");
+  }
+  function submitSignup(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy || submitting.current) return;
+    if (signupStep === "username" && !validUsername(username)) {
+      setFieldError({ name: "username", text: usernameHint });
+      event.currentTarget.querySelector<HTMLInputElement>("[name=username]")?.focus();
+      return;
+    }
+    if (signupStep === "password" && password.length < 6) {
+      setFieldError({ name: "password", text: "Пароль должен содержать не менее 6 символов." });
+      event.currentTarget.querySelector<HTMLInputElement>("[name=password]")?.focus();
+      return;
+    }
+    if (signupStep === "review") {
+      void submit(event);
+      return;
+    }
+    openSignupStep(signupEditing ? "review" : signupSteps[signupPosition + 1]!);
+    setSignupEditing(false);
+  }
+  function previousSignupStep() {
+    openSignupStep(signupEditing ? "review" : signupSteps[signupPosition - 1]!, true);
+    setSignupEditing(false);
+  }
+
+  const usernameField = (
+    <MobileField label="Никнейм" hint="Например, river_hunter" error={errorFor("username")}>
+      <input
+        name="username"
+        className="field"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        minLength={3}
+        maxLength={24}
+        autoComplete="username"
+        autoCapitalize="none"
+        spellCheck={false}
+        required
+      />
+    </MobileField>
+  );
+  const emailField = (
+    <MobileField label="Email" error={errorFor("email")}>
+      <input
+        name="email"
+        className="field"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        autoComplete={mode === "in" ? "username" : "email"}
+        autoCapitalize="none"
+        spellCheck={false}
+        required
+      />
+    </MobileField>
+  );
+  const passwordField = (
+    <MobileField
+      label={mode === "new-password" ? "Новый пароль" : "Пароль"}
+      hint={mode !== "in" ? "Не менее 6 символов." : undefined}
+      error={errorFor("password")}
+      action={
+        <button
+          type="button"
+          className="text-primary"
+          aria-label={passwordVisible ? "Скрыть пароль" : "Показать пароль"}
+          aria-pressed={passwordVisible}
+          onClick={() => setPasswordVisible((value) => !value)}
+        >
+          {passwordVisible ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+        </button>
+      }
+    >
+      <input
+        name="password"
+        className="field"
+        type={passwordVisible ? "text" : "password"}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        minLength={6}
+        autoComplete={mode === "in" ? "current-password" : "new-password"}
+        required
+      />
+    </MobileField>
+  );
+  const signupQuestion = {
+    username: { title: "Как тебя называть?", field: usernameField },
+    email: { title: "Куда отправить письмо?", field: emailField },
+    password: { title: "Придумай пароль", field: passwordField },
+    review: {
+      title: "Проверь данные",
+      field: (
+        <div className="z-single-field-review-edits">
+          {(
+            [
+              ["username", "Никнейм", username],
+              ["email", "Email", email.trim()],
+              ["password", "Пароль", "Пароль задан"],
+            ] as const
+          ).map(([step, label, value]) => (
+            <button
+              key={step}
+              type="button"
+              className="z-single-field-edit"
+              aria-label={"Изменить: " + label}
+              disabled={busy}
+              onClick={() => {
+                setSignupEditing(true);
+                openSignupStep(step, true);
+              }}
+            >
+              <span>
+                <small>{label}</small>
+                <strong>{value}</strong>
+              </span>
+            </button>
+          ))}
+        </div>
+      ),
+    },
+  }[signupStep];
+  const feedback = (
+    <>
+      {error && (
+        <p
+          role="alert"
+          className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+        >
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p role="status" className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
+          {notice}
+        </p>
+      )}
+    </>
+  );
+
   return (
     <Shell>
-      <div className="mx-auto max-w-[440px] overflow-hidden rounded-[28px] border border-[#344153] bg-[#070B10] shadow-[0_25px_100px_rgba(0,0,0,0.65)]">
-        <aside className="relative flex min-h-[300px] flex-col justify-between overflow-hidden bg-[radial-gradient(ellipse_at_60%_83%,#F9A43B_0%,#C4673A_12%,#533C59_34%,#17233A_63%,#070B10_100%)] p-7">
-          <div
-            aria-hidden="true"
-            className="absolute inset-x-0 bottom-0 h-[35%] bg-[linear-gradient(0deg,#030A10_5%,#10182D_65%,transparent_100%)]"
-          />
-          <div
-            aria-hidden="true"
-            className="absolute inset-x-0 bottom-[17%] h-px bg-[#F8B25E]/50 shadow-[0_0_22px_5px_rgba(255,166,73,0.24)]"
-          />
-          <div className="relative">
+      <div
+        className={mode === "up" ? "mx-auto max-w-[440px]" : "z-premium-card mx-auto max-w-[440px]"}
+      >
+        {mode !== "up" && (
+          <header className="border-b border-white/10 px-4 py-5 sm:p-7">
             <Wordmark />
-            <h1 className="mt-14 max-w-sm text-3xl font-black leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.65)]">
-              Вход в сообщество рыболовов
-            </h1>
-            <p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">
-              Записывай выезды, делись уловом и обсуждай рыбалку с теми, кто в теме.
-            </p>
-          </div>
-          <p className="relative text-xs text-muted-foreground">
-            Рыболовное сообщество без лишнего шума 🎣
-          </p>
-        </aside>
-        <section className="bg-[#070B10] p-6 sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            Рыболовное сообщество
-          </p>
-          <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">
-            {mode === "in"
-              ? "С возвращением"
-              : mode === "up"
-                ? "Создать аккаунт"
-                : mode === "forgot"
-                  ? "Восстановить пароль"
-                  : "Новый пароль"}
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {mode === "in"
-              ? "Войди в тестовое сообщество по email и паролю."
-              : mode === "up"
-                ? "Заполни данные и подтверди адрес электронной почты."
-                : mode === "forgot"
-                  ? "Отправим ссылку для сброса пароля на почту."
-                  : "Придумай новый пароль для своего аккаунта."}
-          </p>
-          <div className="my-6 grid grid-cols-2 rounded-xl bg-[#20271D] p-1 text-sm">
-            <a
-              href="/auth?mode=in"
+            <h1 className="mt-3 text-2xl font-black leading-tight">Вход в сообщество рыболовов</h1>
+          </header>
+        )}
+        <section className={mode === "up" ? undefined : "p-4 sm:p-7"}>
+          {mode !== "up" && (
+            <>
+              <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">
+                {mode === "in"
+                  ? "С возвращением"
+                  : mode === "forgot"
+                    ? "Восстановить пароль"
+                    : "Новый пароль"}
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {mode === "in"
+                  ? "Войди по адресу почты и паролю."
+                  : mode === "forgot"
+                    ? "Отправим ссылку для сброса пароля на почту."
+                    : "Придумай новый пароль для своего аккаунта."}
+              </p>
+            </>
+          )}
+          <div className={`z-segments grid grid-cols-2 ${mode === "up" ? "mb-3" : "my-4"}`}>
+            <ActiveSelectionIndicator />
+            <Link
+              to="/auth"
+              search={{ mode: "in" }}
+              activeOptions={{ exact: true, explicitUndefined: true }}
+              onClick={() => {
+                setMode("in");
+                setFieldError(null);
+                setNotice("");
+                setError("");
+              }}
               aria-current={mode === "in" ? "page" : undefined}
               className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "in" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}
             >
               Вход
-            </a>
-            <a
-              href="/auth?mode=up"
+            </Link>
+            <Link
+              to="/auth"
+              search={{ mode: "up" }}
+              activeOptions={{ exact: true, explicitUndefined: true }}
+              onClick={() => {
+                setMode("up");
+                setFieldError(null);
+                setNotice("");
+                setError("");
+              }}
               aria-current={mode === "up" ? "page" : undefined}
               className={`rounded-lg py-2.5 text-center font-semibold transition ${mode === "up" ? "bg-[#D7FF35] text-[#0D100C] shadow-sm" : "text-[#BAC2B4] hover:text-white"}`}
             >
               Регистрация
-            </a>
+            </Link>
           </div>
-          <p
-            role="note"
-            className="mb-4 rounded-xl border border-[#A99AD9]/25 bg-[#A99AD9]/[0.06] p-3 text-xs leading-5 text-[#C7BDE4]"
-          >
-            Alpha использует отдельную тестовую базу: прежние аккаунты сюда не перенесены. Для
-            проверки нажми «Регистрация» и создай тестовый аккаунт. Настоящие данные о рыболовных
-            точках не вводи.
-          </p>
-          \n{" "}
-          <p className="mb-4 text-xs text-zinc-400">
-            Для входа используй <strong className="text-[#D7FF35]">email</strong>, на который
-            регистрировал аккаунт, а не никнейм.
-          </p>
-          <form className="space-y-4" onSubmit={submit}>
-            {mode === "up" && (
-              <label className="block space-y-1.5 text-sm font-medium">
-                Никнейм
-                <input
-                  className="field"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="например, river_hunter"
-                  minLength={3}
-                  maxLength={24}
-                  autoComplete="username"
-                  required
-                />
-              </label>
-            )}
-            {mode !== "new-password" && (
-              <label className="block space-y-1.5 text-sm font-medium">
-                Email
-                <input
-                  className="field"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  required
-                />
-              </label>
-            )}
-            {(mode === "in" || mode === "up" || mode === "new-password") && (
-              <label className="block space-y-1.5 text-sm font-medium">
-                {mode === "new-password" ? "Новый пароль" : "Пароль"}
-                <span className="relative block">
+          {mode === "up" ? (
+            <form
+              className="z-single-field-flow"
+              aria-busy={busy}
+              onSubmit={submitSignup}
+              onInput={() => setFieldError(null)}
+            >
+              <div className="z-single-field-header">
+                <h1>Создать аккаунт</h1>
+                <SingleFieldProgress step={signupPosition + 1} steps={signupSteps} />
+              </div>
+              <SingleFieldStage
+                stepKey={signupStep}
+                question={signupQuestion.title}
+                reverse={signupReverse}
+                review={signupStep === "review"}
+              >
+                {signupQuestion.field}
+              </SingleFieldStage>
+              <StickyFormActions className="z-single-field-actions">
+                <button
+                  type="submit"
+                  className="z-glass-advance"
+                  disabled={busy || !signupReady}
+                  onClick={(event) => {
+                    if (event.detail > 1) event.preventDefault();
+                  }}
+                >
+                  {busy
+                    ? "Подожди…"
+                    : signupStep === "review"
+                      ? "Зарегистрироваться"
+                      : signupEditing
+                        ? "Готово"
+                        : "Далее"}
+                  {!busy && <ArrowRight size={19} aria-hidden="true" />}
+                </button>
+                <div className="z-single-field-secondary">
+                  {(signupPosition > 0 || signupEditing) && (
+                    <button type="button" disabled={busy} onClick={previousSignupStep}>
+                      {signupEditing ? "К просмотру" : "Назад"}
+                    </button>
+                  )}
+                </div>
+              </StickyFormActions>
+              {feedback}
+            </form>
+          ) : (
+            <form
+              className="space-y-3"
+              aria-busy={busy}
+              onSubmit={submit}
+              onInput={() => setFieldError(null)}
+            >
+              {mode !== "new-password" && emailField}
+              {(mode === "in" || mode === "new-password") && passwordField}
+              {mode === "new-password" && (
+                <MobileField
+                  label="Повтори новый пароль"
+                  error={errorFor("confirmPassword")}
+                  action={
+                    <button
+                      type="button"
+                      className="text-primary"
+                      aria-label={
+                        confirmVisible ? "Скрыть повтор пароля" : "Показать повтор пароля"
+                      }
+                      aria-pressed={confirmVisible}
+                      onClick={() => setConfirmVisible((value) => !value)}
+                    >
+                      {confirmVisible ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                    </button>
+                  }
+                >
                   <input
-                    className="field pr-14"
-                    type={passwordVisible ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Не менее 6 символов"
-                    minLength={6}
-                    autoComplete={mode === "in" ? "current-password" : "new-password"}
-                    required
-                  />
-                  <button
-                    type="button"
-                    aria-label={passwordVisible ? "Скрыть пароль" : "Показать пароль"}
-                    title={passwordVisible ? "Скрыть пароль" : "Показать пароль"}
-                    aria-pressed={passwordVisible}
-                    onClick={() => setPasswordVisible((prev) => !prev)}
-                    className="absolute inset-y-0 right-1 flex w-11 items-center justify-center rounded-lg text-[#D7FF35] hover:bg-white/10"
-                  >
-                    {passwordVisible ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-                  </button>
-                </span>
-              </label>
-            )}
-            {mode === "new-password" && (
-              <label className="block space-y-1.5 text-sm font-medium">
-                Повтори новый пароль
-                <span className="relative block">
-                  <input
-                    className="field pr-14"
+                    name="confirmPassword"
+                    className="field"
                     type={confirmVisible ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -310,72 +489,50 @@ function Auth() {
                     autoComplete="new-password"
                     required
                   />
-                  <button
-                    type="button"
-                    aria-label={confirmVisible ? "Скрыть повтор пароля" : "Показать повтор пароля"}
-                    aria-pressed={confirmVisible}
-                    onClick={() => setConfirmVisible((prev) => !prev)}
-                    className="absolute inset-y-0 right-1 flex w-11 items-center justify-center rounded-lg text-[#D7FF35] hover:bg-white/10"
-                  >
-                    {confirmVisible ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-                  </button>
-                </span>
-              </label>
-            )}
-            {error && (
-              <p
-                role="alert"
-                className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
-              >
-                {error}
-              </p>
-            )}
-            {notice && (
-              <p
-                role="status"
-                className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm"
-              >
-                {notice}
-              </p>
-            )}
-            <button className="btn-primary min-h-12 w-full" disabled={busy}>
-              {busy
-                ? "Подожди…"
-                : mode === "in"
-                  ? "Войти в ZAPRUDA →"
-                  : mode === "up"
-                    ? "Зарегистрироваться →"
-                    : mode === "forgot"
-                      ? "Получить письмо →"
-                      : "Сохранить пароль →"}
-            </button>
-            {mode === "in" && (
-              <button
-                type="button"
-                className="w-full py-2 text-center text-xs font-semibold text-[#D7FF35] hover:underline"
-                onClick={() => {
-                  setMode("forgot");
-                  setError("");
-                  setNotice("");
-                }}
-              >
-                Забыли пароль?
-              </button>
-            )}
-            {(mode === "forgot" || mode === "new-password") && (
-              <button
-                type="button"
-                className="w-full py-2 text-center text-xs text-zinc-400 hover:text-white"
-                onClick={() => {
-                  setMode("in");
-                  setError("");
-                  setNotice("");
-                }}
-              >
-                Вернуться ко входу
-              </button>
-            )}
-          </form>
+                </MobileField>
+              )}
+              {feedback}
+              <StickyFormActions>
+                <button type="submit" className="btn-primary min-h-12 w-full" disabled={busy}>
+                  {busy
+                    ? "Подожди…"
+                    : mode === "in"
+                      ? "Войти в ZAPRUDA →"
+                      : mode === "forgot"
+                        ? "Получить письмо →"
+                        : "Сохранить пароль →"}
+                </button>
+              </StickyFormActions>
+              {mode === "in" && (
+                <button
+                  type="button"
+                  className="min-h-11 w-full text-center text-xs font-semibold text-[#D7FF35] hover:underline"
+                  onClick={() => {
+                    setMode("forgot");
+                    setFieldError(null);
+                    setError("");
+                    setNotice("");
+                  }}
+                >
+                  Забыли пароль?
+                </button>
+              )}
+              {(mode === "forgot" || mode === "new-password") && (
+                <button
+                  type="button"
+                  className="min-h-11 w-full text-center text-xs text-zinc-400 hover:text-white"
+                  onClick={() => {
+                    setMode("in");
+                    setFieldError(null);
+                    setError("");
+                    setNotice("");
+                  }}
+                >
+                  Вернуться ко входу
+                </button>
+              )}
+            </form>
+          )}
           <SocialAuthButtons onError={setError} />
           <p className="mt-5 text-center text-xs leading-5 text-muted-foreground">
             Продолжая, ты используешь ZAPRUDA для общения и публикации рыболовных отчётов.

@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, release/v0.7.5-spot]
   workflow_dispatch:
 
 permissions:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
           test -f .output/server/index.mjs
       - name: Install browser for mobile smoke test
         run: |
-          bun add --dev playwright
+          bun add --dev playwright@1.58.2
           bunx playwright install --with-deps chromium
       - name: Start application and check mobile screens
         shell: bash
@@ -104,9 +104,11 @@ jobs:
                     }
                   }
                   if (route === '/reports/new') {
-                    const text = await page.locator('body').innerText();
-                    if (!/новый отчёт/i.test(text) || !/название отчёта/i.test(text)) {
-                      failures++; console.error(width + 'px /reports/new: report form not rendered');
+                    const heading = page.getByRole('heading', {name: 'Новый отчёт', exact: true});
+                    const firstQuestion = page.getByLabel('Водоём или место', {exact: true});
+                    const next = page.getByRole('button', {name: 'Далее', exact: true});
+                    if (!(await heading.isVisible()) || !(await firstQuestion.isVisible()) || !(await next.isVisible())) {
+                      failures++; console.error(width + 'px /reports/new: first report question or action is missing');
                     }
                   }
                   if (route === '/street') {

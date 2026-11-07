@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Check, MapPin, MessageCircle, RefreshCw, Send, UserPlus, X } from "lucide-react";
+import { ActiveSelectionIndicator } from "@/components/ActiveSelectionIndicator";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -421,7 +422,7 @@ function Messages() {
   }
 
   return (
-    <Shell>
+    <Shell screen="chat">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[.18em] text-[#D7FF35]">
@@ -465,11 +466,13 @@ function Messages() {
               <h2 className="mb-3 flex items-center gap-2 font-bold">
                 <MessageCircle className="size-5 text-[#D7FF35]" /> Переписки ({accepted.length})
               </h2>
+              <ActiveSelectionIndicator />
               {accepted.map((t) => (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => setActiveId(t.id)}
+                  aria-current={activeId === t.id ? "page" : undefined}
                   className={
                     "mb-1 flex w-full items-center justify-between rounded-xl border p-3 text-left text-sm " +
                     (activeId === t.id ? "border-[#D7FF35]/60 bg-[#D7FF35]/10" : "border-white/10")

@@ -5,9 +5,11 @@
  * Requires a locally started Nitro app and Playwright browsers.
  */
 const assert = require("node:assert/strict");
+const { appThemeButton } = require("./browser-appearance-controls.cjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const { chromium, webkit, firefox } = require("playwright");
+const { assertShellBounds } = require("./browser-shell-bounds.cjs");
 const ENGINE = process.env.VISUAL_BROWSER || "chromium";
 const ENGINES = { chromium, webkit, firefox };
 assert(ENGINE in ENGINES, "Unsupported VISUAL_BROWSER: " + ENGINE);
@@ -17,7 +19,7 @@ const OUT = path.resolve(process.env.VISUAL_OUTPUT_DIR || "appearance-evidence")
 fs.mkdirSync(OUT, { recursive: true });
 
 const COLORS = Object.freeze({
-  matte: "#090b0c",
+  matte: "#0b0d0e",
   blue: "#1239a6",
   blueHighlight: "#1458db",
   lime: "#d7ff35",
@@ -72,7 +74,7 @@ async function assertNoOliveSurfaces(page, route) {
       "#0D100C", "#171C14", "#080A09", "#0B0D0B", "#121A12",
       "#141914", "#151915", "#0C100E", "#111511", "#151A14",
       "#0E120E", "#151812", "#171a15", "#161D13", "#1A1D19",
-      "#1B2718", "#1E251A", "#27321b",
+      "#1B2718", "#1E251A", "#27321b", "#283721", "#101713",
     ];
     const rgb = (hex) => {
       const v = hex.slice(1);
@@ -91,6 +93,10 @@ async function assertNoOliveSurfaces(page, route) {
       if (bannedRgb.has(style.backgroundColor)) {
         failures.push({ tag: el.tagName, className: String(el.className).slice(0, 100), color: style.backgroundColor });
       }
+      const gradientColors = style.backgroundImage.match(/rgb\(\d+,\s*\d+,\s*\d+\)/g) || [];
+      if (gradientColors.some((color) => bannedRgb.has(color.replace(/,\s*/g, ", ")))) {
+        failures.push({ tag: el.tagName, className: String(el.className).slice(0, 100), gradient: style.backgroundImage });
+      }
     }
     return failures;
   });
@@ -106,6 +112,7 @@ async function openRoute(page, route) {
   const actual = await variables(page);
   assert(!actual.routeError, route + ": React route error screen");
   assert(!actual.horizontalOverflow, route + ": horizontal overflow");
+  await assertShellBounds(page);
   return actual;
 }
 
@@ -119,7 +126,9 @@ async function openRoute(page, route) {
   };
   try {
     for (const viewport of [
+      { label: "mobile-320", width: 320, height: 740, mobile: true },
       { label: "mobile-390", width: 390, height: 844, mobile: true },
+      { label: "tablet-768", width: 768, height: 1024, mobile: false },
       { label: "desktop-1440", width: 1440, height: 900, mobile: false },
     ]) {
       const context = await browser.newContext({
@@ -153,8 +162,8 @@ async function openRoute(page, route) {
         assert.equal(before.theme, "classic", "Matte Black must remain default");
         assert.equal(before.primary, COLORS.lime);
         assert.equal(before.undergroundViolet, "#b4a1d7", "Default visual tokens must not change");
-        const black = page.getByRole("button", { name: /Matte Black/ }).first();
-        const blue = page.getByRole("button", { name: /Electric Blue/ }).first();
+        const black = appThemeButton(page, "classic");
+        const blue = appThemeButton(page, "electric-blue");
         assert(await black.isVisible(), "Matte Black selector missing");
         assert(await blue.isVisible(), "Electric Blue selector missing");
         assert.equal(await black.getAttribute("aria-pressed"), "true", "Matte default not selected");
@@ -162,6 +171,13 @@ async function openRoute(page, route) {
 
         await blue.click();
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "electric-blue");
+        // The pre-paint attribute can precede the rendered panel's final style.
+        // Wait for the same exact approved color asserted below, not a timeout
+        // or a relaxed color range. A real palette regression still fails.
+        await page.waitForFunction(() => {
+          const panel = document.querySelector('section[aria-labelledby="app-background-title"]');
+          return panel && getComputedStyle(panel).backgroundColor === "rgb(26, 54, 127)";
+        });
         const after = await variables(page);
         assert.equal(after.background, COLORS.blue);
         assert.equal(after.primary, COLORS.lime);
@@ -172,7 +188,7 @@ async function openRoute(page, route) {
           panel: getComputedStyle(document.querySelector('section[aria-labelledby="app-background-title"]')).backgroundColor,
           headerGradient: getComputedStyle(document.querySelector("main header")).backgroundImage,
         }));
-        assert.equal(settingsSurfaces.panel, "rgb(26, 54, 127)", "Settings panel kept its old olive fill");
+        assert.equal(settingsSurfaces.panel, "rgb(26, 54, 127)", "Settings panel must retain the approved Electric Blue fill");
         assert(
           settingsSurfaces.headerGradient.includes("32, 82, 187") ||
             settingsSurfaces.headerGradient.includes("32,82,187"),
@@ -191,11 +207,15 @@ async function openRoute(page, route) {
 
         await page.reload({ waitUntil: "domcontentloaded" });
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "electric-blue");
+        // Pre-paint preferences deliberately precede React hydration. Also wait
+        // for the actual control to restore its persisted selected state.
+        await page.locator('section[aria-labelledby="app-background-title"] button[aria-pressed="true"]')
+          .filter({ hasText: "Electric Blue" }).waitFor({ state: "visible" });
         const persisted = await variables(page);
         assert.equal(persisted.background, COLORS.blue, "Blue preference lost after reload");
-        assert.equal(await page.getByRole("button", {name:/Electric Blue/}).first().getAttribute("aria-pressed"), "true");
+        assert.equal(await appThemeButton(page, "electric-blue").getAttribute("aria-pressed"), "true");
 
-        const routes = ["/", "/communities", "/partners", "/chat", "/profile"];
+        const routes = ["/", "/communities", "/partners", "/chat", "/profile", "/assistant", "/reports/new", "/street", "/competitions", "/messages"];
         const checks = [];
         for (const route of routes) {
           const actual = await openRoute(page, route);
@@ -204,7 +224,7 @@ async function openRoute(page, route) {
           await assertNoOliveSurfaces(page, route);
           if (route === "/") {
             const feedSurface = await page.evaluate(() => {
-              const hero = document.querySelector("main > section");
+              const hero = document.querySelector(".z-feed-intro");
               const street = document.querySelector('main a[href="/street"]');
               const helpCard = document.querySelector('main a[href="/assistant"]');
               if (!hero || !street || !helpCard) throw new Error("Feed structure changed");
@@ -214,11 +234,22 @@ async function openRoute(page, route) {
                 helpCard: getComputedStyle(helpCard).backgroundColor,
               };
             });
-            assert.equal(feedSurface.hero, "rgb(21, 45, 114)", "Feed hero retained matte/olive surface");
-            assert.equal(feedSurface.street, "rgb(32, 58, 134)", "Street card retained dark green");
-            assert.equal(feedSurface.helpCard, "rgb(32, 58, 134)", "Lime-tinted card looked olive");
+            assert.equal(feedSurface.hero, "rgba(0, 0, 0, 0)", "Feed heading should not become an oversized filled hero");
+            assert.equal(feedSurface.street, "rgb(20, 45, 107)", "Street card retained dark green");
+            assert.equal(feedSurface.helpCard, "rgb(20, 45, 107)", "Lime-tinted card looked olive");
+          }
+          if (route === "/street") {
+            const hero = await page.locator(".z-electric-street-hero").evaluate((el) => ({
+              color: getComputedStyle(el).backgroundColor,
+              image: getComputedStyle(el).backgroundImage,
+            }));
+            assert.equal(hero.color, "rgb(25, 62, 150)", "STREET hero retained a matte/olive surface");
+            assert(hero.image.replaceAll(" ", "").includes("32,82,187"), "STREET blue gradient missing");
           }
           checks.push({ route, background: actual.background, overflow: actual.horizontalOverflow });
+          if (["/assistant", "/reports/new", "/street", "/competitions"].includes(route)) {
+            await page.screenshot({ path: fileFor(viewport.label, route.slice(1).replaceAll("/", "-") + "-electric-blue"), fullPage: true });
+          }
           if (route === "/" || route === "/chat") {
             await page.screenshot({
               path: fileFor(viewport.label, route === "/" ? "feed-electric-blue" : "chat-electric-blue"),
@@ -235,14 +266,22 @@ async function openRoute(page, route) {
         }
 
         await openRoute(page, "/settings");
-        await page.getByRole("button", {name:/Matte Black/}).first().click();
+        await appThemeButton(page, "classic").click();
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "classic");
         const restored = await variables(page);
         assert.equal(restored.background, COLORS.matte);
-        assert.equal(await page.getByRole("button", {name:/Matte Black/}).first().getAttribute("aria-pressed"), "true");
+        assert.equal(await appThemeButton(page, "classic").getAttribute("aria-pressed"), "true");
         await page.reload({ waitUntil: "domcontentloaded" });
         await page.waitForFunction(() => document.documentElement.dataset.zaprudaBackground === "classic");
         assert.equal((await variables(page)).background, COLORS.matte, "Matte preference lost after reload");
+        const matteChecks = [];
+        for (const route of routes) {
+          const actual = await openRoute(page, route);
+          assert.equal(actual.theme, "classic", route + ": matte preference lost");
+          assert.equal(actual.background, COLORS.matte, route + ": matte background changed");
+          await page.screenshot({ path: fileFor(viewport.label, (route === "/" ? "feed" : route.slice(1).replaceAll("/", "-")) + "-matte"), fullPage: route === "/reports/new" });
+          matteChecks.push({ route, overflow: actual.horizontalOverflow });
+        }
         assert.deepEqual(runtimeErrors, [], "Browser JS errors: " + runtimeErrors.join(" | "));
         evidence.viewports.push({
           viewport: viewport.label,
@@ -251,6 +290,7 @@ async function openRoute(page, route) {
           bluePersistedAfterReload: persisted.theme,
           matteRestored: restored.theme,
           routes: checks,
+          matteRoutes: matteChecks,
           browserErrors: runtimeErrors,
         });
         console.log(

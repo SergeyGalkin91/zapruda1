@@ -59,7 +59,50 @@ afterEach(() => {
   cleanup();
   vi.unstubAllEnvs();
 });
+function next() {
+  fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+}
+
 describe("SPOT personal-state boundaries (offline component tests, not signed-JWT E2E)", () => {
+  it("keeps catch data and the chosen photo when stepping back before submission", async () => {
+    mocks.limit.mockResolvedValue({
+      data: [
+        { id: "approved-fixture", name: "Offline fixture", city: "", disciplines: ["street"] },
+      ],
+      error: null,
+    });
+    render(<SpotCatchFlow />);
+    await screen.findByRole("button", { name: "Далее" });
+    next();
+    next();
+    fireEvent.change(screen.getByLabelText("Вес одной рыбы, г"), { target: { value: "620" } });
+    next();
+    fireEvent.change(screen.getByLabelText("Длина, мм"), { target: { value: "380" } });
+    next();
+    fireEvent.change(screen.getByLabelText("Дата и время поимки"), {
+      target: { value: "2026-11-05T16:30" },
+    });
+    next();
+    await screen.findByRole("option", { name: /Offline fixture/ });
+    fireEvent.change(screen.getByLabelText("Проверенный спот"), {
+      target: { value: "approved-fixture" },
+    });
+    next();
+    const photo = screen.getByLabelText(/Фото рыбы и измерения/);
+    const proof = new File(["offline fixture"], "proof.jpg", { type: "image/jpeg" });
+    fireEvent.change(photo, { target: { files: [proof] } });
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
+    expect(screen.getByLabelText("Проверенный спот")).toHaveValue("approved-fixture");
+    next();
+    expect(screen.getByText("Выбрано фото: proof.jpg")).toBeVisible();
+    next();
+    await screen.findByRole("heading", { name: "Проверь заявку BIG FISH" });
+    fireEvent.click(screen.getByRole("button", { name: "Изменить: Вес" }));
+    expect(screen.getByLabelText("Вес одной рыбы, г")).toHaveValue(620);
+    fireEvent.click(screen.getByRole("button", { name: "Готово" }));
+    expect(screen.getByRole("button", { name: "Отправить на проверку" })).toBeEnabled();
+    expect(mocks.invoke).not.toHaveBeenCalled();
+  });
   it("clears private inbox and proof state when the account signs out", async () => {
     render(<SpotCatchFlow />);
     fireEvent.click(await screen.findByRole("button", { name: "Мои уловы и уведомления" }));
@@ -96,6 +139,8 @@ describe("SPOT personal-state boundaries (offline component tests, not signed-JW
   it("preserves a draft across a token refresh for the same account", async () => {
     render(<SpotCatchFlow />);
     await screen.findByRole("button", { name: "Мои уловы и уведомления" });
+    next();
+    next();
     const weight = screen.getByLabelText("Вес одной рыбы, г");
     fireEvent.change(weight, { target: { value: "123" } });
     act(() => mocks.onAuth.mock.calls[0]?.[0]("TOKEN_REFRESHED", { user }));

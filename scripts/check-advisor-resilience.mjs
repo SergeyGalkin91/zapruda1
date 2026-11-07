@@ -81,12 +81,12 @@ try {
         return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
       });
       await page.goto(base + "/assistant", { waitUntil: "domcontentloaded" });
-      await page.getByRole("heading", { name: "План рыбалки и совет Grok", exact: true }).waitFor();
+      await page.getByRole("heading", { name: "План рыбалки и совет ИИ", exact: true }).waitFor();
       // The server-rendered form is visible before React attaches handlers.
       // Wait for the disconnected Auth fixture's client render before typing;
       // a hung Auth path is separately covered by the component regression.
       if (authenticated)
-        await page.getByRole("button", { name: "Добавить совет Grok", exact: true }).waitFor();
+        await page.getByRole("button", { name: "Добавить совет ИИ", exact: true }).waitFor();
       else await page.getByRole("link", { name: "войди в аккаунт", exact: true }).waitFor();
       const place = page.getByRole("textbox", { name: "Водоём / примерное место", exact: true });
       await place.fill("QA синтетический водоём");
@@ -101,18 +101,18 @@ try {
       assert.match(await plan.textContent(), /Ночной выход/);
       assert.deepEqual(functions, []);
       if (authenticated) {
-        const grok = page.getByRole("button", { name: "Добавить совет Grok", exact: true });
-        await grok.waitFor();
-        await grok.click();
+        const advice = page.getByRole("button", { name: "Добавить совет ИИ", exact: true });
+        await advice.waitFor();
+        await advice.click();
         await page
-          .getByText("Grok временно недоступен. План по правилам готов — им можно пользоваться.", {
+          .getByText("ИИ временно недоступен. План по правилам готов — им можно пользоваться.", {
             exact: true,
           })
           .waitFor();
         assert.equal(await plan.isVisible(), true);
         assert.equal(await page.getByRole("alert").count(), 0);
         assert.equal(
-          await page.getByRole("region", { name: "Совет Grok за сегодня", exact: true }).count(),
+          await page.getByRole("region", { name: "Совет ИИ за сегодня", exact: true }).count(),
           0,
         );
         assert.deepEqual(functions, ["/functions/v1/zapruda-daily-advice"]);

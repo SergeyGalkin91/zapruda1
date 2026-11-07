@@ -1,0 +1,5 @@
+2026-11-05 architecture consolidation: exact candidate real JWT/API and browser report→BIG FISH→owner progress; no feedback fixtures, fake public catches, moderator appointments or AI quota consumption.
+Verified Playwright numeric input assertions use string values; supersedes initial waiting candidate.
+Final UI candidate: use existing themed field utility with 48px fish-selector target; preserve both themes.
+STAGING RPC SQL lives only in supabase/staging, outside automatic production migrations; source and deployed RPC body unchanged.
+2026-11-05 P0: exact protected rerun after scoped app-theme selection; keep all authenticated routes, widths, engines, assertions and cleanup.
