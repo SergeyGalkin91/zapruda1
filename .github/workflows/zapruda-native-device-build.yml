@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  android-debug-apk:
+  android-standalone-apk:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     defaults:
@@ -30,17 +30,22 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Configure public STAGING publishable key
+        run: |
+          key=$(awk '/^\\[context.deploy-preview.environment\\]/{inside=1;next} /^\\[/{inside=0} inside && /^VITE_SUPABASE_PUBLISHABLE_KEY = /{gsub(/"/,"",$3); print $3; exit}' ../../netlify.toml)
+          [[ "$key" == sb_publishable_* ]] || { echo 'Reviewed STAGING publishable key missing'; exit 1; }
+          printf 'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\\n' "$key" >> "$GITHUB_ENV"
       - name: Install Expo dependencies
         run: npm install --no-audit --no-fund
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install
-      - name: Build real Android debug APK
-        run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace
-      - name: Upload Android APK
+      - name: Build installable Android test APK with bundled JS
+        run: cd android && chmod +x gradlew && ./gradlew assembleRelease --no-daemon --stacktrace
+      - name: Upload Android standalone test APK
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: zapruda-app-android-debug-apk
-          path: apps/zapruda-app/android/app/build/outputs/apk/debug/*.apk
+          name: zapruda-app-android-standalone-test-apk
+          path: apps/zapruda-app/android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 7
 
@@ -64,6 +69,11 @@ jobs:
           xcodebuild -version
           swift --version
           swift -version | grep -Eq 'Swift version (6\.[2-9]|[7-9]\.)' || { echo 'Xcode Swift compiler too old for Expo 58'; exit 1; }
+      - name: Configure public STAGING publishable key
+        run: |
+          key=$(awk '/^\\[context.deploy-preview.environment\\]/{inside=1;next} /^\\[/{inside=0} inside && /^VITE_SUPABASE_PUBLISHABLE_KEY = /{gsub(/"/,"",$3); print $3; exit}' ../../netlify.toml)
+          [[ "$key" == sb_publishable_* ]] || { echo 'Reviewed STAGING publishable key missing'; exit 1; }
+          printf 'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\\n' "$key" >> "$GITHUB_ENV"
       - name: Install Expo dependencies
         run: npm install --no-audit --no-fund
       - name: Generate native iOS project
@@ -75,10 +85,10 @@ jobs:
           workspace=$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)
           test -n "$workspace"
           scheme=$(basename "$workspace" .xcworkspace)
-          xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/zapruda-ios-derived" CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/zapruda-ios-derived" CODE_SIGNING_ALLOWED=NO build
       - name: Pack iOS Simulator app
         run: |
-          cd "$RUNNER_TEMP/zapruda-ios-derived/Build/Products/Debug-iphonesimulator"
+          cd "$RUNNER_TEMP/zapruda-ios-derived/Build/Products/Release-iphonesimulator"
           test -d "$(find . -maxdepth 1 -name '*.app' -type d -print -quit)"
           ditto -c -k --sequesterRsrc --keepParent ./*.app "$RUNNER_TEMP/zapruda-ios-simulator.zip"
       - name: Upload unsigned simulator build
