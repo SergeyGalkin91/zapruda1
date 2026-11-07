@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "ZAPRUDA COMMUNITY",
+    "slug": "zapruda-app",
+    "scheme": "zapruda",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "community.zapruda.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Камера нужна для фотографий уловов.",
+        "NSPhotoLibraryUsageDescription": "Выбор фотографий для рыболовных отчётов."
+      }
+    },
+    "android": {
+      "package": "community.zapruda.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#080D11"
+      }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ],
+    "extra": {
+      "buildStage": "staging"
+    }
+  }
+}
