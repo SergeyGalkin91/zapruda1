@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { supabase, stagingConfigured } from "./src/supabase";
 import { theme as t } from "./src/theme";
+import { NativeDirectory } from "./src/NativeDirectory";
 
 type Tab = "Лента" | "Комьюнити" | "Создать" | "Выезды" | "Чат";
 type FeedReport = {
@@ -208,11 +209,7 @@ export default function App() {
       {tab === "Лента" ? <Feed refreshKey={refreshKey} /> :
         tab === "Создать" ? <ReportWizard signedIn={signedIn} onAuth={() => setScreen("auth")}
           onPublished={() => { setRefreshKey(k => k + 1); setTab("Лента"); }} /> :
-        <ScrollView contentContainerStyle={s.content}>
-          {tab === "Комьюнити" && <Empty title="Свои на одной волне" text="Каталог сообществ будет перенесён из существующего STAGING API. Реальные зоны ON SPOT+ пока заблокированы миграцией." />}
-          {tab === "Выезды" && <Empty title="Выезды и СХОДКИ" text="Нативная лента выездов в разработке. Мы не показываем вымышленные поездки." />}
-          {tab === "Чат" && <Empty title="Общение рыбаков" text="Чаты будут подключены после проверки действующих RLS и контрактов STAGING. Фиктивных сообщений нет." />}
-        </ScrollView>}
+        <NativeDirectory kind={tab === "Комьюнити" ? "communities" : tab === "Выезды" ? "trips" : "places"} />}
     </View>
     <View style={s.tabbar}>{tabs.map((item, index) =>
       <Pressable key={item} accessibilityRole="tab" accessibilityState={{ selected: tab === item }}
