@@ -264,6 +264,7 @@ async function profile(page, width, writes) {
 }
 
 async function report(page, width, writes) {
+  if (width === 390) await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto(origin + "/reports/new", { waitUntil: "load" });
   const question = page.locator(".z-single-field-content");
   const place = question.getByLabel("Водоём или место", { exact: true });
@@ -410,7 +411,7 @@ async function run() {
     for (const [width, height] of sizes) {
       const context = await browser.newContext({
         viewport: { width, height },
-        reducedMotion: width === 390 ? "no-preference" : "reduce",
+        reducedMotion: "reduce",
         ...(width === 390 && engine === "chromium"
           ? {
               recordVideo: {
@@ -428,6 +429,11 @@ async function run() {
           try {
             await scenario(page, width, writes);
           } catch (error) {
+            await page
+              .screenshot({
+                path: evidence + "/" + engine + "-" + width + "-" + scenario.name + "-failure.png",
+              })
+              .catch(() => {});
             throw new Error(engine + " " + width + "×" + height + " " + scenario.name, {
               cause: error,
             });
