@@ -35,7 +35,7 @@ function Frame({ children, title, onProfile }: {
 }) {
   return (
     <SafeAreaView style={s.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={t.bg} />
+      <StatusBar barStyle="light-content" />
       <View style={s.header}><Wordmark />
         <Pressable onPress={onProfile} accessibilityRole="button" accessibilityLabel="Профиль"
           style={s.profileButton}><Text style={{ color: t.lime, fontSize: 21 }}>♙</Text></Pressable>
