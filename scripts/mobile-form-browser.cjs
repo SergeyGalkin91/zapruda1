@@ -211,6 +211,7 @@ async function registration(page, width, writes) {
   const password = stage.locator("input[name=password]");
   const next = page.getByRole("button", { name: "Далее", exact: true });
   const submit = page.getByRole("button", { name: "Зарегистрироваться", exact: true });
+  await expect(next).toBeEnabled();
   await assertAction(next);
   await username.fill("!!!!");
   await next.click();
