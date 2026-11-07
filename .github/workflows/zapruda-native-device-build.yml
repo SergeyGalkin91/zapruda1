@@ -41,6 +41,16 @@ jobs:
         run: npx expo prebuild --platform android --no-install
       - name: Build installable Android test APK with bundled JS
         run: cd android && chmod +x gradlew && ./gradlew assembleRelease --no-daemon --stacktrace
+      - name: Verify APK signature, application package and bundled JS
+        run: |
+          apk=$(find android/app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)
+          test -n "$apk"
+          apksigner=$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner | sort -V | tail -1)
+          test -x "$apksigner"
+          "$apksigner" verify --verbose --print-certs "$apk"
+          unzip -l "$apk" | grep -q 'assets/index.android.bundle'
+          aapt=$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name aapt | sort -V | tail -1)
+          "$aapt" dump badging "$apk" | grep "package: name='community.zapruda.app'"
       - name: Upload Android standalone test APK
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -86,6 +96,32 @@ jobs:
           test -n "$workspace"
           scheme=$(basename "$workspace" .xcworkspace)
           xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/zapruda-ios-derived" CODE_SIGNING_ALLOWED=NO build
+      - name: Boot iPhone Simulator and launch native application
+        run: |
+          app=$(find "$RUNNER_TEMP/zapruda-ios-derived/Build/Products/Release-iphonesimulator" -maxdepth 1 -name '*.app' -type d -print -quit)
+          test -n "$app"
+          device=$(xcrun simctl list devices available -j | python3 -c 'import sys,json; d=json.load(sys.stdin); print(next((x["udid"] for group in d["devices"].values() for x in group if x.get("isAvailable") and "iPhone" in x["name"]),""))')
+          if [[ -z "$device" ]]; then
+            echo "No available iPhone simulator on macOS runner"
+            exit 1
+          fi
+          xcrun simctl boot "$device"
+          xcrun simctl bootstatus "$device" -b
+          xcrun simctl install "$device" "$app"
+          bundle=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$app/Info.plist")
+          test "$bundle" = "community.zapruda.app"
+          xcrun simctl launch "$device" "$bundle"
+          sleep 4
+          mkdir -p "$RUNNER_TEMP/zapruda-native-proof"
+          xcrun simctl io "$device" screenshot "$RUNNER_TEMP/zapruda-native-proof/ios-iphone-home.png"
+          xcrun simctl terminate "$device" "$bundle" || true
+      - name: Upload iPhone Simulator screenshot
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zapruda-app-ios-simulator-screenshot
+          path: ${{ runner.temp }}/zapruda-native-proof/ios-iphone-home.png
+          if-no-files-found: error
+          retention-days: 7
       - name: Pack iOS Simulator app
         run: |
           cd "$RUNNER_TEMP/zapruda-ios-derived/Build/Products/Release-iphonesimulator"
