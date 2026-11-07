@@ -32,9 +32,9 @@ jobs:
           java-version: '17'
       - name: Configure public STAGING publishable key
         run: |
-          key=$(awk '/^\\[context.deploy-preview.environment\\]/{inside=1;next} /^\\[/{inside=0} inside && /^VITE_SUPABASE_PUBLISHABLE_KEY = /{gsub(/"/,"",$3); print $3; exit}' ../../netlify.toml)
+          key=$(sed -n 's/^VITE_SUPABASE_PUBLISHABLE_KEY = "\(.*\)"$/\1/p' ../../netlify.toml | tail -1)
           [[ "$key" == sb_publishable_* ]] || { echo 'Reviewed STAGING publishable key missing'; exit 1; }
-          printf 'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\\n' "$key" >> "$GITHUB_ENV"
+          printf 'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$key" >> "$GITHUB_ENV"
       - name: Install Expo dependencies
         run: npm install --no-audit --no-fund
       - name: Generate native Android project
@@ -71,9 +71,9 @@ jobs:
           swift -version | grep -Eq 'Swift version (6\.[2-9]|[7-9]\.)' || { echo 'Xcode Swift compiler too old for Expo 58'; exit 1; }
       - name: Configure public STAGING publishable key
         run: |
-          key=$(awk '/^\\[context.deploy-preview.environment\\]/{inside=1;next} /^\\[/{inside=0} inside && /^VITE_SUPABASE_PUBLISHABLE_KEY = /{gsub(/"/,"",$3); print $3; exit}' ../../netlify.toml)
+          key=$(sed -n 's/^VITE_SUPABASE_PUBLISHABLE_KEY = "\(.*\)"$/\1/p' ../../netlify.toml | tail -1)
           [[ "$key" == sb_publishable_* ]] || { echo 'Reviewed STAGING publishable key missing'; exit 1; }
-          printf 'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\\n' "$key" >> "$GITHUB_ENV"
+          printf 'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$key" >> "$GITHUB_ENV"
       - name: Install Expo dependencies
         run: npm install --no-audit --no-fund
       - name: Generate native iOS project
