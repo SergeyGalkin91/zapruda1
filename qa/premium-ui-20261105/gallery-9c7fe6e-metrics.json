@@ -1,0 +1,80 @@
+{
+  "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+  "screens": [
+    {
+      "screen": "Welcome",
+      "viewport": [
+        390,
+        844
+      ],
+      "theme": "classic",
+      "wallpaper": "carbon",
+      "overflow": false,
+      "loading": false,
+      "backendOrigins": [
+        "https://yudtbifopfnjtjanaqrd.supabase.co"
+      ],
+      "foreignBackend": false
+    },
+    {
+      "screen": "Лента",
+      "viewport": [
+        390,
+        844
+      ],
+      "theme": "classic",
+      "wallpaper": "carbon",
+      "overflow": false,
+      "loading": false,
+      "backendOrigins": [
+        "https://yudtbifopfnjtjanaqrd.supabase.co"
+      ],
+      "foreignBackend": false
+    },
+    {
+      "screen": "Сообщества",
+      "viewport": [
+        390,
+        844
+      ],
+      "theme": "classic",
+      "wallpaper": "carbon",
+      "overflow": false,
+      "loading": false,
+      "backendOrigins": [
+        "https://yudtbifopfnjtjanaqrd.supabase.co"
+      ],
+      "foreignBackend": false
+    },
+    {
+      "screen": "SPOT",
+      "viewport": [
+        390,
+        844
+      ],
+      "theme": "classic",
+      "wallpaper": "carbon",
+      "overflow": false,
+      "loading": false,
+      "backendOrigins": [
+        "https://yudtbifopfnjtjanaqrd.supabase.co"
+      ],
+      "foreignBackend": false
+    },
+    {
+      "screen": "Профиль",
+      "viewport": [
+        390,
+        844
+      ],
+      "theme": "classic",
+      "wallpaper": "carbon",
+      "overflow": false,
+      "loading": false,
+      "backendOrigins": [
+        "https://yudtbifopfnjtjanaqrd.supabase.co"
+      ],
+      "foreignBackend": false
+    }
+  ]
+}

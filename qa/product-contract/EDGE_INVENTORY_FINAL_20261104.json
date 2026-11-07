@@ -1,0 +1,151 @@
+{
+  "catalog_schema_diff": "SCHEMA_DIFF_20261104_FINAL.json",
+  "note": "No hosted SQL schema changed after the catalog snapshot. The only hosted code addition is STAGING daily-fishing-brief version1 with verify_jwt=true. Production inspected only.",
+  "projects": [
+    {
+      "project": "yudtbifopfnjtjanaqrd",
+      "scope": "STAGING; daily-fishing-brief added",
+      "functions": [
+        {
+          "name": "zapruda-daily-advice",
+          "version": 14,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "f5841ad6ee391fd45f7e6ef8a368bbf68b594e0caf3001bc9c38ea54edfd4793"
+        },
+        {
+          "name": "openweather-current",
+          "version": 11,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "fbcfef43cf601087fc234955601199f9ad41dc19bcd48846386a4b9dcc25ff41"
+        },
+        {
+          "name": "zapruda-spot-records",
+          "version": 11,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "4281aec8b57852ca0072294082db81c8a0c4a4620772c6bd228e903273ebcdc2"
+        },
+        {
+          "name": "report-photo-upload",
+          "version": 7,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "299af503e8be6af6fb3b76ec06e538bf1573167ca6abc9aee9998fa9a0340de9"
+        },
+        {
+          "name": "report-photo-access",
+          "version": 2,
+          "verify_jwt": false,
+          "status": "ACTIVE",
+          "ezbr_sha256": "9e52b94434dc3900ee07757b8e3841a95760aab90f4fb3f116d483456f477902"
+        },
+        {
+          "name": "zapruda-daily-advice-yandex",
+          "version": 2,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "3bf134d68c73633eea1867d5b4c18946e5c58472b2b409965c6eeecc327ed0de"
+        },
+        {
+          "name": "chat-photo-upload",
+          "version": 1,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "dfce4e8140efddd25138b3a3d6b50379150ea7913e883a0d36e3abf0b733b548"
+        },
+        {
+          "name": "chat-photo-access",
+          "version": 1,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "6ccbb2430fcd176afb1a316aaa60d26067e3de5bb159414b0b7b87519ae47130"
+        },
+        {
+          "name": "submit-community-request",
+          "version": 2,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "c5de1b122a9c8ad1b1a3042cde1341fb3248e3284f99f338586155fe19c3ae66"
+        },
+        {
+          "name": "daily-fishing-brief",
+          "version": 1,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "47f652c97ec14cbb78cdbd3baa5e0d03b17011214bc35921461df9a329b4a9bc"
+        }
+      ]
+    },
+    {
+      "project": "sonvniuwtvzzyuglscah",
+      "scope": "Read-only production",
+      "functions": [
+        {
+          "name": "submit-community-feedback",
+          "version": 20,
+          "verify_jwt": false,
+          "status": "ACTIVE",
+          "ezbr_sha256": "62dad0e18e5323a8686a9d20a4d2e4b3bb03130e1fb76be3610fef8877232583"
+        },
+        {
+          "name": "submit-community-request",
+          "version": 20,
+          "verify_jwt": false,
+          "status": "ACTIVE",
+          "ezbr_sha256": "5b43f5ceb38ab6e80f8343d7188202c157026995bcef24afb5107f7c6690d2ba"
+        },
+        {
+          "name": "notify-telegram-admin",
+          "version": 20,
+          "verify_jwt": false,
+          "status": "ACTIVE",
+          "ezbr_sha256": "ba4c1b8375424910fb60225a1cc67b877aa5c248c045e55146ae73c3a6e6117b"
+        },
+        {
+          "name": "admin-telegram-retry",
+          "version": 20,
+          "verify_jwt": false,
+          "status": "ACTIVE",
+          "ezbr_sha256": "a7143c6ddfdee6783297af5f32661108040d6b9355c205602e98f36c8985e1db"
+        },
+        {
+          "name": "daily-fishing-brief",
+          "version": 18,
+          "verify_jwt": false,
+          "status": "ACTIVE",
+          "ezbr_sha256": "76b778b2e047b90074390f5535cecd98c35ca4270ea3c949fbbe454b928edd80"
+        },
+        {
+          "name": "identify-fish-photo",
+          "version": 16,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "32f518e200b6a63faa75f1d73da0a4b351b570db95b57d6b0df67886502f8847"
+        },
+        {
+          "name": "zapruda-spot-analytics",
+          "version": 16,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "f8d99adef92046d4d3bff3f9ac9ef78c3786ffd146c6e2c746e244cf9f68e055"
+        },
+        {
+          "name": "zapruda-daily-advice",
+          "version": 16,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "89f0eba0e120f627bd227dbc109b67cf42330b39b5fd4ffbcb6d383f393cbd90"
+        },
+        {
+          "name": "dispatch-admin-email",
+          "version": 20,
+          "verify_jwt": true,
+          "status": "ACTIVE",
+          "ezbr_sha256": "4bd1548bb5659d10a668b3c90c94f726477ad89dc66c7c282e11501e7c2b7109"
+        }
+      ]
+    }
+  ]
+}

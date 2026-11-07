@@ -1,0 +1,309 @@
+{
+  "scope": "real authenticated Netlify Preview, one account, desktop 1348x926",
+  "deployedSha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+  "capturedEntries": 50,
+  "applicationEntries": 0,
+  "entries": [
+    {
+      "timestamp": "2026-11-04T14:28:34.132Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:29:17.107Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:29:17.189Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:29:30.186Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:28.332Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:28.341Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:28.408Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:28.408Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:28.442Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:37.551Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:37.570Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:37.585Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:37.585Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:37.594Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:59.066Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:59.066Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:30:59.067Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:32:24.985Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:33:07.889Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:33:07.927Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:35:05.343Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:35:05.536Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:36:24.098Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:36:52.316Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:36:52.420Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:36:52.421Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:36:52.421Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:37:05.505Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:37:06.215Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:37:06.236Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:37:58.469Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:37:58.471Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:37:58.476Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:38:01.130Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:44:01.206Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:44:35.319Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:44:35.504Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:45:26.052Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:45:36.878Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:45:36.994Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:45:36.995Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:45:59.071Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:45:59.123Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:45:59.139Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:46:49.874Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:48:32.579Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:48:32.584Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:49:03.121Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:49:04.287Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    },
+    {
+      "timestamp": "2026-11-04T14:51:17.700Z",
+      "level": "error",
+      "source": "chrome-extension:[id omitted]",
+      "message": "Error sending browser metadata to extension: Object"
+    }
+  ],
+  "networkTrace": "NOT CAPTURED: connected browser exposes console inspection but no network trace API"
+}

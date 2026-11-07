@@ -1,0 +1,38 @@
+{
+  "candidate": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+  "deployed_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+  "deploy_id": "6aeb97993e0be2ef23c56aa8",
+  "summary": "27 unique CSS viewport layout/readiness cases; two rendered guide backend-contract failures retained. Eight feed width/theme combinations passed. Not complete hosted functional or physical-device acceptance.",
+  "files": [
+    {
+      "path": "qa/product-contract/hosted-4eba367/zapruda-4eba367-hosted-cases.json",
+      "size": 46529,
+      "sha256": "3d5c4a99e6cd0dca293b165ad3339592a1e46f3d2dd6b2f7678aac6a498dca0d",
+      "git_blob_sha": "86e06ff3bda705c215baf6d46cec24d2421391d6"
+    },
+    {
+      "path": "qa/product-contract/hosted-4eba367/zapruda-4eba367-hosted-summary.json",
+      "size": 2033,
+      "sha256": "35f1392c458cdf154d5a6519f8e2a251d0159d36c67a79e93cede87b7fe0a45b",
+      "git_blob_sha": "e7623336e07de007a1e8b0c1a89ea54830e13406"
+    },
+    {
+      "path": "qa/product-contract/hosted-4eba367/zapruda-4eba367-hosted-console.json",
+      "size": 14480,
+      "sha256": "db8629f5a39e289b482af4c379ca254cbc61ca13f53879367521e3296e697f37",
+      "git_blob_sha": "4aa6eb726abba53a1a292f3057920fc0106b4bd2"
+    },
+    {
+      "path": "qa/product-contract/hosted-4eba367/zapruda-4eba367-black-320-final.jpg",
+      "size": 85139,
+      "sha256": "e92a78939b0d114458c68599f5b71d21910e1a8e6b568608df626e79f1ab58f3",
+      "git_blob_sha": "7fcbd2fac181e7879cf1005b99de487e0b865cb7"
+    },
+    {
+      "path": "qa/product-contract/hosted-4eba367/zapruda-4eba367-blue-390-final.jpg",
+      "size": 84790,
+      "sha256": "fb568e33b7782077894614736ee1dd8745fe8c9bdcb6182d16272fb4e95724f7",
+      "git_blob_sha": "f56316f0c8331cce69cb73d175f04c0265fac294"
+    }
+  ]
+}

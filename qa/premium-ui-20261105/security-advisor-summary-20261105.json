@@ -1,0 +1,26 @@
+{
+  "checked_at": "2026-11-04T22:13:54Z",
+  "project_ref": "yudtbifopfnjtjanaqrd",
+  "mode": "read-only",
+  "advisories": [
+    {
+      "name": "rls_enabled_no_policy",
+      "level": "INFO",
+      "count": 11,
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "count": 13,
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+    },
+    {
+      "name": "auth_leaked_password_protection",
+      "level": "WARN",
+      "count": 1,
+      "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
+    }
+  ],
+  "limits": "Default-deny INFO entries do not justify opening tables; SECURITY DEFINER advisories require per-function guarded access review, not a blanket pass. Auth leaked-password protection remains disabled. No Auth setting, role, ACL or RLS changed by this UI continuation."
+}

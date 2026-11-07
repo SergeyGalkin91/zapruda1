@@ -1,0 +1,1324 @@
+[
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 8,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 4,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": true,
+    "layoutPass": true,
+    "screenshot": "zapruda-current-classic-320-feed-c216963.jpg"
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/communities",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 16,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 4,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 14
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 3,
+    "renderedErrorMarkers": [
+      "Не удалось",
+      "Could not find",
+      "does not exist"
+    ],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/partners",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 12,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 6
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 3,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/chat",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 8,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8,
+      "https://www.anacondastores.com": 1,
+      "https://www.battlbox.com": 1,
+      "https://images.squarespace-cdn.com": 1,
+      "https://journal.rozetka.com.ua": 1
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 4,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/messages",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 9,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 7
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 3,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/reports/new",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 7,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 7
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/street",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 10,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 4
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/profile",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 7,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 16,
+      "https://yandex.ru": 1
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 3,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/settings",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 10,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 5
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 3,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/atlas",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 9,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 7
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 3,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/competitions",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 9,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 9
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 3,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/assistant",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 9,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 6
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 390,
+    "innerWidth": 390,
+    "innerHeight": 640,
+    "clientWidth": 375,
+    "scrollWidth": 375,
+    "overflow": false,
+    "route": "/",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 8,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 267,
+        "right": 311,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 319,
+        "right": 363,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": true,
+    "layoutPass": true,
+    "screenshot": "zapruda-current-classic-390-feed-c216963.jpg"
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 390,
+    "innerWidth": 390,
+    "innerHeight": 640,
+    "clientWidth": 375,
+    "scrollWidth": 375,
+    "overflow": false,
+    "route": "/chat",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 7,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8,
+      "https://www.anacondastores.com": 1,
+      "https://fs.tonkosti.ru": 1,
+      "https://www.battlbox.com": 1,
+      "https://images.squarespace-cdn.com": 1,
+      "https://journal.rozetka.com.ua": 1
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 267,
+        "right": 311,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 319,
+        "right": 363,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 3,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 768,
+    "innerWidth": 768,
+    "innerHeight": 640,
+    "clientWidth": 753,
+    "scrollWidth": 753,
+    "overflow": false,
+    "route": "/",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 8,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 565.109375,
+        "right": 677,
+        "tag": "A",
+        "width": 111.890625
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 685,
+        "right": 729,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": true,
+    "layoutPass": true,
+    "screenshot": "zapruda-c216-black-768.jpg"
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 768,
+    "innerWidth": 768,
+    "innerHeight": 640,
+    "clientWidth": 753,
+    "scrollWidth": 753,
+    "overflow": false,
+    "route": "/chat",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 7,
+      "https://fonts.googleapis.com": 1,
+      "https://www.anacondastores.com": 1,
+      "https://www.battlbox.com": 1,
+      "https://images.squarespace-cdn.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8,
+      "https://journal.rozetka.com.ua": 1
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 565.109375,
+        "right": 677,
+        "tag": "A",
+        "width": 111.890625
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 685,
+        "right": 729,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 5,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 1440,
+    "innerWidth": 1440,
+    "innerHeight": 640,
+    "clientWidth": 1425,
+    "scrollWidth": 1425,
+    "overflow": false,
+    "route": "/",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 8,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 1164.609375,
+        "right": 1276.5,
+        "tag": "A",
+        "width": 111.890625
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 1284.5,
+        "right": 1328.5,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": true,
+    "layoutPass": true,
+    "screenshot": "zapruda-c216-black-1440.jpg"
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 1440,
+    "innerWidth": 1440,
+    "innerHeight": 640,
+    "clientWidth": 1425,
+    "scrollWidth": 1425,
+    "overflow": false,
+    "route": "/chat",
+    "theme": "classic",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 7,
+      "https://fonts.googleapis.com": 1,
+      "https://www.anacondastores.com": 1,
+      "https://www.battlbox.com": 1,
+      "https://images.squarespace-cdn.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8,
+      "https://journal.rozetka.com.ua": 1
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "classic",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 1164.609375,
+        "right": 1276.5,
+        "tag": "A",
+        "width": 111.890625
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 1284.5,
+        "right": 1328.5,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 5,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/",
+    "theme": "electric-blue",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 8,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "electric-blue",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": true,
+    "layoutPass": true,
+    "screenshot": "zapruda-current-electric-blue-320-feed-c216963.jpg"
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "innerHeight": 640,
+    "clientWidth": 305,
+    "scrollWidth": 305,
+    "overflow": false,
+    "route": "/chat",
+    "theme": "electric-blue",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 7,
+      "https://fonts.googleapis.com": 1,
+      "https://www.anacondastores.com": 1,
+      "https://www.battlbox.com": 1,
+      "https://images.squarespace-cdn.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8,
+      "https://journal.rozetka.com.ua": 1
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "electric-blue",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 197,
+        "right": 241,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 249,
+        "right": 293,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 5,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 390,
+    "innerWidth": 390,
+    "innerHeight": 640,
+    "clientWidth": 375,
+    "scrollWidth": 375,
+    "overflow": false,
+    "route": "/",
+    "theme": "electric-blue",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 8,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "electric-blue",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 267,
+        "right": 311,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 319,
+        "right": 363,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": true,
+    "layoutPass": true,
+    "screenshot": "zapruda-c216-blue-390.jpg"
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 390,
+    "innerWidth": 390,
+    "innerHeight": 640,
+    "clientWidth": 375,
+    "scrollWidth": 375,
+    "overflow": false,
+    "route": "/chat",
+    "theme": "electric-blue",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 7,
+      "https://fonts.googleapis.com": 1,
+      "https://www.anacondastores.com": 1,
+      "https://www.battlbox.com": 1,
+      "https://images.squarespace-cdn.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8,
+      "https://journal.rozetka.com.ua": 1
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "electric-blue",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 267,
+        "right": 311,
+        "tag": "A",
+        "width": 44
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 319,
+        "right": 363,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 5,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 768,
+    "innerWidth": 768,
+    "innerHeight": 640,
+    "clientWidth": 753,
+    "scrollWidth": 753,
+    "overflow": false,
+    "route": "/",
+    "theme": "electric-blue",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 8,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "electric-blue",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 565.109375,
+        "right": 677,
+        "tag": "A",
+        "width": 111.890625
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 685,
+        "right": 729,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": true,
+    "layoutPass": true,
+    "screenshot": "zapruda-current-electric-blue-768-feed-c216963.jpg"
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 768,
+    "innerWidth": 768,
+    "innerHeight": 640,
+    "clientWidth": 753,
+    "scrollWidth": 753,
+    "overflow": false,
+    "route": "/chat",
+    "theme": "electric-blue",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 7,
+      "https://fonts.googleapis.com": 1,
+      "https://www.anacondastores.com": 1,
+      "https://www.battlbox.com": 1,
+      "https://images.squarespace-cdn.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8,
+      "https://fs.tonkosti.ru": 1,
+      "https://journal.rozetka.com.ua": 1
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "electric-blue",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 565.109375,
+        "right": 677,
+        "tag": "A",
+        "width": 111.890625
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 685,
+        "right": 729,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 3,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 1440,
+    "innerWidth": 1440,
+    "innerHeight": 640,
+    "clientWidth": 1425,
+    "scrollWidth": 1425,
+    "overflow": false,
+    "route": "/",
+    "theme": "electric-blue",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 8,
+      "https://fonts.googleapis.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "electric-blue",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 1164.609375,
+        "right": 1276.5,
+        "tag": "A",
+        "width": 111.890625
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 1284.5,
+        "right": 1328.5,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 2,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": true,
+    "layoutPass": true,
+    "screenshot": "zapruda-current-electric-blue-1440-feed-c216963.jpg"
+  },
+  {
+    "deployedSha": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "level": "actual hosted app / same-origin iframe CSS viewport; no physical-device claim",
+    "requestedWidth": 1440,
+    "innerWidth": 1440,
+    "innerHeight": 640,
+    "clientWidth": 1425,
+    "scrollWidth": 1425,
+    "overflow": false,
+    "route": "/chat",
+    "theme": "electric-blue",
+    "signedInProfileLink": true,
+    "bottomNavPadding": "0px",
+    "activeElement": "BODY",
+    "loading": false,
+    "visibleImagesPending": 0,
+    "resourceOrigins": {
+      "https://deploy-preview-93--zapruda1.netlify.app": 7,
+      "https://fonts.googleapis.com": 1,
+      "https://www.anacondastores.com": 1,
+      "https://fs.tonkosti.ru": 1,
+      "https://www.battlbox.com": 1,
+      "https://images.squarespace-cdn.com": 1,
+      "https://fonts.gstatic.com": 5,
+      "https://yudtbifopfnjtjanaqrd.supabase.co": 8,
+      "https://journal.rozetka.com.ua": 1
+    },
+    "foreignBackend": [],
+    "networkLimit": "Resource Timing origins only; excludes response bodies, query strings, WebSocket frames and a complete HTTP trace",
+    "expectedTheme": "electric-blue",
+    "header": [
+      {
+        "height": 44,
+        "label": "Профиль",
+        "left": 1164.609375,
+        "right": 1276.5,
+        "tag": "A",
+        "width": 111.890625
+      },
+      {
+        "height": 44,
+        "label": "Открыть список разделов",
+        "left": 1284.5,
+        "right": 1328.5,
+        "tag": "SUMMARY",
+        "width": 44
+      }
+    ],
+    "stableSamples": 2,
+    "measurementAttempts": 3,
+    "renderedErrorMarkers": [],
+    "dailyBriefRendered": false,
+    "layoutPass": true
+  }
+]

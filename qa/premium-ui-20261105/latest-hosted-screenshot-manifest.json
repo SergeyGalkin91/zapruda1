@@ -1,0 +1,13 @@
+{
+  "sha": "e391c578eff6d9eb717e7dfb9e43e36956307630",
+  "url": "https://deploy-preview-93--zapruda1.netlify.app/",
+  "gallery_url": "https://deploy-preview-93--zapruda1.netlify.app/__qa/premium.html",
+  "netlify_site_id": "3a98edc7-c77f-45f8-9fe0-7a156c72abf5",
+  "netlify_deploy_id": "6aebaa9dcba491b547ff1f60",
+  "screenshot": {
+    "file": "five-live-screens-e391c57-390.jpg",
+    "bytes": 163987,
+    "sha256": "5337258a530d2d362d4032869e16b453b30a5a95f45bc807c70b2be05ea34fe9"
+  },
+  "scope": "five genuine hosted 390x844 CSS viewports, same account, Chromium; no physical-phone/full JWT E2E claim"
+}

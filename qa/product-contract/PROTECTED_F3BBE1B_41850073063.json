@@ -1,0 +1,89 @@
+{
+  "sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+  "run_id": 41850073063,
+  "job_id": 126644073907,
+  "conclusion": "success",
+  "artifact_id": 13338252889,
+  "level": "real confirmed STAGING JWT; browser frontend at localhost, not hosted Netlify",
+  "proofs": [
+    {
+      "test": "pilot-schema real confirmed JWT",
+      "passed": true,
+      "cleanup": true,
+      "publicCatchFixtures": 0,
+      "checks": [
+        "four-confirmed-distinct-real-JWTs",
+        "real-JWT-read-summary-and-private-boundaries-no-watermark-mutation",
+        "atomic-catch-failure-rollback-retry-and-owner-boundary",
+        "public-to-private-HTTP-revocation-metadata-comments-no-direct-signing",
+        "actual-JWT-Realtime-sanitized-photo-update",
+        "real-chat-send-reaction-sanitized-photo-retry-and-Storage-boundary",
+        "global-message-actual-Realtime-foreign-mutations-guest-and-geography-denied",
+        "private-marks-gear-primary-concurrency-and-own-profile",
+        "partner-trip-REST-column-contract-without-a-public-trip-fixture",
+        "independent-authenticated-OpenWeather-without-AI-quota-use"
+      ],
+      "photoRealtimeEvents": [
+        {
+          "event": "INSERT",
+          "ready": false
+        },
+        {
+          "event": "UPDATE",
+          "ready": true
+        }
+      ],
+      "guestChatPhotoStatus": 404
+    },
+    {
+      "test": "feedback real JWT",
+      "marker": "QA-FEEDBACK-94788aaa-9749-4d4f-be5f-4d551a67c545",
+      "passed": true,
+      "checks": [
+        "guest-denied-and-invalid-body-rejected",
+        "confirmed-server-submission-saved-without-Telegram",
+        "own-history-foreign-private-data-and-direct-write-boundaries",
+        "actual-frontend-history-query",
+        "six-concurrent-real-requests-limited-to-five-saves"
+      ],
+      "ownedRequestIds": [
+        "3d450684-f16c-4cd6-aa64-10a52fd2a396",
+        "5c9a9b50-89be-4334-83c2-82a3c52f658a",
+        "2f4f8496-b0db-421a-bb16-1a89f6e0d3dd",
+        "c7bf860f-0e57-495b-b9da-81ddacee5685",
+        "192a2eca-c205-4e50-8784-250460219fdd"
+      ],
+      "cleanup": "external-exact-QA-UUIDs-required",
+      "savedCount": 5,
+      "responseStatuses": [
+        429,
+        201,
+        201,
+        201,
+        201,
+        201
+      ],
+      "telegramDisabled": true,
+      "uiHistoryWorks": true,
+      "hourlyConcurrencyLimitWorks": true
+    },
+    {
+      "passed": true,
+      "cleanup": true,
+      "checks": [
+        "real JWT Atlas catalog and own invoker progress read; no catalog fixtures inserted",
+        "two distinct actual UI password logins",
+        "UI send lost-response recovery: one persisted message; B unread via Realtime; open/read/reload; foreign marker denied; real Realtime preserves draft",
+        "actual wizard: catch/no-catch, photo, back/next, restored draft, private submit, outsider denial, no premature publish",
+        "STREET tick >1 min, reload, tackle/lure, catch log, opt-in import, same-browser account isolation",
+        "authenticated 3-engine x 4-width x 2-theme route screenshots and overflow; unauthorized admin only"
+      ]
+    }
+  ],
+  "spot_preflight": "all four confirmed signed JWTs; own catches/inbox; foreign moderation/evidence denial; unapproved spot upload rejected; not positive KING",
+  "limitations": [
+    "Feedback left five exact private QA fixture rows for externally approved cleanup",
+    "After the successful run, hosted QA found a 320px header clipping defect; the later Shell fix requires final protected acceptance",
+    "No real independent KING moderator, approved SPOT or genuine catch supplied"
+  ]
+}

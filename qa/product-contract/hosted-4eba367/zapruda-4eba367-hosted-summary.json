@@ -1,0 +1,47 @@
+{
+  "candidate": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+  "deployedSha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+  "netlifyDeployId": "6aeb97993e0be2ef23c56aa8",
+  "checkedAt": "2026-11-04T20:58:41.496Z",
+  "observations": 32,
+  "uniqueLayoutReadinessCases": 27,
+  "feedFourWidthsBothThemes": 8,
+  "authenticatedAccounts": 1,
+  "scope": "Same-origin CSS viewport layout/readiness and existing-account login. No new report/message/catch/spot published by this focused browser pass.",
+  "themeRestored": {
+    "matteBlack": "true",
+    "electricBlue": "false"
+  },
+  "blockedFeatureCases": [
+    {
+      "route": "/communities",
+      "width": 390,
+      "theme": "electric-blue",
+      "alerts": [
+        "Не удалось загрузить проверенных гидов: column guide_profiles.live_sonar_system does not exist",
+        "Не удалось загрузить заявки на выезды: Could not find the table 'public.guide_booking_inquiries' in the schema cache"
+      ]
+    },
+    {
+      "route": "/communities",
+      "width": 320,
+      "theme": "classic",
+      "alerts": [
+        "Не удалось загрузить проверенных гидов: column guide_profiles.live_sonar_system does not exist",
+        "Не удалось загрузить заявки на выезды: Could not find the table 'public.guide_booking_inquiries' in the schema cache"
+      ]
+    }
+  ],
+  "open": [
+    "Hosted two-account positive transactions/read receipts/media/retry",
+    "Hosted new signup/email confirmation/recovery",
+    "Physical device keyboard and safe-area acceptance",
+    "Guide frontend/backend contract mismatch",
+    "Genuine KING moderation and CARP/WINTER/BOAT public product flows"
+  ],
+  "networkEvidence": "Resource Timing origins and sanitized console only; no headers, cookies, JWT, query strings, response bodies or complete HTTP trace captured",
+  "screenshots": [
+    "zapruda-4eba367-black-320-final.jpg",
+    "zapruda-4eba367-blue-390-final.jpg"
+  ]
+}

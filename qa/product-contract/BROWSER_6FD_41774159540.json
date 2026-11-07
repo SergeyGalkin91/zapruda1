@@ -1,0 +1,32 @@
+{
+  "sha": "6fd24641e4b7ae20a78eb0cedc7e4e9c7c29c24a",
+  "environment": "local frontend + real Supabase STAGING JWT",
+  "passed": false,
+  "cleanup": true,
+  "checks": [
+    "real JWT Atlas catalog and own invoker progress read; no catalog fixtures inserted",
+    "two distinct actual UI password logins",
+    "UI send lost-response recovery: one persisted message; B unread via Realtime; open/read/reload; foreign marker denied; real Realtime preserves draft"
+  ],
+  "limitations": [
+    "No genuine KING evidence/spot/moderator provisioned",
+    "No physical device keyboard or mobile network proof",
+    "No production changes"
+  ],
+  "screenshots": [
+    "390-chat-after-read.png",
+    "failure-wizard-private-publication.png"
+  ],
+  "ai": {
+    "diagnosticOnly": true,
+    "configuration": "YANDEX_KEY_MISSING",
+    "webSearchEnabled": false
+  },
+  "chatEmbeddedRead": "OK",
+  "chatPostStatus": 201,
+  "chatAfterSendCount": 1,
+  "chatAlerts": [],
+  "phase": "wizard-private-publication",
+  "error": "BROWSER_ASSERTION_FAILED",
+  "detail": "locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByLabel('Вид рыбалки для достижений *', { exact: true })\n"
+}

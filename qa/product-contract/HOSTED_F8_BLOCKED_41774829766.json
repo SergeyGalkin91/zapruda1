@@ -1,0 +1,25 @@
+{
+  "sha": "f8fdb54f8e94d47557d71021fc1b789b426bd482",
+  "environment": "https://deploy-preview-93--zapruda1.netlify.app + real Supabase STAGING JWT",
+  "passed": false,
+  "cleanup": true,
+  "checks": [
+    "real JWT Atlas catalog and own invoker progress read; no catalog fixtures inserted"
+  ],
+  "limitations": [
+    "No genuine KING evidence/spot/moderator provisioned",
+    "No physical device keyboard or mobile network proof",
+    "No production changes"
+  ],
+  "screenshots": [
+    "failure-real-ui-login.png"
+  ],
+  "ai": {
+    "diagnosticOnly": true,
+    "configuration": "YANDEX_KEY_MISSING",
+    "webSearchEnabled": false
+  },
+  "phase": "real-ui-login",
+  "error": "BROWSER_ASSERTION_FAILED",
+  "detail": "locator.fill: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByLabel('Email', { exact: true })\n    - waiting for \"https://app.netlify.com/edge-access?domain=deploy-preview-93--zapruda1.netlify.app&requested_path=%2Fauth%3Fmode%3Din&site_id=3a98edc7-c77f-45f8-9fe0-7a156c72abf5\" navigation to finish...\n    - navigated to \"https://app.netlify.com/edge-access?domain=deploy-preview-93--zapruda1.netlify.app&requested_path=%2Fauth%3Fmode%3Din&site_id=3a98edc7-c77f-45f8-9fe0-7a156c72abf5\"\n"
+}

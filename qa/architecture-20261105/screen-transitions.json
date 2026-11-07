@@ -1,0 +1,791 @@
+{
+  "code": "37eb39aa92e55607e58234f264da0470c973fe10",
+  "scope": "static source links; shared components retain their actual visibility/role conditions; no JWT/hosted acceptance",
+  "registeredRouteDefinitions": 28,
+  "edges": [
+    {
+      "from": "shared/conditional component",
+      "to": "/reports/new",
+      "source": "src/components/CatchJourneyNav.tsx",
+      "line": 5,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/big-fish",
+      "source": "src/components/CatchJourneyNav.tsx",
+      "line": 6,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/big-fish#my-catches",
+      "source": "src/components/CatchJourneyNav.tsx",
+      "line": 7,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/profile#verified-titles",
+      "source": "src/components/CatchJourneyNav.tsx",
+      "line": 8,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/profile",
+      "source": "src/components/DailyFishingBrief.tsx",
+      "line": 157,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/auth",
+      "source": "src/components/FishingAdvisor.tsx",
+      "line": 417,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/analytics",
+      "source": "src/components/FishingAdvisor.tsx",
+      "line": 482,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/specializations",
+      "source": "src/components/FishingDisciplineTree.tsx",
+      "line": 53,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/reports/new",
+      "source": "src/components/PremiumFeedHeader.tsx",
+      "line": 12,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/",
+      "source": "src/components/PremiumFeedHeader.tsx",
+      "line": 18,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/communities",
+      "source": "src/components/PremiumFeedHeader.tsx",
+      "line": 21,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/competitions",
+      "source": "src/components/PremiumFeedHeader.tsx",
+      "line": 22,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/street",
+      "source": "src/components/PremiumFeedHeader.tsx",
+      "line": 25,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/assistant",
+      "source": "src/components/PremiumFeedHeader.tsx",
+      "line": 32,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/analytics",
+      "source": "src/components/PrivateFishingMarks.tsx",
+      "line": 323,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/messages",
+      "source": "src/components/PrivateFishingMarks.tsx",
+      "line": 332,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/big-fish",
+      "source": "src/components/ReportBigFishNextStep.tsx",
+      "line": 66,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/",
+      "source": "src/components/Shell.tsx",
+      "line": 30,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/reports/new",
+      "source": "src/components/Shell.tsx",
+      "line": 31,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/partners",
+      "source": "src/components/Shell.tsx",
+      "line": 32,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/communities",
+      "source": "src/components/Shell.tsx",
+      "line": 33,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/chat",
+      "source": "src/components/Shell.tsx",
+      "line": 34,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/messages",
+      "source": "src/components/Shell.tsx",
+      "line": 35,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/assistant",
+      "source": "src/components/Shell.tsx",
+      "line": 36,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/guides",
+      "source": "src/components/Shell.tsx",
+      "line": 49,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/analytics",
+      "source": "src/components/Shell.tsx",
+      "line": 52,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/market",
+      "source": "src/components/Shell.tsx",
+      "line": 53,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/profile",
+      "source": "src/components/Shell.tsx",
+      "line": 195,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/auth",
+      "source": "src/components/Shell.tsx",
+      "line": 206,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/welcome",
+      "source": "src/components/Shell.tsx",
+      "line": 232,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/competitions",
+      "source": "src/components/Shell.tsx",
+      "line": 241,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/admin",
+      "source": "src/components/Shell.tsx",
+      "line": 272,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/moderation",
+      "source": "src/components/Shell.tsx",
+      "line": 282,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/settings",
+      "source": "src/components/Shell.tsx",
+      "line": 292,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/auth",
+      "source": "src/components/SocialGroups.tsx",
+      "line": 290,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/messages",
+      "source": "src/components/SocialGroups.tsx",
+      "line": 482,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/auth?mode=in",
+      "source": "src/components/SpotVerifiedProgress.tsx",
+      "line": 120,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/big-fish",
+      "source": "src/components/SpotVerifiedProgress.tsx",
+      "line": 190,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/competitions#spot-records",
+      "source": "src/components/SpotVerifiedProgress.tsx",
+      "line": 193,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/messages",
+      "source": "src/components/VerifiedGuideDirectory.tsx",
+      "line": 177,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/",
+      "source": "src/lib/error-page.ts",
+      "line": 25,
+      "registered": true
+    },
+    {
+      "from": "shared/conditional component",
+      "to": "/",
+      "source": "src/routes/__root.tsx",
+      "line": 30,
+      "registered": true
+    },
+    {
+      "from": "/admin/feedback",
+      "to": "/feedback",
+      "source": "src/routes/admin.feedback.tsx",
+      "line": 135,
+      "registered": true
+    },
+    {
+      "from": "/admin/",
+      "to": "/moderation",
+      "source": "src/routes/admin.index.tsx",
+      "line": 23,
+      "registered": true
+    },
+    {
+      "from": "/admin/",
+      "to": "/finance",
+      "source": "src/routes/admin.index.tsx",
+      "line": 36,
+      "registered": true
+    },
+    {
+      "from": "/admin/",
+      "to": "/admin/feedback",
+      "source": "src/routes/admin.index.tsx",
+      "line": 42,
+      "registered": true
+    },
+    {
+      "from": "/admin/",
+      "to": "/admin/operations",
+      "source": "src/routes/admin.index.tsx",
+      "line": 49,
+      "registered": true
+    },
+    {
+      "from": "/admin/",
+      "to": "/auth",
+      "source": "src/routes/admin.index.tsx",
+      "line": 156,
+      "registered": true
+    },
+    {
+      "from": "/admin/operations",
+      "to": "/admin",
+      "source": "src/routes/admin.operations.tsx",
+      "line": 150,
+      "registered": true
+    },
+    {
+      "from": "/analytics",
+      "to": "/auth",
+      "source": "src/routes/analytics.tsx",
+      "line": 270,
+      "registered": true
+    },
+    {
+      "from": "/analytics",
+      "to": "/profile",
+      "source": "src/routes/analytics.tsx",
+      "line": 305,
+      "registered": true
+    },
+    {
+      "from": "/atlas",
+      "to": "/reports/new",
+      "source": "src/routes/atlas.tsx",
+      "line": 140,
+      "registered": true
+    },
+    {
+      "from": "/auth",
+      "to": "/profile",
+      "source": "src/routes/auth.tsx",
+      "line": 60,
+      "registered": true
+    },
+    {
+      "from": "/auth",
+      "to": "/auth?mode=in",
+      "source": "src/routes/auth.tsx",
+      "line": 216,
+      "registered": true
+    },
+    {
+      "from": "/auth",
+      "to": "/auth?mode=up",
+      "source": "src/routes/auth.tsx",
+      "line": 223,
+      "registered": true
+    },
+    {
+      "from": "/big-fish",
+      "to": "/profile#verified-titles",
+      "source": "src/routes/big-fish.tsx",
+      "line": 27,
+      "registered": true
+    },
+    {
+      "from": "/chat",
+      "to": "/chat",
+      "source": "src/routes/chat.tsx",
+      "line": 314,
+      "registered": true
+    },
+    {
+      "from": "/chat",
+      "to": "/reports/new",
+      "source": "src/routes/chat.tsx",
+      "line": 708,
+      "registered": true
+    },
+    {
+      "from": "/chat",
+      "to": "/auth",
+      "source": "src/routes/chat.tsx",
+      "line": 796,
+      "registered": true
+    },
+    {
+      "from": "/chat",
+      "to": "/messages",
+      "source": "src/routes/chat.tsx",
+      "line": 1404,
+      "registered": true
+    },
+    {
+      "from": "/communities",
+      "to": "/chat",
+      "source": "src/routes/communities.tsx",
+      "line": 45,
+      "registered": true
+    },
+    {
+      "from": "/communities",
+      "to": "/on-spot",
+      "source": "src/routes/communities.tsx",
+      "line": 62,
+      "registered": true
+    },
+    {
+      "from": "/communities",
+      "to": "/atlas",
+      "source": "src/routes/communities.tsx",
+      "line": 124,
+      "registered": true
+    },
+    {
+      "from": "/communities",
+      "to": "/feedback",
+      "source": "src/routes/communities.tsx",
+      "line": 188,
+      "registered": true
+    },
+    {
+      "from": "/competitions",
+      "to": "/big-fish",
+      "source": "src/routes/competitions.tsx",
+      "line": 77,
+      "registered": true
+    },
+    {
+      "from": "/competitions",
+      "to": "/big-fish#my-catches",
+      "source": "src/routes/competitions.tsx",
+      "line": 78,
+      "registered": true
+    },
+    {
+      "from": "/competitions",
+      "to": "/profile#verified-titles",
+      "source": "src/routes/competitions.tsx",
+      "line": 79,
+      "registered": true
+    },
+    {
+      "from": "/competitions",
+      "to": "/on-spot",
+      "source": "src/routes/competitions.tsx",
+      "line": 80,
+      "registered": true
+    },
+    {
+      "from": "/competitions",
+      "to": "/auth",
+      "source": "src/routes/competitions.tsx",
+      "line": 97,
+      "registered": true
+    },
+    {
+      "from": "/feedback",
+      "to": "/auth",
+      "source": "src/routes/feedback.tsx",
+      "line": 173,
+      "registered": true
+    },
+    {
+      "from": "/finance",
+      "to": "/moderation",
+      "source": "src/routes/finance.tsx",
+      "line": 95,
+      "registered": true
+    },
+    {
+      "from": "/guides",
+      "to": "/partners",
+      "source": "src/routes/guides.tsx",
+      "line": 369,
+      "registered": true
+    },
+    {
+      "from": "/guides",
+      "to": "/auth",
+      "source": "src/routes/guides.tsx",
+      "line": 401,
+      "registered": true
+    },
+    {
+      "from": "/",
+      "to": "/reports/new",
+      "source": "src/routes/index.tsx",
+      "line": 431,
+      "registered": true
+    },
+    {
+      "from": "/market",
+      "to": "/",
+      "source": "src/routes/market.tsx",
+      "line": 77,
+      "registered": true
+    },
+    {
+      "from": "/market",
+      "to": "/reports/new",
+      "source": "src/routes/market.tsx",
+      "line": 147,
+      "registered": true
+    },
+    {
+      "from": "/messages",
+      "to": "/auth",
+      "source": "src/routes/messages.tsx",
+      "line": 446,
+      "registered": true
+    },
+    {
+      "from": "/moderation",
+      "to": "/",
+      "source": "src/routes/moderation.tsx",
+      "line": 175,
+      "registered": true
+    },
+    {
+      "from": "/on-spot",
+      "to": "/chat?country=&place=&topic=general",
+      "source": "src/routes/on-spot.tsx",
+      "line": 31,
+      "registered": true
+    },
+    {
+      "from": "/on-spot",
+      "to": "/partners",
+      "source": "src/routes/on-spot.tsx",
+      "line": 34,
+      "registered": true
+    },
+    {
+      "from": "/on-spot",
+      "to": "/communities#community-meetups",
+      "source": "src/routes/on-spot.tsx",
+      "line": 37,
+      "registered": true
+    },
+    {
+      "from": "/on-spot",
+      "to": "/competitions#approved-spot-map",
+      "source": "src/routes/on-spot.tsx",
+      "line": 40,
+      "registered": true
+    },
+    {
+      "from": "/partners",
+      "to": "/guides",
+      "source": "src/routes/partners.tsx",
+      "line": 440,
+      "registered": true
+    },
+    {
+      "from": "/partners",
+      "to": "/auth",
+      "source": "src/routes/partners.tsx",
+      "line": 470,
+      "registered": true
+    },
+    {
+      "from": "/partners",
+      "to": "/communities",
+      "source": "src/routes/partners.tsx",
+      "line": 992,
+      "registered": true
+    },
+    {
+      "from": "/profile",
+      "to": "/reports/new",
+      "source": "src/routes/profile.tsx",
+      "line": 210,
+      "registered": true
+    },
+    {
+      "from": "/profile",
+      "to": "/",
+      "source": "src/routes/profile.tsx",
+      "line": 347,
+      "registered": true
+    },
+    {
+      "from": "/profile",
+      "to": "/auth",
+      "source": "src/routes/profile.tsx",
+      "line": 716,
+      "registered": true
+    },
+    {
+      "from": "/profile",
+      "to": "/settings",
+      "source": "src/routes/profile.tsx",
+      "line": 720,
+      "registered": true
+    },
+    {
+      "from": "/profile",
+      "to": "/assistant",
+      "source": "src/routes/profile.tsx",
+      "line": 799,
+      "registered": true
+    },
+    {
+      "from": "/profile",
+      "to": "/guides",
+      "source": "src/routes/profile.tsx",
+      "line": 1201,
+      "registered": true
+    },
+    {
+      "from": "/profile",
+      "to": "/spearfishing",
+      "source": "src/routes/profile.tsx",
+      "line": 1204,
+      "registered": true
+    },
+    {
+      "from": "/profile",
+      "to": "/feedback",
+      "source": "src/routes/profile.tsx",
+      "line": 1236,
+      "registered": true
+    },
+    {
+      "from": "/reports/new",
+      "to": "/",
+      "source": "src/routes/reports.new.tsx",
+      "line": 694,
+      "registered": true
+    },
+    {
+      "from": "/settings",
+      "to": "/",
+      "source": "src/routes/settings.tsx",
+      "line": 85,
+      "registered": true
+    },
+    {
+      "from": "/settings",
+      "to": "/chat",
+      "source": "src/routes/settings.tsx",
+      "line": 275,
+      "registered": true
+    },
+    {
+      "from": "/settings",
+      "to": "/messages",
+      "source": "src/routes/settings.tsx",
+      "line": 281,
+      "registered": true
+    },
+    {
+      "from": "/spearfishing",
+      "to": "/partners",
+      "source": "src/routes/spearfishing.tsx",
+      "line": 150,
+      "registered": true
+    },
+    {
+      "from": "/spearfishing",
+      "to": "/reports/new",
+      "source": "src/routes/spearfishing.tsx",
+      "line": 154,
+      "registered": true
+    },
+    {
+      "from": "/spearfishing",
+      "to": "/profile",
+      "source": "src/routes/spearfishing.tsx",
+      "line": 158,
+      "registered": true
+    },
+    {
+      "from": "/spearfishing",
+      "to": "/auth",
+      "source": "src/routes/spearfishing.tsx",
+      "line": 211,
+      "registered": true
+    },
+    {
+      "from": "/specializations",
+      "to": "/profile",
+      "source": "src/routes/specializations.tsx",
+      "line": 154,
+      "registered": true
+    },
+    {
+      "from": "/specializations",
+      "to": "/auth",
+      "source": "src/routes/specializations.tsx",
+      "line": 231,
+      "registered": true
+    },
+    {
+      "from": "/specializations",
+      "to": "/reports/new",
+      "source": "src/routes/specializations.tsx",
+      "line": 291,
+      "registered": true
+    },
+    {
+      "from": "/specializations",
+      "to": "/specializations",
+      "source": "src/routes/specializations.tsx",
+      "line": 307,
+      "registered": true
+    },
+    {
+      "from": "/street",
+      "to": "/reports/new",
+      "source": "src/routes/street.tsx",
+      "line": 330,
+      "registered": true
+    },
+    {
+      "from": "/street",
+      "to": "/partners",
+      "source": "src/routes/street.tsx",
+      "line": 363,
+      "registered": true
+    },
+    {
+      "from": "/street",
+      "to": "/chat",
+      "source": "src/routes/street.tsx",
+      "line": 372,
+      "registered": true
+    },
+    {
+      "from": "/welcome",
+      "to": "/auth",
+      "source": "src/routes/welcome.tsx",
+      "line": 32,
+      "registered": true
+    },
+    {
+      "from": "/welcome",
+      "to": "/",
+      "source": "src/routes/welcome.tsx",
+      "line": 35,
+      "registered": true
+    },
+    {
+      "from": "/welcome",
+      "to": "/communities",
+      "source": "src/routes/welcome.tsx",
+      "line": 40,
+      "registered": true
+    },
+    {
+      "from": "/welcome",
+      "to": "/settings",
+      "source": "src/routes/welcome.tsx",
+      "line": 43,
+      "registered": true
+    }
+  ]
+}

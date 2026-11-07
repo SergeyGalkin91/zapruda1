@@ -1,0 +1,112 @@
+{
+  "run_id": 41908405475,
+  "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+  "status": "completed",
+  "conclusion": "success",
+  "job": {
+    "id": 126849136280,
+    "name": "real-pilot",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "completed_at_utc": "2026-11-04T21:21:50Z",
+  "completed_at_moscow": "2026-11-05T00:21:50+03:00",
+  "artifact": {
+    "id": 13364102978,
+    "name": "pilot-real-JWT-safe-result",
+    "size_in_bytes": 31994446,
+    "url": "https://api.github.com/repos/SergeyGalkin91/zapruda1/actions/artifacts/13364102978",
+    "archive_download_url": "https://api.github.com/repos/SergeyGalkin91/zapruda1/actions/artifacts/13364102978/zip",
+    "expired": false,
+    "created_at": "2026-11-04T21:21:47Z",
+    "expires_at": "2026-11-11T21:21:44Z",
+    "updated_at": "2026-11-04T21:21:47Z",
+    "digest": "sha256:c1db6f8e2f924c0865ea8eaa76ec0daec15b0823095f10faf1c14f7430a55ef6",
+    "workflow_run": {
+      "id": 41908405475,
+      "repository_id": 1436439070,
+      "head_repository_id": 1436439070,
+      "head_branch": "feat/ai-yandex-deepseek-staging",
+      "head_sha": "4eba36702a62de0957fb2a0310b0aa6fa8913985"
+    }
+  },
+  "scope": "Actual STAGING four-account API JWT and authenticated localhost browser. Not hosted Netlify and not the later Premium UI SHA.",
+  "protected_environment_review_completed_by_owner": true,
+  "core": {
+    "test": "pilot-schema real confirmed JWT",
+    "passed": true,
+    "cleanup": true,
+    "publicCatchFixtures": 0,
+    "checks": [
+      "four-confirmed-distinct-real-JWTs",
+      "real-JWT-read-summary-and-private-boundaries-no-watermark-mutation",
+      "atomic-catch-failure-rollback-retry-and-owner-boundary",
+      "public-to-private-HTTP-revocation-metadata-comments-no-direct-signing",
+      "actual-JWT-Realtime-sanitized-photo-update",
+      "real-chat-send-reaction-sanitized-photo-retry-and-Storage-boundary",
+      "global-message-actual-Realtime-foreign-mutations-guest-and-geography-denied",
+      "private-marks-gear-primary-concurrency-and-own-profile",
+      "partner-trip-REST-column-contract-without-a-public-trip-fixture",
+      "independent-authenticated-OpenWeather-without-AI-quota-use"
+    ],
+    "photoRealtimeEvents": [
+      {
+        "event": "INSERT",
+        "ready": false
+      },
+      {
+        "event": "UPDATE",
+        "ready": true
+      }
+    ],
+    "guestChatPhotoStatus": 404
+  },
+  "feedback": {
+    "test": "feedback real JWT",
+    "marker": "QA-FEEDBACK-849eb2a4-477b-45cf-8348-dadd64ffa242",
+    "passed": true,
+    "checks": [
+      "guest-denied-and-invalid-body-rejected",
+      "confirmed-server-submission-saved-without-Telegram",
+      "own-history-foreign-private-data-and-direct-write-boundaries",
+      "actual-frontend-history-query",
+      "six-concurrent-real-requests-limited-to-five-saves"
+    ],
+    "ownedRequestIds": [
+      "2919a4ff-02a7-4dc8-a382-22adae7ef04d",
+      "83af652c-9fc8-4a7d-a668-eb987883a843",
+      "6f01f901-7a8e-46c4-a642-e2ae86f89240",
+      "1d21732e-755e-4b38-b8fb-ae4d8ff37a04",
+      "c2fd0a9e-9692-4b8f-9845-a4355ea782a7"
+    ],
+    "cleanup": "external-exact-QA-UUIDs-required",
+    "savedCount": 5,
+    "responseStatuses": [
+      201,
+      201,
+      201,
+      201,
+      201,
+      429
+    ],
+    "telegramDisabled": true,
+    "uiHistoryWorks": true,
+    "hourlyConcurrencyLimitWorks": true
+  },
+  "browser": {
+    "passed": true,
+    "cleanup": true,
+    "checks": [
+      "real JWT Atlas catalog and own invoker progress read; no catalog fixtures inserted",
+      "two distinct actual UI password logins",
+      "UI send lost-response recovery: one persisted message; B unread via Realtime; open/read/reload; foreign marker denied; real Realtime preserves draft",
+      "actual wizard: catch/no-catch, photo, back/next, restored draft, private submit, outsider denial, no premature publish",
+      "STREET tick >1 min, reload, tackle/lure, catch log, opt-in import, same-browser account isolation",
+      "authenticated 3-engine x 4-width x 2-theme route screenshots, header control bounds and 44px targets; unauthorized admin only"
+    ]
+  },
+  "spot": "Four genuine confirmed JWT users; outsider queue/review/evidence denied, own inbox reads, unapproved multipart upload rejected without a catch. Positive KING not tested.",
+  "latest_premium_source": "57c23c294026e0378a13a9c57e5d189394745f09",
+  "new_feedback_rows_deleted": false,
+  "new_feedback_cleanup_permission": "Not granted for the five UUIDs created by this run; preserve them and avoid a known-dirty rerun."
+}

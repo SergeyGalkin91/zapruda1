@@ -1,0 +1,56 @@
+{
+  "sha": "9c7fe6e1bf1ee386e910769dac8eb611d50bd08e",
+  "url": "https://6aebae0a59ab32e0cc56cdfb--zapruda1.netlify.app",
+  "scope": "genuine immutable hosted UI, guest appearance controls; no JWT copied",
+  "checks": [
+    {
+      "theme": "classic",
+      "wallpaper": "matte-black",
+      "reload": true,
+      "selected": true
+    },
+    {
+      "theme": "classic",
+      "wallpaper": "carbon",
+      "reload": true,
+      "selected": true
+    },
+    {
+      "theme": "classic",
+      "wallpaper": "neon-threads",
+      "reload": true,
+      "selected": true
+    },
+    {
+      "theme": "classic",
+      "wallpaper": "topographic",
+      "reload": true,
+      "selected": true
+    },
+    {
+      "theme": "electric-blue",
+      "wallpaper": "matte-black",
+      "reload": true,
+      "selected": true
+    },
+    {
+      "theme": "electric-blue",
+      "wallpaper": "carbon",
+      "reload": true,
+      "selected": true
+    },
+    {
+      "theme": "electric-blue",
+      "wallpaper": "neon-threads",
+      "reload": true,
+      "selected": true
+    },
+    {
+      "theme": "electric-blue",
+      "wallpaper": "topographic",
+      "reload": true,
+      "selected": true
+    }
+  ],
+  "restored": "classic/matte-black"
+}

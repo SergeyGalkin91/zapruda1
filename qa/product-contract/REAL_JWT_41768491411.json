@@ -1,0 +1,37 @@
+{
+  "run": 41768491411,
+  "sha": "3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd",
+  "result": "success",
+  "core": {
+    "passed": true,
+    "cleanup": true,
+    "publicCatchFixtures": 0,
+    "checks": [
+      "four-confirmed-distinct-real-JWTs",
+      "real-JWT-read-summary-and-private-boundaries-no-watermark-mutation",
+      "atomic-catch-failure-rollback-retry-and-owner-boundary",
+      "public-to-private-HTTP-revocation-metadata-comments-no-direct-signing",
+      "actual-JWT-Realtime-sanitized-photo-update",
+      "real-chat-send-reaction-sanitized-photo-retry-and-Storage-boundary",
+      "global-message-actual-Realtime-foreign-mutations-guest-and-geography-denied",
+      "private-marks-gear-primary-concurrency-and-own-profile",
+      "partner-trip-REST-column-contract-without-a-public-trip-fixture",
+      "independent-authenticated-OpenWeather-without-AI-quota-use"
+    ]
+  },
+  "feedback": {
+    "passed": true,
+    "concurrentResults": "5x201 + 1x429",
+    "telegramDisabled": true,
+    "qaRowsRemainingOnReadback": 0
+  },
+  "spot": {
+    "passed": true,
+    "scope": "authorization preflight and rejected unapproved-spot upload only; no live KING"
+  },
+  "browserQaReport": {
+    "remaining": 1,
+    "is_public": false,
+    "cleanup": "expired deletion confirmation"
+  }
+}

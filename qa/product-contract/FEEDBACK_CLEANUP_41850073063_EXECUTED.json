@@ -1,0 +1,61 @@
+{
+  "project_id": "yudtbifopfnjtjanaqrd",
+  "scope": "Only five explicitly owner-approved disposable feedback rows from run 41850073063; no Production/main/version/release changes",
+  "approved_sql_path": "qa/product-contract/OWNER_APPROVAL_REQUIRED_feedback_41850073063.sql",
+  "approved_sql_git_blob_sha": "76cf8bb2d8a236cf2c407b3ff5a2fe68c32e06a1",
+  "approved_marker": "QA-FEEDBACK-94788aaa-9749-4d4f-be5f-4d551a67c545",
+  "approved_ids": [
+    "3d450684-f16c-4cd6-aa64-10a52fd2a396",
+    "5c9a9b50-89be-4334-83c2-82a3c52f658a",
+    "2f4f8496-b0db-421a-bb16-1a89f6e0d3dd",
+    "c7bf860f-0e57-495b-b9da-81ddacee5685",
+    "192a2eca-c205-4e50-8784-250460219fdd"
+  ],
+  "preflight": {
+    "checked_at": "2026-11-04 20:21:45.707382+00",
+    "exact_rows": 5,
+    "exact_owners": 1,
+    "all_row_guards": true,
+    "marker_rows": 5,
+    "required_migrations": 2,
+    "incoming_foreign_keys": 0,
+    "delete_triggers": [],
+    "old_feedback_remaining": 0,
+    "old_report_remaining": 0
+  },
+  "recheck_after_expired_confirmation": {
+    "checked_at": "2026-11-04 20:31:46.247001+00",
+    "exact_rows": 5,
+    "exact_owners": 1,
+    "all_row_guards": true,
+    "marker_rows": 5,
+    "required_migrations": 2,
+    "incoming_foreign_keys": 0,
+    "delete_triggers": [],
+    "old_feedback_remaining": 0,
+    "old_report_remaining": 0
+  },
+  "expired_first_confirmation": {
+    "mutation_confirmed": false,
+    "result": "Remote confirmation expired; unchanged preflight still found exactly five rows"
+  },
+  "execution": {
+    "original_sql_unmodified": true,
+    "all_guards_enforced": true,
+    "transaction_committed": true,
+    "deleted_count": 5,
+    "checked_at": "2026-11-04 20:32:18.037513+00",
+    "latest_feedback_marker_remaining": 0
+  },
+  "independent_post_commit_select": {
+    "checked_at": "2026-11-04 20:34:16.006839+00",
+    "approved_marker_remaining": 0,
+    "approved_ids_remaining": 0,
+    "feedback_test_owner_remaining": 0
+  },
+  "final_protected_candidate": "4eba36702a62de0957fb2a0310b0aa6fa8913985",
+  "runtime_source_sha": "c21696356cd1e9eb211af06e8645ab8872002701",
+  "runtime_unchanged_from_source": true,
+  "workflow_request_only_diff": ".github/pilot-e2e-request.txt",
+  "new_fixtures_not_covered_by_permission": true
+}

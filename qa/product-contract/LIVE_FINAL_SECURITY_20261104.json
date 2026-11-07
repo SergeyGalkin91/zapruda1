@@ -1,0 +1,49 @@
+{
+  "stage": "yudtbifopfnjtjanaqrd",
+  "policy": {
+    "checked_at": "2026-11-04 19:00:59.588107+00",
+    "club_message_policies": [
+      {
+        "cmd": "INSERT",
+        "name": "group_msg_insert",
+        "qual": null,
+        "with_check": "((user_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM social_group_members m\n  WHERE ((m.group_id = social_group_messages.group_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.status = 'accepted'::text)))))"
+      },
+      {
+        "cmd": "SELECT",
+        "name": "group_msg_read",
+        "qual": "(EXISTS ( SELECT 1\n   FROM social_group_members m\n  WHERE ((m.group_id = social_group_messages.group_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.status = 'accepted'::text))))",
+        "with_check": null
+      }
+    ],
+    "public_tables_without_rls": 0,
+    "required_security_deltas_applied": 2
+  },
+  "cleanup": {
+    "checked_at": "2026-11-04 18:43:19.401835+00",
+    "old_feedback_remaining": 0,
+    "old_private_report_remaining": 0,
+    "new_feedback_remaining": 5
+  },
+  "king": {
+    "checked_at": "2026-11-04 18:43:40.729076+00",
+    "moderators": 0,
+    "catches": 0,
+    "title_holders": 0,
+    "approved_reviewed_spots": 0
+  },
+  "main_comparison": {
+    "main": "0d787d8e615dde821ca326fec1eeb6b9ef4ac15d",
+    "head": "c21696356cd1e9eb211af06e8645ab8872002701",
+    "main_is_ancestor": true,
+    "changed_paths": 335,
+    "deleted": 0
+  },
+  "operations": {
+    "production_mutations": 0,
+    "sql_ddl_this_checkpoint": 0,
+    "feedback_deletions_this_checkpoint": 0,
+    "role_changes": 0,
+    "main_updates": 0
+  }
+}

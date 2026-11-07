@@ -1,4 +1,40 @@
+# Архитектурная консолидация — актуальное продолжение 05.11.2026
+
+> **Актуальный P0, 05.11.2026:** #93 `37eb39aa92e55607e58234f264da0470c973fe10` — полный защищённый [41957327094](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41957327094) **PASS**,13/13 обычных workflow,484 Vitest. [Точные результаты и BLOCKED-этапы](ZAPRUDA_E2E_FINAL_ACCEPTANCE_20261105.md). Положительный KING и hosted Netlify mobile не приняты. ON SPOT+ продолжается отдельно в [PR114](https://github.com/SergeyGalkin91/zapruda1/pull/114), без применения новой дельты. Цель D22 **0.7.6 KING FINISH ON SPOT+**, версия0.7.5;56 ID/8 модулей/7 KING/OSP-01…09 сохранены. **Main/Production/release NO-GO.**
+
+Первопричина финального падения устранена коммитом37eb39a. Настоящие авторизованные browser/JWT сценарии прошли, cleanup=true;292 PNG. [Полный отчёт](ZAPRUDA_E2E_FINAL_ACCEPTANCE_20261105.md) имеет приоритет. Новый ON SPOT+ PR114 — отдельный непринимаемый пока срез, не часть37eb PASS.
+
+---
+
+## Исторический срез 8777e4f до исправления E2E
+
+Ниже сохранён прежний технический отчёт. Указанные в нём pending/review и483 относятся к тому срезу; run41941541992 впоследствии FAILURE, run41957327094 на37eb SUCCESS.
+
 # Architecture consolidation — 05.11.2026
+
+> **Текущий код #93: `8777e4ffbe43211ffcb04dba968dcfe28a149bcd`. Обычные workflow13/13 SUCCESS; Vitest483/42 файлов PASS. Это не release approval.**
+
+## Подтверждённые проверки текущего кандидата
+
+| Workflow | Результат |
+|---|---|
+| [v0.7.1 Meetup security guards](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941550534) | SUCCESS |
+| [ZAPRUDA Electric Blue cross-browser review](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941547906) | SUCCESS |
+| [Netlify preview STAGING isolation guard](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941548003) | SUCCESS |
+| [Yandex canary Deno typecheck](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941547830) | SUCCESS |
+| [SPOT isolated PostgreSQL transaction races](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941547950) | SUCCESS |
+| [ZAPRUDA Docker image smoke test](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941547816) | SUCCESS |
+| [Independent Node hosting proof](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941547815) | SUCCESS |
+| [Report photo privacy browser check](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941548037) | SUCCESS |
+| [ZAPRUDA checks](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941547954) | SUCCESS |
+| [ZAPRUDA Frontend Build](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941548212) | SUCCESS |
+| [Advisor availability without an AI provider](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941547813) | SUCCESS |
+| [Pilot schema PostgreSQL and Deno checks](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941547875) | SUCCESS |
+| [v0.7.1 Meetup mobile browser smoke](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941548254) | SUCCESS |
+
+Изолированный гостевой Premium UI: **Chromium/Firefox/WebKit ×320/390/768/1440 ×2 темы**,264 проверки /168 PNG, по88 проверок и56 PNG на движок. Архив GitHub artifact `13376359978`, SHA256 `1a6775ff10894f30f0b7a50ed9d9a12ad41469e5b986f14b651d1fcc351e45cb`, исходный SHA8777e4f. Это настоящие рендеры приложения на изолированном гостевом backend, а не hosted/JWT acceptance. SQL/rollback9 +1 проверка размещения STAGING delta входят в483.
+
+Netlify deploy `6aebcd9de9da0d32615233d1` связан с этим SHA через Netlify GitHub status; статус `Deploy Preview ready!`. Доступ в текущем проверочном браузере закрыт Team protection. Единственный актуальный protected run —41941541992; требуемое действие владельца указано ниже.
 
 Target: **0.7.6 KING FINISH ON SPOT+**, technical package remains 0.7.5. Source: code9c7fe6e, canonical specification a6ded87/D22. The latest owner asks for one screen/transition map, a dependency inventory, a continuous catch → BIG FISH → independent review → title → profile journey, and integration with the existing Premium UI. Main/Production remain prohibited. No previously working module is being rewritten or removed.
 
@@ -36,7 +72,44 @@ All56 legacy IDs/8 modules/7 KING and OSP-01…09 remain obligations. This archi
 - Applied only new STAGING RPC migration `20261105000601_v076_owned_spot_progress`; isolated SQL/rollback9 PASS. No table grants or RLS changes.
 - Deployed only STAGING `zapruda-spot-records` v12 with verify_jwt=true; corrected URL shadowing, strict owned preview origins and STAGING-only project fence. Legacy v11 source was captured before replacement.
 - Added `/on-spot` entry and links without false membership/presence implementation. Full OSP-01…09 remain P0 open.
-- Local TypeScript, build, Deno exact gateway imports and483 Vitest tests PASS. ESLint has no errors; baseline fast-refresh warnings remain. Ordinary CI and protected real JWT/browser evidence for the published candidate are pending until actual runs complete.
+- Local TypeScript, build, Deno exact gateway imports and483 Vitest tests PASS. ESLint has no errors; baseline fast-refresh warnings remain. Ordinary CI13/13 now PASS; protected real JWT/browser evidence remains BLOCKED before runner review.
 - New scoped protected architecture workflow reuses existing live SPOT and browser suites; excludes pre-existing feedback fixture set and does not consume model quotas. Positive KING remains blocked by genuine prerequisites.
 
+## Карта, ветки и независимые модули
+
+- [28 router definitions /6 ключевых переходов](ZAPRUDA_SCREEN_MAP_20261105.md), JSON registry и `node scripts/check-route-graph.mjs`: PASS. Проверка существования маршрутов не считается работающим backend.
+- [8 модулей и незавершённые зависимости](ZAPRUDA_MODULE_DEPENDENCIES_20261105.md); все56 ID сохранены, SPOT-03 повышен только до IMPLEMENTED, без ложного E2E VERIFIED.
+- Стартовый95 branches/75 open PRs/4 shared-head groups: `qa/architecture-20261105/BRANCH_PR_INVENTORY.md`. После кода: `qa/architecture-20261105/final-code/BRANCH_PR_INVENTORY.md`; исходный snapshot сохранён. Сверка старого snapshot после движения ref намеренно отклоняется; для нового среза получен свежий GitHub snapshot. Ни одна ветка не удалена и PR не закрыт.
+
+## Точный проверяемый код и STAGING
+
+Финальный функциональный SHA: `8777e4ffbe43211ffcb04dba968dcfe28a149bcd` в #93. Коммиты: `8777e4f` — STAGING SQL вынесен из автоматических Production migrations и проверен отдельным scope-тестом; `f1d9b70` — новые связи и owner progress/CORS; `85a5bd0` — очистка устаревшего переноса после успешного no-catch отчёта и корректные браузерные assertions; `1dd8c8f` — существующий themed field/48px для выбора одной рыбы. Нет bump/тега/релиза.
+
+STAGING `yudtbifopfnjtjanaqrd`: миграция `20261105000601_v076_owned_spot_progress` применена ровно один раз. Тело RPC: MD5 `e52618251fbcee5cd12f3f044e50c047`, совпадает с репозиторием; stable/security definer, фиксированный search_path, anon EXECUTE=false, authenticated EXECUTE=true, private schema USAGE=false, private catches SELECT=false, public CREATE=false. Девять isolated PostgreSQL проверок включают настоящий SQL review/revoke и rollback только RPC; это не подписанный JWT и не настоящий улов.
+
+Edge `zapruda-spot-records` v12 ACTIVE, verify_jwt=true; оба readback-файла `index.ts`/`origin.ts` совпадают с репозиторием. Проблема v11: строковая константа URL затеняла глобальный конструктор URL, поэтому браузерный Origin отклонялся; дополнительно не было immutable host. Теперь backend-константа переименована, Origin вынесен в отдельный модуль со строгим allowlist своего сайта. Другие функции и Production не развёртывались.
+
+Оставшиеся security advisories не скрыты: intentional deny-by-default private RLS tables, intentional confirmed-owner SECURITY DEFINER RPC (новая функция разобрана выше), существующее предупреждение leaked-password protection. Не отключены RLS/reviewers и не расширены private table grants.
+
+## Настоящая E2E и hosted — текущие ограничения
+
+Защищённый [41941541992](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41941541992) ожидает **Review deployments → staging-e2e → Approve and deploy** владельцем. Только этот запуск актуален;41939384974/41940006418/41940382100 отменены как заменённые, без выдачи secrets runner. Новый scoped workflow использует существующие четыре подтверждённых аккаунта, реальные JWT, browser Origin, чужой аргумент RPC/guest/неразрешённую загрузку и реальный UI private-report → выбор одной рыбы → BIG FISH → профиль. До фактического выполнения это BLOCKED, не PASS. Гостевые скриншоты и SQL-фикстуры не подменяют данный gate. Неподтверждённый аккаунт проверен в SQL/component regression; реальный неподтверждённый JWT не заявлен.
+
+Netlify подтвердил `Deploy Preview ready!` для точного SHA; Site ID `3a98edc7-c77f-45f8-9fe0-7a156c72abf5`, [preview](https://deploy-preview-93--zapruda1.netlify.app). Preview-only build helper запрещает другой Supabase URL и требует40-символьный COMMIT_REF; STAGING isolation CI проходит. В текущем проверочном браузере наблюдается Team protection / **This site is private — Sign in with an invited Netlify account**. Hosted UI/network/мобильная приёмка нового кандидата не объявляется PASS. Защита доступа сохранена; предыдущая hosted приёмка9c7fe6e остаётся историческим evidence.
+
+Positive KING по-прежнему BLOCKED:0 модераторов,0 approved lawful SPOT,0 private SPOT catches/evidence/title holders на момент сверки. Требуются разрешённый независимый модератор, реальная законная точка и подлинное доказательство. Нет назначения ролей, поддельного публичного улова/спота, сброса квот, расхода AI generation quota или очистки чужого feedback fixture set.
+
+## Четыре обязательных результата
+
+| Результат | Статус | Граница |
+|---|---|---|
+| Единая карта экранов/переходов | DONE |28 routes/6 key transitions + automatic dangling-link check; не backend acceptance |
+| Инвентаризация веток и незавершённых модулей | DONE |95 branches/75 PRs/4 shared-head groups +8 modules/56 IDs/OSP contract; без реорганизации |
+| Улов → BIG FISH → проверка → титул → профиль | PARTIAL / BLOCKED |Реальные engines связаны; private owner progress в STAGING; подписанный тест ждёт review, positive KING требует подлинных условий |
+| Интеграция в Premium UI | PARTIAL |Реальные route/components/themes сохранены; ordinary isolated browsers проверяются; hosted private access и owner phone acceptance OPEN |
+
+ON SPOT+: безопасный вход/fallback реализован; moderated zones/membership/presence/invites и полные OSP-01…09 **NOT STARTED / BLOCKED**, обязательные P0. Всё это сохраняется в текущей цели0.7.6 KING FINISH ON SPOT+; полного релиза/пилотного GO нет.
+
 STAGING isolation: the new SQL delta is stored in `supabase/staging/20261105000601_v076_owned_spot_progress.sql`, outside automatic Production migrations. An isolated regression checks that no copy exists in `supabase/migrations`; the already deployed RPC body and Edge sources are unchanged.
+
+Полная [карта112 статических переходов](ZAPRUDA_SCREEN_TRANSITIONS_20261105.md) из фактического кода дополняет6 критических связей;28 route definitions включают admin-layout и index. В CI #111 добавлена сверка карты с исходниками. Приватные/динамические и auth-переходы по-прежнему требуют настоящей E2E, которая ждёт review. Дополнительная проверка STAGING-only размещения SQL увеличила общий Vitest до483; девять SQL/rollback регрессий сохранены, новых действий в базе не было.

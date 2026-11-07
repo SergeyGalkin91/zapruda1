@@ -1,0 +1,1973 @@
+{
+  "recorded_at_utc": "2026-11-05T00:30:07.772Z",
+  "code_sha": "8777e4ffbe43211ffcb04dba968dcfe28a149bcd",
+  "specification_sha": "a6ded8771a713248cc2367fa733873023d31958f",
+  "main_sha": "0d787d8e615dde821ca326fec1eeb6b9ef4ac15d",
+  "scope": "read-only remote-ref and open-PR inventory; not authorization to reorganize Git or repeat SQL",
+  "branches": [
+    {
+      "name": "audit/auth-avatar-safety-20261102",
+      "sha": "7078475ed6424a63d02323221c336613ff958384",
+      "behind": 357,
+      "ahead": 20,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 20,
+      "equivalent_patches": 0,
+      "open_prs": [
+        33
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "audit/claude-security-review-v070",
+      "sha": "d8571b722ef3d82ac1d298b0a794b91c5cd3b001",
+      "behind": 373,
+      "ahead": 7,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 7,
+      "equivalent_patches": 0,
+      "open_prs": [
+        16
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "audit/legacy-cleanup-inventory-20261102",
+      "sha": "1e715633a59e78fe91e35e74f36d01fa13a7d28b",
+      "behind": 357,
+      "ahead": 5,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 5,
+      "equivalent_patches": 0,
+      "open_prs": [
+        50
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "audit/staging-parity-gates",
+      "sha": "c4c74695be2e4749f18493325cb57b119b5f6289",
+      "behind": 436,
+      "ahead": 14,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 14,
+      "equivalent_patches": 0,
+      "open_prs": [
+        13
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "audit/ux-accessibility-2026-10-30",
+      "sha": "1e1a85d33e6c9c06da4386342570f62f9cb23251",
+      "behind": 577,
+      "ahead": 107,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 107,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "backup/2026-10-29-checkpoint",
+      "sha": "12e4276610300e55997e04f9fc5e9d9db08ac4ca",
+      "behind": 801,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "backup/2026-10-31-before-yandex-oauth",
+      "sha": "135740b86726ce4a2ad1d23803b63b1ccc842555",
+      "behind": 524,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "chore/lovable-independent-vite-v075",
+      "sha": "d2602de3790e323715fd7708ddca8f9d265e621e",
+      "behind": 89,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "claude/selective-improvements-20261101",
+      "sha": "4b17865c2685d21807b1d02f8de76d72aacf0102",
+      "behind": 357,
+      "ahead": 14,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 14,
+      "equivalent_patches": 0,
+      "open_prs": [
+        27
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "deploy/cloudflare-beta",
+      "sha": "08c9275aafeaa4e046fb8837e9e15022edaf3a2b",
+      "behind": 577,
+      "ahead": 177,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 175,
+      "equivalent_patches": 2,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "design/approved-v060-mobile-implementation",
+      "sha": "c29abf13ed26028797466175c28782a40e742234",
+      "behind": 360,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "design/ux-refinement-v075-approved",
+      "sha": "978fce9de4279a9ed6da9391c49adfa334eb2097",
+      "behind": 92,
+      "ahead": 5,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 5,
+      "equivalent_patches": 0,
+      "open_prs": [
+        92
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "docs/community-readme-v075-20261104",
+      "sha": "57359ba1a598d12654012ca58ca793bc1d712480",
+      "behind": 43,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        113,
+        109
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "docs/official-domain-zaprudacommunity-20261104",
+      "sha": "b690a3877cf06266b0f18be8ff42b0b4396fbb20",
+      "behind": 73,
+      "ahead": 3,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 3,
+      "equivalent_patches": 0,
+      "open_prs": [
+        96
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "docs/product-architecture-spot-community-guides",
+      "sha": "b7215fa4e21af06de093f56ea7fd832a7f34cb75",
+      "behind": 357,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        46
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "docs/readme-current-community-v070-20261102",
+      "sha": "29ba966da8e955784a221c992e99118fbeb6d382",
+      "behind": 357,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        51
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "docs/zapruda-canonical-decisions-20261104",
+      "sha": "a6ded8771a713248cc2367fa733873023d31958f",
+      "behind": 4,
+      "ahead": 53,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": true,
+      "unique_patches": 39,
+      "equivalent_patches": 0,
+      "open_prs": [
+        111
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "docs/zapruda-master-plan-v070-20261101",
+      "sha": "ee1699258454c55a4cf3acda61a5a5c8e5bc2c92",
+      "behind": 357,
+      "ahead": 3,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 3,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "feat/ai-yandex-deepseek-staging",
+      "sha": "8777e4ffbe43211ffcb04dba968dcfe28a149bcd",
+      "behind": 0,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": false,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [
+        93
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "feat/auth-confirm-profile-onboarding-20261101",
+      "sha": "0c4e70a5c80459c8d792f345bbb636ff65dc9f38",
+      "behind": 357,
+      "ahead": 12,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 12,
+      "equivalent_patches": 0,
+      "open_prs": [
+        26
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "feat/avatar-defaults-crop-20261102",
+      "sha": "3cd1c0d0dde0895b947160572bd4c01b0a5da6d9",
+      "behind": 357,
+      "ahead": 18,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 18,
+      "equivalent_patches": 0,
+      "open_prs": [
+        29
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "feature/admin-console",
+      "sha": "e6eeb63f703b25ea3181175fc7452e0c583d13d5",
+      "behind": 455,
+      "ahead": 11,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 5,
+      "equivalent_patches": 6,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "feature/appearance-bright-blue-v071-20261103",
+      "sha": "f6e5f39717d67d4667ec050ecda18eeec21621f2",
+      "behind": 235,
+      "ahead": 5,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 5,
+      "equivalent_patches": 0,
+      "open_prs": [
+        74
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "feature/bright-blue-optional-background-20261103",
+      "sha": "283a549d249e916c389559fe5f87535dd0abe50d",
+      "behind": 235,
+      "ahead": 3,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 3,
+      "equivalent_patches": 0,
+      "open_prs": [
+        75
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "feature/issue76-electric-blue-background",
+      "sha": "35fd63e119eeb971f3ae6b06c1da1139f0e52099",
+      "behind": 223,
+      "ahead": 19,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 18,
+      "equivalent_patches": 1,
+      "open_prs": [
+        77
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "feature/meetup-shodka-spec-20261102",
+      "sha": "3a0872b9937afe3ccc0176a3a97d52929ad92b7e",
+      "behind": 357,
+      "ahead": 4,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 3,
+      "equivalent_patches": 1,
+      "open_prs": [
+        53
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "feature/spec-share-spots-clubs-20261102",
+      "sha": "1e8538db9471de7c514834f6e88693a175dd16ab",
+      "behind": 357,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        35
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/chat-stage-b-design-lock-20261101",
+      "sha": "1551036412d7c8219eb414f0678cd3266187e16b",
+      "behind": 357,
+      "ahead": 7,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 7,
+      "equivalent_patches": 0,
+      "open_prs": [
+        19
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/club-activation-single-flow",
+      "sha": "818240ff22ea2e12693b37ff171a374bf1ef1c13",
+      "behind": 455,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 0,
+      "equivalent_patches": 1,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/issue61-a-competitions",
+      "sha": "b19f08b082942a78a0526c0409e687f1a93eaac2",
+      "behind": 291,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/issue61-v071-p0-stages-5-8",
+      "sha": "02ac98c4a982d6cfd0c093a04e7cdb5a6d7efee8",
+      "behind": 181,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [
+        63
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/issue67-photo-privacy-20261103",
+      "sha": "39d30a1f69cf476239dcee640a6a566f8aedc828",
+      "behind": 176,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [
+        86
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/issue76-electric-blue-no-green",
+      "sha": "2f1433588a8a923b2873bf300c47bb4584b0066e",
+      "behind": 218,
+      "ahead": 7,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 6,
+      "equivalent_patches": 1,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/issue76-electric-blue-no-olive-20261103",
+      "sha": "68fd8019d83bc225ff57a972a8ba2fdd27e2068b",
+      "behind": 201,
+      "ahead": 3,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 1,
+      "open_prs": [
+        82
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/issue76-electric-blue-palette-audit-current",
+      "sha": "20ec430f3f3d71088ae01836e996838ae43c2d60",
+      "behind": 215,
+      "ahead": 3,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 1,
+      "open_prs": [
+        79
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/p0-mobile-smoke-stability",
+      "sha": "f6d0728cbac319ca2ca5ea7a7d8382dd302a443c",
+      "behind": 453,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 0,
+      "equivalent_patches": 1,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/p1-profile-load-save-races",
+      "sha": "4ce7561e92fb48ee339a74f1a7147c71b90a4b4a",
+      "behind": 453,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 0,
+      "equivalent_patches": 1,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/p2-feed-comments-request-race",
+      "sha": "cc3377b910b3269baeb22ff84e28c42be7fe520a",
+      "behind": 453,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 0,
+      "equivalent_patches": 1,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/profile-header-save-20261102",
+      "sha": "5516522b34b8af1366264e9ca0e9df2e7a93a4ab",
+      "behind": 357,
+      "ahead": 26,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 26,
+      "equivalent_patches": 0,
+      "open_prs": [
+        45
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/remove-supabase-as-any",
+      "sha": "a6377927ee2bcafe6498ec118a0ddf009ada1111",
+      "behind": 453,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        30
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-admin-role-lookup-20261104",
+      "sha": "b2893a1cd4c229db02c9ee23624ae9b4f6a8347a",
+      "behind": 73,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        103
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-atlas-schema-20261104",
+      "sha": "a66dce2f5611c7fe1d556ea64a8a3643980c9ab2",
+      "behind": 73,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        105
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-data-api-grants-20261102",
+      "sha": "6813df1ce22575307b1cd9de9cdebafcdb6b6aa4",
+      "behind": 357,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        36
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-feed-profile-join-20261104",
+      "sha": "960a540bce555a8b26ec9cce30ef6c2ccaf01c77",
+      "behind": 39,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        112,
+        110
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-feedback-function-20261104",
+      "sha": "811110841560378ee4c43eb51283815811106154",
+      "behind": 73,
+      "ahead": 3,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 3,
+      "equivalent_patches": 0,
+      "open_prs": [
+        107
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-feedback-requests-20261104",
+      "sha": "fd1ea35f40926d906af4e6cfc3deaaeaada3fcd0",
+      "behind": 73,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        106
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-follows-20261104",
+      "sha": "28a4d5e818d51e152401d530e116896edd8dc26c",
+      "behind": 73,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        104
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-geochat-20261104",
+      "sha": "dc517e880349743e715e64baa062689bf88015ec",
+      "behind": 73,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        99
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-global-chat-20261104",
+      "sha": "16d0813242f8f61ea0e7e23ddf2870a7512b42bd",
+      "behind": 73,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        102
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-profile-gear-20261104",
+      "sha": "abe52db6282188530a880f718dbf94f5d605b6fa",
+      "behind": 73,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        100
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-profile-private-rpc-20261104",
+      "sha": "872b80d10d5000ff9ea5a7214e42a146a18ce0fe",
+      "behind": 47,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        101
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/staging-report-core-20261104",
+      "sha": "7e66bc6c898f24930da16b84a6d422a3ffa4ac8d",
+      "behind": 73,
+      "ahead": 3,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 3,
+      "equivalent_patches": 0,
+      "open_prs": [
+        98
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/typescript-zero-errors",
+      "sha": "3466451a29c5b4ad472729aee9450ef923bccd5b",
+      "behind": 453,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        31
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "fix/xai-staging-preflight-v071",
+      "sha": "81b9522f9ea454fbd2340f9833a1fa863249af58",
+      "behind": 176,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [
+        89
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/approved-ui-v070",
+      "sha": "91f75917c0574595cc6a932a2ebf129c10ee93f1",
+      "behind": 357,
+      "ahead": 5,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 5,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/approved-ui-v070-fix",
+      "sha": "a196b91f732e7df01fdbb0847fecb4be3e36b534",
+      "behind": 357,
+      "ahead": 3,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 3,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/design-qa-tsc-lint-20261102",
+      "sha": "fc7ea6766bae60bba68b51b67fc4e0ff519f7a7e",
+      "behind": 357,
+      "ahead": 7,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 7,
+      "equivalent_patches": 0,
+      "open_prs": [
+        44
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/fix-exhaustive-deps-20261101",
+      "sha": "3ac263d1e21af61a63e11ff9f0f74e8c53378ea7",
+      "behind": 357,
+      "ahead": 7,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 7,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/fix-lint-tsc-20261101",
+      "sha": "a36597047f20a42346a6959e307a39b5dc637818",
+      "behind": 357,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/improvements",
+      "sha": "aa8b114931376c037a4b69f780d4f7200b18ac45",
+      "behind": 576,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/p0-mobile-auth-nav-20261101",
+      "sha": "5407b296840e20eb50a7785b9e9352111f27610d",
+      "behind": 357,
+      "ahead": 6,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 6,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/p1-spot-catalog-compact-20261101",
+      "sha": "2851be10432e58e898a29acbbbc934d94ff987d2",
+      "behind": 357,
+      "ahead": 13,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 13,
+      "equivalent_patches": 0,
+      "open_prs": [
+        24
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/p2-main-screens-compact-20261101",
+      "sha": "8d5a91bd4be014b1721d8fe634d993d8ace04e08",
+      "behind": 357,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        25
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/stage-c-thread-ui-20261101",
+      "sha": "9f1f3d047bf502743a1a956a3ae3576b6af43aaa",
+      "behind": 357,
+      "ahead": 11,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 11,
+      "equivalent_patches": 0,
+      "open_prs": [
+        21
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/stage1-spot-hub-ia",
+      "sha": "c10685af5ce71ce430b67f250c29c3e430f3a84f",
+      "behind": 357,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        47
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/stage2-partner-dm-reactions",
+      "sha": "2630442867e9c5f444ef75fa1f09894e7b221436",
+      "behind": 357,
+      "ahead": 2,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 2,
+      "equivalent_patches": 0,
+      "open_prs": [
+        48
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/stage3-club-limit-15",
+      "sha": "bb6c49302079e4354ab47dbe1eb31c11b08be229",
+      "behind": 357,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        49
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/stage4-street-gather",
+      "sha": "f95f9ac03284a9bbd6eb5e9cacf073f92d1e8db6",
+      "behind": 357,
+      "ahead": 4,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 4,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/stage5-guides-commission",
+      "sha": "6819e32530ecfbfe69e143cdc5283a0e249f3031",
+      "behind": 357,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        57
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/stage6-team-competitions",
+      "sha": "b208d072bcbd97b31403e6d918b44cda9c6839e2",
+      "behind": 357,
+      "ahead": 9,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 9,
+      "equivalent_patches": 0,
+      "open_prs": [
+        56
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/stage7-grok-api-advice",
+      "sha": "74f89e7275aaff508713d94d29d82f1e8a5da5f1",
+      "behind": 357,
+      "ahead": 6,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 6,
+      "equivalent_patches": 0,
+      "open_prs": [
+        58
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/stage8-openweather-api",
+      "sha": "2e65a44f7585ede65f428b48c5e28ab4112f417a",
+      "behind": 357,
+      "ahead": 7,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 7,
+      "equivalent_patches": 0,
+      "open_prs": [
+        59
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/street-report-import-hint-20261103",
+      "sha": "e6d888de774f78c05b4a1f79c665631c5bb962cc",
+      "behind": 217,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        81
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "grok/street-report-import-hint-20261103b",
+      "sha": "8b5fa0dc04f5ec1fe5ada4c26179ec950e44e1be",
+      "behind": 183,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        97,
+        88
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "integration/p0-admin-beta-rc1",
+      "sha": "e916ec04370dae862da3e299e94c7e7cfff06b9d",
+      "behind": 455,
+      "ahead": 20,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 11,
+      "equivalent_patches": 9,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "integration/p0-admin-beta-rc1-clean",
+      "sha": "e76b0da7a012d39e34af0cf1ae7a7a5e4172e1d3",
+      "behind": 436,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "integration/spot-messages-stage1-2-20261102",
+      "sha": "ae7ae86515cd279c02685484d5ee7f861fbf977b",
+      "behind": 357,
+      "ahead": 12,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 12,
+      "equivalent_patches": 0,
+      "open_prs": [
+        52
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "main",
+      "sha": "0d787d8e615dde821ca326fec1eeb6b9ef4ac15d",
+      "behind": 453,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "preview/auth-onboarding-staging-20261101",
+      "sha": "98c1e426e7ac69641a5fdc498c0d781249551c99",
+      "behind": 357,
+      "ahead": 15,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 15,
+      "equivalent_patches": 0,
+      "open_prs": [
+        28
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "preview/avatar-upgrade-staging-20261102",
+      "sha": "d1691fbfa1eb3b97c4fce4faed5067fd152f6aa8",
+      "behind": 357,
+      "ahead": 21,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 21,
+      "equivalent_patches": 0,
+      "open_prs": [
+        32
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "preview/profile-private-rpc-20261102",
+      "sha": "68e6c94f15f47dd69a5db2a9aa5c0d3664439b9a",
+      "behind": 357,
+      "ahead": 22,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 22,
+      "equivalent_patches": 0,
+      "open_prs": [
+        41
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "release/v0.7.0-alpha",
+      "sha": "a36597047f20a42346a6959e307a39b5dc637818",
+      "behind": 357,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [
+        18
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "release/v0.7.1-integration-20261102",
+      "sha": "17f077bf3466bf298e30bc1cc9b113b602a9a0f0",
+      "behind": 285,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [
+        60
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "release/v0.7.5-spot",
+      "sha": "3a43ed67c34ca3114cb6db987b546807a59c4d02",
+      "behind": 73,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [
+        85
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "security/anon-profile-column-access-20261102",
+      "sha": "48b79ba5e90a36f09a6e194d96ddb1be1e2d5e09",
+      "behind": 357,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        37
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "security/approx-coords-rounding-20261102",
+      "sha": "86adf9bf6229a2b9ef817e0c057f6696383a97da",
+      "behind": 357,
+      "ahead": 3,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 3,
+      "equivalent_patches": 0,
+      "open_prs": [
+        39
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "security/data-api-two-user-test-20261102",
+      "sha": "a007de1bd83b7fdec02e7be9a33e0130ed18595b",
+      "behind": 357,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        40
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "security/prod-trip-truncate-review-20261102",
+      "sha": "62da01c88a6633bef5d678f44795d4eb00d8febc",
+      "behind": 357,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        55
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "security/profiles-column-grants-20261102",
+      "sha": "dafa968c20ed016aed07475e81ef77034f0a25d4",
+      "behind": 357,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        38
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "security/public-report-coordinate-guard-20261102",
+      "sha": "43eda599f08684129370da4783b9cd2f828a942a",
+      "behind": 357,
+      "ahead": 1,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 1,
+      "equivalent_patches": 0,
+      "open_prs": [
+        34
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "security/revoke-legacy-club-rpc-execute",
+      "sha": "9f58a7ff653eb0cf901394fb030a27f728960a34",
+      "behind": 453,
+      "ahead": 4,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 3,
+      "equivalent_patches": 1,
+      "open_prs": [
+        11
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "staging/club15-preparation-20261102",
+      "sha": "e1288d404db9912a11190cd1ad0e752300f660c1",
+      "behind": 323,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [
+        54
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "test/issue67-geo-rls-staging-20261103",
+      "sha": "e2db3dc785c0605794291fb1da1293fc78e24e51",
+      "behind": 240,
+      "ahead": 4,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 4,
+      "equivalent_patches": 0,
+      "open_prs": [
+        72,
+        71
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "test/profile-private-fields-staging-20261102",
+      "sha": "b6708d00c985c33cd89ff80c11eba7994689f032",
+      "behind": 357,
+      "ahead": 25,
+      "ancestor_of_code": false,
+      "ancestor_of_spec": false,
+      "unique_patches": 25,
+      "equivalent_patches": 0,
+      "open_prs": [
+        42
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    },
+    {
+      "name": "work/v075-consolidation-20261104",
+      "sha": "3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd",
+      "behind": 34,
+      "ahead": 0,
+      "ancestor_of_code": true,
+      "ancestor_of_spec": true,
+      "unique_patches": 0,
+      "equivalent_patches": 0,
+      "open_prs": [
+        108
+      ],
+      "disposition": "PRESERVE; ancestry/patch equivalence does not prove schema deployment or feature acceptance"
+    }
+  ],
+  "pull_requests": [
+    {
+      "number": 113,
+      "title": "Docs/community readme v075 20261104",
+      "head": "docs/community-readme-v075-20261104",
+      "sha": "57359ba1a598d12654012ca58ca793bc1d712480",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/113"
+    },
+    {
+      "number": 112,
+      "title": "Fix/staging feed profile join 20261104",
+      "head": "fix/staging-feed-profile-join-20261104",
+      "sha": "960a540bce555a8b26ec9cce30ef6c2ccaf01c77",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/112"
+    },
+    {
+      "number": 111,
+      "title": "docs(ui): verified premium STAGING, JWT history and all 56 features",
+      "head": "docs/zapruda-canonical-decisions-20261104",
+      "sha": "a6ded8771a713248cc2367fa733873023d31958f",
+      "base": "feat/ai-yandex-deepseek-staging",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/111"
+    },
+    {
+      "number": 110,
+      "title": "fix(staging): restore fishing_reports → profiles relationship for Netlify preview",
+      "head": "fix/staging-feed-profile-join-20261104",
+      "sha": "960a540bce555a8b26ec9cce30ef6c2ccaf01c77",
+      "base": "feat/ai-yandex-deepseek-staging",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/110"
+    },
+    {
+      "number": 109,
+      "title": "docs: ZAPRUDA COMMUNITY — сообщество о всей рыбалке, актуальный README v0.7.5",
+      "head": "docs/community-readme-v075-20261104",
+      "sha": "57359ba1a598d12654012ca58ca793bc1d712480",
+      "base": "feat/ai-yandex-deepseek-staging",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/109"
+    },
+    {
+      "number": 108,
+      "title": "Work/v075 consolidation 20261104",
+      "head": "work/v075-consolidation-20261104",
+      "sha": "3fbaa2c4ab4e8803fa3d3bfa6a8e1219d62bdefd",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/108"
+    },
+    {
+      "number": 107,
+      "title": "fix(staging): развернуть защищённую Edge Function обратной связи",
+      "head": "fix/staging-feedback-function-20261104",
+      "sha": "811110841560378ee4c43eb51283815811106154",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/107"
+    },
+    {
+      "number": 106,
+      "title": "fix(staging): безопасная таблица обратной связи и фиксация отставания main",
+      "head": "fix/staging-feedback-requests-20261104",
+      "sha": "fd1ea35f40926d906af4e6cfc3deaaeaada3fcd0",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/106"
+    },
+    {
+      "number": 105,
+      "title": "draft(staging): схема Атласа с проверкой доказательств — требует ревью",
+      "head": "fix/staging-atlas-schema-20261104",
+      "sha": "a66dce2f5611c7fe1d556ea64a8a3643980c9ab2",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/105"
+    },
+    {
+      "number": 104,
+      "title": "fix(staging): подписки пользователей follows и RLS",
+      "head": "fix/staging-follows-20261104",
+      "sha": "28a4d5e818d51e152401d530e116896edd8dc26c",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/104"
+    },
+    {
+      "number": 103,
+      "title": "fix(staging): безопасная таблица проверки роли администратора без назначений",
+      "head": "fix/staging-admin-role-lookup-20261104",
+      "sha": "b2893a1cd4c229db02c9ee23624ae9b4f6a8347a",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/103"
+    },
+    {
+      "number": 102,
+      "title": "fix(staging): восстановить отправку сообщений в общем чате",
+      "head": "fix/staging-global-chat-20261104",
+      "sha": "16d0813242f8f61ea0e7e23ddf2870a7512b42bd",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/102"
+    },
+    {
+      "number": 101,
+      "title": "fix(profile): загружать приватное bio через owner-only RPC в STAGING",
+      "head": "fix/staging-profile-private-rpc-20261104",
+      "sha": "872b80d10d5000ff9ea5a7214e42a146a18ce0fe",
+      "base": "work/v075-consolidation-20261104",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/101"
+    },
+    {
+      "number": 100,
+      "title": "fix(staging): восстановить личные снасти и комплекты профиля с owner-only RLS",
+      "head": "fix/staging-profile-gear-20261104",
+      "sha": "abe52db6282188530a880f718dbf94f5d605b6fa",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/100"
+    },
+    {
+      "number": 99,
+      "title": "fix(staging): восстановить геочат и реакции с RLS, без небезопасных фото",
+      "head": "fix/staging-geochat-20261104",
+      "sha": "dc517e880349743e715e64baa062689bf88015ec",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/99"
+    },
+    {
+      "number": 98,
+      "title": "fix(staging): восстановить catches/comments с ограниченным RLS и правами",
+      "head": "fix/staging-report-core-20261104",
+      "sha": "7e66bc6c898f24930da16b84a6d422a3ffa4ac8d",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/98"
+    },
+    {
+      "number": 97,
+      "title": "Grok/street report import hint 20261103b",
+      "head": "grok/street-report-import-hint-20261103b",
+      "sha": "8b5fa0dc04f5ec1fe5ada4c26179ec950e44e1be",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/97"
+    },
+    {
+      "number": 96,
+      "title": "docs(domain): закрепить zaprudacommunity.ru как официальный домен ZAPRUDA",
+      "head": "docs/official-domain-zaprudacommunity-20261104",
+      "sha": "b690a3877cf06266b0f18be8ff42b0b4396fbb20",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/96"
+    },
+    {
+      "number": 93,
+      "title": "feat(pilot): approved premium UI and STAGING report/chat continuity",
+      "head": "feat/ai-yandex-deepseek-staging",
+      "sha": "8777e4ffbe43211ffcb04dba968dcfe28a149bcd",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/93"
+    },
+    {
+      "number": 92,
+      "title": "design(uiux): approved premium refinement foundations + 3-step report spec",
+      "head": "design/ux-refinement-v075-approved",
+      "sha": "978fce9de4279a9ed6da9391c49adfa334eb2097",
+      "base": "release/v0.7.5-spot",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/92"
+    },
+    {
+      "number": 89,
+      "title": "legacy(xAI): safe diagnostics retained until authorized Yandex cutover",
+      "head": "fix/xai-staging-preflight-v071",
+      "sha": "81b9522f9ea454fbd2340f9833a1fa863249af58",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/89"
+    },
+    {
+      "number": 88,
+      "title": "fix(street): подсказка о переносе сессии (rebase на HEAD #63)",
+      "head": "grok/street-report-import-hint-20261103b",
+      "sha": "8b5fa0dc04f5ec1fe5ada4c26179ec950e44e1be",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/88"
+    },
+    {
+      "number": 86,
+      "title": "fix(privacy): gate sanitized report photos by current visibility and close GPS column access",
+      "head": "fix/issue67-photo-privacy-20261103",
+      "sha": "39d30a1f69cf476239dcee640a6a566f8aedc828",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/86"
+    },
+    {
+      "number": 85,
+      "title": "feat(v0.7.5 SPOT): STAGING catch upload → moderation → KING → in-app notifications [draft]",
+      "head": "release/v0.7.5-spot",
+      "sha": "3a43ed67c34ca3114cb6db987b546807a59c4d02",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/85"
+    },
+    {
+      "number": 82,
+      "title": "fix(#76): Electric Blue without olive green, two palette choices and eggplant chat previews",
+      "head": "fix/issue76-electric-blue-no-olive-20261103",
+      "sha": "68fd8019d83bc225ff57a972a8ba2fdd27e2068b",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/82"
+    },
+    {
+      "number": 81,
+      "title": "fix(street): подсказка о переносе сессии в отчёт",
+      "head": "grok/street-report-import-hint-20261103",
+      "sha": "e6d888de774f78c05b4a1f79c665631c5bb962cc",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/81"
+    },
+    {
+      "number": 79,
+      "title": "test(#76): verify Electric Blue has no remaining dark-green panels",
+      "head": "fix/issue76-electric-blue-palette-audit-current",
+      "sha": "20ec430f3f3d71088ae01836e996838ae43c2d60",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/79"
+    },
+    {
+      "number": 77,
+      "title": "feat(#76): optional Electric Blue background with lime and eggplant; keep Matte Black default",
+      "head": "feature/issue76-electric-blue-background",
+      "sha": "35fd63e119eeb971f3ae6b06c1da1139f0e52099",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/77"
+    },
+    {
+      "number": 75,
+      "title": "feat(appearance): optional bright blue background; keep matte black default",
+      "head": "feature/bright-blue-optional-background-20261103",
+      "sha": "283a549d249e916c389559fe5f87535dd0abe50d",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/75"
+    },
+    {
+      "number": 74,
+      "title": "feat(ui): optional bright-blue background; keep matte-black as default",
+      "head": "feature/appearance-bright-blue-v071-20261103",
+      "sha": "f6e5f39717d67d4667ec050ecda18eeec21621f2",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/74"
+    },
+    {
+      "number": 72,
+      "title": "test(#67): rollback-only STAGING GPS/RLS checks (guest, stranger, owner, forged-admin)",
+      "head": "test/issue67-geo-rls-staging-20261103",
+      "sha": "e2db3dc785c0605794291fb1da1293fc78e24e51",
+      "base": "fix/issue61-v071-p0-stages-5-8",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/72"
+    },
+    {
+      "number": 71,
+      "title": "Test/issue67 geo rls staging 20261103",
+      "head": "test/issue67-geo-rls-staging-20261103",
+      "sha": "e2db3dc785c0605794291fb1da1293fc78e24e51",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/71"
+    },
+    {
+      "number": 63,
+      "title": "fix(v0.7.1): enforce release checks and keep the fishing advisor available",
+      "head": "fix/issue61-v071-p0-stages-5-8",
+      "sha": "02ac98c4a982d6cfd0c093a04e7cdb5a6d7efee8",
+      "base": "release/v0.7.1-integration-20261102",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/63"
+    },
+    {
+      "number": 60,
+      "title": "release(v0.7.1): integration candidate, source of truth and release gates",
+      "head": "release/v0.7.1-integration-20261102",
+      "sha": "17f077bf3466bf298e30bc1cc9b113b602a9a0f0",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/60"
+    },
+    {
+      "number": 59,
+      "title": "feat(stage8): OpenWeather API — погода в сводке и отчётах",
+      "head": "grok/stage8-openweather-api",
+      "sha": "2e65a44f7585ede65f428b48c5e28ab4112f417a",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/59"
+    },
+    {
+      "number": 58,
+      "title": "feat(stage7): интеграция Grok API — Выйти на воду",
+      "head": "grok/stage7-grok-api-advice",
+      "sha": "74f89e7275aaff508713d94d29d82f1e8a5da5f1",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/58"
+    },
+    {
+      "number": 57,
+      "title": "Grok/stage5 guides commission",
+      "head": "grok/stage5-guides-commission",
+      "sha": "6819e32530ecfbfe69e143cdc5283a0e249f3031",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/57"
+    },
+    {
+      "number": 56,
+      "title": "feat(stage6): командные соревнования клубов",
+      "head": "grok/stage6-team-competitions",
+      "sha": "b208d072bcbd97b31403e6d918b44cda9c6839e2",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/56"
+    },
+    {
+      "number": 55,
+      "title": "security(review only): remove dangerous trip TRUNCATE grants in PROD",
+      "head": "security/prod-trip-truncate-review-20261102",
+      "sha": "62da01c88a6633bef5d678f44795d4eb00d8febc",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/55"
+    },
+    {
+      "number": 54,
+      "title": "docs(staging): review-only club capacity 15 SQL + Claude handoff",
+      "head": "staging/club15-preparation-20261102",
+      "sha": "e1288d404db9912a11190cd1ad0e752300f660c1",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/54"
+    },
+    {
+      "number": 53,
+      "title": "docs(v0.7.1): APPROVED MUST-HAVE СХОДКИ + cross-service handoff",
+      "head": "feature/meetup-shodka-spec-20261102",
+      "sha": "3a0872b9937afe3ccc0176a3a97d52929ad92b7e",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/53"
+    },
+    {
+      "number": 52,
+      "title": "feat(alpha): integrate SPOT navigation, community paths and DM reactions",
+      "head": "integration/spot-messages-stage1-2-20261102",
+      "sha": "ae7ae86515cd279c02685484d5ee7f861fbf977b",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/52"
+    },
+    {
+      "number": 51,
+      "title": "docs: rewrite README for all-fishing ZAPRUDA COMMUNITY v0.7.0-alpha",
+      "head": "docs/readme-current-community-v070-20261102",
+      "sha": "29ba966da8e955784a221c992e99118fbeb6d382",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/51"
+    },
+    {
+      "number": 50,
+      "title": "docs(audit): legacy PR cleanup inventory and alpha safety gates",
+      "head": "audit/legacy-cleanup-inventory-20261102",
+      "sha": "1e715633a59e78fe91e35e74f36d01fa13a7d28b",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/50"
+    },
+    {
+      "number": 49,
+      "title": "feat(stage3): клуб 500 ₽ и лимит 15 участников",
+      "head": "grok/stage3-club-limit-15",
+      "sha": "bb6c49302079e4354ab47dbe1eb31c11b08be229",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/49"
+    },
+    {
+      "number": 48,
+      "title": "feat(stage2): напарник + реакции в личных сообщениях",
+      "head": "grok/stage2-partner-dm-reactions",
+      "sha": "2630442867e9c5f444ef75fa1f09894e7b221436",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/48"
+    },
+    {
+      "number": 47,
+      "title": "feat(stage1): хаб СПОТ + навигация + табы Комьюнити",
+      "head": "grok/stage1-spot-hub-ia",
+      "sha": "c10685af5ce71ce430b67f250c29c3e430f3a84f",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/47"
+    },
+    {
+      "number": 46,
+      "title": "docs: архитектура СПОТ / Комьюнити / Гиды 10%",
+      "head": "docs/product-architecture-spot-community-guides",
+      "sha": "b7215fa4e21af06de093f56ea7fd832a7f34cb75",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/46"
+    },
+    {
+      "number": 45,
+      "title": "fix(profile): compact profile name and prominent save button",
+      "head": "fix/profile-header-save-20261102",
+      "sha": "5516522b34b8af1366264e9ca0e9df2e7a93a4ab",
+      "base": "test/profile-private-fields-staging-20261102",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/45"
+    },
+    {
+      "number": 44,
+      "title": "fix(qa): design lock + TypeScript progression safety (draft)",
+      "head": "grok/design-qa-tsc-lint-20261102",
+      "sha": "fc7ea6766bae60bba68b51b67fc4e0ff519f7a7e",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/44"
+    },
+    {
+      "number": 42,
+      "title": "test(staging): owner-only profile RPC integration with avatar and auth preview",
+      "head": "test/profile-private-fields-staging-20261102",
+      "sha": "b6708d00c985c33cd89ff80c11eba7994689f032",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/42"
+    },
+    {
+      "number": 41,
+      "title": "test(staging): private profile RPC + avatar preview compatibility",
+      "head": "preview/profile-private-rpc-20261102",
+      "sha": "68e6c94f15f47dd69a5db2a9aa5c0d3664439b9a",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/41"
+    },
+    {
+      "number": 40,
+      "title": "security: тест безопасности Data API (два пользователя, разные JWT)",
+      "head": "security/data-api-two-user-test-20261102",
+      "sha": "a007de1bd83b7fdec02e7be9a33e0130ed18595b",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/40"
+    },
+    {
+      "number": 39,
+      "title": "security: контракт серверного округления приблизительных координат",
+      "head": "security/approx-coords-rounding-20261102",
+      "sha": "86adf9bf6229a2b9ef817e0c057f6696383a97da",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/39"
+    },
+    {
+      "number": 38,
+      "title": "security: profiles — разделение публичных и личных полей (колоночные GRANT + RPC владельца)",
+      "head": "security/profiles-column-grants-20261102",
+      "sha": "dafa968c20ed016aed07475e81ef77034f0a25d4",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/38"
+    },
+    {
+      "number": 37,
+      "title": "security(staging): restrict anonymous profile SELECT to public identity fields",
+      "head": "security/anon-profile-column-access-20261102",
+      "sha": "48b79ba5e90a36f09a6e194d96ddb1be1e2d5e09",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/37"
+    },
+    {
+      "number": 36,
+      "title": "fix(staging): restore Data API grants for reports and profiles",
+      "head": "fix/staging-data-api-grants-20261102",
+      "sha": "6813df1ce22575307b1cd9de9cdebafcdb6b6aa4",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/36"
+    },
+    {
+      "number": 35,
+      "title": "docs(future): opt-in spot sharing, fishing clubs and street-fishing events",
+      "head": "feature/spec-share-spots-clubs-20261102",
+      "sha": "1e8538db9471de7c514834f6e88693a175dd16ab",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/35"
+    },
+    {
+      "number": 34,
+      "title": "security(reports): forbid precise coordinates in public reports",
+      "head": "security/public-report-coordinate-guard-20261102",
+      "sha": "43eda599f08684129370da4783b9cd2f828a942a",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/34"
+    },
+    {
+      "number": 33,
+      "title": "fix(security): rollback failed avatar uploads and document release risks",
+      "head": "audit/auth-avatar-safety-20261102",
+      "sha": "7078475ed6424a63d02323221c336613ff958384",
+      "base": "feat/avatar-defaults-crop-20261102",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/33"
+    },
+    {
+      "number": 32,
+      "title": "test(staging): avatar crop/defaults preview QA",
+      "head": "preview/avatar-upgrade-staging-20261102",
+      "sha": "d1691fbfa1eb3b97c4fce4faed5067fd152f6aa8",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/32"
+    },
+    {
+      "number": 31,
+      "title": "Исправить все 32 ошибки TypeScript — tsc --noEmit теперь 0",
+      "head": "fix/typescript-zero-errors",
+      "sha": "3466451a29c5b4ad472729aee9450ef923bccd5b",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/31"
+    },
+    {
+      "number": 30,
+      "title": "Убрать касты as any у Supabase-клиента и типизировать события Яндекс.Карт",
+      "head": "fix/remove-supabase-as-any",
+      "sha": "a6377927ee2bcafe6498ec118a0ddf009ada1111",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/30"
+    },
+    {
+      "number": 29,
+      "title": "feat(profile): fishing default avatars and crop/zoom photo editor",
+      "head": "feat/avatar-defaults-crop-20261102",
+      "sha": "3cd1c0d0dde0895b947160572bd4c01b0a5da6d9",
+      "base": "preview/auth-onboarding-staging-20261101",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/29"
+    },
+    {
+      "number": 28,
+      "title": "test(staging): preview auth confirmation and profile onboarding",
+      "head": "preview/auth-onboarding-staging-20261101",
+      "sha": "98c1e426e7ac69641a5fdc498c0d781249551c99",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/28"
+    },
+    {
+      "number": 27,
+      "title": "fix(reports): selectively adopt Claude pressure precision improvement",
+      "head": "claude/selective-improvements-20261101",
+      "sha": "4b17865c2685d21807b1d02f8de76d72aacf0102",
+      "base": "feat/auth-confirm-profile-onboarding-20261101",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/27"
+    },
+    {
+      "number": 26,
+      "title": "feat(auth/profile): email confirmation return, onboarding and avatar upload",
+      "head": "feat/auth-confirm-profile-onboarding-20261101",
+      "sha": "0c4e70a5c80459c8d792f345bbb636ff65dc9f38",
+      "base": "grok/p0-mobile-auth-nav-20261101",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/26"
+    },
+    {
+      "number": 25,
+      "title": "feat(ui): P2 main screens density — communities, trips, feed, report (draft)",
+      "head": "grok/p2-main-screens-compact-20261101",
+      "sha": "8d5a91bd4be014b1721d8fe634d993d8ace04e08",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/25"
+    },
+    {
+      "number": 24,
+      "title": "fix(chat): P1 compact ZAPRUDA SPOT catalog (draft)",
+      "head": "grok/p1-spot-catalog-compact-20261101",
+      "sha": "2851be10432e58e898a29acbbbc934d94ff987d2",
+      "base": "grok/stage-c-thread-ui-20261101",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/24"
+    },
+    {
+      "number": 21,
+      "title": "fix(chat): Stage C — ZAPRUDA SPOT thread UI (draft)",
+      "head": "grok/stage-c-thread-ui-20261101",
+      "sha": "9f1f3d047bf502743a1a956a3ae3576b6af43aaa",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/21"
+    },
+    {
+      "number": 19,
+      "title": "fix(chat): Stage B approved «Свои на связи» UI alignment",
+      "head": "fix/chat-stage-b-design-lock-20261101",
+      "sha": "1551036412d7c8219eb414f0678cd3266187e16b",
+      "base": "release/v0.7.0-alpha",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/19"
+    },
+    {
+      "number": 18,
+      "title": "Release/v0.7.0 alpha",
+      "head": "release/v0.7.0-alpha",
+      "sha": "a36597047f20a42346a6959e307a39b5dc637818",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/18"
+    },
+    {
+      "number": 16,
+      "title": "Audit/claude security review v070",
+      "head": "audit/claude-security-review-v070",
+      "sha": "d8571b722ef3d82ac1d298b0a794b91c5cd3b001",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/16"
+    },
+    {
+      "number": 13,
+      "title": "test(staging): schema parity and privileged RPC audit gates",
+      "head": "audit/staging-parity-gates",
+      "sha": "c4c74695be2e4749f18493325cb57b119b5f6289",
+      "base": "integration/p0-admin-beta-rc1-clean",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/13"
+    },
+    {
+      "number": 11,
+      "title": "SECURITY DRAFT: revoke authenticated EXECUTE on legacy activate_paid_club RPC",
+      "head": "security/revoke-legacy-club-rpc-execute",
+      "sha": "9f58a7ff653eb0cf901394fb030a27f728960a34",
+      "base": "main",
+      "url": "https://github.com/SergeyGalkin91/zapruda1/pull/11"
+    }
+  ],
+  "shared_pr_heads": [
+    [
+      {
+        "number": 113,
+        "title": "Docs/community readme v075 20261104",
+        "head": "docs/community-readme-v075-20261104",
+        "sha": "57359ba1a598d12654012ca58ca793bc1d712480",
+        "base": "main",
+        "url": "https://github.com/SergeyGalkin91/zapruda1/pull/113"
+      },
+      {
+        "number": 109,
+        "title": "docs: ZAPRUDA COMMUNITY — сообщество о всей рыбалке, актуальный README v0.7.5",
+        "head": "docs/community-readme-v075-20261104",
+        "sha": "57359ba1a598d12654012ca58ca793bc1d712480",
+        "base": "feat/ai-yandex-deepseek-staging",
+        "url": "https://github.com/SergeyGalkin91/zapruda1/pull/109"
+      }
+    ],
+    [
+      {
+        "number": 112,
+        "title": "Fix/staging feed profile join 20261104",
+        "head": "fix/staging-feed-profile-join-20261104",
+        "sha": "960a540bce555a8b26ec9cce30ef6c2ccaf01c77",
+        "base": "main",
+        "url": "https://github.com/SergeyGalkin91/zapruda1/pull/112"
+      },
+      {
+        "number": 110,
+        "title": "fix(staging): restore fishing_reports → profiles relationship for Netlify preview",
+        "head": "fix/staging-feed-profile-join-20261104",
+        "sha": "960a540bce555a8b26ec9cce30ef6c2ccaf01c77",
+        "base": "feat/ai-yandex-deepseek-staging",
+        "url": "https://github.com/SergeyGalkin91/zapruda1/pull/110"
+      }
+    ],
+    [
+      {
+        "number": 97,
+        "title": "Grok/street report import hint 20261103b",
+        "head": "grok/street-report-import-hint-20261103b",
+        "sha": "8b5fa0dc04f5ec1fe5ada4c26179ec950e44e1be",
+        "base": "main",
+        "url": "https://github.com/SergeyGalkin91/zapruda1/pull/97"
+      },
+      {
+        "number": 88,
+        "title": "fix(street): подсказка о переносе сессии (rebase на HEAD #63)",
+        "head": "grok/street-report-import-hint-20261103b",
+        "sha": "8b5fa0dc04f5ec1fe5ada4c26179ec950e44e1be",
+        "base": "fix/issue61-v071-p0-stages-5-8",
+        "url": "https://github.com/SergeyGalkin91/zapruda1/pull/88"
+      }
+    ],
+    [
+      {
+        "number": 72,
+        "title": "test(#67): rollback-only STAGING GPS/RLS checks (guest, stranger, owner, forged-admin)",
+        "head": "test/issue67-geo-rls-staging-20261103",
+        "sha": "e2db3dc785c0605794291fb1da1293fc78e24e51",
+        "base": "fix/issue61-v071-p0-stages-5-8",
+        "url": "https://github.com/SergeyGalkin91/zapruda1/pull/72"
+      },
+      {
+        "number": 71,
+        "title": "Test/issue67 geo rls staging 20261103",
+        "head": "test/issue67-geo-rls-staging-20261103",
+        "sha": "e2db3dc785c0605794291fb1da1293fc78e24e51",
+        "base": "main",
+        "url": "https://github.com/SergeyGalkin91/zapruda1/pull/71"
+      }
+    ]
+  ],
+  "branch_count": 95,
+  "open_pr_count": 75
+}

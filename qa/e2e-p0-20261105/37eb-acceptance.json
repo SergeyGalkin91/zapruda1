@@ -1,0 +1,55 @@
+{
+  "source_sha": "37eb39aa92e55607e58234f264da0470c973fe10",
+  "run": 41957327094,
+  "workflow": "SUCCESS",
+  "scope": "real STAGING JWT/API + authenticated localhost frontend; not hosted Netlify or genuine positive KING",
+  "artifact": {
+    "id": 13384367803,
+    "sha256": "b427400b822668382cc1b8fdc9e5292bb897fe5898edbdf441d10ffa0ea7ef4a",
+    "png_count": 292
+  },
+  "jwt_api": {
+    "sha": "37eb39aa92e55607e58234f264da0470c973fe10",
+    "passed": true,
+    "scope": "four real confirmed JWTs; own progress; browser Origin; denied unauthorized review and upload",
+    "noPublicFixtures": true,
+    "positiveKing": "BLOCKED: genuine lawful spot, authorized independent moderator and genuine proof required",
+    "cleanup": "negative upload rejected and own catch IDs unchanged; no accepted SPOT catch created"
+  },
+  "browser": {
+    "passed": true,
+    "cleanup": true,
+    "checks": [
+      "real JWT Atlas catalog and own invoker progress read; no catalog fixtures inserted",
+      "two distinct actual UI password logins",
+      "UI send lost-response recovery: one persisted message; B unread via Realtime; open/read/reload; foreign marker denied; real Realtime preserves draft",
+      "real private report → explicit one-fish transfer → reload → authoritative profile; no automatic SPOT submit; foreign browser sees no handoff",
+      "actual wizard: catch/no-catch, photo, back/next, restored draft, private submit, outsider denial, no premature publish",
+      "STREET tick >1 min, reload, tackle/lure, catch log, opt-in import, same-browser account isolation",
+      "authenticated 3-engine x 4-width x 2-theme route screenshots, header control bounds and 44px targets; unauthorized admin only"
+    ],
+    "limitations": [
+      "No genuine KING evidence/spot/moderator provisioned",
+      "No physical device keyboard or mobile network proof",
+      "No production changes"
+    ],
+    "ai": {
+      "diagnosticOnly": true,
+      "configuration": "YANDEX_KEY_MISSING",
+      "webSearchEnabled": false
+    },
+    "chatEmbeddedRead": "OK",
+    "chatPostStatus": 201,
+    "chatAfterSendCount": 1,
+    "fishReportCommitStatus": 200,
+    "noCatchReportCommitStatus": 201,
+    "matrixContext": {
+      "engine": "webkit",
+      "width": 1440,
+      "theme": "electric-blue",
+      "route": "/admin"
+    }
+  },
+  "positiveKing": "BLOCKED: no lawful reviewed SPOT, independent authorized moderator or genuine evidence",
+  "netlify": "deploy status success on exact SHA; hosted verification blocked by Team protection/Google device approval"
+}

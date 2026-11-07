@@ -1,3 +1,5 @@
+> **Актуальный P0, 05.11.2026:** #93 `37eb39aa92e55607e58234f264da0470c973fe10` — полный защищённый [41957327094](https://github.com/SergeyGalkin91/zapruda1/actions/runs/41957327094) **PASS**,13/13 обычных workflow,484 Vitest. [Точные результаты и BLOCKED-этапы](ZAPRUDA_E2E_FINAL_ACCEPTANCE_20261105.md). Положительный KING и hosted Netlify mobile не приняты. ON SPOT+ продолжается отдельно в [PR114](https://github.com/SergeyGalkin91/zapruda1/pull/114), без применения новой дельты. Цель D22 **0.7.6 KING FINISH ON SPOT+**, версия0.7.5;56 ID/8 модулей/7 KING/OSP-01…09 сохранены. **Main/Production/release NO-GO.**
+
 # Текущее состояние — ZAPRUDA v0.7.5 SPOT, 04.11.2026
 
 **Защищённый JWT E2E PASS; публичный запуск пока NO-GO.** Канонический [PR #93](https://github.com/SergeyGalkin91/zapruda1/pull/93) → `release/v0.7.5-spot`, head `feat/ai-yandex-deepseek-staging`, work mirror `work/v075-consolidation-20261104`. Определять точный актуальный HEAD из GitHub, а не из старого текста PR. Дизайн v0.6.0-admin-rc.1, обе темы и пять вкладок сохранены.

@@ -1,0 +1,172 @@
+{
+  "sha": "e9fd4aa8172d7e55553c0882640ecebb75c9d421",
+  "deployId": "6aeb663d03e8681d52163b74",
+  "cases": 96,
+  "ready": 96,
+  "geometryPass": 96,
+  "withRenderedErrors": [
+    {
+      "route": "/",
+      "width": 320,
+      "theme": "classic",
+      "markers": [
+        "Не удалось"
+      ]
+    },
+    {
+      "route": "/communities",
+      "width": 320,
+      "theme": "classic",
+      "markers": [
+        "Не удалось",
+        "Could not find",
+        "does not exist"
+      ]
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "theme": "classic",
+      "markers": [
+        "Не удалось"
+      ]
+    },
+    {
+      "route": "/communities",
+      "width": 390,
+      "theme": "classic",
+      "markers": [
+        "Не удалось",
+        "Could not find",
+        "does not exist"
+      ]
+    },
+    {
+      "route": "/",
+      "width": 768,
+      "theme": "classic",
+      "markers": [
+        "Не удалось"
+      ]
+    },
+    {
+      "route": "/communities",
+      "width": 768,
+      "theme": "classic",
+      "markers": [
+        "Не удалось",
+        "Could not find",
+        "does not exist"
+      ]
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "theme": "classic",
+      "markers": [
+        "Не удалось"
+      ]
+    },
+    {
+      "route": "/communities",
+      "width": 1440,
+      "theme": "classic",
+      "markers": [
+        "Не удалось",
+        "Could not find",
+        "does not exist"
+      ]
+    },
+    {
+      "route": "/",
+      "width": 320,
+      "theme": "electric-blue",
+      "markers": [
+        "Не удалось"
+      ]
+    },
+    {
+      "route": "/communities",
+      "width": 320,
+      "theme": "electric-blue",
+      "markers": [
+        "Не удалось",
+        "Could not find",
+        "does not exist"
+      ]
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "theme": "electric-blue",
+      "markers": [
+        "Не удалось"
+      ]
+    },
+    {
+      "route": "/communities",
+      "width": 390,
+      "theme": "electric-blue",
+      "markers": [
+        "Не удалось",
+        "Could not find",
+        "does not exist"
+      ]
+    },
+    {
+      "route": "/",
+      "width": 768,
+      "theme": "electric-blue",
+      "markers": [
+        "Не удалось"
+      ]
+    },
+    {
+      "route": "/communities",
+      "width": 768,
+      "theme": "electric-blue",
+      "markers": [
+        "Не удалось",
+        "Could not find",
+        "does not exist"
+      ]
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "theme": "electric-blue",
+      "markers": [
+        "Не удалось"
+      ]
+    },
+    {
+      "route": "/communities",
+      "width": 1440,
+      "theme": "electric-blue",
+      "markers": [
+        "Не удалось",
+        "Could not find",
+        "does not exist"
+      ]
+    }
+  ],
+  "images": [
+    "classic-320-feed-e9fd4aa-context.jpg",
+    "classic-390-feed-e9fd4aa-context.jpg",
+    "classic-390-chat-e9fd4aa-context.jpg",
+    "classic-390-reports-new-e9fd4aa-context.jpg",
+    "classic-768-feed-e9fd4aa-context.jpg",
+    "classic-1440-feed-e9fd4aa-context.jpg",
+    "electric-blue-320-feed-e9fd4aa-context.jpg",
+    "electric-blue-390-feed-e9fd4aa-context.jpg",
+    "electric-blue-390-chat-e9fd4aa-context.jpg",
+    "electric-blue-390-reports-new-e9fd4aa-context.jpg",
+    "electric-blue-768-feed-e9fd4aa-context.jpg",
+    "electric-blue-1440-feed-e9fd4aa-context.jpg"
+  ],
+  "restoredTheme": "classic",
+  "level": "Actual hosted authenticated single-account same-origin iframe CSS viewport; not a physical-device or complete two-user publication E2E",
+  "beforeImage": "classic-320-feed-viewport-aa67109.jpg",
+  "deduplication": "First observation retained for each route / requested CSS width / theme; 96 distinct cases. A later duplicate feed capture supplies the persisted 320px after-image.",
+  "captureLimit": "Native 1363x936 parent-browser context screenshots; child CSS viewport width differs from bitmap width. 1440px child extends beyond the screenshot right edge. JSON metrics cover the full child viewport. Browser preview collaboration controls may overlay content; no physical-device claim."
+}

@@ -1,0 +1,205 @@
+{
+  "code_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+  "release_decision": "NO-GO",
+  "technical_version": "0.7.5",
+  "target": "0.7.6 KING FINISH",
+  "cleanup_readback": {
+    "checked_at": "2026-11-04 15:01:31.180633+00",
+    "approved_feedback_remaining": 0,
+    "feedback_marker_remaining": 0,
+    "approved_report_remaining": 0,
+    "hosted_qa_published_reports": 0
+  },
+  "cleanup_action_this_task": "SELECT only, no repeated deletion",
+  "ordinary_workflows": [
+    {
+      "id": 41850086583,
+      "name": "ZAPRUDA Frontend Build",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086015,
+      "name": "Advisor availability without an AI provider",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086290,
+      "name": "ZAPRUDA checks",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086367,
+      "name": "Netlify preview STAGING isolation guard",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086127,
+      "name": "Report photo privacy browser check",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086281,
+      "name": "v0.7.1 Meetup security guards",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086131,
+      "name": "Independent Node hosting proof",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086137,
+      "name": "ZAPRUDA Docker image smoke test",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086405,
+      "name": "SPOT isolated PostgreSQL transaction races",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086042,
+      "name": "Yandex canary Deno typecheck",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086325,
+      "name": "Pilot schema PostgreSQL and Deno checks",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086289,
+      "name": "v0.7.1 Meetup mobile browser smoke",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41850086260,
+      "name": "ZAPRUDA Electric Blue cross-browser review",
+      "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "protected_e2e": {
+    "id": 41850073063,
+    "head_sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+    "status": "waiting",
+    "job_id": 126644073907,
+    "steps_executed": 0,
+    "environment": "staging-e2e",
+    "owner_action": "Review deployments → staging-e2e → Approve and deploy"
+  },
+  "hosted": {
+    "deploy_id": "6aeb44183e24593119932b5b",
+    "deploy_details": "https://app.netlify.com/projects/zapruda1/deploys/6aeb44183e24593119932b5b",
+    "sha": "f3bbe1bc4a731c3ec1c56a5b1d7dce13d8d559ec",
+    "real_accounts": 1,
+    "viewport": {
+      "width": 1348,
+      "height": 926
+    },
+    "actual_login": true,
+    "published_reports": 0,
+    "sent_chat_messages": 0,
+    "street_qa_draft_cleared": true,
+    "report_qa_draft_cleared": true,
+    "original_theme_restored": "Matte Black",
+    "hosted_mobile_320_390": "NOT ACCEPTED",
+    "two_user_hosted_write_realtime_media": "NOT ACCEPTED",
+    "network_trace": "NOT CAPTURED"
+  },
+  "postgres": {
+    "live_staging_rollback": "PASS, no persistent fixtures; SQL role/claim simulation, not signed JWT",
+    "independent_race_rounds": 5,
+    "live_migrations": [
+      {
+        "version": "20261104133211",
+        "name": "v076_club_message_membership_scope"
+      },
+      {
+        "version": "20261104133529",
+        "name": "v076_meetup_leave_cancel"
+      }
+    ]
+  },
+  "contract": {
+    "original_ids": 56,
+    "regression_tests": 7,
+    "local_validation": "PASS; not release approval"
+  },
+  "screenshots": [
+    {
+      "path": "qa/product-contract/hosted-street-blue-before-ba1275f.jpg",
+      "bytes": 86757,
+      "sha256": "756ffd02eb2df0a6c5c7a635837ca21f6c84bcac5258582a2035dfaac557b465",
+      "git_blob": "3d00f3da0f9214f95e24046c27d28de8b0b4d539"
+    },
+    {
+      "path": "qa/product-contract/hosted-street-blue-after-a671f85.jpg",
+      "bytes": 85998,
+      "sha256": "e3e6b24089d01f061dd746f4b8c870b8424d699d89a0ba1cdf0e410918bea858",
+      "git_blob": "bbefe73b708371f0aa11a858fde0921728a2ed02"
+    },
+    {
+      "path": "qa/product-contract/hosted-import-blue-before-ba1275f.jpg",
+      "bytes": 86925,
+      "sha256": "c91d1e22d025b982da0bf3dde909fb18252d41442c6be6bfce06c515276ec8e4",
+      "git_blob": "9a932a6c0124daa36e0b249f6bda5654e69d5b54"
+    },
+    {
+      "path": "qa/product-contract/hosted-import-blue-after-f3bbe1b.jpg",
+      "bytes": 87437,
+      "sha256": "a977b955196bca8a87837cf40e49f03a9abb5119e8faffc4adfc3d807da14c93",
+      "git_blob": "b0be12161b517e4ccb0b03657d2b9db8d44b86e3"
+    },
+    {
+      "path": "qa/product-contract/hosted-report-private-ba1275f.jpg",
+      "bytes": 88729,
+      "sha256": "467629b89c47251d3bf09152d9ecaaeeff241ac7d70eecc75bde2e9773ecebd4",
+      "git_blob": "d2813525bb7d7789b7b5a36626c202f0221f018e"
+    },
+    {
+      "path": "qa/product-contract/hosted-chat-matte-ba1275f.jpg",
+      "bytes": 67295,
+      "sha256": "fd7060e375bea50169ad7334561786d6dbcd32faeffe57ccbc0b26100bf46ba5",
+      "git_blob": "a504bd44f1aa19d6c4672daf12f251076b876593"
+    },
+    {
+      "path": "qa/product-contract/hosted-profile-blue-f3bbe1b.jpg",
+      "bytes": 107366,
+      "sha256": "a86f6335f1a775ab7f2ce599d38721ac49adc8aeb94b833848d70015ad0cd24e",
+      "git_blob": "40de189523f7ee2da619bc1782926573a9e5636c"
+    },
+    {
+      "path": "qa/product-contract/hosted-profile-matte-f3bbe1b.jpg",
+      "bytes": 99600,
+      "sha256": "572f85ad13294c71eac5843e441157b86d35105094f660ca2eca11e87f25c92e",
+      "git_blob": "932430f85f174e360b8ea3d67d5485d13701c33a"
+    }
+  ],
+  "production": "READ ONLY; exact catalog diff and future sequence in linked report"
+}
