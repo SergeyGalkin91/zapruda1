@@ -1,0 +1,87 @@
+name: ZAPRUDA APP native Android and iOS build
+on:
+  push:
+    branches: [feat/zapruda-app-native-ios-android]
+    paths:
+      - 'apps/zapruda-app/**'
+      - '.github/workflows/zapruda-native-device-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-debug-apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: apps/zapruda-app
+    env:
+      EXPO_PUBLIC_SUPABASE_URL: https://yudtbifopfnjtjanaqrd.supabase.co
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Expo dependencies
+        run: npm install --no-audit --no-fund
+      - name: Generate native Android project
+        run: npx expo prebuild --platform android --no-install
+      - name: Build real Android debug APK
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace
+      - name: Upload Android APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zapruda-app-android-debug-apk
+          path: apps/zapruda-app/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
+
+  ios-simulator:
+    runs-on: macos-15
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: apps/zapruda-app
+    env:
+      EXPO_PUBLIC_SUPABASE_URL: https://yudtbifopfnjtjanaqrd.supabase.co
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Verify Xcode availability
+        run: xcodebuild -version
+      - name: Install Expo dependencies
+        run: npm install --no-audit --no-fund
+      - name: Generate native iOS project
+        run: npx expo prebuild --platform ios --no-install
+      - name: Install CocoaPods
+        run: cd ios && pod install
+      - name: Compile iOS Simulator application without signing
+        run: |
+          workspace=$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)
+          test -n "$workspace"
+          scheme=$(basename "$workspace" .xcworkspace)
+          xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/zapruda-ios-derived" CODE_SIGNING_ALLOWED=NO build
+      - name: Pack iOS Simulator app
+        run: |
+          cd "$RUNNER_TEMP/zapruda-ios-derived/Build/Products/Debug-iphonesimulator"
+          test -d "$(find . -maxdepth 1 -name '*.app' -type d -print -quit)"
+          ditto -c -k --sequesterRsrc --keepParent ./*.app "$RUNNER_TEMP/zapruda-ios-simulator.zip"
+      - name: Upload unsigned simulator build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zapruda-app-ios-simulator-unsigned
+          path: ${{ runner.temp }}/zapruda-ios-simulator.zip
+          if-no-files-found: error
+          retention-days: 7
