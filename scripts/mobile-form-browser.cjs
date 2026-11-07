@@ -366,6 +366,18 @@ async function report(page, width, writes) {
   await disciplines.getByText("Спиннинг", { exact: true }).click();
   await expect(disciplines.getByRole("radio", { name: "Спиннинг" })).toBeChecked();
   assert.equal(await questionScroll(), 0, "Selecting a discipline must leave its question in view");
+  await expect
+    .poll(() =>
+      disciplines
+        .locator("label")
+        .first()
+        .evaluate((tile) => {
+          const list = tile.closest(".z-liquid-category-scroll").getBoundingClientRect();
+          const box = tile.getBoundingClientRect();
+          return box.top >= list.top - 1 && box.bottom <= list.bottom + 1;
+        }),
+    )
+    .toBe(true);
   if (width === 390) {
     await page.screenshot({
       path: evidence + "/" + engine + "-liquid-category.png",

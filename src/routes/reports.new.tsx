@@ -909,7 +909,10 @@ export function NewReport() {
                   value={item.code}
                   checked={fishingMethod === item.code}
                   required
-                  onChange={() => setFishingMethod(item.code)}
+                  onChange={(event) => {
+                    setFishingMethod(item.code);
+                    event.currentTarget.parentElement?.scrollIntoView?.({ block: "nearest" });
+                  }}
                 />
                 <span>{item.title}</span>
               </label>
