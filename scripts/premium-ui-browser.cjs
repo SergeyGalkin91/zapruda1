@@ -20,7 +20,21 @@ fs.mkdirSync(out, { recursive: true });
       const context = await browser.newContext({ viewport:{width,height:844}, locale:"ru-RU", reducedMotion:"reduce" });
       const badRequests = [], errors = [];
       context.on("request", (request) => { if (request.url().includes("sonvniuwtvzzyuglscah.supabase.co")) badRequests.push("production request"); });
-      await context.route("https://ci-placeholder.supabase.co/**", route => route.fulfill({status:route.request().url().includes("/auth/")?401:200,contentType:"application/json",headers:{"access-control-allow-origin":"*"},body:route.request().url().includes("/auth/")?'{"message":"No test session"}':"[]"}));
+      await context.route("https://ci-placeholder.supabase.co/**", (route) => {
+        const request = route.request();
+        const headers = {
+          "access-control-allow-origin": new URL(base).origin,
+          "access-control-allow-methods": "GET, HEAD, POST, OPTIONS",
+          "access-control-allow-headers": request.headers()["access-control-request-headers"] ?? "*",
+        };
+        if (request.method() === "OPTIONS") return route.fulfill({ status: 204, headers });
+        const auth = request.url().includes("/auth/");
+        return route.fulfill({
+          status: auth ? 401 : 200,
+          headers,
+          json: auth ? { message: "No test session" } : [],
+        });
+      });
       const page = await context.newPage();
       page.on("pageerror", e => errors.push(e.message));
       for (const theme of ["classic","electric-blue"]) {
