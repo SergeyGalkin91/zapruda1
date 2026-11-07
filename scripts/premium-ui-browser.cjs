@@ -82,6 +82,7 @@ fs.mkdirSync(out, { recursive: true });
         }
         // Exercise real geography filtering and menu targets; never create fixture data.
         await page.goto(base+"/communities",{waitUntil:"domcontentloaded"});
+        await page.locator('[data-z-catalog-ready="true"]').waitFor();
         const sectionNav = page.getByRole("navigation", {name:"Каталог сообществ"});
         const clubs = sectionNav.getByRole("link", {name:"Клубы",exact:true});
         await clubs.click();
@@ -89,6 +90,7 @@ fs.mkdirSync(out, { recursive: true });
         await clubs.and(sectionNav.locator('[aria-current="page"]')).waitFor();
         assert.equal(await sectionNav.locator('[aria-current="page"]').count(),1);
         await page.goto(base+"/communities",{waitUntil:"domcontentloaded"});
+        await page.locator('[data-z-catalog-ready="true"]').waitFor();
         await page.getByRole("searchbox",{name:"Поиск страны"}).fill("Россия");
         await page.getByRole("button",{name:/Россия/}).click();
         assert(await page.getByRole("link",{name:/Открыть чаты страны/}).count());

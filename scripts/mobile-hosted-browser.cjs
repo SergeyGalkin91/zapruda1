@@ -221,6 +221,7 @@ async function run() {
           await page.locator("main h1").first().waitFor();
           if (screen.name === "feed") await waitForFeed(page);
           if (screen.name === "communities" && width === 320) {
+            await page.locator('[data-z-catalog-ready="true"]').waitFor();
             const labels = page.locator(".z-country-card > span:nth-child(2)");
             await labels.first().waitFor();
             const wrapped = await labels.evaluateAll((elements) =>

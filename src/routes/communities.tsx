@@ -37,12 +37,15 @@ const communitySections = [
 function Communities() {
   const [country, setCountry] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [catalogReady, setCatalogReady] = useState(false);
   const selectedCountry = useRef<HTMLDivElement>(null);
   const visible = countries.filter(
     (c) =>
       c.group === "cis" && c.name.toLocaleLowerCase("ru").includes(search.toLocaleLowerCase("ru")),
   );
   const selected = countries.find((c) => c.code === country);
+
+  useEffect(() => setCatalogReady(true), []);
 
   useEffect(() => {
     if (country && window.matchMedia("(max-width: 639px)").matches) {
@@ -90,6 +93,8 @@ function Communities() {
           <span className="sr-only">Поиск страны</span>
           <input
             type="search"
+            data-z-catalog-ready={catalogReady || undefined}
+            disabled={!catalogReady}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Найти страну"
