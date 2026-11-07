@@ -104,9 +104,11 @@ jobs:
                     }
                   }
                   if (route === '/reports/new') {
-                    const text = await page.locator('body').innerText();
-                    if (!/новый отчёт/i.test(text) || !/название отчёта/i.test(text)) {
-                      failures++; console.error(width + 'px /reports/new: report form not rendered');
+                    const heading = page.getByRole('heading', {name: 'Новый отчёт', exact: true});
+                    const firstQuestion = page.getByLabel('Водоём или место', {exact: true});
+                    const next = page.getByRole('button', {name: 'Далее', exact: true});
+                    if (!(await heading.isVisible()) || !(await firstQuestion.isVisible()) || !(await next.isVisible())) {
+                      failures++; console.error(width + 'px /reports/new: first report question or action is missing');
                     }
                   }
                   if (route === '/street') {
