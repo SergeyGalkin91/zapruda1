@@ -529,13 +529,17 @@ async function liquidDrop(page, width) {
     "aria-current",
     "page",
   );
-  assert.deepEqual(await navGeometry(), feedGeometry);
+  await expect(page.getByRole("heading", { name: "Сообщества", exact: true })).toBeVisible();
+  await expect.poll(navGeometry).toEqual(feedGeometry);
   await nav.getByRole("link", { name: "SPOT", exact: true }).click();
   await expect(nav.getByRole("link", { name: "SPOT", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
-  assert.deepEqual(await navGeometry(), feedGeometry);
+  await expect(
+    page.getByRole("heading", { name: "Места, которые объединяют.", exact: true }),
+  ).toBeVisible();
+  await expect.poll(navGeometry).toEqual(feedGeometry);
   await expect.poll(moves).toBe(2);
 }
 
