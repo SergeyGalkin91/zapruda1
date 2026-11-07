@@ -433,6 +433,15 @@ async function liquidDrop(page, width) {
       }),
     );
   const initialGeometry = await geometry();
+  const firstCell = initialGeometry[1];
+  const layer = await indicator.boundingBox();
+  assert.ok(
+    layer &&
+      Math.abs(layer.width - firstCell[2]) <= 1 &&
+      Math.abs(layer.height - firstCell[3]) <= 1,
+    "Liquid indicator must occupy exactly one cell",
+  );
+  assert.equal(await indicator.evaluate((node) => getComputedStyle(node).pointerEvents), "none");
   await expect(strength).toHaveValue("40");
   const variants = [
     ["Classic Glass", "classic-glass", ".z-liquid-classic"],

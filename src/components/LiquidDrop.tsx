@@ -57,7 +57,10 @@ export function LiquidDrop({
       ref={indicator}
       aria-hidden="true"
       className="z-liquid-indicator"
-      style={{ gridColumn: (active % columns) + 1, gridRow: Math.floor(active / columns) + 1 }}
+      style={{
+        gridColumn: `${(active % columns) + 1} / span 1`,
+        gridRow: `${Math.floor(active / columns) + 1} / span 1`,
+      }}
     >
       <LiquidDropArtwork />
     </span>
