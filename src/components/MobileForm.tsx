@@ -100,6 +100,27 @@ export function StickyFormActions({
   return <div className={`z-sticky-form-actions ${className}`}>{children}</div>;
 }
 
+export function SingleFieldProgress({ step, steps }: { step: number; steps: readonly string[] }) {
+  return (
+    <>
+      <span role="status" aria-label={`Шаг ${step} из ${steps.length}`}>
+        {step} / {steps.length}
+      </span>
+      <ol className="z-single-field-progress" aria-label="Шаги формы">
+        {steps.map((id, index) => (
+          <li
+            key={id}
+            data-complete={index < step || undefined}
+            aria-current={index + 1 === step ? "step" : undefined}
+          >
+            <span className="sr-only">Шаг {index + 1}</span>
+          </li>
+        ))}
+      </ol>
+    </>
+  );
+}
+
 export function SingleFieldStage({
   stepKey,
   question,

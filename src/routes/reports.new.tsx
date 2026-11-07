@@ -2,7 +2,12 @@ import { streetStorageKey } from "@/lib/street-storage";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRight, ImagePlus, Pencil, Trash2, Sparkles } from "lucide-react";
-import { MobileField, SingleFieldStage, StickyFormActions } from "@/components/MobileForm";
+import {
+  MobileField,
+  SingleFieldProgress,
+  SingleFieldStage,
+  StickyFormActions,
+} from "@/components/MobileForm";
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
@@ -1154,20 +1159,7 @@ export function NewReport() {
       >
         <header className="z-single-field-header">
           <h1>Новый отчёт</h1>
-          <span role="status" aria-label={`Шаг ${position} из ${reportSteps.length}`}>
-            {position} / {reportSteps.length}
-          </span>
-          <ol className="z-single-field-progress" aria-label="Шаги отчёта">
-            {reportSteps.map((id, index) => (
-              <li
-                key={id}
-                data-complete={index < position || undefined}
-                aria-current={index + 1 === position ? "step" : undefined}
-              >
-                <span className="sr-only">Шаг {index + 1}</span>
-              </li>
-            ))}
-          </ol>
+          <SingleFieldProgress step={position} steps={reportSteps} />
         </header>
         <datalist id="zapruda-atlas-species">
           {catalogFishes.map((fish) => (

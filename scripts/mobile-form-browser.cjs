@@ -205,30 +205,42 @@ async function checkLabel(page, lifted) {
 
 async function registration(page, width, writes) {
   await page.goto(origin + "/auth?mode=up", { waitUntil: "load" });
-  const username = page.getByRole("textbox", { name: "Никнейм" });
-  const email = page.getByRole("textbox", { name: "Email" });
-  const password = page.locator("input[name=password]");
-  const submit = page.getByRole("button", { name: /Зарегистрироваться/ });
-  await checkLabel(page, false);
-  await email.focus();
-  await checkLabel(page, true);
-  await email.fill(user.email);
+  const stage = page.locator(".z-single-field-content");
+  const username = stage.getByRole("textbox", { name: "Никнейм" });
+  const email = stage.getByRole("textbox", { name: "Email" });
+  const password = stage.locator("input[name=password]");
+  const next = page.getByRole("button", { name: "Далее", exact: true });
+  const submit = page.getByRole("button", { name: "Зарегистрироваться", exact: true });
   await username.fill("!!!!");
-  await checkLabel(page, true);
-  await password.fill("isolated-qa-value");
-  await submit.click();
+  await next.click();
   await expect(page.getByRole("alert").filter({ hasText: "3–24 символа" })).toBeVisible();
   await expect(username).toHaveAttribute("aria-invalid", "true");
   if (width === 390)
     await page.screenshot({ path: evidence + "/" + engine + "-registration-validation.png" });
   await username.fill("mobile_qa");
-  await simulateKeyboard(page, email, submit);
+  await next.click();
+  await checkLabel(page, false);
+  await email.focus();
+  await checkLabel(page, true);
+  await email.fill(user.email);
+  await checkLabel(page, true);
+  await simulateKeyboard(page, email, next);
+  await next.click();
+  await expect(stage.getByRole("heading")).toBeFocused();
+  await resetKeyboard(page);
+  await password.fill("isolated-qa-value");
+  await next.click();
+  const reviewEmail = stage.getByRole("button", { name: "Изменить: Email", exact: true });
+  await expect(reviewEmail).toContainText(user.email);
+  await expect(stage).not.toContainText("isolated-qa-value");
+  assert.ok(!writes.includes("/auth/v1/signup"), "The review must not trigger registration");
   await submit.click();
   await expect(page.getByRole("alert").filter({ hasText: /Проверь подключение/ })).toBeVisible();
   assert.ok(writes.includes("/auth/v1/signup"));
-  await resetKeyboard(page);
-  await expect(username).toHaveValue("mobile_qa");
+  await reviewEmail.click();
   await expect(email).toHaveValue(user.email);
+  await page.getByRole("button", { name: "Готово", exact: true }).click();
+  await stage.getByRole("button", { name: "Изменить: Пароль", exact: true }).click();
   await expect(password).toHaveValue("isolated-qa-value");
 }
 

@@ -1208,6 +1208,12 @@ body {
   top: 0.35rem;
   font-size: 0.6875rem;
 }
+.z-single-field-flow .z-mobile-field-body[data-action] > input {
+  padding-inline-end: 3.35rem;
+}
+.z-single-field-flow .z-mobile-field-body[data-action] > label {
+  max-width: calc(100% - 4.35rem);
+}
 .z-single-field-flow .z-mobile-field-body > .z-single-field-story {
   height: 5.5rem;
   border-radius: 1.75rem;

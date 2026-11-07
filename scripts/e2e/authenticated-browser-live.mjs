@@ -354,9 +354,22 @@ try {
         .getByRole("button", { name: "Передать одну рыбу в BIG FISH", exact: true })
         .click();
       await a.waitForURL(base + "/big-fish");
+      const openWeight = async (page) => {
+        const next = page
+          .locator("#big-fish-submission")
+          .getByRole("button", { name: "Далее", exact: true });
+        await next.click();
+        await next.click();
+      };
+      await openWeight(a);
       await expect(a.getByLabel("Вес одной рыбы, г")).toHaveValue("100");
+      await a
+        .locator("#big-fish-submission")
+        .getByRole("button", { name: "Далее", exact: true })
+        .click();
       await expect(a.getByLabel("Длина, мм")).toHaveValue("200");
       await a.reload();
+      await openWeight(a);
       await expect(a.getByLabel("Вес одной рыбы, г")).toHaveValue("100");
       const actual = await A.c.functions.invoke("zapruda-spot-records", {
         body: { action: "progress" },
@@ -379,6 +392,7 @@ try {
         throw Error("PROFILE_CROWN_NOT_AUTHORITATIVE");
       await shot(a, "390-big-fish-authoritative-profile");
       await b.goto(base + "/big-fish");
+      await openWeight(b);
       await expect(b.getByLabel("Вес одной рыбы, г")).toHaveValue("");
       result.checks.push(
         "real private report → explicit one-fish transfer → reload → authoritative profile; no automatic SPOT submit; foreign browser sees no handoff",
@@ -403,15 +417,26 @@ try {
   await expect(a.getByText(/1 мин/)).toBeVisible({ timeout: 70000 });
   await a.getByRole("button", { name: "Завершить сессию", exact: true }).click();
   await a.getByRole("link", { name: "Оформить отчёт", exact: true }).click();
+  await a.getByText("Перенос из ZAPRUDA STREET", { exact: true }).click();
   await expect(
     a.getByRole("button", { name: "Перенести Street-сессию", exact: true }),
   ).toBeEnabled();
   await a.getByRole("button", { name: "Перенести Street-сессию", exact: true }).click();
 
+  const importedNext = a.getByRole("button", { name: "Далее", exact: true });
+  const importedSkip = a.getByRole("button", { name: "Пропустить", exact: true });
+  for (let question = 0; question < 3; question++) await importedNext.click();
   await a
     .getByLabel("Вид рыбалки для достижений *", { exact: true })
     .selectOption({ label: "Спиннинг" });
-  await a.getByRole("button", { name: "Далее", exact: true }).click();
+  await importedNext.click();
+  await importedNext.click();
+  await importedSkip.click();
+  await importedSkip.click();
+  await importedNext.click();
+  await importedSkip.click();
+  await a.getByText("Дополнительные детали", { exact: true }).click();
+  await a.getByRole("button", { name: "Изменить: Снасти", exact: true }).click();
   await expect(a.getByLabel("Снасти", { exact: true })).toHaveValue(tag + " tackle");
   // Switch identity in the SAME context through real logout/login.
   await a.goto(base + "/profile");
