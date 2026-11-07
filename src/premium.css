@@ -1339,7 +1339,7 @@ body {
   }
 }
 
-/* LIQUID DROP — limited to the section track and fishing discipline picker. */
+/* Liquid Drop artwork and the primary section track. */
 .z-liquid-track,
 .z-liquid-category-grid {
   position: relative;
@@ -1625,6 +1625,17 @@ body {
 .z-active-selection .z-liquid-art,
 .z-active-selection-mark .z-liquid-art {
   inset: 1px 2px;
+}
+:is(.z-liquid-track, .z-segments) .z-active-selection .z-liquid-art {
+  max-inline-size: 15rem;
+  margin-inline: auto;
+}
+.z-liquid-options .z-active-selection .z-liquid-art {
+  inset: 5px 4px auto;
+  block-size: 27px;
+}
+.z-liquid-options [data-selection-active="true"] .z-liquid-swatch {
+  visibility: hidden;
 }
 :has(> .z-active-selection) > :is(a, button, label) {
   position: relative;

@@ -586,7 +586,10 @@ async function globalNavigation(page, width) {
   };
   const screenshot = async (name) => {
     if (width === 390)
-      await page.screenshot({ path: evidence + "/" + engine + "-global-" + name + ".png" });
+      await page.screenshot({
+        path: evidence + "/" + engine + "-global-" + name + ".png",
+        animations: "disabled",
+      });
   };
   await state(bottom, "Лента");
   assert.equal(await top.isVisible(), false);
