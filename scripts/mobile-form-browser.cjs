@@ -59,6 +59,8 @@ async function interceptLocalBackend(context) {
     { origin, user, token, expiresAt },
   );
   const failedWrites = [];
+  let pendingReportId;
+  let publishedReport;
   await context.route("https://**.supabase.co/**", (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -70,9 +72,36 @@ async function interceptLocalBackend(context) {
       "access-control-allow-headers": request.headers()["access-control-request-headers"] ?? "*",
     };
     if (method === "OPTIONS") return route.fulfill({ status: 204, headers });
+    if (method === "POST" && url.pathname === "/rest/v1/rpc/publish_report_with_catches") {
+      const payload = request.postDataJSON();
+      if (!pendingReportId) {
+        pendingReportId = payload.p_report_id;
+        failedWrites.push(url.pathname);
+        return route.abort("failed");
+      }
+      assert.equal(
+        payload.p_report_id,
+        pendingReportId,
+        "Retry must reuse the draft publication ID",
+      );
+      assert.equal(
+        payload.p_report.is_public,
+        true,
+        "Only a deliberately public fixture goes to the feed",
+      );
+      publishedReport = {
+        ...payload.p_report,
+        id: pendingReportId,
+        user_id: user.id,
+        created_at: new Date().toISOString(),
+        profiles: { username: "mobile_qa" },
+      };
+      return route.fulfill({ json: pendingReportId, headers });
+    }
+    if (method === "GET" && url.pathname === "/rest/v1/fishing_reports")
+      return route.fulfill({ json: publishedReport ? [publishedReport] : [], headers });
     if (
-      (method === "POST" &&
-        ["/auth/v1/signup", "/rest/v1/rpc/publish_report_with_catches"].includes(url.pathname)) ||
+      (method === "POST" && url.pathname === "/auth/v1/signup") ||
       (method === "PATCH" && url.pathname === "/rest/v1/profiles")
     ) {
       failedWrites.push(url.pathname);
@@ -318,7 +347,7 @@ async function report(page, width, writes) {
   await resetKeyboard(page);
   await question.getByLabel(/Вид рыбалки для достижений/).selectOption({ index: 1 });
   await next.click();
-  const species = question.getByRole("textbox", { name: "Вид рыбы", exact: true });
+  const species = question.getByLabel("Вид рыбы", { exact: true });
   await species.fill("Окунь");
   await next.click();
   await question.getByLabel("Вес, кг", { exact: true }).fill("0.4");
@@ -342,6 +371,7 @@ async function report(page, width, writes) {
   await page.getByRole("button", { name: "Сохранить черновик", exact: true }).click();
   await expect(page.getByRole("status").filter({ hasText: /Черновик сохранён/ })).toBeVisible();
   const publish = page.getByRole("button", { name: "Опубликовать отчёт", exact: true });
+  await question.getByRole("checkbox", { name: "Опубликовать в общей ленте" }).check();
   await assertAction(publish);
   await publish.click();
   await expect(page.getByRole("alert").filter({ hasText: /Черновик сохранён/ })).toBeVisible();
@@ -352,6 +382,13 @@ async function report(page, width, writes) {
   await expect(
     question.getByRole("button", { name: "Изменить: Рыба №1", exact: true }),
   ).toContainText("Окунь");
+  await publish.click();
+  await expect(page).toHaveURL(origin + "/");
+  const article = page.getByRole("article").filter({ hasText: "Мобильный черновик" });
+  await expect(article).toBeVisible();
+  await expect(article).toContainText("Волга у города");
+  await page.reload();
+  await expect(article).toBeVisible();
 }
 
 async function communities(page, width) {

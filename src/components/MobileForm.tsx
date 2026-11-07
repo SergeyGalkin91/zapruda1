@@ -135,7 +135,7 @@ export function SingleFieldStage({
     }
     heading.current?.focus({ preventScroll: !current.current.review });
     current.current = { stepKey, question, review, children };
-  });
+  }, [stepKey, question, review, children, reverse]);
 
   useLayoutEffect(() => {
     if (!outgoing) return;

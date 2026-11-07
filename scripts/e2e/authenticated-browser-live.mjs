@@ -252,7 +252,10 @@ try {
     await next.click();
     if (withFish) {
       // Private transport fixture only. Never submitted to SPOT or claimed as genuine evidence.
-      await a.getByRole("textbox", { name: "Вид рыбы", exact: true }).fill("Щука");
+      await a
+        .locator(".z-single-field-content")
+        .getByLabel("Вид рыбы", { exact: true })
+        .fill("Щука");
       await next.click();
       await a.getByLabel("Вес, кг", { exact: true }).fill("0.1");
       await next.click();
