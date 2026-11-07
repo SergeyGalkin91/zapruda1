@@ -1,4 +1,12 @@
-import { cloneElement, useId, useState, type ReactElement, type ReactNode } from "react";
+import {
+  cloneElement,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 
 type FieldControl = {
   id?: string;
@@ -82,6 +90,77 @@ export function MobileField({
   );
 }
 
-export function StickyFormActions({ children }: { children: ReactNode }) {
-  return <div className="z-sticky-form-actions">{children}</div>;
+export function StickyFormActions({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return <div className={`z-sticky-form-actions ${className}`}>{children}</div>;
+}
+
+export function SingleFieldStage({
+  stepKey,
+  question,
+  reverse,
+  review,
+  children,
+}: {
+  stepKey: string;
+  question: string;
+  reverse: boolean;
+  review: boolean;
+  children: ReactNode;
+}) {
+  const current = useRef({ stepKey, question, review, children });
+  const [outgoing, setOutgoing] = useState<typeof current.current | null>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const content = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (current.current.stepKey === stepKey) {
+      current.current = { stepKey, question, review, children };
+      return;
+    }
+    if (window.matchMedia?.("(prefers-reduced-motion: no-preference)").matches) {
+      setOutgoing(current.current);
+      content.current?.animate?.(
+        [
+          { transform: `translateX(${reverse ? "-1.5rem" : "1.5rem"})`, opacity: 0 },
+          { transform: "translateX(0)", opacity: 1 },
+        ],
+        { duration: 210, easing: "ease-out" },
+      );
+    }
+    heading.current?.focus({ preventScroll: !current.current.review });
+    current.current = { stepKey, question, review, children };
+  });
+
+  useLayoutEffect(() => {
+    if (!outgoing) return;
+    const timeout = window.setTimeout(() => setOutgoing(null), 210);
+    return () => window.clearTimeout(timeout);
+  }, [outgoing]);
+
+  return (
+    <div
+      className="z-single-field-stage"
+      data-review={review || undefined}
+      data-reverse={reverse || undefined}
+    >
+      {outgoing && (
+        <fieldset className="z-single-field-outgoing" disabled inert aria-hidden="true">
+          <p className="z-single-field-question">{outgoing.question}</p>
+          {outgoing.children}
+        </fieldset>
+      )}
+      <div key={stepKey} ref={content} className="z-single-field-content">
+        <h2 ref={heading} tabIndex={-1} className="z-single-field-question">
+          {question}
+        </h2>
+        {children}
+      </div>
+    </div>
+  );
 }

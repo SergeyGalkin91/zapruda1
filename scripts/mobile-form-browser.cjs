@@ -236,35 +236,111 @@ async function profile(page, width, writes) {
 
 async function report(page, width, writes) {
   await page.goto(origin + "/reports/new", { waitUntil: "load" });
-  const heading = page.getByRole("heading", { name: "Новый отчёт", exact: true });
-  const title = page.getByLabel(/Название отчёта/);
+  const question = page.locator(".z-single-field-content");
+  const place = question.getByLabel("Водоём или место", { exact: true });
+  const title = question.getByLabel(/Название отчёта/);
   const next = page.getByRole("button", { name: "Далее", exact: true });
+  const skip = page.getByRole("button", { name: "Пропустить", exact: true });
+  const back = page.getByRole("button", { name: "Назад", exact: true });
+  const frame = () =>
+    page.locator(".z-single-field-flow").evaluate((element) => {
+      const top = element.getBoundingClientRect().top;
+      return [
+        element.querySelector(".z-single-field-content .field").getBoundingClientRect().top - top,
+        element.querySelector(".z-single-field-actions").offsetTop,
+      ];
+    });
+  const labelTop = () =>
+    place.evaluate((element) => parseFloat(getComputedStyle(element.labels[0]).top));
+  const shot = async (name) => {
+    if (width === 390) {
+      await page.waitForTimeout(350);
+      await page.screenshot({ path: evidence + "/" + engine + "-glass-" + name + ".png" });
+    }
+  };
+  await expect(next).toBeEnabled();
+  await expect.poll(labelTop).toBe(16);
+  const style = await place.evaluate((element) => ({
+    radius: getComputedStyle(element).borderRadius,
+    height: element.getBoundingClientRect().height,
+  }));
+  assert.equal(style.radius, "999px");
+  assert.ok(style.height >= 44);
+  const buttonStyle = await next.evaluate((element) => ({
+    radius: getComputedStyle(element).borderRadius,
+    background: getComputedStyle(element).backgroundImage,
+  }));
+  assert.equal(buttonStyle.radius, "999px");
+  assert.match(buttonStyle.background, /gradient/);
+  const initialFrame = await frame();
+  await shot("empty");
+  await place.focus();
+  await expect.poll(labelTop).toBeLessThan(12);
+  await shot("focused");
+  await place.fill("Волга");
+  await shot("filled");
+  await page.evaluate(() => {
+    const stage = document.querySelector(".z-single-field-stage");
+    stage.addEventListener("animationstart", (event) => {
+      if (event.animationName === "z-single-field-exit") stage.dataset.sawExit = "true";
+    });
+  });
+  await next.click();
+  const date = question.getByLabel("Дата рыбалки", { exact: true });
+  await expect(date).toBeVisible();
+  await expect(question.getByRole("heading")).toBeFocused();
+  const dateFrame = await frame();
+  assert.ok(
+    dateFrame.every((value, i) => Math.abs(value - initialFrame[i]) <= 1),
+    `Field and action bar must keep their position: ${initialFrame} → ${dateFrame}`,
+  );
+  if (width === 390) {
+    await expect(page.locator(".z-single-field-stage")).toHaveAttribute("data-saw-exit", "true");
+  } else {
+    await expect(page.locator(".z-single-field-outgoing")).toHaveCount(0);
+  }
+  await shot("date");
+  await skip.click();
+  await expect(title).toBeVisible();
+  await expect(skip).toHaveCount(0);
   await next.click();
   await expect(page.getByRole("alert").filter({ hasText: "Укажи название отчёта." })).toBeVisible();
+  await back.click();
+  await expect(date).toHaveValue("");
+  await back.click();
+  await expect(place).toHaveValue("Волга");
+  await next.click();
+  await skip.click();
   await title.fill("Мобильный черновик");
-  await page.getByLabel(/Вид рыбалки для достижений/).selectOption({ index: 1 });
   await simulateKeyboard(page, title, next);
   await next.click();
-  await expect(heading).toBeFocused();
+  await expect(question.getByRole("heading")).toBeFocused();
   await resetKeyboard(page);
-  const species = page.getByLabel("Вид рыбы", { exact: true });
-  const catchCount = await species.count();
-  await page.getByRole("button", { name: "+ Рыба" }).click();
-  const newCatch = species.nth(catchCount);
-  await newCatch.fill("Окунь");
-  await page.getByLabel("Вес, кг", { exact: true }).nth(catchCount).fill("0.4");
-  const back = page.getByRole("button", { name: "Назад", exact: true });
-  await assertAction(back);
+  await question.getByLabel(/Вид рыбалки для достижений/).selectOption({ index: 1 });
+  await next.click();
+  const species = question.getByRole("textbox", { name: "Вид рыбы", exact: true });
+  await species.fill("Окунь");
+  await next.click();
+  await question.getByLabel("Вес, кг", { exact: true }).fill("0.4");
   await back.click();
-  await expect(title).toHaveValue("Мобильный черновик");
+  await expect(species).toHaveValue("Окунь");
   await next.click();
-  await expect(heading).toBeFocused();
-  await expect(newCatch).toHaveValue("Окунь");
-  await simulateKeyboard(page, newCatch, next);
-  if (width === 390) await page.screenshot({ path: evidence + "/" + engine + "-report-catch.png" });
+  await expect(question.getByLabel("Вес, кг", { exact: true })).toHaveValue("0.4");
   await next.click();
-  await expect(heading).toBeFocused();
-  await resetKeyboard(page);
+  await skip.click();
+  await skip.click();
+  await skip.click();
+  const review = question.getByRole("heading", { name: "Проверь отчёт" });
+  const edit = question.getByRole("button", { name: "Изменить: Место", exact: true });
+  await expect(review).toBeVisible();
+  await shot("review");
+  await edit.click();
+  await expect(place).toHaveValue("Волга");
+  await place.fill("Волга у города");
+  await page.getByRole("button", { name: "Готово", exact: true }).click();
+  await expect(edit).toContainText("Волга у города");
+  await page.getByRole("button", { name: "Сохранить черновик", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: /Черновик сохранён/ })).toBeVisible();
   const publish = page.getByRole("button", { name: "Опубликовать отчёт", exact: true });
   await assertAction(publish);
   await publish.click();
@@ -272,10 +348,10 @@ async function report(page, width, writes) {
   assert.ok(writes.includes("/rest/v1/rpc/publish_report_with_catches"));
   await page.reload();
   await expect(publish).toBeEnabled();
-  await back.click();
-  await expect(newCatch).toHaveValue("Окунь");
-  await back.click();
-  await expect(title).toHaveValue("Мобильный черновик");
+  await expect(edit).toContainText("Волга у города");
+  await expect(
+    question.getByRole("button", { name: "Изменить: Рыба №1", exact: true }),
+  ).toContainText("Окунь");
 }
 
 async function communities(page, width) {
@@ -297,7 +373,15 @@ async function run() {
     for (const [width, height] of sizes) {
       const context = await browser.newContext({
         viewport: { width, height },
-        reducedMotion: "reduce",
+        reducedMotion: width === 390 ? "no-preference" : "reduce",
+        ...(width === 390 && engine === "chromium"
+          ? {
+              recordVideo: {
+                dir: "appearance-evidence/mobile-form-recording",
+                size: { width, height },
+              },
+            }
+          : {}),
         ...(engine === "firefox" ? {} : { isMobile: true, hasTouch: true }),
       });
       try {
@@ -312,6 +396,11 @@ async function run() {
             });
           } finally {
             await page.close();
+            const video = page.video();
+            if (video) {
+              if (scenario === report) await video.saveAs(evidence + "/premium-glass-390.webm");
+              await video.delete();
+            }
           }
         }
       } finally {

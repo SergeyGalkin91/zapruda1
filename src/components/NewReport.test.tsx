@@ -79,24 +79,47 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
+function next() {
+  fireEvent.click(screen.getByRole("button", { name: "Далее", exact: true }));
+}
+function skip() {
+  fireEvent.click(screen.getByRole("button", { name: "Пропустить", exact: true }));
+}
+function selectDiscipline() {
+  const select = screen.getByLabelText(/Вид рыбалки для достижений/) as HTMLSelectElement;
+  fireEvent.change(select, { target: { value: select.options[1]!.value } });
+}
 async function fillReport() {
   const view = render(<NewReport />);
   await waitFor(() =>
     expect(localStorage.getItem("zapruda-report-draft-v1-offline-account-a")).not.toBeNull(),
   );
+  skip();
+  skip();
   fireEvent.change(screen.getByLabelText(/Название отчёта/), {
     target: { value: "Private offline draft" },
   });
-  const discipline = screen.getByLabelText(/Вид рыбалки для достижений/) as HTMLSelectElement;
-  fireEvent.change(discipline, { target: { value: discipline.options[1]!.value } });
-  const submit = screen.getByRole("button", { name: "Далее" });
-  fireEvent.click(submit);
-  return { ...view, form: submit.closest("form")! };
+  next();
+  selectDiscipline();
+  next();
+  return view;
 }
-function submitReport(form: HTMLElement) {
-  const next = screen.queryByRole("button", { name: "Далее" });
-  if (next) fireEvent.click(next);
-  fireEvent.submit(form);
+function reachReview() {
+  if (screen.queryByRole("heading", { name: "Проверь отчёт" })) return;
+  const species = screen.getByLabelText("Вид рыбы") as HTMLInputElement;
+  if (species.value) {
+    next();
+    skip();
+    skip();
+  } else {
+    skip();
+  }
+  skip();
+  skip();
+}
+function submitReport() {
+  reachReview();
+  fireEvent.click(screen.getByRole("button", { name: "Опубликовать отчёт", exact: true }));
 }
 describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
   it("imports STREET notes and catches with real line breaks into a private unpublished draft", async () => {
@@ -110,13 +133,19 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
       }),
     );
     render(<NewReport />);
+    fireEvent.click(screen.getByText("Перенос из ZAPRUDA STREET"));
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Перенести Street-сессию" })).not.toBeDisabled(),
     );
     fireEvent.click(screen.getByRole("button", { name: "Перенести Street-сессию" }));
-    const discipline = screen.getByLabelText(/Вид рыбалки для достижений/) as HTMLSelectElement;
-    fireEvent.change(discipline, { target: { value: discipline.options[1]!.value } });
-    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    next();
+    next();
+    next();
+    selectDiscipline();
+    next();
+    next();
+    skip();
+    skip();
     const story = screen.getByRole("textbox", { name: "Рассказ" }) as HTMLTextAreaElement;
     expect(story.value).toContain(
       "\nЗаметки: Offline fixture notes\n• Offline fixture fish — Offline fixture lure",
@@ -148,8 +177,8 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
           : { data: committed, error: null };
       return query;
     });
-    const { form } = await fillReport();
-    submitReport(form);
+    await fillReport();
+    submitReport();
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalled());
     expect(mocks.insert).toHaveBeenCalledTimes(1);
     expect(committed?.["id"]).toMatch(/^[0-9a-f-]{36}$/i);
@@ -157,6 +186,11 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
   });
   it("names selects from their caption without including all options", async () => {
     render(<NewReport />);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Далее" })).toBeEnabled());
+    skip();
+    skip();
+    fireEvent.change(screen.getByLabelText(/Название отчёта/), { target: { value: "Draft" } });
+    next();
     const discipline = await screen.findByRole("combobox", {
       name: "Вид рыбалки для достижений *",
     });
@@ -177,7 +211,9 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     );
     render(<NewReport />);
     fireEvent.click(await screen.findByRole("button", { name: "Очистить черновик" }));
-    expect((screen.getByLabelText("Дата рыбалки") as HTMLInputElement).value).toBe("");
+    expect(screen.getByLabelText("Водоём или место")).toHaveValue("");
+    skip();
+    expect(screen.getByLabelText("Дата рыбалки")).toHaveValue("");
     expect(screen.getByRole("button", { name: "Далее" })).toBeTruthy();
     await waitFor(() =>
       expect(
@@ -187,7 +223,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
   });
   it("reaches review without publishing and requires a separate submit click", async () => {
     await fillReport();
-    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    reachReview();
     await screen.findByText("Проверь отчёт");
     expect(mocks.insert).not.toHaveBeenCalled();
     expect(mocks.rpc).not.toHaveBeenCalled();
@@ -198,8 +234,21 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
       false,
     );
   });
+  it("returns to a skipped question and edits it from review without submitting", async () => {
+    await fillReport();
+    reachReview();
+    fireEvent.click(screen.getByRole("button", { name: "Изменить: Место", exact: true }));
+    expect(screen.getByLabelText("Водоём или место")).toHaveValue("");
+    fireEvent.change(screen.getByLabelText("Водоём или место"), { target: { value: "Волга" } });
+    fireEvent.click(screen.getByRole("button", { name: "Готово", exact: true }));
+    expect(screen.getByRole("button", { name: "Изменить: Место", exact: true })).toHaveTextContent(
+      "Волга",
+    );
+    expect(screen.getByRole("heading", { name: "Private offline draft" })).toBeVisible();
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
   it("keeps the draft when the atomic catch transaction fails after a successful preflight", async () => {
-    const { form } = await fillReport();
+    await fillReport();
     const original = mocks.from.getMockImplementation()!;
     mocks.from.mockImplementation((table: string) =>
       table === "catches"
@@ -209,7 +258,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     fireEvent.change(screen.getByLabelText("Вид рыбы"), {
       target: { value: "Окунь" },
     });
-    submitReport(form);
+    submitReport();
     await screen.findByText(
       "Не удалось сохранить отчёт с уловом. Черновик сохранён — попробуй позже.",
     );
@@ -228,7 +277,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     fireEvent.change(screen.getByLabelText("Вид рыбы"), {
       target: { value: "Окунь" },
     });
-    submitReport(view.form);
+    submitReport();
     await screen.findByText(
       "Не удалось сохранить отчёт с уловом. Черновик сохранён — попробуй позже.",
     );
@@ -239,7 +288,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     await screen.findByText(
       "Черновик восстановлен на этом устройстве. Фотографии нужно добавить снова.",
     );
-    submitReport(screen.getByRole("button", { name: "Опубликовать отчёт" }).closest("form")!);
+    submitReport();
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" }));
     expect(mocks.rpc.mock.calls[1]![1].p_report_id).toBe(id);
     expect(mocks.insert).not.toHaveBeenCalled();
@@ -254,6 +303,8 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     );
     vi.stubGlobal("createImageBitmap", bitmapRequest);
     const { unmount } = await fillReport();
+    skip();
+    skip();
     fireEvent.change(screen.getByLabelText("Выбрать фотографии с рыбалки"), {
       target: { files: [new File(["offline-image"], "private.jpg", { type: "image/jpeg" })] },
     });
@@ -268,22 +319,22 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     expect(mocks.invoke).not.toHaveBeenCalled();
   });
   it("does not create a partial report when the required catch store is unavailable", async () => {
-    const { form } = await fillReport();
+    await fillReport();
     fireEvent.change(screen.getByLabelText("Вид рыбы"), {
       target: { value: "Окунь" },
     });
-    submitReport(form);
+    submitReport();
     await screen.findByText("Публикация временно недоступна. Черновик сохранён — попробуй позже.");
     expect(mocks.insert).not.toHaveBeenCalled();
     expect(mocks.from).not.toHaveBeenCalledWith("fishing_reports");
-    expect(screen.getByLabelText(/Название отчёта/)).toHaveValue("Private offline draft");
+    expect(screen.getByRole("heading", { name: "Private offline draft" })).toBeVisible();
     expect(localStorage.getItem("zapruda-report-draft-v1-offline-account-a")).toContain(
       "Private offline draft",
     );
   });
   it("allows an explicitly empty catch log without accessing the unavailable catch store", async () => {
-    const { form } = await fillReport();
-    submitReport(form);
+    await fillReport();
+    submitReport();
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/" }));
     expect(mocks.insert).toHaveBeenCalledTimes(1);
     expect(mocks.insert).toHaveBeenCalledWith(
@@ -293,18 +344,18 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     expect(mocks.from).not.toHaveBeenCalledWith("catches");
   });
   it("does not publish one account's draft as a newly signed-in account", async () => {
-    const { form } = await fillReport();
+    await fillReport();
     mocks.getUser.mockResolvedValue({
       data: { user: { ...user, id: "offline-account-b" } },
       error: null,
     });
-    submitReport(form);
+    submitReport();
     await screen.findByText("Сессия изменилась. Открой отчёт из своего аккаунта.");
     expect(mocks.insert).not.toHaveBeenCalled();
     expect(mocks.from).not.toHaveBeenCalledWith("fishing_reports");
   });
   it("stops the old publication continuation after the route unmounts", async () => {
-    const { form, unmount } = await fillReport();
+    const { unmount } = await fillReport();
     let complete: (value: unknown) => void = () => {};
     mocks.getUser.mockImplementation(
       () =>
@@ -312,7 +363,7 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
           complete = resolve;
         }),
     );
-    submitReport(form);
+    submitReport();
     unmount();
     await act(async () => complete({ data: { user }, error: null }));
     expect(mocks.insert).not.toHaveBeenCalled();

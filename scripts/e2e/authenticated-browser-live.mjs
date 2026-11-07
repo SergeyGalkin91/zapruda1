@@ -233,42 +233,48 @@ try {
     throw Error("OWN_PROGRESS_API_FAILED");
   for (const withFish of [true, false]) {
     await a.goto(base + "/reports/new");
-    await expect(
-      a.getByRole("button", { name: "Перенести Street-сессию", exact: true }),
-    ).toBeEnabled();
+    const next = a.getByRole("button", { name: "Далее", exact: true });
+    const skip = a.getByRole("button", { name: "Пропустить", exact: true });
+    await expect(next).toBeEnabled();
     if (await a.getByRole("button", { name: "Очистить черновик", exact: true }).isVisible())
       await a.getByRole("button", { name: "Очистить черновик", exact: true }).click();
-    await a
-      .getByLabel("Название отчёта *", { exact: true })
-      .fill(tag + (withFish ? " fish-private" : " no-catch-private"));
+    await skip.click();
     await a.getByLabel("Дата рыбалки", { exact: true }).fill(new Date().toISOString().slice(0, 10));
+    await next.click();
+    const reportTitle = tag + (withFish ? " fish-private" : " no-catch-private");
+    await a.getByLabel("Название отчёта *", { exact: true }).fill(reportTitle);
+    await a.reload();
+    await expect(a.getByLabel("Название отчёта *", { exact: true })).toHaveValue(reportTitle);
+    await next.click();
     await a
       .getByLabel("Вид рыбалки для достижений *", { exact: true })
       .selectOption({ label: "Фидер" });
-    await a.reload();
-    await expect(a.getByLabel("Название отчёта *", { exact: true })).toHaveValue(
-      tag + (withFish ? " fish-private" : " no-catch-private"),
-    );
-    await a.getByRole("button", { name: "Далее", exact: true }).click();
+    await next.click();
     if (withFish) {
       // Private transport fixture only. Never submitted to SPOT or claimed as genuine evidence.
-      await a.getByPlaceholder("Вид (щука, окунь…)").fill("Щука");
-      await a.getByPlaceholder("Вес, кг").fill("0.1");
-      await a.getByPlaceholder("Длина, см").fill("20");
-      await a
-        .getByRole("button", { name: "Выбрать фотографии с рыбалки", exact: true })
-        .isVisible()
-        .catch(() => false);
-      await a
-        .locator("input[type=file]")
-        .setInputFiles({ name: "technical-qa.jpg", mimeType: "image/jpeg", buffer: jpeg });
+      await a.getByRole("textbox", { name: "Вид рыбы", exact: true }).fill("Щука");
+      await next.click();
+      await a.getByLabel("Вес, кг", { exact: true }).fill("0.1");
+      await next.click();
+      await a.getByLabel("Длина, см", { exact: true }).fill("20");
+      await next.click();
+    } else {
+      await skip.click();
     }
     await a
       .getByLabel("Рассказ", { exact: true })
       .fill("Private technical acceptance, not a real catch claim.");
-    await a.getByRole("button", { name: "Далее", exact: true }).click();
+    await next.click();
+    if (withFish) {
+      await a
+        .getByLabel("Выбрать фотографии с рыбалки", { exact: true })
+        .setInputFiles({ name: "technical-qa.jpg", mimeType: "image/jpeg", buffer: jpeg });
+      await next.click();
+    } else {
+      await skip.click();
+    }
     await expect(a.getByRole("heading", { name: "Проверь отчёт", exact: true })).toBeVisible();
-    // Critical regression: going 2→3 never writes anything.
+    // Opening review never writes anything.
     const premature = await must(
       A.c
         .from("fishing_reports")
