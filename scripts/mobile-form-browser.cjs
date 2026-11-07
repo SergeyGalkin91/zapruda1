@@ -211,6 +211,7 @@ async function registration(page, width, writes) {
   const password = stage.locator("input[name=password]");
   const next = page.getByRole("button", { name: "Далее", exact: true });
   const submit = page.getByRole("button", { name: "Зарегистрироваться", exact: true });
+  await assertAction(next);
   await username.fill("!!!!");
   await next.click();
   await expect(page.getByRole("alert").filter({ hasText: "3–24 символа" })).toBeVisible();

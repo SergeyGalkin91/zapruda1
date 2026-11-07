@@ -40,6 +40,7 @@ function Auth() {
   const [mode, setMode] = useState<"in" | "up" | "forgot" | "new-password">(search.mode);
   const [username, setUsername] = useState("");
   const [signupStep, setSignupStep] = useState<SignupStep>("username");
+  const [signupReady, setSignupReady] = useState(false);
   const [signupEditing, setSignupEditing] = useState(false);
   const [signupReverse, setSignupReverse] = useState(false);
   const [email, setEmail] = useState("");
@@ -55,6 +56,7 @@ function Auth() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    setSignupReady(true);
     // Never forcibly redirect users from registration to profile.
     // Existing sessions are checked after explicit login; password recovery is handled separately.
     const params = new URLSearchParams(window.location.search);
@@ -341,31 +343,35 @@ function Auth() {
 
   return (
     <Shell>
-      <div className="z-premium-card mx-auto max-w-[440px]">
-        <header className="border-b border-white/10 px-4 py-5 sm:p-7">
-          <Wordmark />
-          <h1 className="mt-3 text-2xl font-black leading-tight">Вход в сообщество рыболовов</h1>
-        </header>
-        <section className="p-4 sm:p-7">
-          <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">
-            {mode === "in"
-              ? "С возвращением"
-              : mode === "up"
-                ? "Создать аккаунт"
-                : mode === "forgot"
-                  ? "Восстановить пароль"
-                  : "Новый пароль"}
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {mode === "in"
-              ? "Войди по адресу почты и паролю."
-              : mode === "up"
-                ? "Заполни данные и подтверди адрес электронной почты."
-                : mode === "forgot"
-                  ? "Отправим ссылку для сброса пароля на почту."
-                  : "Придумай новый пароль для своего аккаунта."}
-          </p>
-          <div className="z-segments my-4 grid grid-cols-2">
+      <div
+        className={mode === "up" ? "mx-auto max-w-[440px]" : "z-premium-card mx-auto max-w-[440px]"}
+      >
+        {mode !== "up" && (
+          <header className="border-b border-white/10 px-4 py-5 sm:p-7">
+            <Wordmark />
+            <h1 className="mt-3 text-2xl font-black leading-tight">Вход в сообщество рыболовов</h1>
+          </header>
+        )}
+        <section className={mode === "up" ? undefined : "p-4 sm:p-7"}>
+          {mode !== "up" && (
+            <>
+              <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">
+                {mode === "in"
+                  ? "С возвращением"
+                  : mode === "forgot"
+                    ? "Восстановить пароль"
+                    : "Новый пароль"}
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {mode === "in"
+                  ? "Войди по адресу почты и паролю."
+                  : mode === "forgot"
+                    ? "Отправим ссылку для сброса пароля на почту."
+                    : "Придумай новый пароль для своего аккаунта."}
+              </p>
+            </>
+          )}
+          <div className={`z-segments grid grid-cols-2 ${mode === "up" ? "mb-3" : "my-4"}`}>
             <Link
               to="/auth"
               search={{ mode: "in" }}
@@ -403,7 +409,7 @@ function Auth() {
               onInput={() => setFieldError(null)}
             >
               <div className="z-single-field-header">
-                <span className="font-bold">Регистрация</span>
+                <h1>Создать аккаунт</h1>
                 <SingleFieldProgress step={signupPosition + 1} steps={signupSteps} />
               </div>
               <SingleFieldStage
@@ -418,7 +424,7 @@ function Auth() {
                 <button
                   type="submit"
                   className="z-glass-advance"
-                  disabled={busy}
+                  disabled={busy || !signupReady}
                   onClick={(event) => {
                     if (event.detail > 1) event.preventDefault();
                   }}
