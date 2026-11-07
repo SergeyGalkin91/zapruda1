@@ -360,7 +360,16 @@ async function report(page, width, writes) {
   await next.click();
   await expect(question.getByRole("heading")).toBeFocused();
   await resetKeyboard(page);
-  await question.getByLabel(/Вид рыбалки для достижений/).selectOption({ index: 1 });
+  const disciplines = question.getByRole("group", { name: "Вид рыбалки для достижений *" });
+  await disciplines.getByText("Фидер", { exact: true }).click();
+  await disciplines.getByText("Спиннинг", { exact: true }).click();
+  await expect(disciplines.getByRole("radio", { name: "Спиннинг" })).toBeChecked();
+  if (width === 390) {
+    await page.screenshot({
+      path: evidence + "/" + engine + "-liquid-category.png",
+      animations: "disabled",
+    });
+  }
   await next.click();
   const species = question.getByLabel("Вид рыбы", { exact: true });
   await species.fill("Окунь");
@@ -406,6 +415,111 @@ async function report(page, width, writes) {
   await expect(article).toBeVisible();
 }
 
+async function liquidDrop(page, width) {
+  if (width !== 390) return;
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto(origin + "/settings#liquid-drop", { waitUntil: "load" });
+  await page.locator('[data-appearance-ready="true"]').waitFor();
+  const settings = page.locator("#liquid-drop");
+  await settings.evaluate((element) => element.scrollIntoView({ block: "center" }));
+  const preview = settings.getByRole("group", { name: "Предпросмотр выделения" });
+  const indicator = preview.locator(".z-liquid-indicator");
+  const strength = settings.getByRole("slider", { name: "Интенсивность" });
+  const geometry = () =>
+    preview.evaluate((element) =>
+      [element, ...element.querySelectorAll("button")].map((node) => {
+        const box = node.getBoundingClientRect();
+        return [box.x, box.y - element.getBoundingClientRect().y, box.width, box.height];
+      }),
+    );
+  const initialGeometry = await geometry();
+  await expect(strength).toHaveValue("40");
+  const variants = [
+    ["Classic Glass", "classic-glass", ".z-liquid-classic"],
+    ["Soft Liquid", "soft-liquid", '[data-liquid-art="soft-liquid"]'],
+    ["Organic Drop", "organic-drop", '[data-liquid-art="organic-drop"]'],
+  ];
+  const silhouettes = [];
+  for (const [title, style, selector] of variants) {
+    await settings.getByText(title, { exact: true }).click();
+    await expect(indicator.locator(selector)).toBeVisible();
+    const path = indicator.locator(selector + " > path").first();
+    let original;
+    for (const level of [20, 40, 70, 100]) {
+      await settings.getByRole("button", { name: level + "%", exact: true }).click();
+      await expect(strength).toHaveValue(String(level));
+      assert.equal(
+        await indicator.evaluate((element) =>
+          getComputedStyle(element).getPropertyValue("--z-liquid-strength").trim(),
+        ),
+        String(level / 100),
+      );
+      if (style !== "classic-glass") {
+        const current = await path.getAttribute("d");
+        original ??= current;
+        assert.equal(current, original, "Changing intensity must preserve the silhouette");
+      }
+      assert.deepEqual(await geometry(), initialGeometry);
+      if (engine === "chromium")
+        await page.screenshot({
+          path: evidence + "/liquid-390-" + style + "-" + level + ".png",
+          animations: "disabled",
+        });
+    }
+    if (original) silhouettes.push(original);
+  }
+  assert.equal(new Set(silhouettes).size, 2, "Soft and Organic need separate contours");
+  await page.addInitScript(() => {
+    window.liquidMovements = 0;
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (...args) {
+      if (this.matches(".z-liquid-indicator")) window.liquidMovements++;
+      return animate.apply(this, args);
+    };
+  });
+  await page.reload();
+  await page.locator('[data-appearance-ready="true"]').waitFor();
+  const moves = () => page.evaluate(() => window.liquidMovements);
+  await preview.getByRole("button", { name: "Вокруг" }).click();
+  await expect.poll(moves).toBe(1);
+  await expect(preview.getByRole("button", { name: "Вокруг" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await settings.getByRole("checkbox", { name: "Анимация" }).uncheck();
+  await preview.getByRole("button", { name: "SPOT" }).click();
+  assert.equal(await moves(), 1);
+  await settings.getByRole("checkbox", { name: "Анимация" }).check();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await preview.getByRole("button", { name: "Лента" }).click();
+  assert.equal(await moves(), 1);
+  await strength.press("Home");
+  await expect(strength).toHaveValue("0");
+  await settings.getByRole("button", { name: "70%", exact: true }).click();
+  await page.reload();
+  await page.locator('[data-appearance-ready="true"]').waitFor();
+  await expect(strength).toHaveValue("70");
+  await expect(settings.getByRole("radio", { name: "Organic Drop" })).toBeChecked();
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.getByRole("link", { name: "Вернуться к ленте" }).click();
+  const nav = page.getByRole("navigation", { name: "Разделы сообщества" });
+  await expect(nav.getByRole("link", { name: "Лента", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await nav.getByRole("link", { name: "Вокруг", exact: true }).click();
+  await expect(nav.getByRole("link", { name: "Вокруг", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await nav.getByRole("link", { name: "SPOT", exact: true }).click();
+  await expect(nav.getByRole("link", { name: "SPOT", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect.poll(moves).toBe(2);
+}
+
 async function communities(page, width) {
   if (![320, 390, 430].includes(width)) return;
   await page.goto(origin + "/communities", { waitUntil: "load" });
@@ -438,7 +552,7 @@ async function run() {
       });
       try {
         const writes = await interceptLocalBackend(context);
-        for (const scenario of [registration, profile, report, communities]) {
+        for (const scenario of [registration, profile, report, communities, liquidDrop]) {
           const page = await context.newPage();
           try {
             await scenario(page, width, writes);
@@ -456,6 +570,7 @@ async function run() {
             const video = page.video();
             if (video) {
               if (scenario === report) await video.saveAs(evidence + "/premium-glass-390.webm");
+              if (scenario === liquidDrop) await video.saveAs(evidence + "/liquid-drop-390.webm");
               await video.delete();
             }
           }

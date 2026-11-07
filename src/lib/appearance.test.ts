@@ -120,6 +120,25 @@ describe("ZAPRUDA appearance preferences", () => {
     expect(document.documentElement.dataset["zaprudaWallpaper"]).toBe("matte-black");
   });
 
+  it("loads only supported Liquid Drop styles and clamps intensity before paint", () => {
+    const settings = {
+      ...DEFAULT_APPEARANCE,
+      liquidDrop: { style: "organic-drop", intensity: 100, animate: false },
+    } as const;
+    window.localStorage.setItem(
+      APPEARANCE_STORAGE_KEY,
+      JSON.stringify({ ...settings, liquidDrop: { ...settings.liquidDrop, intensity: 125 } }),
+    );
+    new Function(APPEARANCE_BOOTSTRAP_SCRIPT)();
+    expect(loadAppearance()).toEqual(settings);
+    expect(document.documentElement.dataset["zaprudaLiquid"]).toBe("organic-drop");
+    expect(document.documentElement.dataset["zaprudaLiquidMotion"]).toBe("off");
+    expect(document.documentElement.style.getPropertyValue("--z-liquid-strength")).toBe("1");
+    expect(
+      normalizeAppearance({ liquidDrop: { style: "invalid", intensity: -5 } }).liquidDrop,
+    ).toEqual({ style: "soft-liquid", intensity: 0, animate: true });
+  });
+
   it("sets allowlisted pre-paint appearance and rejects injected stored attributes", () => {
     window.localStorage.setItem(
       APPEARANCE_STORAGE_KEY,

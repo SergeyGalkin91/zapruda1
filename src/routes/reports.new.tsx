@@ -11,6 +11,7 @@ import {
 import { Shell } from "@/components/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { FISHING_DISCIPLINES } from "@/lib/disciplines";
+import { LiquidDrop } from "@/components/LiquidDrop";
 import { prepareReportPhoto } from "@/lib/report-photo";
 import {
   clearReportHandoff,
@@ -890,23 +891,30 @@ export function NewReport() {
   } else if (step === "discipline") {
     question = "Какой вид рыбалки?";
     body = (
-      <MobileField label="Вид рыбалки для достижений *">
-        <select
-          className="field"
-          value={fishingMethod}
-          required
-          onChange={(e) => setFishingMethod(e.target.value)}
-        >
-          <option value="" disabled>
-            Выбери дисциплину…
-          </option>
-          {FISHING_DISCIPLINES.map((d) => (
-            <option key={d.code} value={d.code}>
-              {d.title}
-            </option>
+      <fieldset className="z-liquid-categories">
+        <legend>Вид рыбалки для достижений *</legend>
+        <div className="z-liquid-category-grid">
+          {fishingMethod && FISHING_DISCIPLINES.some((item) => item.code === fishingMethod) && (
+            <LiquidDrop
+              active={FISHING_DISCIPLINES.findIndex((item) => item.code === fishingMethod)}
+              columns={2}
+            />
+          )}
+          {FISHING_DISCIPLINES.map((item, index) => (
+            <label key={item.code} data-liquid-choice={index}>
+              <input
+                type="radio"
+                name="fishingMethod"
+                value={item.code}
+                checked={fishingMethod === item.code}
+                required
+                onChange={() => setFishingMethod(item.code)}
+              />
+              <span>{item.title}</span>
+            </label>
           ))}
-        </select>
-      </MobileField>
+        </div>
+      </fieldset>
     );
   } else if (step === "catch") {
     question = "Что поймал?";

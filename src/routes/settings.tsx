@@ -10,16 +10,21 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { LiquidDropPreview } from "@/components/LiquidDrop";
+import { LiquidDropArtwork } from "@/components/LiquidDropArtwork";
 import { supabase } from "@/integrations/supabase/client";
 import {
   APP_BACKGROUNDS,
   APP_WALLPAPERS,
   CHAT_BACKGROUNDS,
   DEFAULT_APPEARANCE,
+  DEFAULT_LIQUID_DROP,
+  LIQUID_DROP_STYLES,
   loadAppearance,
   applyAppearance,
   saveAppearance,
   type Appearance,
+  type LiquidDropAppearance,
 } from "@/lib/appearance";
 
 export const Route = createFileRoute("/settings")({
@@ -73,6 +78,10 @@ function SettingsPage() {
         : "Оформление применено, но браузер запретил сохранение. После перезапуска оно может сброситься.",
     );
   }
+
+  const liquidDrop = appearance.liquidDrop ?? DEFAULT_LIQUID_DROP;
+  const changeLiquidDrop = (patch: Partial<LiquidDropAppearance>) =>
+    change({ ...appearance, liquidDrop: { ...liquidDrop, ...patch } });
 
   return (
     <Shell screen="settings">
@@ -165,6 +174,77 @@ function SettingsPage() {
               );
             })}
           </div>
+        </section>
+
+        <section
+          id="liquid-drop"
+          aria-labelledby="liquid-drop-title"
+          className="z-premium-card z-liquid-settings p-5 sm:p-7"
+        >
+          <h2 id="liquid-drop-title" className="text-lg font-bold">
+            Liquid Drop
+          </h2>
+          <fieldset disabled={!appearanceReady} className="z-liquid-options">
+            <legend>Стиль выделения</legend>
+            <div>
+              {LIQUID_DROP_STYLES.map(({ value, title }) => (
+                <label key={value}>
+                  <input
+                    type="radio"
+                    name="liquidDropStyle"
+                    checked={liquidDrop.style === value}
+                    onChange={() => changeLiquidDrop({ style: value })}
+                  />
+                  <span className="z-liquid-swatch" data-zapruda-liquid={value}>
+                    <LiquidDropArtwork />
+                  </span>
+                  <span>{title}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <div className="z-liquid-settings-control">
+            <label htmlFor="liquid-drop-intensity">Интенсивность</label>
+            <output htmlFor="liquid-drop-intensity">{liquidDrop.intensity}%</output>
+            <input
+              id="liquid-drop-intensity"
+              type="range"
+              min="0"
+              max="100"
+              aria-valuetext={liquidDrop.intensity + "%"}
+              value={liquidDrop.intensity}
+              disabled={!appearanceReady}
+              onChange={(event) =>
+                changeLiquidDrop({ intensity: event.currentTarget.valueAsNumber })
+              }
+            />
+          </div>
+          <div className="z-liquid-presets" role="group" aria-label="Быстрый выбор интенсивности">
+            {[20, 40, 70, 100].map((intensity) => (
+              <button
+                key={intensity}
+                type="button"
+                disabled={!appearanceReady}
+                aria-pressed={liquidDrop.intensity === intensity}
+                onClick={() => changeLiquidDrop({ intensity })}
+              >
+                {intensity}%
+              </button>
+            ))}
+          </div>
+          <label className="z-liquid-motion-option">
+            <input
+              type="checkbox"
+              checked={liquidDrop.animate}
+              disabled={!appearanceReady}
+              onChange={(event) => changeLiquidDrop({ animate: event.currentTarget.checked })}
+            />
+            Анимация
+          </label>
+          <p className="text-xs text-muted-foreground">
+            Проверь переход между вкладками в предпросмотре.
+          </p>
+          <LiquidDropPreview />
         </section>
 
         <section aria-labelledby="wallpaper-title" className="z-premium-card p-5 sm:p-7">

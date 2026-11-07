@@ -2,16 +2,30 @@
 export type AppBackground = "classic" | "electric-blue";
 export type ChatBackground = "plain" | "forest" | "slate" | "water";
 export type AppWallpaper = "matte-black" | "carbon" | "neon-threads" | "topographic";
-// Optional so existing v1 device preferences migrate without losing their theme/chat.
+export const LIQUID_DROP_STYLES = [
+  { value: "classic-glass", title: "Classic Glass" },
+  { value: "soft-liquid", title: "Soft Liquid" },
+  { value: "organic-drop", title: "Organic Drop" },
+] as const;
+export type LiquidDropStyle = (typeof LIQUID_DROP_STYLES)[number]["value"];
+export type LiquidDropAppearance = { style: LiquidDropStyle; intensity: number; animate: boolean };
+export const DEFAULT_LIQUID_DROP: LiquidDropAppearance = {
+  style: "soft-liquid",
+  intensity: 40,
+  animate: true,
+};
+
+// Optional fields keep existing device preferences compatible.
 export type Appearance = {
   background: AppBackground;
   chat: ChatBackground;
   wallpaper?: AppWallpaper;
+  liquidDrop?: LiquidDropAppearance;
 };
 
 export const APPEARANCE_STORAGE_KEY = "zapruda.appearance.v1";
 /** Runs before styles/paint. Only allowlisted appearance enums reach HTML attributes. */
-export const APPEARANCE_BOOTSTRAP_SCRIPT = `(function(){try{var a=JSON.parse(localStorage.getItem("zapruda.appearance.v1")||"null")||{},d=document.documentElement;d.dataset.zaprudaBackground=a.background==="electric-blue"?"electric-blue":"classic";d.dataset.zaprudaWallpaper=["matte-black","carbon","neon-threads","topographic"].includes(a.wallpaper)?a.wallpaper:"matte-black";}catch(e){}})();`;
+export const APPEARANCE_BOOTSTRAP_SCRIPT = `(function(){try{var a=JSON.parse(localStorage.getItem("zapruda.appearance.v1")||"null")||{},d=document.documentElement,l=a.liquidDrop||{};d.dataset.zaprudaBackground=a.background==="electric-blue"?"electric-blue":"classic";d.dataset.zaprudaWallpaper=["matte-black","carbon","neon-threads","topographic"].includes(a.wallpaper)?a.wallpaper:"matte-black";d.dataset.zaprudaLiquid=["classic-glass","soft-liquid","organic-drop"].includes(l.style)?l.style:"soft-liquid";d.dataset.zaprudaLiquidMotion=l.animate===false?"off":"on";d.style.setProperty("--z-liquid-strength",typeof l.intensity==="number"&&Number.isFinite(l.intensity)?String(Math.round(Math.min(100,Math.max(0,l.intensity)))/100):"0.4");}catch(e){}})();`;
 export const DEFAULT_APPEARANCE: Appearance = { background: "classic", chat: "plain" };
 
 export const APP_BACKGROUNDS: ReadonlyArray<{
@@ -114,6 +128,20 @@ export const APP_WALLPAPERS: ReadonlyArray<{
 const backgroundValues = APP_BACKGROUNDS.map((item) => item.value);
 const chatValues = CHAT_BACKGROUNDS.map((item) => item.value);
 
+function normalizeLiquidDrop(value: object): LiquidDropAppearance {
+  const raw = value as Partial<Record<keyof LiquidDropAppearance, unknown>>;
+  return {
+    style:
+      LIQUID_DROP_STYLES.find((item) => item.value === raw.style)?.value ??
+      DEFAULT_LIQUID_DROP.style,
+    intensity:
+      typeof raw.intensity === "number" && Number.isFinite(raw.intensity)
+        ? Math.round(Math.max(0, Math.min(100, raw.intensity)))
+        : DEFAULT_LIQUID_DROP.intensity,
+    animate: typeof raw.animate === "boolean" ? raw.animate : DEFAULT_LIQUID_DROP.animate,
+  };
+}
+
 export function normalizeAppearance(value: unknown): Appearance {
   if (!value || typeof value !== "object") return { ...DEFAULT_APPEARANCE };
   const raw = value as Partial<Record<keyof Appearance, unknown>>;
@@ -126,6 +154,9 @@ export function normalizeAppearance(value: unknown): Appearance {
       : DEFAULT_APPEARANCE.chat,
     ...(APP_WALLPAPERS.some((item) => item.value === raw.wallpaper)
       ? { wallpaper: raw.wallpaper as AppWallpaper }
+      : {}),
+    ...(raw.liquidDrop && typeof raw.liquidDrop === "object"
+      ? { liquidDrop: normalizeLiquidDrop(raw.liquidDrop) }
       : {}),
   };
 }
@@ -146,6 +177,10 @@ export function applyAppearance(appearance: Appearance) {
   document.documentElement.dataset["zaprudaBackground"] = appearance.background;
   document.documentElement.dataset["zaprudaChat"] = appearance.chat;
   document.documentElement.dataset["zaprudaWallpaper"] = appearance.wallpaper ?? "matte-black";
+  const liquid = appearance.liquidDrop ?? DEFAULT_LIQUID_DROP;
+  document.documentElement.dataset["zaprudaLiquid"] = liquid.style;
+  document.documentElement.dataset["zaprudaLiquidMotion"] = liquid.animate ? "on" : "off";
+  document.documentElement.style.setProperty("--z-liquid-strength", String(liquid.intensity / 100));
 }
 
 export function saveAppearance(appearance: Appearance): boolean {

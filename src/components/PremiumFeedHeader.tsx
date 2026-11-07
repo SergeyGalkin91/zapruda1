@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { LiquidSectionNav } from "./LiquidDrop";
 import { ArrowUpRight, Compass, MapPin, Plus, Waves } from "lucide-react";
 
 export function PremiumFeedHeader() {
@@ -14,13 +15,7 @@ export function PremiumFeedHeader() {
         </Link>
       </div>
       <p className="z-screen-description">Истории с воды. Люди, с которыми хочется ловить.</p>
-      <nav className="z-segments" aria-label="Разделы сообщества">
-        <Link to="/" aria-current="page">
-          Лента
-        </Link>
-        <Link to="/communities">Вокруг</Link>
-        <Link to="/competitions">SPOT</Link>
-      </nav>
+      <LiquidSectionNav route="/" />
       <div className="z-feed-shortcuts">
         <Link to="/street">
           <Waves className="size-4" />

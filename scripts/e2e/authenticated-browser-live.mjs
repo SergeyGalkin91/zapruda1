@@ -247,8 +247,9 @@ try {
     await expect(a.getByLabel("Название отчёта *", { exact: true })).toHaveValue(reportTitle);
     await next.click();
     await a
-      .getByLabel("Вид рыбалки для достижений *", { exact: true })
-      .selectOption({ label: "Фидер" });
+      .getByRole("group", { name: "Вид рыбалки для достижений *" })
+      .getByText("Фидер", { exact: true })
+      .click();
     await next.click();
     if (withFish) {
       // Private transport fixture only. Never submitted to SPOT or claimed as genuine evidence.
@@ -427,8 +428,9 @@ try {
   const importedSkip = a.getByRole("button", { name: "Пропустить", exact: true });
   for (let question = 0; question < 3; question++) await importedNext.click();
   await a
-    .getByLabel("Вид рыбалки для достижений *", { exact: true })
-    .selectOption({ label: "Спиннинг" });
+    .getByRole("group", { name: "Вид рыбалки для достижений *" })
+    .getByText("Спиннинг", { exact: true })
+    .click();
   await importedNext.click();
   await importedNext.click();
   await importedSkip.click();

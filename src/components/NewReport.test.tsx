@@ -86,8 +86,7 @@ function skip() {
   fireEvent.click(screen.getByRole("button", { name: "Пропустить" }));
 }
 function selectDiscipline() {
-  const select = screen.getByLabelText(/Вид рыбалки для достижений/) as HTMLSelectElement;
-  fireEvent.change(select, { target: { value: select.options[1]!.value } });
+  fireEvent.click(screen.getByRole("radio", { name: "Спиннинг" }));
 }
 async function fillReport() {
   const view = render(<NewReport />);
@@ -184,18 +183,21 @@ describe("Report publication safety (offline UI, not signed-JWT E2E)", () => {
     expect(committed?.["id"]).toMatch(/^[0-9a-f-]{36}$/i);
     expect(mocks.rpc).not.toHaveBeenCalledWith("publish_report_with_catches", expect.anything());
   });
-  it("names selects from their caption without including all options", async () => {
+  it("names the fishing discipline group and preserves required selection", async () => {
     render(<NewReport />);
     await waitFor(() => expect(screen.getByRole("button", { name: "Далее" })).toBeEnabled());
     skip();
     skip();
     fireEvent.change(screen.getByLabelText(/Название отчёта/), { target: { value: "Draft" } });
     next();
-    const discipline = await screen.findByRole("combobox", {
+    const discipline = await screen.findByRole("group", {
       name: "Вид рыбалки для достижений *",
     });
     expect(discipline).toHaveAccessibleName("Вид рыбалки для достижений *");
-    expect(screen.getByLabelText("Вид рыбалки для достижений *")).toBe(discipline);
+    expect(screen.getByRole("radio", { name: "Спиннинг" })).toBeRequired();
+    expect(screen.getByRole("radio", { name: "Фидер" })).not.toBeChecked();
+    selectDiscipline();
+    expect(screen.getByRole("radio", { name: "Спиннинг" })).toBeChecked();
   });
   it("clears restored review fields and returns to private step one", async () => {
     localStorage.setItem(
