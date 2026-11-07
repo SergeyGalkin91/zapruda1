@@ -422,7 +422,7 @@ function Feed() {
   }, [loadPage]);
 
   return (
-    <Shell screen="feed">
+    <Shell screen="feed" sectionNav="/">
       <PremiumFeedHeader />
       <ReportBigFishNextStep />
       {loading && <ScreenState kind="loading">Загружаем отчёты…</ScreenState>}

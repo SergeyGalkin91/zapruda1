@@ -1479,6 +1479,21 @@ body {
     transform: none !important;
   }
 }
+.z-single-field-content:has(.z-liquid-categories) {
+  block-size: 100%;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+.z-liquid-categories {
+  display: flex;
+  min-block-size: 0;
+  flex-direction: column;
+}
+.z-liquid-category-scroll {
+  min-block-size: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
 .z-liquid-categories,
 .z-liquid-options {
   min-width: 0;

@@ -22,6 +22,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
+import { LiquidSectionNav, type LiquidSectionRoute } from "@/components/LiquidDrop";
 import { BrandWallpaper } from "@/components/BrandWallpaper";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityTracker } from "@/components/ActivityTracker";
@@ -57,8 +58,10 @@ const otherNav = [
 export function Shell({
   children,
   screen = "default",
+  sectionNav,
 }: {
   children: ReactNode;
+  sectionNav?: LiquidSectionRoute;
   screen?:
     | "default"
     | "feed"
@@ -421,6 +424,7 @@ export function Shell({
             <span>Нет подключения к интернету. После восстановления связи повтори действие.</span>
           </div>
         )}
+        {sectionNav && <LiquidSectionNav route={sectionNav} />}
         {children}
       </main>
       <footer className="z-shell-content mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-white/10 py-5 text-xs text-zinc-500">

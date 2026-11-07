@@ -361,9 +361,11 @@ async function report(page, width, writes) {
   await expect(question.getByRole("heading")).toBeFocused();
   await resetKeyboard(page);
   const disciplines = question.getByRole("group", { name: "Вид рыбалки для достижений *" });
+  const questionScroll = () => question.evaluate((node) => node.scrollTop);
   await disciplines.getByText("Фидер", { exact: true }).click();
   await disciplines.getByText("Спиннинг", { exact: true }).click();
   await expect(disciplines.getByRole("radio", { name: "Спиннинг" })).toBeChecked();
+  assert.equal(await questionScroll(), 0, "Selecting a discipline must leave its question in view");
   if (width === 390) {
     await page.screenshot({
       path: evidence + "/" + engine + "-liquid-category.png",
@@ -512,20 +514,28 @@ async function liquidDrop(page, width) {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.getByRole("link", { name: "Вернуться к ленте" }).click();
   const nav = page.getByRole("navigation", { name: "Разделы сообщества" });
+  const navGeometry = () =>
+    nav.evaluate((node) => {
+      const box = node.getBoundingClientRect();
+      return [box.x + window.scrollX, box.y + window.scrollY, box.width, box.height];
+    });
   await expect(nav.getByRole("link", { name: "Лента", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
+  const feedGeometry = await navGeometry();
   await nav.getByRole("link", { name: "Вокруг", exact: true }).click();
   await expect(nav.getByRole("link", { name: "Вокруг", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
+  assert.deepEqual(await navGeometry(), feedGeometry);
   await nav.getByRole("link", { name: "SPOT", exact: true }).click();
   await expect(nav.getByRole("link", { name: "SPOT", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
+  assert.deepEqual(await navGeometry(), feedGeometry);
   await expect.poll(moves).toBe(2);
 }
 

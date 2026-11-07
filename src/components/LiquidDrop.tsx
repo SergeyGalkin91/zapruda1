@@ -8,8 +8,8 @@ const sections = [
   { to: "/competitions", label: "SPOT" },
 ] as const;
 
-type SectionRoute = (typeof sections)[number]["to"];
-let nextSectionMotion: { to: SectionRoute; from: number; expires: number } | undefined;
+export type LiquidSectionRoute = (typeof sections)[number]["to"];
+let nextSectionMotion: { to: LiquidSectionRoute; from: number; expires: number } | undefined;
 
 export function LiquidDrop({
   active,
@@ -67,7 +67,7 @@ export function LiquidDrop({
   );
 }
 
-export function LiquidSectionNav({ route }: { route: SectionRoute }) {
+export function LiquidSectionNav({ route }: { route: LiquidSectionRoute }) {
   const active = sections.findIndex((section) => section.to === route);
   const entry = useRef(nextSectionMotion);
   const motion = entry.current;

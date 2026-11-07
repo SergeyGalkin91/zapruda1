@@ -893,26 +893,28 @@ export function NewReport() {
     body = (
       <fieldset className="z-liquid-categories">
         <legend>Вид рыбалки для достижений *</legend>
-        <div className="z-liquid-category-grid">
-          {fishingMethod && FISHING_DISCIPLINES.some((item) => item.code === fishingMethod) && (
-            <LiquidDrop
-              active={FISHING_DISCIPLINES.findIndex((item) => item.code === fishingMethod)}
-              columns={2}
-            />
-          )}
-          {FISHING_DISCIPLINES.map((item, index) => (
-            <label key={item.code} data-liquid-choice={index}>
-              <input
-                type="radio"
-                name="fishingMethod"
-                value={item.code}
-                checked={fishingMethod === item.code}
-                required
-                onChange={() => setFishingMethod(item.code)}
+        <div className="z-liquid-category-scroll">
+          <div className="z-liquid-category-grid">
+            {fishingMethod && FISHING_DISCIPLINES.some((item) => item.code === fishingMethod) && (
+              <LiquidDrop
+                active={FISHING_DISCIPLINES.findIndex((item) => item.code === fishingMethod)}
+                columns={2}
               />
-              <span>{item.title}</span>
-            </label>
-          ))}
+            )}
+            {FISHING_DISCIPLINES.map((item, index) => (
+              <label key={item.code} data-liquid-choice={index}>
+                <input
+                  type="radio"
+                  name="fishingMethod"
+                  value={item.code}
+                  checked={fishingMethod === item.code}
+                  required
+                  onChange={() => setFishingMethod(item.code)}
+                />
+                <span>{item.title}</span>
+              </label>
+            ))}
+          </div>
         </div>
       </fieldset>
     );

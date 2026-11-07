@@ -7,7 +7,6 @@ import { ZaprudaPublicSpotAtlas } from "@/components/ZaprudaPublicSpotAtlas";
 import { SpotCatchFlow } from "@/components/SpotCatchFlow";
 import { SpotLeaderboards } from "@/components/SpotLeaderboards";
 import { ScreenSectionNav } from "@/components/ScreenSectionNav";
-import { LiquidSectionNav } from "@/components/LiquidDrop";
 import { ScreenState } from "@/components/ScreenState";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -74,7 +73,7 @@ function CompetitionsPage() {
   }, [load]);
 
   return (
-    <Shell screen="spot">
+    <Shell screen="spot" sectionNav="/competitions">
       <header className="z-screen-heading">
         <div>
           <Wordmark variant="spot" />
@@ -84,7 +83,6 @@ function CompetitionsPage() {
       <p className="z-screen-description">
         Открывай проверенные споты. Сохраняй свою воду. Участвуй честно.
       </p>
-      <LiquidSectionNav route="/competitions" />
       <ScreenSectionNav route="/competitions" label="Разделы SPOT" sections={spotSections} />
       <ZaprudaPublicSpotAtlas />
       <nav aria-label="Связанные сценарии SPOT" className="z-catch-journey">

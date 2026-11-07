@@ -15,7 +15,6 @@ import { SocialGroups } from "@/components/SocialGroups";
 import { SocialMeetups } from "@/components/SocialMeetups";
 import { VerifiedGuideDirectory } from "@/components/VerifiedGuideDirectory";
 import { ScreenSectionNav } from "@/components/ScreenSectionNav";
-import { LiquidSectionNav } from "@/components/LiquidDrop";
 import { countries } from "@/lib/geo";
 
 export const Route = createFileRoute("/communities")({
@@ -55,7 +54,7 @@ function Communities() {
   }, [country]);
 
   return (
-    <Shell screen="communities">
+    <Shell screen="communities" sectionNav="/communities">
       <header className="z-screen-heading">
         <div>
           <p className="z-eyebrow">СВОИ ЛЮДИ. СВОЯ ВОДА.</p>
@@ -73,7 +72,6 @@ function Communities() {
       <p className="z-screen-description">
         Выбирай свою географию. Находи напарников, клубы и новые истории.
       </p>
-      <LiquidSectionNav route="/communities" />
       <ScreenSectionNav
         route="/communities"
         label="Каталог сообществ"
