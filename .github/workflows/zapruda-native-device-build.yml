@@ -45,7 +45,7 @@ jobs:
           retention-days: 7
 
   ios-simulator:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 60
     defaults:
       run:
@@ -60,7 +60,10 @@ jobs:
         with:
           node-version: '24'
       - name: Verify Xcode availability
-        run: xcodebuild -version
+        run: |
+          xcodebuild -version
+          swift --version
+          swift -version | grep -Eq 'Swift version (6\.[2-9]|[7-9]\.)' || { echo 'Xcode Swift compiler too old for Expo 58'; exit 1; }
       - name: Install Expo dependencies
         run: npm install --no-audit --no-fund
       - name: Generate native iOS project
